@@ -1,0 +1,28 @@
+create_param_grid_CV = function(TRAIN_PREFIX, METHOD_TRANS_TRAIN, NGENE,
+                             MAXIT, TOL, IMAXIT,
+                             K_VALS, LAMBDA_VALS, ETA_VALS, 
+                             LAMBDAW_VALS, LAMBDAH_VALS, NFOLD){
+  # note alpha is not included here because of the warm start
+
+  
+  param_tbl <- tidyr::expand_grid(train_prefix = TRAIN_PREFIX,
+                                  method_trans_train = METHOD_TRANS_TRAIN,
+                                  ngene = NGENE,
+                                  maxit = MAXIT,
+                                  tol = TOL,
+                                  imaxit = IMAXIT,
+                                  k       = K_VALS, 
+                                  lambda  = LAMBDA_VALS,
+                                  eta     = ETA_VALS,
+                                  lambdaW = LAMBDAW_VALS,
+                                  lambdaH = LAMBDAH_VALS,
+                                  fold    = 1:NFOLD) #%>%
+    # mutate(id = sprintf("%s_m=%s_ng=%d_mi=%d_t=%.0e_imi=%d_i=%d_k=%d_l=%.0e_e=%.0e_lW=%.0e_lH=%.0e", 
+    #                     train_prefix, method_trans_train, ngene, maxit, 
+    #                     tol, imaxit, init, k, lambda, eta, lambdaW, lambdaH))
+  
+  # note by splitting over named list, targets should only run new combos
+  # param_list <- split(param_tbl, param_tbl$id)  # each element is a 1-row tibble
+  
+  return(param_tbl)
+}

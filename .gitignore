@@ -1,0 +1,26 @@
+# ---- R specific ----
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+
+# ---- targets package cache ----
+_targets/           # main cache directory
+stores/             # if you use multiple stores (see tar_config_set)
+bt-registry/        # if using future.batchtools registry
+crew/               # if using crew
+
+# ---- results / generated data ----
+results/
+reports/
+data/
+*.rds
+
+# ---- logs ----
+logs/
+*.out
+*.err
+
+# ---- OS junk ----
+.DS_Store
+Thumbs.db
