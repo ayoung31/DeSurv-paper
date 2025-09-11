@@ -209,7 +209,8 @@ list(
     iteration = "list",
     resources = tar_resources(
       crew = tar_resources_crew(controller = "inits")
-    )
+    ),
+    cue = tar_cue(mode = "never")
   ),
   # 
   #select best initializations
@@ -220,7 +221,8 @@ list(
       select_best_init(df = df, method_select = METHOD_SELECT_INIT)
     },
     pattern   = map(alpha0_inits_CV),
-    iteration = "list"
+    iteration = "list",
+    cue = tar_cue(mode = "never")
   ),
   
   tar_target(
@@ -264,44 +266,48 @@ list(
     format = "file",
     resources = tar_resources(
       crew = tar_resources_crew(controller = "model_runs")
-    )
-  )
+    ),
+    cue = tar_cue(mode = "never")
+  ),
 
-  # tar_target(
-  #   CV_metrics_full,
-  #   {
-  #     compute_metrics_CV(path = warmstarts_files_CV, 
-  #                        data_folds = data_folds, 
-  #                        ntop = NTOP)
-  #   },
-  #   pattern = map(warmstarts_files_CV),
-  #   iteration = "list"
-  # ),
-  # 
-  # 
-  # tar_target(
-  #   CV_metrics,
-  #   {
-  #     mets = dplyr::bind_rows(CV_metrics_full)
-  #     mets %>% 
-  #       group_by(alpha,lambda,eta,lambdaW,lambdaH) %>%
-  #       summarise(bic_mean = mean(bic,na.rm=TRUE),
-  #                 bic_sd = sd(bic,na.rm=TRUE)) %>%
-  #       ungroup()
-  #       
-  #   }
-  #   
-  # ),
-  # 
-  # # find the param combo with min BIC
-  # tar_target(
-  #   selected_params,
-  #   CV_metrics %>%
-  #   slice_min(order_by = bic_mean, n = 1, with_ties = FALSE) %>%
-  #     left_join(param_grid_CV) %>%
-  #     filter(fold == 1)
-  # ),
-  # # 
+  tar_target(
+    CV_metrics_full_file,
+    {
+      compute_metrics_CV(path = warmstarts_files_CV,
+                         data_folds = data_folds,
+                         ntop = NTOP)
+    },
+    pattern = map(warmstarts_files_CV),
+    iteration = "list",
+    resources = tar_resources(
+      crew = tar_resources_crew(controller = "model_runs")
+    )
+  ),
+
+
+  tar_target(
+    CV_metrics,
+    {
+      mets = dplyr::bind_rows(CV_metrics_full)
+      mets %>%
+        group_by(alpha,lambda,eta,lambdaW,lambdaH) %>%
+        summarise(bic_mean = mean(bic,na.rm=TRUE),
+                  bic_sd = sd(bic,na.rm=TRUE)) %>%
+        ungroup()
+
+    }
+
+  ),
+
+  # find the param combo with min BIC
+  tar_target(
+    selected_params,
+    CV_metrics %>%
+    slice_min(order_by = bic_mean, n = 1, with_ties = FALSE) %>%
+      left_join(param_grid_CV) %>%
+      filter(fold == 1)
+  )
+  #
   # # # initialize full model run for selected params
   # tar_target(
   #   alpha0_inits,

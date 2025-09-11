@@ -3,12 +3,11 @@
 .Rhistory
 .RData
 .Ruserdata
+DeSurv-paper.Rproj
 
 # ---- targets package cache ----
-_targets/           # main cache directory
+/_targets/           # main cache directory
 stores/             # if you use multiple stores (see tar_config_set)
-bt-registry/        # if using future.batchtools registry
-crew/               # if using crew
 
 # ---- results / generated data ----
 results/
