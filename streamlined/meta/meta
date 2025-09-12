@@ -1,25 +1,32 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-alpha|stem|3fa5850fcc8a12e5|d1fb2a63e327c544|983ddd6320fcee1f|-1209573786||t20343.5473248699s|s119b|119|rds|local|vector|||2.261||
+alpha|stem|3fa5850fcc8a12e5|d1fb2a63e327c544|983ddd6320fcee1f|-1209573786||t20343.5800154603s|s119b|119|rds|local|vector|||1.954||
 raw_data|stem|91b4651df9f451ba|90c23eff5559cb0e|2ca0910a9acd6aa6|-1101284392|data/original/TCGA_PAAD.rds*data/original/TCGA_PAAD.survival_data.rds*data/original/TCGA_PAAD_subtype.csv|t20263.6836689815s|s12420780b|12420780|file|local|vector|||0||
-param_grid_CV|stem|d5a90e67e0dd5d45|f7e579cfd7bc7175|4d904af9bb5b2d38|235458371||t20343.5473410946s|s361b|361|rds|local|vector||param_grid_CV_5bba95420195cee0*param_grid_CV_e4a25698eccff5b1*param_grid_CV_79509bb63c654be5*param_grid_CV_77909b0f2ddeda2d*param_grid_CV_31b9a1b41ac1cde8|0.006||
-data|stem|9e17f329ed868fa5|274b6324873a0880|343c98a93f89f08a|33550471||t20343.547373971s|s16782000b|16782000|rds|local|vector|||0.842||
-data_filtered|stem|12bd8211f2e54bdc|d8735d3a48a0d6fb|71575fd21fd93486|-1689973547||t20343.5473966141s|s399002b|399002|rds|local|vector|||1.044||
-data_folds|stem|feba0e0d084e1534|98416ec534c61deb|2698e052b4d637b3|101884843||t20343.5474158683s|s2056922b|2056922|rds|local|vector|||1.146||
-alpha0_inits_CV_d71b15b74cc985bf|branch|20e8f991e7aceb3e|1d984b0cc4637bc7|a6314a67458c9528|1457985846|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/alpha0_inits_CV/k5_l1e-01_e5e-01_w1e+01_h1e-03_f1.rds|t20341.0980335477s|s587b|587|file|local|list|alpha0_inits_CV||3.726|package ‘dplyr’ was built under R version 4.4.2|
-best_init_per_param_combo_CV_a433da6e52e679be|branch|bd51e0296f8e5b1c|0684ec7ba538e1c0|312951ff1c695aa5|838355633||t20343.5476847653s|s396b|396|rds|local|list|best_init_per_param_combo_CV||0.013||
-alpha0_inits_CV_07505e55c5230f45|branch|d09dea2eec4f691c|1d984b0cc4637bc7|a6314a67458c9528|299178333|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/alpha0_inits_CV/k5_l1e-01_e5e-01_w1e+01_h1e-03_f3.rds|t20341.0979863421s|s589b|589|file|local|list|alpha0_inits_CV||3.366|package ‘dplyr’ was built under R version 4.4.2|
-best_init_per_param_combo_CV_0561c147efe33581|branch|99841e09a4791adf|0684ec7ba538e1c0|d6d8a62611c328f2|-1611266755||t20343.5476958837s|s398b|398|rds|local|list|best_init_per_param_combo_CV||0.025||
-alpha0_inits_CV_7cb93afa500ca477|branch|2499b96840863f33|1d984b0cc4637bc7|a6314a67458c9528|-233411150|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/alpha0_inits_CV/k5_l1e-01_e5e-01_w1e+01_h1e-03_f2.rds|t20341.097580818s|s590b|590|file|local|list|alpha0_inits_CV||3.073|package ‘dplyr’ was built under R version 4.4.2|
-best_init_per_param_combo_CV_bd9f223a0f367358|branch|59d6ebd928acafaa|0684ec7ba538e1c0|8025c1001f67fd1b|-1914555510||t20343.5477076925s|s397b|397|rds|local|list|best_init_per_param_combo_CV||0.006||
-alpha0_inits_CV_bdfa0cf1d6492ffe|branch|43c784e623b0cf79|1d984b0cc4637bc7|a6314a67458c9528|-611292439|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/alpha0_inits_CV/k5_l1e-01_e5e-01_w1e+01_h1e-03_f4.rds|t20341.097971191s|s584b|584|file|local|list|alpha0_inits_CV||3.097|package ‘dplyr’ was built under R version 4.4.2|
-best_init_per_param_combo_CV_8f2ed0b7abf9b571|branch|cc66468c4cc0966a|0684ec7ba538e1c0|b3052dc1fcd0e91a|765837344||t20343.5477159277s|s393b|393|rds|local|list|best_init_per_param_combo_CV||0.007||
-alpha0_inits_CV_6ed9059b4d975430|branch|180c55a902d1c138|1d984b0cc4637bc7|a6314a67458c9528|-1403070898|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/alpha0_inits_CV/k5_l1e-01_e5e-01_w1e+01_h1e-03_f5.rds|t20341.0978404388s|s588b|588|file|local|list|alpha0_inits_CV||3.244|package ‘dplyr’ was built under R version 4.4.2|
-best_init_per_param_combo_CV_6971debf40e495c8|branch|b9643ddfc71f804f|0684ec7ba538e1c0|7b4536fdbd8079dd|-1569271515||t20343.547723989s|s397b|397|rds|local|list|best_init_per_param_combo_CV||0.008||
-alpha0_inits_CV|pattern|2e13ff40910927c8|1d984b0cc4637bc7||46378149||||2938|file|local|list||alpha0_inits_CV_d71b15b74cc985bf*alpha0_inits_CV_7cb93afa500ca477*alpha0_inits_CV_07505e55c5230f45*alpha0_inits_CV_bdfa0cf1d6492ffe*alpha0_inits_CV_6ed9059b4d975430|16.506||
-best_init_per_param_combo_CV|pattern|3ab8cfb9cb373baa|0684ec7ba538e1c0||-15030912||||1981|rds|local|list||best_init_per_param_combo_CV_a433da6e52e679be*best_init_per_param_combo_CV_bd9f223a0f367358*best_init_per_param_combo_CV_0561c147efe33581*best_init_per_param_combo_CV_8f2ed0b7abf9b571*best_init_per_param_combo_CV_6971debf40e495c8|0.059||
-best_inits_cv_feasible_params|stem|783182bac90fe1c1|863a017b4f7568cc|8891a2792f7f0445|-629901663||t20343.5477326912s|s683b|683|rds|local|vector||best_inits_cv_feasible_params_ae4ddf95b946d0e3*best_inits_cv_feasible_params_b34b74398140f962*best_inits_cv_feasible_params_639058c299a65ad7*best_inits_cv_feasible_params_3204f351e89bddda*best_inits_cv_feasible_params_16dccf66b7904c35|0.013||
-warmstarts_files_CV_8b4edb1429e73368|branch|ae2494e2000fb9d2|8cb84b0fdebf6a55|3c4d4a2164deac00|-1738001684|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/model_runs_cv/surv/k5_l1e-01_e5e-01_w1e+01_h1e-03_i8_f1.rds|t20343.5510108889s|s1949644b|1949644|file|local|list|warmstarts_files_CV||260.422|package ‘dplyr’ was built under R version 4.4.2. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge|
-CV_metrics_full_file_3f08490e4f0ea321|branch|dab157e1fa27ab2b|560e0bf5338801b3|013576f0373281af|804398015||t20343.551024458s|s536b|536|rds|local|list|CV_metrics_full_file||0.767||
+param_grid_CV|stem|9722ba2d986ac967|f7e579cfd7bc7175|0d349a3e491adb29|235458371||t20343.5800259916s|s362b|362|rds|local|vector||param_grid_CV_8b7e4e11dddc6223*param_grid_CV_8065f145ec9f907c*param_grid_CV_4d09af09439e9eb2*param_grid_CV_8b199429ae508076*param_grid_CV_b0df6dc0e46c108e|0.006||
+data|stem|9e17f329ed868fa5|274b6324873a0880|343c98a93f89f08a|33550471||t20343.5800615553s|s16782000b|16782000|rds|local|vector|||0.873||
+data_filtered|stem|12bd8211f2e54bdc|d8735d3a48a0d6fb|71575fd21fd93486|-1689973547||t20343.580078389s|s399002b|399002|rds|local|vector|||0.814||
+data_folds|stem|feba0e0d084e1534|98416ec534c61deb|2698e052b4d637b3|101884843||t20343.5800972779s|s2056922b|2056922|rds|local|vector|||0.845||
+alpha0_inits_CV_ce27ce6b92f95b32|branch|2587670406f55c00|1d984b0cc4637bc7|a6314a67458c9528|-477761669|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/alpha0_inits_CV/k5_l1e-01_e9e-01_w1e-02_h1e+02_f1.rds|t20341.1031933664s|s584b|584|file|local|list|alpha0_inits_CV||2.475|package ‘dplyr’ was built under R version 4.4.2|
+best_init_per_param_combo_CV_0f153413c908638c|branch|d6c961ecd93797be|0684ec7ba538e1c0|1c0a0bb93238937b|945224039||t20343.5802767003s|s396b|396|rds|local|list|best_init_per_param_combo_CV||0.021||
+alpha0_inits_CV_e02cd4a96464736a|branch|e667f272a5ce395a|1d984b0cc4637bc7|a6314a67458c9528|991308193|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/alpha0_inits_CV/k5_l1e-01_e9e-01_w1e-02_h1e+02_f5.rds|t20341.1034508912s|s591b|591|file|local|list|alpha0_inits_CV||0.01||
+best_init_per_param_combo_CV_ee09c8cd9c371302|branch|992ce6363b66cd47|0684ec7ba538e1c0|4b1292f1dc93fcc1|-892605476||t20343.5802882786s|s396b|396|rds|local|list|best_init_per_param_combo_CV||0.033||
+alpha0_inits_CV_e855b6bffbe5e298|branch|66492d747909da87|1d984b0cc4637bc7|a6314a67458c9528|-724134530|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/alpha0_inits_CV/k5_l1e-01_e9e-01_w1e-02_h1e+02_f3.rds|t20341.1033469204s|s584b|584|file|local|list|alpha0_inits_CV||2.986|package ‘dplyr’ was built under R version 4.4.2|
+best_init_per_param_combo_CV_036becefcea09dd6|branch|ce23abc829019cd5|0684ec7ba538e1c0|a615e58b007080d5|-290651794||t20343.580300996s|s399b|399|rds|local|list|best_init_per_param_combo_CV||0.007||
+alpha0_inits_CV_62085921d607261b|branch|f702c6e51e38ec2d|1d984b0cc4637bc7|a6314a67458c9528|834789306|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/alpha0_inits_CV/k5_l1e-01_e9e-01_w1e-02_h1e+02_f2.rds|t20341.1032761289s|s587b|587|file|local|list|alpha0_inits_CV||2.984|package ‘dplyr’ was built under R version 4.4.2|
+best_init_per_param_combo_CV_8badbf7e5b6b40d9|branch|700d222cb338ea1a|0684ec7ba538e1c0|05abc8c10e800e7d|956303328||t20343.5803170449s|s399b|399|rds|local|list|best_init_per_param_combo_CV||0.011||
+alpha0_inits_CV_d716c575d95feba8|branch|789a5db0d429622b|1d984b0cc4637bc7|a6314a67458c9528|1184829814|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/alpha0_inits_CV/k5_l1e-01_e9e-01_w1e-02_h1e+02_f4.rds|t20341.103274184s|s587b|587|file|local|list|alpha0_inits_CV||3.514|package ‘dplyr’ was built under R version 4.4.2|
+best_init_per_param_combo_CV_4e4f9f692097320d|branch|dbf613b7366ce1cc|0684ec7ba538e1c0|2aa5ccba71236a2b|-19910838||t20343.5803349875s|s399b|399|rds|local|list|best_init_per_param_combo_CV||0.019||
+alpha0_inits_CV|pattern|9e9cd74508e459d2|1d984b0cc4637bc7||46378149||||2933|file|local|list||alpha0_inits_CV_ce27ce6b92f95b32*alpha0_inits_CV_62085921d607261b*alpha0_inits_CV_e855b6bffbe5e298*alpha0_inits_CV_d716c575d95feba8*alpha0_inits_CV_e02cd4a96464736a|11.969||
+best_init_per_param_combo_CV|pattern|544a6407f1aa3f7d|0684ec7ba538e1c0||-15030912||||1989|rds|local|list||best_init_per_param_combo_CV_0f153413c908638c*best_init_per_param_combo_CV_8badbf7e5b6b40d9*best_init_per_param_combo_CV_036becefcea09dd6*best_init_per_param_combo_CV_4e4f9f692097320d*best_init_per_param_combo_CV_ee09c8cd9c371302|0.091||
+best_inits_cv_feasible_params|stem|a96f2a7ad64f6c40|863a017b4f7568cc|e9747e0768d5bcce|-629901663||t20343.5803481226s|s687b|687|rds|local|vector||best_inits_cv_feasible_params_328d869ecb6a6f6e*best_inits_cv_feasible_params_b79419787cba6c6d*best_inits_cv_feasible_params_b6d6f948f29a4cef*best_inits_cv_feasible_params_68bbab0ef812d9a0*best_inits_cv_feasible_params_a8ecf16e181656e2|0.013||
+warmstarts_files_CV_64818a3fb27086c7|branch|47e78eecea33969f|8cb84b0fdebf6a55|3c4d4a2164deac00|-610803877|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/model_runs_cv/surv/k5_l1e-01_e9e-01_w1e-02_h1e+02_i8_f4.rds|t20343.5852688292s|s3003332b|3003332|file|local|list|warmstarts_files_CV||413.014|package ‘dplyr’ was built under R version 4.4.2. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge|
+warmstarts_files_CV_1d3f03e75bc8587d|branch|5ac2ff8e3b6fd2d8|8cb84b0fdebf6a55|3c4d4a2164deac00|-538494489|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/model_runs_cv/surv/k5_l1e-01_e9e-01_w1e-02_h1e+02_i4_f1.rds|t20343.5854810274s|s2391432b|2391432|file|local|list|warmstarts_files_CV||433.223|package ‘dplyr’ was built under R version 4.4.2. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge|
+warmstarts_files_CV_1c3f8a23e1b2ef0e|branch|69245bec66b0174d|8cb84b0fdebf6a55|3c4d4a2164deac00|-2083660481|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/model_runs_cv/surv/k5_l1e-01_e9e-01_w1e-02_h1e+02_i8_f2.rds|t20343.5858332902s|s3080780b|3080780|file|local|list|warmstarts_files_CV||462.711|package ‘dplyr’ was built under R version 4.4.2. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge|
+warmstarts_files_CV_847d821fdc79c674|branch|0f79abfa86edd567|8cb84b0fdebf6a55|3c4d4a2164deac00|-1537791140|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/model_runs_cv/surv/k5_l1e-01_e9e-01_w1e-02_h1e+02_i10_f3.rds|t20343.5863250034s|s2923936b|2923936|file|local|list|warmstarts_files_CV||504.252|package ‘dplyr’ was built under R version 4.4.2. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge|
+warmstarts_files_CV_4ffd571e972bd4f9|branch|c024ed0510b40e88|8cb84b0fdebf6a55|3c4d4a2164deac00|854278311|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/model_runs_cv/surv/k5_l1e-01_e9e-01_w1e-02_h1e+02_i1_f5.rds|t20343.5868436972s|s3018664b|3018664|file|local|list|warmstarts_files_CV||548.322|package ‘dplyr’ was built under R version 4.4.2. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge|
+warmstarts_files_CV|pattern|3dcd553d1bb23f0f|8cb84b0fdebf6a55||1804956196||||14418144|file|local|list||warmstarts_files_CV_1d3f03e75bc8587d*warmstarts_files_CV_1c3f8a23e1b2ef0e*warmstarts_files_CV_847d821fdc79c674*warmstarts_files_CV_64818a3fb27086c7*warmstarts_files_CV_4ffd571e972bd4f9|2361.522||
+selected_params|stem|a8bf8b7abaf88725|431abedae72a839a|be14fc12f6f55cca|-2138408319||t20343.5868786236s|s334b|334|rds|local|vector|||0.061||
+CV_metrics_full_file|pattern|6fec3d734170a1e1|27068ffb8eb5fdf7||-2028259060||||2636|file|local|list||CV_metrics_full_file_81b62777f4e4c6af*CV_metrics_full_file_b5b410aaf00f82ba*CV_metrics_full_file_ccdd01fdaf3fc477*CV_metrics_full_file_23f38b4f85356e9a*CV_metrics_full_file_583355854719dd5c|10.058||
+CV_metrics|stem|52126888bec06c17|f60d7b7d0980719d|b80080a94def7bc0|1468105984||t20343.5868702324s||617|rds|local|vector|||0.09||Must group by variables found in `.data`. Column `alpha` is not found. Column `lambda` is not found. Column `eta` is not found. Column `lambdaW` is not found. Column `lambdaH` is not found.
 init_alpha0|function|6fbdad5c7a0fc6c7
 preprocess_data|function|3ef406727af927d0
 create_filepath_init_alpha0_CV|function|8aa57c109b3fcb47
@@ -33,9 +40,9 @@ compare_clusters_to_known_labels|function|628d9fbb55d7edc2
 METHOD_SELECT_INIT|object|4cfc1ccb537bec00
 create_table|function|5309ad88070cf481
 ORA_plots|function|dbfe537989b6c022
-LAMBDAW_VALS|object|d516855f98da7f3d
+LAMBDAW_VALS|object|cf0025f6b6d15e62
 full_pipeline|function|65f20d32ce0534e0
-model_runs_controller|object|de11240ff4ad6ced
+model_runs_controller|object|8ca89fffdd8847fa
 ALPHA_VALS|object|eff0c85ebb73ccdb
 NINIT|object|d516855f98da7f3d
 select_best_init|function|9a14cc7860ee60e2
@@ -44,15 +51,17 @@ plot_survival|function|d075f8caa042d9c9
 print.clustering_input|function|b922721232d3baf2
 IMAXIT|object|45eddf26bb0b215d
 plot_heatmap.clustering_input|function|95db972e2c7e59da
-default_controller|object|671eccbf73c6fc2f
+default_controller|object|3fcbda7dd15786d6
 NFOLD|object|c386c7b04396aaec
 build_model_save_dir|function|fa3822f3eb70228d
 LAMBDA_VALS|object|ff81af095a75741e
+create_filepath_CV_metrics|function|f2e59ecb7152f456
 create_filepath_init_alpha0|function|0542dbdee68902ea
-.Random.seed|object|c682eb6b8507b643
+.Random.seed|object|0ceac145e64cf249
 load_data_internal|function|58fd49316c9e2cb5
 consensusclusterplus_run|function|6fc9397e62757d11
 validate_clustering_input|function|98e45a22677e1a40
+val_comp_controller|object|e3cfb2cbb0c27db3
 plot_heatmap|function|a7595eec80e0ffa7
 build_metrics_path|function|4252c3b04914cadb
 build_model_filename|function|9f228b32017770f3
@@ -61,13 +70,13 @@ as.data.frame.clustering_result|function|a1ae4b6f6879cbf0
 validate_clustering_result|function|8c8a8174fd245ab6
 MAXIT|object|45eddf26bb0b215d
 "%||%"|function|cbd551ae0ec020a9
-ETA_VALS|object|a0f70b97cb958d4f
+ETA_VALS|object|8094e2aa6573adfd
 NTOP|object|5328423ee29e059b
 summary.clustering_result|function|977e7c5fd714e1ed
 print.clustering_results|function|0ee5b6cf3782864f
 TOL|object|1cdc73a836bf9836
 survival_summary|function|9b9d825800d39812
-LAMBDAH_VALS|object|34d968d1945b655e
+LAMBDAH_VALS|object|9ad0b176bfc1180e
 create_filepath_warmstart_runs_CV|function|5fa701338caac6f3
 run_warmstarts_cv|function|f3bdc43d8c4f792c
 create_filepath_warmstart_runs|function|1a4c6edfb6e6630a
@@ -76,7 +85,7 @@ comp_class|function|dc82e0c14fa99783
 new_clustering_results|function|d52e2e5664d6377d
 select_factors|function|d441fa13632b160c
 init_alpha0_CV|function|fea3890a6a3cef27
-easy_comp_controller|object|b12eb2427415f55e
+easy_comp_controller|object|1abc44ecdffc3515
 create_param_grid|function|5255f3df6bd57b68
 METHOD_TRANS_TRAIN|object|036d6276cef00c21
 comp_alphas|function|148ec645a63d140b
@@ -87,7 +96,7 @@ init_one_alpha0|function|6a90cf6c8ce8137c
 NGENE|object|d887885b74fc7404
 K_VALS|object|c386c7b04396aaec
 create_param_grid_CV|function|d369e6384f543984
-compute_metrics_CV|function|59f16a77f7038310
+compute_metrics_CV|function|456cf9000563761e
 Plot_heatmap_CC|function|9822151b0fa74ebb
 ORA|function|6833fc7eb32bde72
 plot_heatmap.clustering_result|function|0d73c9d3d12e0252
@@ -100,15 +109,8 @@ comp_models|function|7b986b0d6b705e5a
 model_description|function|d63c724c46c38c1e
 consensus_cluster|function|b0d5030ba16633af
 cluster_dataset|function|1d2c7b84ff2eef21
-warmstarts_files_CV_3422c47028c1c015|branch|cd339a08a02658c2|8cb84b0fdebf6a55|3c4d4a2164deac00|-1136896310|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/model_runs_cv/surv/k5_l1e-01_e5e-01_w1e+01_h1e-03_i3_f5.rds|t20343.5525246568s|s2665224b|2665224|file|local|list|warmstarts_files_CV||390.136|package ‘dplyr’ was built under R version 4.4.2. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge|
-CV_metrics_full_file_dc6a08a9746653d5|branch|75f0fecad6348a47|560e0bf5338801b3|eef845451bcb6eaf|1451182444||t20343.5525540748s|s527b|527|rds|local|list|CV_metrics_full_file||0.815||
-warmstarts_files_CV_de6d6460c70540b6|branch|7d39c8a82d7a3a3a|8cb84b0fdebf6a55|3c4d4a2164deac00|-1956874998|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/model_runs_cv/surv/k5_l1e-01_e5e-01_w1e+01_h1e-03_i1_f3.rds|t20343.5533002821s|s2616392b|2616392|file|local|list|warmstarts_files_CV||457.78|package ‘dplyr’ was built under R version 4.4.2. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge|
-CV_metrics_full_file_91cb9af2a228825f|branch|abbc2a20fc397c7c|560e0bf5338801b3|b5aabfe656dbd411|-1960306035||t20343.5533189712s|s535b|535|rds|local|list|CV_metrics_full_file||0.853||
-warmstarts_files_CV_4aef8bd896c9ee92|branch|1b878a0f46737a97|8cb84b0fdebf6a55|3c4d4a2164deac00|-1987979780|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/model_runs_cv/surv/k5_l1e-01_e5e-01_w1e+01_h1e-03_i4_f4.rds|t20343.553576797s|s3349896b|3349896|file|local|list|warmstarts_files_CV||481.531|package ‘dplyr’ was built under R version 4.4.2. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge|
-warmstarts_files_CV_6860bfbcbabf5e8c|branch|a10bf55f2c90735a|8cb84b0fdebf6a55|3c4d4a2164deac00|-101672964|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/model_runs_cv/surv/k5_l1e-01_e5e-01_w1e+01_h1e-03_i10_f2.rds|t20343.5535936117s|s2790052b|2790052|file|local|list|warmstarts_files_CV||483.468|package ‘dplyr’ was built under R version 4.4.2. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge. coxNMF failed to converge|
-warmstarts_files_CV|pattern|58cce03f60a08c26|8cb84b0fdebf6a55||1804956196||||13371208|file|local|list||warmstarts_files_CV_8b4edb1429e73368*warmstarts_files_CV_6860bfbcbabf5e8c*warmstarts_files_CV_de6d6460c70540b6*warmstarts_files_CV_4aef8bd896c9ee92*warmstarts_files_CV_3422c47028c1c015|2073.337||
-CV_metrics_full_file_024cc829e75e1362|branch|d942c9fb39f94661|560e0bf5338801b3|1586245878925424|2008971377||t20343.5535985095s|s536b|536|rds|local|list|CV_metrics_full_file||1.022||
-CV_metrics_full_file_2a8eb0baf84182e3|branch|e57c6fce78f77e3c|560e0bf5338801b3|7fb61ea3783d6e0c|-1329846147||t20343.5536068422s|s528b|528|rds|local|list|CV_metrics_full_file||0.832||
-CV_metrics_full_file|pattern|e72ec6cfa22603c8|560e0bf5338801b3||-2028259060||||2662|rds|local|list||CV_metrics_full_file_3f08490e4f0ea321*CV_metrics_full_file_2a8eb0baf84182e3*CV_metrics_full_file_91cb9af2a228825f*CV_metrics_full_file_024cc829e75e1362*CV_metrics_full_file_dc6a08a9746653d5|4.289||
-CV_metrics|stem||f60d7b7d0980719d|0bdb198c2d1d8391|1468105984||t20343.5536232961s||0|rds|local|vector|||0.056||Must group by variables found in `.data`. ✖ Column `alpha` is not found.
-selected_params|stem||431abedae72a839a|de86d81e4d204a20|-2138408319||t20343.553630499s||0|rds|local|vector|||0.01||could not load dependency CV_metrics of target selected_params. invalid 'description' argument
+CV_metrics_full_file_23f38b4f85356e9a|branch|c74d8125fd5e83e2|27068ffb8eb5fdf7|904051a39aa3deaf|1372263432|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/cv_metrics/surv/k5_l1e-01_e9e-01_w1e-02_h1e+02_f4.rds|t20343.6725249297s|s524b|524|file|local|list|CV_metrics_full_file||1.5||
+CV_metrics_full_file_ccdd01fdaf3fc477|branch|379f013e66953cf4|27068ffb8eb5fdf7|818ec04cbd9ee35d|312360002|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/cv_metrics/surv/k5_l1e-01_e9e-01_w1e-02_h1e+02_f3.rds|t20343.6725249169s|s528b|528|file|local|list|CV_metrics_full_file||1.46||
+CV_metrics_full_file_b5b410aaf00f82ba|branch|aaadc6b73d3c5acf|27068ffb8eb5fdf7|59bc55aa3dba74f1|1287932966|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/cv_metrics/surv/k5_l1e-01_e9e-01_w1e-02_h1e+02_f2.rds|t20343.6725295468s|s524b|524|file|local|list|CV_metrics_full_file||1.707||
+CV_metrics_full_file_583355854719dd5c|branch|e50bdd67ec1c992f|27068ffb8eb5fdf7|8f22b9c8710926fb|-1263223660|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/cv_metrics/surv/k5_l1e-01_e9e-01_w1e-02_h1e+02_f5.rds|t20343.672535418s|s528b|528|file|local|list|CV_metrics_full_file||1.769||
+CV_metrics_full_file_81b62777f4e4c6af|branch|177a660ed645b123|27068ffb8eb5fdf7|39d61848345a21ce|-715190226|results/TCGA_PAAD/quant/ng1000_imax6000_tol1e-06_max6000/cv_metrics/surv/k5_l1e-01_e9e-01_w1e-02_h1e+02_f1.rds|t20343.6725375136s|s532b|532|file|local|list|CV_metrics_full_file||2.028||

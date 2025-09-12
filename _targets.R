@@ -80,11 +80,11 @@ IMAXIT             = 6000
 TOL                = 1e-6
 MAXIT              = 6000
 NINIT              = 10
-K_VALS             = 2:12#2:16   #= c(2,3,4,5)
-LAMBDA_VALS        = 10^seq(-3,3)#10^seq(-4,4)
-ETA_VALS           = c(.1,.5,.9)#seq(.1,.9,by=.1)
-LAMBDAW_VALS       = 10^seq(-3,3)#10^seq(-4,4)
-LAMBDAH_VALS       = 10^seq(-3,3)#10^seq(-4,4)
+K_VALS             = 5#2:12#2:16   #= c(2,3,4,5)
+LAMBDA_VALS        = .1#10^seq(-3,3)#10^seq(-4,4)
+ETA_VALS           = .9#c(.1,.5,.9)#seq(.1,.9,by=.1)
+LAMBDAW_VALS       = 1e-2#10^seq(-3,3)#10^seq(-4,4)
+LAMBDAH_VALS       = 1e2#10^seq(-3,3)#10^seq(-4,4)
 NFOLD              = 5
 NTOP               = 25
 
@@ -290,12 +290,19 @@ list(
   tar_target(
     CV_metrics_full_file,
     {
-      compute_metrics_CV(path = warmstarts_files_CV,
-                         data_folds = data_folds,
-                         ntop = NTOP)
+      model = readRDS(warmstarts_files_CV)
+      path_out = create_filepath_CV_metrics(model$meta,
+                                            TRAIN_PREFIX,
+                                            METHOD_TRANS_TRAIN,
+                                            METHOD_SELECT_INIT)
+      compute_metrics_CV(path_out = path_out,
+        path = warmstarts_files_CV,
+        data_folds = data_folds,
+        ntop = NTOP)
     },
     pattern = map(warmstarts_files_CV),
     iteration = "list",
+    format = "file",
     resources = tar_resources(
       crew = tar_resources_crew(controller = "cv_validation")
     )

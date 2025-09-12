@@ -2,7 +2,7 @@
 
 #SBATCH --mem=8g
 #SBATCH --cpus-per-task 16
-#SBATCH -t 02:00:00
+#SBATCH -t 04:00:00
 
 module load r/4.4.0
 

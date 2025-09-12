@@ -1,4 +1,4 @@
-compute_metrics_CV = function(path,data_folds,ntop,score_bin=FALSE){
+compute_metrics_CV = function(path_out,path,data_folds,ntop,score_bin=FALSE){
   
   b <- readRDS(path)
   stopifnot(is.list(b$fits), length(b$fits) > 0)
@@ -21,9 +21,16 @@ compute_metrics_CV = function(path,data_folds,ntop,score_bin=FALSE){
     if(!is.null(W) & sum(W)>0){
       tops = get_top_genes(W = W, ntop = ntop)
       score_data = compute_scores(tops,W,X,y,delta,score_bin)
-      survfit = survival::coxph(Surv(time,event)~., data=score_data)
+      bic = tryCatch(
+        {
+          survfit = survival::coxph(Surv(time,event)~., data=score_data)
+          stats::BIC(survfit)
+        },
+        error = function(e){
+          NA
+        }
+      )
       
-      bic = stats::BIC(survfit)
       
       
       
@@ -41,5 +48,10 @@ compute_metrics_CV = function(path,data_folds,ntop,score_bin=FALSE){
   
   metrics = dplyr::bind_rows(res)
   
-  return(metrics)
+  tmp <- paste0(path_out, ".tmp")
+  saveRDS(metrics, tmp, compress = "xz")
+  file.rename(tmp, path_out)
+
+  
+  return(path_out)
 }

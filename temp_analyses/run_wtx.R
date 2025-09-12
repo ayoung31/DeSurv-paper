@@ -3,8 +3,11 @@ library(survival)
 library(ggplot2)
 library(parallel)
 library(foreach)
-purrr::walk(list.files("R", full.names = TRUE, pattern = "[.]R$"), source)
+library(coxNMF)
+purrr::walk(list.files("/work/users/a/y/ayoung31/DeSurv-paper/R", full.names = TRUE, pattern = "[.]R$"), source)
+    
 setwd("/work/users/a/y/ayoung31/DeSurv-paper-dev")
+
 
 args <- commandArgs(trailingOnly = TRUE)
 ntop <- as.integer(args[[1]])
@@ -21,7 +24,8 @@ model.params = list(
   maxit=6000
 )
 
-select_model_v3_foreach_outer <- function(model.params, ntop, data, score_bin = FALSE) {
+select_model_v3_foreach_outer <- function(model.params, ntop, data, 
+                                          score_bin = FALSE, rank = FALSE) {
   stopifnot(requireNamespace("Matrix", quietly = TRUE),
             requireNamespace("survival", quietly = TRUE),
             requireNamespace("foreach", quietly = TRUE))
@@ -33,14 +37,17 @@ select_model_v3_foreach_outer <- function(model.params, ntop, data, score_bin = 
   tol     <- model.params$tol
   maxit   <- model.params$maxit
   
-  ks <- 2:16
+  ks <- 2:12
   
   res <- foreach::foreach(
     k = ks,
     .combine  = rbind,                      # combine per-k data.frames
     .inorder  = FALSE,                      # allow out-of-order completion
-    .packages = c("Matrix", "survival")     # load on workers
+    .packages = c("Matrix", "survival", "dplyr", "coxNMF")     # load on workers
   ) %dopar% {
+    
+    purrr::walk(list.files("/work/users/a/y/ayoung31/DeSurv-paper/R", full.names = TRUE, pattern = "[.]R$"), source)
+    
     
     message(sprintf(">>> Worker starting k = %d", k))
     
@@ -64,57 +71,6 @@ select_model_v3_foreach_outer <- function(model.params, ntop, data, score_bin = 
     build_model_path <- function(version, ngene, filename) {
       file.path('results', version, 'full', paste0('ngene', ngene), 'raw', filename)
     }
-    
-    get_top_genes_v2 <- function(results) {
-      W <- results$fit_cox$W
-      maxes = apply(W,2,max)
-      W = W[,maxes>0,drop=FALSE]
-      
-      if(ncol(W)>0){
-        if(ncol(W)>1){
-          W = W%*%diag(1/apply(W,2,max))
-        }else{
-          W = W/apply(W,2,max)
-        }
-        
-        ntop <- results$ntop
-        
-        if (is.null(W) || !is.matrix(W)) stop("W must be a non-null matrix.")
-        if (ntop > nrow(W)) stop("ntop exceeds number of genes available.")
-        
-        top_genes <- list()
-        top_diffs <- list()
-        flag_empty <- FALSE
-        
-        for (i in seq_len(ncol(W))) {
-          current_col <- W[, i]
-          
-          if (sum(current_col) > 0) {
-            other_cols <- W[, -i, drop = FALSE]
-            max_other <- if (ncol(W) > 1) apply(other_cols, 1, max) else rep(0, nrow(W))
-            
-            diff_vector <- current_col - max_other
-            top_indices <- order(diff_vector, decreasing = TRUE)[1:ntop]
-            
-            top_genes[[paste0("factor", i)]] <- rownames(W)[top_indices]
-            top_diffs[[paste0("factor", i)]] <- diff_vector[top_indices]
-          } else {
-            flag_empty <- TRUE
-          }
-        }
-        
-        if (flag_empty) {
-          warning("Some factors had zero weights for all genes.")
-        }
-        
-        results$tops <- as.data.frame(top_genes)
-        results$diffs <- as.data.frame(top_diffs)
-        
-      }
-      
-      return(results)
-    }
-    
     
     metrics_path <- build_metrics_path(version, ngene, k, ninit, imaxit, tol, maxit)
     if (!file.exists(metrics_path)) {
@@ -162,10 +118,9 @@ select_model_v3_foreach_outer <- function(model.params, ntop, data, score_bin = 
         next
       }
       
-      results <- list(ntop = ntop, fit_cox = e$fit_cox, model.params = model.params)
-      results <- get_top_genes_v2(results)
+      tops <- get_top_genes(e$fit_cox$W,ntop)
       
-      if (is.null(results$tops)) {
+      if (is.null(tops)) {
         bix <- bix + 1L
         bics_k[[bix]] <- data.frame(
           k = k,
@@ -176,13 +131,8 @@ select_model_v3_foreach_outer <- function(model.params, ntop, data, score_bin = 
       }
       
       # ---- Vectorized scoring (same as v3) ----
-      W <- results$fit_cox$W
-      X <- data$ex[rownames(data$ex) %in% rownames(W),]
-      if(rank){
-        X = apply(X,2,rank,ties.method="average")
-      }else{
-        X = preprocessCore::normalize.quantiles(X,keep.names = TRUE)
-      }
+      W <- e$fit_cox$W
+      X <- data$ex
       
       
       g_common <- intersect(rownames(W), rownames(X))
@@ -199,9 +149,9 @@ select_model_v3_foreach_outer <- function(model.params, ntop, data, score_bin = 
       Wc <- W[g_common, , drop = FALSE]
       Xc <- X[g_common, , drop = FALSE]
       
-      p <- ncol(results$tops)
+      p <- ncol(tops)
       idx_list <- lapply(seq_len(p), function(i) {
-        m <- match(results$tops[, i], g_common)
+        m <- match(tops[, i], g_common)
         m[!is.na(m)]
       })
       rows <- unlist(idx_list, use.names = FALSE)
@@ -267,14 +217,26 @@ select_model_v3_foreach_outer <- function(model.params, ntop, data, score_bin = 
 validation_datasets = "CPTAC"#c("CPTAC","Dijk","Linehan","Moffitt_GEO_array","PACA_AU_array",
                         #"PACA_AU_seq","Puleo_array")
 
-data=load_data(datasets=validation_datasets)
+
 
 cl = parallel::makeCluster(ncore,outfile="")
 doParallel::registerDoParallel(cl)
 parallel::clusterCall(cl, function(x) .libPaths(x), .libPaths())
 
-bics = select_model_v3_foreach_outer(model.params,ntop=ntop,data,score_bin=FALSE)
+data=load_data(datasets=validation_datasets)
+data = preprocess_data(data,method_trans_train="quant")
 
-save(bics,file=paste0("wtx_bics_top",ntop,"_val_cptac_rank.RData"))
+bics = select_model_v3_foreach_outer(model.params,ntop=ntop,data,
+                                     score_bin=FALSE, rank=FALSE)
+
+
+save(bics,file=paste0("wtx_bics_top",ntop,"_val_cptac_quant_nobin.RData"))
+
+
+bics = select_model_v3_foreach_outer(model.params,ntop=ntop,data,
+                                     score_bin=TRUE, rank=FALSE)
+
+
+save(bics,file=paste0("wtx_bics_top",ntop,"_val_cptac_quant_bin.RData"))
 
 stopCluster(cl)
