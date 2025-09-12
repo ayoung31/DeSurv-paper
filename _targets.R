@@ -383,7 +383,6 @@ list(
   #   training_metrics_table,
   #   dplyr::bind_rows(training_metrics)
   # )
-test123
   
   ##### Summaries #####
 )
