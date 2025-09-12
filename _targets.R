@@ -36,11 +36,28 @@ easy_comp_controller = crew_controller_slurm(
   )
 )
 
+val_comp_controller = crew_controller_slurm(
+  name = "cv_validation",
+  workers = 300,
+  seconds_idle = 120,
+  seconds_interval = 0.25,
+  options_cluster = crew_options_slurm(
+    memory_gigabytes_per_cpu = 1,
+    time_minutes = 300,
+    log_error = "logs/crew_log_%A.err",
+    log_output = "logs/crew_log_%A.out",
+    script_lines = "module load r/4.4.0"
+  )
+)
+
 # ---- Global options ----
 tar_option_set(
   packages = c("coxNMF","tidyverse","survival","cvwrapr","rmarkdown","dplyr"),
   format = "rds",
-  controller = crew_controller_group(default_controller, model_runs_controller,easy_comp_controller),
+  controller = crew_controller_group(default_controller, 
+                                     model_runs_controller,
+                                     easy_comp_controller,
+                                     val_comp_controller),
   error = "continue"
 )
 
@@ -280,7 +297,7 @@ list(
     pattern = map(warmstarts_files_CV),
     iteration = "list",
     resources = tar_resources(
-      crew = tar_resources_crew(controller = "model_runs")
+      crew = tar_resources_crew(controller = "cv_validation")
     )
   ),
 
@@ -288,7 +305,7 @@ list(
   tar_target(
     CV_metrics,
     {
-      mets = dplyr::bind_rows(CV_metrics_full)
+      mets = dplyr::bind_rows(CV_metrics_full_file)
       mets %>%
         group_by(alpha,lambda,eta,lambdaW,lambdaH) %>%
         summarise(bic_mean = mean(bic,na.rm=TRUE),

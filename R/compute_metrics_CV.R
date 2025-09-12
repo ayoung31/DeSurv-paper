@@ -9,6 +9,10 @@ compute_metrics_CV = function(path,data_folds,ntop,score_bin=FALSE){
   y = data_test$sampInfo$time
   delta = data_test$sampInfo$event
   res <- vector("list", length(b$fits))
+  res_df = as.data.frame(pars)
+  res_df$alpha = res_df$alpha_vec
+  res_df$alpha_vec = NULL
+  
   j = 1
   for (nm in sort(names(b$fits))){
     a <- as.numeric(nm)
@@ -28,10 +32,9 @@ compute_metrics_CV = function(path,data_folds,ntop,score_bin=FALSE){
     }
     
     #create a dataframe of params and bic results
-    res_df = pars
-    res_df$alpha = a
-    res_df$bic = bic
-    res[[j]] = res_df
+    cur_df = res_df[j,]
+    cur_df$bic = bic
+    res[[j]] = cur_df
     
     j = j+1
   }
