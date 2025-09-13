@@ -80,11 +80,11 @@ IMAXIT             = 6000
 TOL                = 1e-6
 MAXIT              = 6000
 NINIT              = 10
-K_VALS             = 5#2:12#2:16   #= c(2,3,4,5)
-LAMBDA_VALS        = .1#10^seq(-3,3)#10^seq(-4,4)
-ETA_VALS           = .9#c(.1,.5,.9)#seq(.1,.9,by=.1)
-LAMBDAW_VALS       = 1e-2#10^seq(-3,3)#10^seq(-4,4)
-LAMBDAH_VALS       = 1e2#10^seq(-3,3)#10^seq(-4,4)
+K_VALS             = 2:12#2:16   #= c(2,3,4,5)
+LAMBDA_VALS        = 10^seq(-3,3)#10^seq(-4,4)
+ETA_VALS           = c(.1,.5,.9)#seq(.1,.9,by=.1)
+LAMBDAW_VALS       = 10^seq(-3,3)#10^seq(-4,4)
+LAMBDAH_VALS       = 10^seq(-3,3)#10^seq(-4,4)
 NFOLD              = 5
 NTOP               = 25
 
@@ -127,21 +127,21 @@ list(
                o = order(vals)
                vals[o]
              }),
-  
-  # tar_target(param_grid,
-  #            create_param_grid(TRAIN_PREFIX = TRAIN_PREFIX, 
-  #                              METHOD_TRANS_TRAIN = METHOD_TRANS_TRAIN, 
-  #                              NGENE = NGENE, 
-  #                              MAXIT = MAXIT, 
-  #                              TOL = TOL, 
-  #                              IMAXIT = IMAXIT, 
-  #                              K_VALS = K_VALS, 
-  #                              LAMBDA_VALS = LAMBDA_VALS, 
-  #                              ETA_VALS = ETA_VALS,
-  #                              LAMBDAW_VALS = LAMBDAW_VALS, 
-  #                              LAMBDAH_VALS = LAMBDAH_VALS)
-  #            ),
-  
+
+  tar_target(param_grid,
+             create_param_grid(TRAIN_PREFIX = TRAIN_PREFIX,
+                               METHOD_TRANS_TRAIN = METHOD_TRANS_TRAIN,
+                               NGENE = NGENE,
+                               MAXIT = MAXIT,
+                               TOL = TOL,
+                               IMAXIT = IMAXIT,
+                               K_VALS = K_VALS,
+                               LAMBDA_VALS = LAMBDA_VALS,
+                               ETA_VALS = ETA_VALS,
+                               LAMBDAW_VALS = LAMBDAW_VALS,
+                               LAMBDAH_VALS = LAMBDAH_VALS)
+             ),
+
 
   # run and save initializations for each parameter combo
   
@@ -181,233 +181,233 @@ list(
   
   ##### Cross Validation #####
   
-  # split data into folds
-  tar_target(data_folds,
-             set_folds(data = data_filtered, nfold = NFOLD)
-             ),
-  
-  # create param grid
-  tar_target(param_grid_CV,
-             create_param_grid_CV(TRAIN_PREFIX = TRAIN_PREFIX, 
-                               METHOD_TRANS_TRAIN = METHOD_TRANS_TRAIN, 
-                               NGENE = NGENE, 
-                               MAXIT = MAXIT, 
-                               TOL = TOL, 
-                               IMAXIT = IMAXIT, 
-                               K_VALS = K_VALS, 
-                               LAMBDA_VALS = LAMBDA_VALS, 
-                               ETA_VALS = ETA_VALS,
-                               LAMBDAW_VALS = LAMBDAW_VALS, 
-                               LAMBDAH_VALS = LAMBDAH_VALS, 
-                               NFOLD = NFOLD)
-  ), 
-  
-  # initializations
-  tar_target(
-    alpha0_inits_CV,
-    {
-      print("running inits...")
-      
-      path = create_filepath_init_alpha0_CV(param_grid=param_grid_CV)
-      
-      data_train = data_folds$data_train[[param_grid_CV$fold]]
-      
-      init_alpha0_CV(
-        X = data_train$ex, 
-        y = data_train$sampInfo$time, 
-        delta = data_train$sampInfo$event,
-        param_grid = param_grid_CV,
-        path = path,
-        NINIT = NINIT
-      )
-    },
-    pattern   = map(param_grid_CV),
-    format    = "file",
-    iteration = "list",
-    resources = tar_resources(
-      crew = tar_resources_crew(controller = "inits")
-    ),
-    cue = tar_cue(mode = "never")
-  ),
+  # # split data into folds
+  # tar_target(data_folds,
+  #            set_folds(data = data_filtered, nfold = NFOLD)
+  #            ),
   # 
-  #select best initializations
-  tar_target(
-    best_init_per_param_combo_CV,
-    {
-      df = readRDS(alpha0_inits_CV)
-      select_best_init(df = df, method_select = METHOD_SELECT_INIT)
-    },
-    pattern   = map(alpha0_inits_CV),
-    iteration = "list",
-    cue = tar_cue(mode = "never")
-  ),
-  
-  tar_target(
-    best_inits_cv_feasible_params,
-    {
-      inits <- dplyr::bind_rows(best_init_per_param_combo_CV, .id = "src")
-      
-      # 2) Validate names early (paranoid but useful)
-      inits <- tibble::as_tibble(inits, .name_repair = "check_unique")
-      
-      # 3) Filter feasible and add row ids
-      feasible <- dplyr::filter(inits, !flag_nan)
-      feasible <- dplyr::mutate(feasible, id = dplyr::row_number())
-    }
-  ),
-  
+  # # create param grid
+  # tar_target(param_grid_CV,
+  #            create_param_grid_CV(TRAIN_PREFIX = TRAIN_PREFIX, 
+  #                              METHOD_TRANS_TRAIN = METHOD_TRANS_TRAIN, 
+  #                              NGENE = NGENE, 
+  #                              MAXIT = MAXIT, 
+  #                              TOL = TOL, 
+  #                              IMAXIT = IMAXIT, 
+  #                              K_VALS = K_VALS, 
+  #                              LAMBDA_VALS = LAMBDA_VALS, 
+  #                              ETA_VALS = ETA_VALS,
+  #                              LAMBDAW_VALS = LAMBDAW_VALS, 
+  #                              LAMBDAH_VALS = LAMBDAH_VALS, 
+  #                              NFOLD = NFOLD)
+  # ), 
   # 
-  #run warm starts
-  tar_target(
-    warmstarts_files_CV,
-    {
-      print("running warmstarts...")
-
-      fold = best_inits_cv_feasible_params$fold
-
-      path = create_filepath_warmstart_runs_CV(params = best_inits_cv_feasible_params)
-
-      data_train = data_folds$data_train[[fold]]
-
-      run_warmstarts_cv(
-        X = data_train$ex, y = data_train$sampInfo$time, delta = data_train$sampInfo$event,
-        params = best_inits_cv_feasible_params,
-        alpha_vec = alpha,
-        verbose = FALSE,
-        path = path
-      )
-
-    },
-    pattern   = map(best_inits_cv_feasible_params),
-    iteration = "list",
-    format = "file",
-    resources = tar_resources(
-      crew = tar_resources_crew(controller = "model_runs")
-    ),
-    cue = tar_cue(mode = "never")
-  ),
-
-  tar_target(
-    CV_metrics_full_file,
-    {
-      model = readRDS(warmstarts_files_CV)
-      path_out = create_filepath_CV_metrics(model$meta,
-                                            TRAIN_PREFIX,
-                                            METHOD_TRANS_TRAIN,
-                                            METHOD_SELECT_INIT)
-      compute_metrics_CV(path_out = path_out,
-        path = warmstarts_files_CV,
-        data_folds = data_folds,
-        ntop = NTOP)
-    },
-    pattern = map(warmstarts_files_CV),
-    iteration = "list",
-    format = "file",
-    resources = tar_resources(
-      crew = tar_resources_crew(controller = "cv_validation")
-    )
-  ),
-
-
-  tar_target(
-    CV_metrics,
-    {
-      mets = dplyr::bind_rows(CV_metrics_full_file)
-      mets %>%
-        group_by(alpha,lambda,eta,lambdaW,lambdaH) %>%
-        summarise(bic_mean = mean(bic,na.rm=TRUE),
-                  bic_sd = sd(bic,na.rm=TRUE)) %>%
-        ungroup()
-
-    }
-
-  ),
-
-  # find the param combo with min BIC
-  tar_target(
-    selected_params,
-    CV_metrics %>%
-    slice_min(order_by = bic_mean, n = 1, with_ties = FALSE) %>%
-      left_join(param_grid_CV) %>%
-      filter(fold == 1)
-  )
-  #
-  # # # initialize full model run for selected params
+  # # initializations
   # tar_target(
-  #   alpha0_inits,
+  #   alpha0_inits_CV,
   #   {
   #     print("running inits...")
-  # 
-  #     path = create_filepath_init_alpha0(param_grid=selected_params)
-  # 
-  # 
-  #     init_alpha0(
-  #       X = data_filtered$ex,
-  #       y = data_filtered$sampInfo$time,
-  #       delta = data_filtered$sampInfo$event,
-  #       param_grid = selected_params,
+  #     
+  #     path = create_filepath_init_alpha0_CV(param_grid=param_grid_CV)
+  #     
+  #     data_train = data_folds$data_train[[param_grid_CV$fold]]
+  #     
+  #     init_alpha0_CV(
+  #       X = data_train$ex, 
+  #       y = data_train$sampInfo$time, 
+  #       delta = data_train$sampInfo$event,
+  #       param_grid = param_grid_CV,
   #       path = path,
   #       NINIT = NINIT
   #     )
   #   },
-  #   pattern = map(selected_params),
-  #   iteration = "list",
+  #   pattern   = map(param_grid_CV),
   #   format    = "file",
+  #   iteration = "list",
   #   resources = tar_resources(
   #     crew = tar_resources_crew(controller = "inits")
-  #   )
+  #   ),
+  #   cue = tar_cue(mode = "never")
   # ),
   # # 
+  # #select best initializations
   # tar_target(
-  #   best_init_per_param_combo,
+  #   best_init_per_param_combo_CV,
   #   {
-  #     df = readRDS(alpha0_inits)
+  #     df = readRDS(alpha0_inits_CV)
   #     select_best_init(df = df, method_select = METHOD_SELECT_INIT)
   #   },
-  #   pattern   = map(alpha0_inits),
-  #   iteration = "list"
+  #   pattern   = map(alpha0_inits_CV),
+  #   iteration = "list",
+  #   cue = tar_cue(mode = "never")
   # ),
-  # # 
+  # 
   # tar_target(
-  #   warmstarts_files,
+  #   best_inits_cv_feasible_params,
+  #   {
+  #     inits <- dplyr::bind_rows(best_init_per_param_combo_CV, .id = "src")
+  #     
+  #     # 2) Validate names early (paranoid but useful)
+  #     inits <- tibble::as_tibble(inits, .name_repair = "check_unique")
+  #     
+  #     # 3) Filter feasible and add row ids
+  #     feasible <- dplyr::filter(inits, !flag_nan)
+  #     feasible <- dplyr::mutate(feasible, id = dplyr::row_number())
+  #   }
+  # ),
+  # 
+  # # 
+  # #run warm starts
+  # tar_target(
+  #   warmstarts_files_CV,
   #   {
   #     print("running warmstarts...")
   # 
-  #     path = create_filepath_warmstart_runs(params = best_init_per_param_combo)
+  #     fold = best_inits_cv_feasible_params$fold
   # 
-  #     run_warmstarts(
-  #       X = data_filtered$ex, y = data_filtered$sampInfo$time, delta = data_filtered$sampInfo$event,
-  #       params = best_init_per_param_combo,
+  #     path = create_filepath_warmstart_runs_CV(params = best_inits_cv_feasible_params)
+  # 
+  #     data_train = data_folds$data_train[[fold]]
+  # 
+  #     run_warmstarts_cv(
+  #       X = data_train$ex, y = data_train$sampInfo$time, delta = data_train$sampInfo$event,
+  #       params = best_inits_cv_feasible_params,
   #       alpha_vec = alpha,
   #       verbose = FALSE,
   #       path = path
   #     )
   # 
   #   },
-  #   pattern   = map(best_init_per_param_combo),
+  #   pattern   = map(best_inits_cv_feasible_params),
   #   iteration = "list",
   #   format = "file",
   #   resources = tar_resources(
   #     crew = tar_resources_crew(controller = "model_runs")
-  #   )
-  # ),
-  # # 
-  # # Compute model metrics
-  # tar_target(
-  #   training_metrics,
-  #   compute_metrics(warmstarts_files,
-  #                   data_filtered$ex,
-  #                   data_filtered$sampInfo$time,
-  #                   data_filtered$sampInfo$event),
-  #   pattern   = map(warmstarts_files),
-  #   iteration = "list"
+  #   ),
+  #   cue = tar_cue(mode = "never")
   # ),
   # 
   # tar_target(
-  #   training_metrics_table,
-  #   dplyr::bind_rows(training_metrics)
+  #   CV_metrics_full_file,
+  #   {
+  #     model = readRDS(warmstarts_files_CV)
+  #     path_out = create_filepath_CV_metrics(model$meta,
+  #                                           TRAIN_PREFIX,
+  #                                           METHOD_TRANS_TRAIN,
+  #                                           METHOD_SELECT_INIT)
+  #     compute_metrics_CV(path_out = path_out,
+  #       path = warmstarts_files_CV,
+  #       data_folds = data_folds,
+  #       ntop = NTOP)
+  #   },
+  #   pattern = map(warmstarts_files_CV),
+  #   iteration = "list",
+  #   format = "file",
+  #   resources = tar_resources(
+  #     crew = tar_resources_crew(controller = "cv_validation")
+  #   )
   # )
-  
-  
+# 
+# 
+#   tar_target(
+#     CV_metrics,
+#     {
+#       mets = dplyr::bind_rows(CV_metrics_full_file)
+#       mets %>%
+#         group_by(alpha,lambda,eta,lambdaW,lambdaH) %>%
+#         summarise(bic_mean = mean(bic,na.rm=TRUE),
+#                   bic_sd = sd(bic,na.rm=TRUE)) %>%
+#         ungroup()
+# 
+#     }
+# 
+#   ),
+# 
+#   # find the param combo with min BIC
+#   tar_target(
+#     selected_params,
+#     CV_metrics %>%
+#     slice_min(order_by = bic_mean, n = 1, with_ties = FALSE) %>%
+#       left_join(param_grid_CV) %>%
+#       filter(fold == 1)
+#   )
+  #
+  # # initialize full model run for selected params
+  tar_target(
+    alpha0_inits,
+    {
+      print("running inits...")
+
+      path = create_filepath_init_alpha0(param_grid=selected_params)
+
+
+      init_alpha0(
+        X = data_filtered$ex,
+        y = data_filtered$sampInfo$time,
+        delta = data_filtered$sampInfo$event,
+        param_grid = selected_params,
+        path = path,
+        NINIT = NINIT
+      )
+    },
+    pattern = map(selected_params),
+    iteration = "list",
+    format    = "file",
+    resources = tar_resources(
+      crew = tar_resources_crew(controller = "inits")
+    )
+  ),
+  #
+  tar_target(
+    best_init_per_param_combo,
+    {
+      df = readRDS(alpha0_inits)
+      select_best_init(df = df, method_select = METHOD_SELECT_INIT)
+    },
+    pattern   = map(alpha0_inits),
+    iteration = "list"
+  ),
+  #
+  tar_target(
+    warmstarts_files,
+    {
+      print("running warmstarts...")
+
+      path = create_filepath_warmstart_runs(params = best_init_per_param_combo)
+
+      run_warmstarts(
+        X = data_filtered$ex, y = data_filtered$sampInfo$time, delta = data_filtered$sampInfo$event,
+        params = best_init_per_param_combo,
+        alpha_vec = alpha,
+        verbose = FALSE,
+        path = path
+      )
+
+    },
+    pattern   = map(best_init_per_param_combo),
+    iteration = "list",
+    format = "file",
+    resources = tar_resources(
+      crew = tar_resources_crew(controller = "model_runs")
+    )
+  ),
+  #
+  # Compute model metrics
+  tar_target(
+    training_metrics,
+    compute_metrics(warmstarts_files,
+                    data_filtered$ex,
+                    data_filtered$sampInfo$time,
+                    data_filtered$sampInfo$event),
+    pattern   = map(warmstarts_files),
+    iteration = "list"
+  ),
+
+  tar_target(
+    training_metrics_table,
+    dplyr::bind_rows(training_metrics)
+  )
+
+
   ##### Summaries #####
 )
