@@ -1,0 +1,76 @@
+---
+title: "Survival driven deconvolution (deSurv) reveals clinically relevant tumor and stromal gene signatures"
+
+author:
+  - name: Alice Anonymous
+    affiliation: a,1,2
+  - name: Bob Security
+    affiliation: a,b
+
+address:
+  - code: a
+    address: Some Institute of Technology, Department, Street, City, State, Zip
+  - code: b
+    address: Another University Department, Street, City, State, Zip
+
+corresponding_author:
+  code: 2
+  text: "To whom correspondence should be addressed. E-mail: bob@email.com"
+
+lead_author_surname: Anonymous
+
+equal_authors:
+  code: 1
+  text: "A.O.(Author One) and A.T. (Author Two) contributed equally to this work."
+
+author_contributions: |
+  Please provide details of author contributions here.
+
+conflict_of_interest: |
+  Please declare any conflict of interest here.
+
+abstract: |
+  Please provide an abstract of no more than 250 words.
+
+significance: |
+  Authors must submit a 120-word maximum statement about the significance of their research paper.
+
+acknowledgements: |
+  Please include your acknowledgments here.
+
+keywords:
+  - one
+  - two
+  - optional
+
+bibliography: references.bib
+csl: pnas.csl
+
+lineno: false
+
+output:
+  word_document
+---
+
+
+```{r child="02_introduction.Rmd"}
+
+```
+
+# Results {.unnumbered}
+
+```{r child="04_results.Rmd"}
+
+```
+
+# Materials and methods {.unnumbered}
+
+```{r child="03_methods.Rmd"}
+
+```
+
+
+<!-- Leave these lines as they are at the end of your .Rmd file to ensure placement of methods & acknowledgements sections before the references-->
+\showmatmethods
+\showacknow
+\pnasbreak

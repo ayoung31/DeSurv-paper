@@ -8,6 +8,7 @@ DeSurv-paper.Rproj
 # ---- targets package cache ----
 /_targets/           # main cache directory
 stores/             # if you use multiple stores (see tar_config_set)
+streamlined/
 
 # ---- results / generated data ----
 results/

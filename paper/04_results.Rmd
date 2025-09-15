@@ -1,0 +1,56 @@
+## DeSurv incorporates patient survival information directly into deconvolution {.unnumbered}
+We developed deSurv, a survival-driven deconvolution framework that integrates bulk RNA-sequencing data with patient outcome information to identify cell-type-enriched gene signatures with prognostic value.
+Unlike standard unsupervised methods that cluster expression patterns without regard to patient survival, deSurv incorporates time-to-event data directly into the signature discovery process. We applied deSurv to bulk RNA-seq profiles from pancreatic, bladder, and colorectal cancer cohorts, each with matched clinical follow-up data, encompassing a total of n = XXXX patients across discovery and validation sets (Table 1).
+An overview of DeSurv can be found in Figure \@ref(fig:fig-schema)
+
+```{r fig-schema, fig.cap="DeSurv overview", out.width="80%"}
+knitr::include_graphics("desurv_schematic_v5.pdf")
+```
+
+## DeSurv captures distinct cell-type specific gene signatures {.unnumbered}
+In PDAC, deSurv identified cell-type-specific signatures spanning tumor, stromal, and immune compartments. Many signatures were distinct from those obtained using unsupervised methods (Figure 2a and 2b). Representative heatmaps illustrate the differential expression of these signatures across patients (Figure 2c).
+
+```{r}
+model.params = list(
+  dataset="TCGA_PAAD", # dataset we trained the model on
+  version="TCGA_PAAD",
+  ngene=1000,
+  ninit=100,
+  imaxit=6000,
+  tol=1e-6,
+  maxit=6000,
+  k=9
+)
+datasets = c("CPTAC","Dijk","Linehan","Moffitt_GEO_array","PACA_AU_array",
+             "PACA_AU_seq","Puleo_array")
+
+results_best = model_description(model.params = model.params,which.alpha = "best",
+                                 ntop=ntop,top_genes = top_genes, plot=FALSE,
+                                 top.type = top.type, p.adj=.01, colors=colors)
+
+data=load_data(datasets=datasets,save=TRUE,replace=FALSE)
+
+heatmap_tumor=plot_gg_heatmap(results_best,data,type="tumor",factors=c(1,6),nclus=2)
+
+```
+
+
+## DeSurv extracts prognostic tumor signatures {.unnumbered}
+Tumor signatures derived using deSurv stratified patients into groups with significantly different survival outcomes (log-rank P < 0.001 in all datasets), often outperforming unsupervised methods (Figures 3a-c). For example, a deSurv tumor signature achieved a concordance index (C-index) of 0.72 compared to 0.61 for the nearest unsupervised equivalent (Table 1).
+Performance gains were consistent in independent validation cohorts (Figures 3d-e) , indicating that survival integration during signature discovery enhances prognostic robustness.
+
+```{r}
+
+```
+
+
+## DeSurv extracts prognostic stromal factors {.unnumbered}
+
+Figure: Panel A , Panel B, Panel C, 
+
+At k=9, DeSurv finds an iCAF factor that is not found in standard NMF. When we cluster on this factor in the validation datasets the resulting clusters are prognostic for patient survival. Note that almost all other stromal factors are not associated with survival.
+
+## Cross-cancer robustness of prognostic signatures {.unnumbered}
+Several deSurv-derived signatures retained prognostic value when applied to other cancer types. A tumor signature discovered in PDAC was also prognostic in colorectal cancer (log-rank P = xx), and a stromal signature from pancreatic cancer predicted improved survival in bladder cancer (Figure 4a).
+Heatmaps of hazard ratios across cross-cancer applications revealed that X\% of signatures demonstrated statistically significant associations in at least two cancer types (Figure 4b), suggesting a degree of pan-cancer prognostic relevance.
+

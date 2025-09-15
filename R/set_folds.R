@@ -1,6 +1,60 @@
-set_folds = function(data, nfold = 5){
+# X_train, X_val: genes x samples (rows = genes), numeric
+# Returns: list of per-gene maps from training and transformed matrices on [0,1]
+fit_rank_maps <- function(X_train) {
+  apply(X_train, 1, function(v) {
+    o <- order(v); sv <- v[o]; n <- length(sv)
+    rle_v <- rle(sv)
+    ends   <- cumsum(rle_v$lengths)
+    starts <- ends - rle_v$lengths + 1
+    midr   <- (starts + ends) / 2              # midrank indices
+    list(vals = rle_v$values, midr = midr / n, n = n)
+  })
+}
+
+apply_rank_maps <- function(X, maps) {
+  stopifnot(nrow(X) == length(maps))
+  Y <- X
+  for (g in seq_len(nrow(X))) {
+    m <- maps[[g]]
+    # findInterval gives the index of the last training value <= x
+    idx <- findInterval(X[g, ], m$vals, rightmost.closed = TRUE)
+    idx[idx < 1] <- 1                          # below min -> lowest bin
+    idx[idx > length(m$midr)] <- length(m$midr)# above max -> highest bin
+    Y[g, ] <- m$midr[idx]                      # map to training midrank in [0,1]
+  }
+  dimnames(Y) <- dimnames(X)
+  Y
+}
+
+## usage
+
+make_stratified_folds <- function(time, status, K = 5, seed = 1) {
+  set.seed(seed)
+  # bin event times into quantiles (events only)
+  q <- quantile(time[status == 1], probs = seq(0, 1, length.out = 6), na.rm = TRUE)
+  time_bin <- cut(time, breaks = unique(q), include.lowest = TRUE)
+  # label censored separately so their distribution is also balanced
+  strat <- interaction(factor(status, levels = c(0,1), labels = c("C","E")), addNA(time_bin))
+  # create folds by stratified sampling
+  levs <- levels(strat)
+  idx <- split(seq_along(time), strat)
+  folds <- rep(NA_integer_, length(time))
+  for (lv in names(idx)) {
+    ids <- idx[[lv]]
+    if (length(ids) == 0) next
+    krep <- rep(1:K, length.out = length(ids))
+    krep <- sample(krep)  # shuffle
+    folds[ids] <- krep
+  }
+  folds
+}
+
+
+set_folds = function(data, nfold = 5, seed = 123){
+  #set.seed(seed)
   
-  folds=caret::createFolds(data$sampInfo$time,k=nfold,list=FALSE)
+  folds=caret::createFolds(data$sampInfo$event,nfold,list=FALSE)
+    # make_stratified_folds(data$sampInfo$time,data$sampInfo$event,nfold,seed=seed)
   
   data_train = list()
   data_test = list()
@@ -10,12 +64,31 @@ set_folds = function(data, nfold = 5){
                            sampInfo = data$sampInfo[folds != i,,drop=FALSE],
                            featInfo = data$featInfo,
                            dataname = data$dataname)
+    
+    #fiter genes
+    data_train[[i]]$ex = gene_filter(data_train[[i]]$ex,1000)
+    # #normalize
+    rns = rownames(data_train[[i]]$ex)
+    targets=preprocessCore::normalize.quantiles.determine.target(data_train[[i]]$ex)
+    data_train[[i]]$ex = preprocessCore::normalize.quantiles.use.target(data_train[[i]]$ex,
+                                                                        target=targets)
+    rownames(data_train[[i]]$ex)=rns
 
     data_test[[i]] = list(ex = data$ex[,folds==i,drop=FALSE],
                           sampInfo = data$sampInfo[folds == i,,drop=FALSE],
                           featInfo = data$featInfo,
                           dataname = data$dataname)
+    
+    data_test[[i]]$ex = data_test[[i]]$ex[rownames(data_train[[i]]$ex),]
+    data_test[[i]]$ex = preprocessCore::normalize.quantiles.use.target(data_test[[i]]$ex,target = targets)
 
+    
+    
+    # maps       <- fit_rank_maps(data_train[[i]]$ex)
+    # data_train[[i]]$ex  <- apply_rank_maps(data_train[[i]]$ex, maps)   # train-in, train-out (idempotent up to ties)
+    # data_test[[i]]$ex    <- apply_rank_maps(data_test[[i]]$ex,   maps)   # apply train map to validation (no leakage)
+    
+    
   }#end for loop
   
   return(list(data_train = data_train, data_test = data_test))

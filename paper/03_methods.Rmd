@@ -1,0 +1,163 @@
+## Standard NMF {.unnumbered}
+Let $X$ be a bulk gene expression matrix of $p$ genes by $n$ subjects. Standard NMF seeks to reconstruct X using two nonnegative matrices $W$ and $H$ such that $X = WH$, where $W$ is a $p \times k$ matrix of gene weights and $H$ is a $k \times n$ matrix of sample weights. This is done by minimizing the loss function
+
+\begin{equation}
+    ||X - WH||^2_F
+\end{equation}
+
+where $F$ represents the Frobenius norm. 
+
+Multiplicative updates were proposed by Lee and Seung with the following update rules @lee2000algorithms:
+
+\begin{equation}
+    W_{ij} = \frac{W_{ij} (XH^T)_{ij}}{(WHH^T)_{ij}}
+\end{equation}
+
+\begin{equation}
+    H_{ij} = H_{ij} \frac{(W^TX)_{ij}}{(W^TWH)_{ij}}
+\end{equation}
+
+These updates are alternated until convergence to a stationary point.
+
+
+## Proportional Hazards {.unnumbered}
+To determine how the lower dimensional representation of X is associated with patient survival outcomes, we take $Z=W^TX$ to be the covariates passed to the proportional hazards model. The matrix $Z$ can be interpreted as the transformation of the data matrix $X$ into the lower dimensional space, such that $Z_{ri}$ represents a score for the contribution of factor $r$ to subject $i$.
+
+Let $y_i = \min(T_i,C_i)$ where $T_i$ is the event time and $C_i$ is the censoring time for the $i$th subject; let $\delta_i$ represent the indicator that the event time for the $i$th subject is observed. The the log partial likelihood is
+
+\begin{equation}
+    \ell(W,\beta) = \sum_{i=1}^n \delta_i \left[Z_i^T\beta - \log\left(\sum_{j=1}^n \exp \left(Z_j^T\beta\right) \mathbbm{1} (y_j \geq y_i) \right)\right]
+\end{equation}
+
+## DeSurv {.unnumbered}
+DeSurv is a semi-supervised extension of NMF that incorporates the cox proportional hazards directly into the NMF model to encourage the discovered factors to be associated with patient survival. We propose the following loss function
+
+\begin{equation}
+    \mathcal{L}(W,H,\beta) = \frac{(1-\alpha)}{2np}||X-WH||^2_F - \alpha(\frac{2}{n}\ell(W,\beta) - \lambda p_{\xi}(\beta)) + \frac{\gamma}{2pk} ||W||^2_F + \frac{\nu}{2nk} ||H||^2_F
+\end{equation}
+
+where $\alpha$ is the hyperparameter that balances the contribution of the NMF and proportional hazards model to the overall loss. Penalty terms $||W||_F^2$, and $||H||_F^2$ provide additional stability for the model. We take 
+
+\begin{equation}
+    p_{\xi}(\beta) = \xi||\beta||_1 + \frac{(1-\xi)}{2} ||\beta||^2_2
+\end{equation}
+
+to be an elastic net penalty on the regression coefficients $\beta$. The L1 component allows factors that are not associated with survival to be shrunk out of the proportional hazards model, while still contributing to the reconstruction of $X$.
+
+## Update Rules for DeSurv {.unnumbered}
+To solve this loss function, we propose an update scheme that alternates between updating $W$, $H$, and $\beta$ until convergence. The algorithm is summarized in Algorithm \ref{deSurv}.
+
+\begin{algorithm}
+    \caption{DeSurv algorithm}\label{deSurv}
+
+    \begin{algorithmic}[1]
+        \Require $X \in \mathbb{R}_{\geq 0}^{p \times n}$, $y \in \mathbb{R}^n_{\geq 0}$, $\delta \in \mathbb{R}_{0,1}^{n}$
+        \State $eps \gets \infty$
+        \State $iter \gets 0$
+        \State $W_{jr} \sim Unif(0,\max(X))$ for $j=1,\dots,p$ and $r=1,\dots, k$
+        \State $H_{ri} \sim Unif(0, \max(X))$ for $r=1,\dots,k$ and $i=1,\dots,n$
+        \While{$eps < tol$ \textbf{and} $iter < maxit$}
+            \State $W \gets \argmin_{W \geq 0} \mathcal{L}(W,H,\beta)$
+            \State $H \gets \argmin_{H \geq 0} \mathcal{L}(W,H,\beta)$
+            \State $\beta \gets \argmin_{\beta} \mathcal{L}(W,H,\beta)$
+            \State $errNew \gets \mathcal{L}(W,H,\beta)$
+            \State $relErr \gets |errNew - err|/err$
+            \State $err \gets errNew$
+            \State $iter \gets iter + 1$
+        \EndWhile
+        \State \Return $W, H, \beta$
+    \end{algorithmic}
+\end{algorithm}
+
+
+## Update for $W$ {.unnumbered}
+
+To get the update rule for $W$, we must find
+
+\begin{equation}
+    \argmin_{W \geq 0} \mathcal{L}(W,H,\beta)
+\end{equation}
+
+The derivative of the loss with respect to $W$ is
+
+\begin{equation}
+        \frac{\partial \mathcal{L}}{\partial W} = \frac{(1-\alpha)}{s} (WH-X)H^T - \frac{2\alpha}{n}\frac{\partial \ell}{\partial W} + \frac{\gamma}{pk}W
+\end{equation}
+
+where $\frac{\partial \ell}{\partial W}$ is the derivative of the partial likelihood with respect to $W$
+
+\begin{equation}
+    \frac{\partial \ell}{\partial W} = \sum_{i=1}^n \delta_i \left[X_i - \frac{\sum_{j=1}^n e^{Z_j^T\beta} \mathbbm{1} (y_j \geq y_i)X_j}{\sum_{j=1}^n e^{Z_j^T\beta} \mathbbm{1} (y_j \geq y_i)} \right] \beta^T
+\end{equation}
+
+A multiplicative update for W can then be formed as
+
+\begin{equation}
+    W = W \odot \max\left(\frac{XH^T + \frac{2 \alpha s}{n(1-\alpha)} \frac{\partial \ell}{\partial W}}{WHH^T + \frac{\gamma s}{pk(1-\alpha)}W}, 0 \right)    
+\end{equation}
+
+note that the $\max(*, 0)$ is necessary because the derivative of the partial likelihood is not guaranteed to be nonnegative.
+
+
+## Update for $H$ {.unnumbered}
+The update for $H$ is a standard NMF multiplicative update.
+
+\begin{equation}
+        H = H \odot \frac{W^TX}{W^TWH + \frac{\nu s}{nk(1-\alpha)}H}
+\end{equation}
+
+## Update for $\beta$ {.unnumbered}
+
+To get the update for $\beta$ we take
+
+\begin{equation}
+    \beta = \argmin_\beta \mathcal{L}(W,H,\beta)
+\end{equation}
+
+which is equivalent to
+
+\begin{equation}
+    \beta = \argmax_\beta \frac{2}{n}\ell(W,\beta) - \lambda p_{\xi}(\beta)
+\end{equation}
+
+Note that this is the same form as a standard cox partial likelihood update. So the $\beta$ update as derived in \cite{simon2011regularization} is
+
+\begin{equation}
+    \hat{\beta}_r = \frac{S(\frac{1}{n}\sum_{i=1}^n w(\Tilde{\eta})_i v_{i,r} \left[ z(\Tilde{\eta})_i - \sum_{j\ne r} v_{ij} \beta_j,\right], \lambda\xi)}{\frac{1}{n}\sum_{i=1}^n w(\Tilde{\eta})_i v_{i,r}^2 + \lambda(1-\xi)}
+\end{equation}
+
+where
+
+\begin{equation}
+    S(x,\lambda)=sgn(x)(|x|-\lambda)_+.
+\end{equation}
+
+\begin{equation}
+w(\tilde{\eta})_{r}=\ell^{\prime \prime}(\tilde{\eta})_{r, r}=\sum_{i \in C_{r}}\left[\frac{e^{\tilde{\eta}_{r}} \sum_{j \in R_{i}} e^{\tilde{\eta}_{j}}-\left(e^{\tilde{\eta}_{r}}\right)^{2}}{\left(\sum_{j \in R_{i}} e^{\tilde{\eta}_{j}}\right)^{2}}\right] 
+\end{equation}
+
+\begin{equation}
+    z(\tilde{\eta})_{r}=\tilde{\eta}_{r}-\frac{\ell^{\prime}(\tilde{\eta})_{r}}{\ell^{\prime \prime}(\tilde{\eta})_{r, r}}=\tilde{\eta}_{r}+\frac{1}{w(\tilde{\eta})_{r}}\left[\delta_{r}-\sum_{i \in C_{r}}\left(\frac{e^{\tilde{\eta}_{r}}}{\sum_{j \in R_{i}} e^{\tilde{\eta}_{j}}}\right)\right]
+\end{equation}
+
+
+\subsection{Publicly Available Datasets}
+Text
+
+\subsection{Model Training}
+DeSurv was applied to the TCGA dataset. The data were log-transformed for variance stabilization and then quantile normalized to ensure comparability of expression values across samples. Next, the data was filtered to the top 5000 highly expressed and variable genes. Models were trained across a grid of hyperparameters $\alpha \in \{0,.95\}$, $\lambda \in$, $\xi \in$, $\gamma \in$, $\nu \in$, and $k = 2,\dots,15$
+
+\subsubsection{Hyperparameter selection}
+The hyperparameters $\alpha$, $\lambda$, $\xi$, $\gamma$, and $\nu$ were selected to adequately balance the supervised and unsupervised portions of the model using a metric we defined as the c-index of the proportional hazards model divided by the reconstruction error. The parameters were chosen to maximize this metric. Since the reconstruction error exclusively decreases as the dimension $k$ increases, this metric was not adequate to choose $k$. 
+
+\subsubsection{Top genes}
+The top genes were extracted from each factor of W in the selected model at each value of $k$. A top gene was defined as ...
+
+\subsection{Model Validation}
+The remaining 7 publicly available datasets, CPTAC, Dijk, Linehan, Moffitt, PACA microarray, PACA RNAseq, and Puleo, were used to validate our models. The datasets were log transformed and merged. To mitigate between study and between platform heterogeneities, the samples were rank transformed. For each selected model, the merged data was restricted to the top genes in each factor and clustered to determine patient subtypes.
+
+\subsubsection{Clustering}
+Consensus clustering was performed with the ConsensusClusterPlus package in R, using the Kmeans algorithm and euclidean distance. Each repetition samples 80\% of subjects and 80\% of the top genes. To account for the difference in sample size across studies, subjects were sampled with weight $1/Dn_d $ where $D$ is the number of studies in the validation set, and $n_d$ is the number of subjects in dataset $d$. The number of clusters ranged from 2-3. 
+
+\subsubsection{Survival Analysis}
+After clustering, stratified cox models were fit to the clusters in the merged validation dataset. From these models, the following metrics were obtained: the hazard ratio, c-index, BIC, and p-values for the likelihood ratio test. These metrics were used to compare our approach to the unsupervised NMF equivalent.

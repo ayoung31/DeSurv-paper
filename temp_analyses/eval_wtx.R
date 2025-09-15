@@ -1,103 +1,72 @@
-load("wtx_bics_top25_val_cptac_rank.RData")
-load("data/derv/cmbSubtypes_formatted.RData")
+library(targets)
+tar_load_globals()
 
-temp = bics %>% group_by(k) %>% slice_min(order_by = bic,n=1,with_ties = FALSE)
-
-plot(temp$k,temp$bic,type='l')
-
-
-
-best = temp[temp$k==5,]
-
-bics_a0 = bics %>% filter(alpha==0)
-best_a0=bics_a0[which.min(bics_a0$bic),]
+load("../DeSurv-paper-dev/data/derv/cmbSubtypes_formatted.RData")
+library(dplyr)
+library(ggplot2)
 
 ntop = 25
 
-model.params = list(
-  dataset="TCGA_PAAD", # dataset we trained the model on
-  version="TCGA_PAAD",
-  ngene=1000,
-  ninit=100,
-  imaxit=6000,
-  tol=1e-6,
-  maxit=6000
-)
+load("../DeSurv-paper-dev/wtx_bics_top25_val_cptac_quant_bin.RData")
+bics_quant_bin=bics
+
+temp_quant_bin = bics_quant_bin %>% group_by(alpha,k) %>% 
+  slice_min(order_by = bic,n=1,with_ties=FALSE) %>%
+  ungroup()
+
+ggplot(temp_quant_bin,aes(x=k,y=alpha,fill=bic))+
+  geom_tile()
 
 
-build_model_filename <- function(k, alpha, lambda, eta, lambdaW, lambdaH,
-                                 ninit, imaxit, tol, maxit) {
-  paste0("k=", k, "_alpha", alpha,
-         "_lambda", lambda, "_eta", eta,
-         "_lambdaW", lambdaW, "_lambdaH", lambdaH,
-         "_full_ninit", ninit, "_imaxit", imaxit,
-         "_tol", tol, "_maxit", maxit, ".RData")
-}
+best = temp_quant_bin %>% filter(k==4)%>% slice_min(order_by = bic,n=1,with_ties=FALSE)
 
-#' Generate full path to the raw model
-build_model_path <- function(version, ngene, filename) {
-  file.path('results', version, 'full', paste0('ngene', ngene), 'raw', filename)
-}
+bics_a0_quant_bin = bics_quant_bin %>% filter(alpha==0)
+best_a0=bics_a0_quant_bin[which.min(bics_a0_quant_bin$bic),]
 
 
-model_filename = build_model_filename(best$k,best$alpha,best$lambda,best$eta,
-                                      best$lambdaW,best$lambdaH,model.params$ninit,
-                                      model.params$imaxit,model.params$tol,model.params$maxit)
 
-model_path = build_model_path(model.params$version,model.params$ngene,model_filename)
-
-load(model_path)
-
-results <- list(ntop = ntop, fit_cox = fit_cox, model.params = model.params)
-
-tops =get_top_genes_v2(results)
-results$tops = tops$tops
-create_table_v2(results,top_genes,"DECODER",colors,save=FALSE)
-
-validation_datasets = "Dijk"#c("CPTAC","Dijk","Linehan","Moffitt_GEO_array","PACA_AU_array",
+validation_datasets = "TCGA_PAAD"#c("Dijk","Linehan","Moffitt_GEO_array","PACA_AU_array",
 #"PACA_AU_seq","Puleo_array")
+data=load_data(datasets=validation_datasets)
+table(rownames(data$ex) %in% rownames(W))
 
-data=load_data(datasets=validation_datasets,save=TRUE,replace=FALSE)
-dim(data$ex)
-
-X=data$ex
+## best model at k=4
+fit_cox=load_model(best)
+tops =get_top_genes(fit_cox$W,ntop)
 W=fit_cox$W
 
-g_common <- intersect(rownames(W), rownames(X))
+data_filtered = preprocess_data(data,genes=rownames(W))
+X=data_filtered$ex
 
-Wc <- W[g_common, , drop = FALSE]
-Xc <- X[g_common, , drop = FALSE]
-
-p <- ncol(results$tops)
-idx_list <- lapply(seq_len(p), function(i) {
-  m <- match(results$tops[, i], g_common)
-  m[!is.na(m)]
-})
-rows <- unlist(idx_list, use.names = FALSE)
-cols <- rep.int(seq_len(p), vapply(idx_list, length, integer(1)))
-
-
-M <- Matrix::sparseMatrix(
-  i = rows, j = cols, x = 1,
-  dims = dim(Wc), dimnames = dimnames(Wc)
-)
-
-if (score_bin) {
-  W_eff <- Matrix::drop0(Matrix::Matrix((Wc > 0) * (M != 0), sparse = TRUE))
-} else {
-  W_eff <- Matrix::drop0(Matrix::Matrix(Wc, sparse = TRUE) * M)
-}
-
-scores <- as.matrix(Matrix::crossprod(as.matrix(Xc), W_eff))  # samples x factors
-
-score_data <- data.frame(scores,
-                         time = data$sampInfo$time,
-                         event = data$sampInfo$event,
-                         check.names = FALSE)
-
-fit <- survival::coxph(
-  survival::Surv(time, event) ~ .,
-  data = score_data,
-  model = FALSE, x = FALSE, y = FALSE
-)
+fit=fit_val_model(X,data_filtered$sampInfo$time,data_filtered$sampInfo$event,tops,W)
 bic_val <- stats::BIC(fit)
+summary(fit)
+# create_table(tops,top_genes,"DECODER",colors)
+
+# alpha 0 at k=4
+fit_cox_a0=load_model(best_a0)
+tops_a0 =get_top_genes(fit_cox_a0$W,ntop)
+W_a0=fit_cox_a0$W
+
+data_filtered_a0 = preprocess_data(data,genes=rownames(W_a0))
+X_a0=data_filtered_a0$ex
+
+fit_a0=fit_val_model(X_a0,data_filtered$sampInfo$time,data_filtered$sampInfo$event,tops_a0,W_a0)
+bic_val_a0 <- stats::BIC(fit_a0)
+summary(fit_a0)
+# create_table(tops_a0,top_genes,"DECODER",colors,)
+
+
+# std NMF at k=4
+# tar_load(data_filtered)
+# nmf_fit=NMF::nmf(as.matrix(data_filtered$ex),rank=4,method="lee",nrun=50)
+tops_std =get_top_genes(nmf_fit@fit@W,ntop)
+W_std=nmf_fit@fit@W
+
+data_filtered_std = preprocess_data(data,genes=rownames(W_std))
+X_std=data_filtered_std$ex
+
+fit_std=fit_val_model(X_std,data_filtered$sampInfo$time,data_filtered$sampInfo$event,tops_std,W_std)
+bic_val_std <- stats::BIC(fit_std)
+summary(fit_std)
+# create_table(tops_std,top_genes,"DECODER",colors,)
