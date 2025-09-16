@@ -1,25 +1,30 @@
 get_top_genes <- function(W,ntop) {
   maxes = apply(W,2,max)
-  W = W[,maxes>0,drop=FALSE]
+  nc = sum(maxes>0)
+  wc = which(maxes>0)
+  # W = W[,maxes>0,drop=FALSE]
   
-  if(ncol(W)>0){
-    if(ncol(W)>1){
-      W = W%*%diag(1/apply(W,2,max))
+  if(nc){
+    submat = W[,wc,drop=FALSE]
+    if(nc>1){
+      W[,wc] = submat%*%diag(1/apply(submat,2,max))
     }else{
-      W = W/apply(W,2,max)
+      W[,wc] = submat/apply(submat,2,max)
     }
     
     if (is.null(W) || !is.matrix(W)) stop("W must be a non-null matrix.")
     if (ntop > nrow(W)) stop("ntop exceeds number of genes available.")
     
-    top_genes <- list()
-    top_diffs <- list()
+    top_genes <- vector("list",ncol(W))
+    names(top_genes) = paste0("factor", 1:ncol(W))
+    top_diffs <- vector("list",ncol(W))
     flag_empty <- FALSE
     
-    for (i in seq_len(ncol(W))) {
+    for (i in 1:ncol(W)) {
       current_col <- W[, i]
       
       if (sum(current_col) > 0) {
+        
         other_cols <- W[, -i, drop = FALSE]
         max_other <- if (ncol(W) > 1) apply(other_cols, 1, max) else rep(0, nrow(W))
         
@@ -28,9 +33,7 @@ get_top_genes <- function(W,ntop) {
         
         top_genes[[paste0("factor", i)]] <- rownames(W)[top_indices]
         top_diffs[[paste0("factor", i)]] <- diff_vector[top_indices]
-      } else {
-        flag_empty <- TRUE
-      }
+      } 
     }
     
     if (flag_empty) {
@@ -38,8 +41,8 @@ get_top_genes <- function(W,ntop) {
     }
     
     
-    
+    return(top_genes)
   }
   
-  return(as.data.frame(top_genes))
+  return(NULL)
 }

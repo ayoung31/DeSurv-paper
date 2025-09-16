@@ -6,31 +6,34 @@ library(dplyr)
 library(ggplot2)
 
 ntop = 25
+dataset = "CPTAC"
+score="bin"
+method="rank"
 
-load("../DeSurv-paper-dev/wtx_bics_top25_val_cptac_quant_bin.RData")
-bics_quant_bin=bics
+load(paste0("../DeSurv-paper-dev/wtx_bics_top",ntop,"_val_",dataset,"_",score,"_",method,".RData"))
 
-temp_quant_bin = bics_quant_bin %>% group_by(alpha,k) %>% 
+
+temp = bics%>%group_by(alpha,k) %>% 
   slice_min(order_by = bic,n=1,with_ties=FALSE) %>%
   ungroup()
 
-ggplot(temp_quant_bin,aes(x=k,y=alpha,fill=bic))+
-  geom_tile()
+ggplot(temp,aes(x=k,y=alpha,fill=bic))+
+  geom_tile()+
+  scale_fill_gradient(low = "red", high = "white")
 
 
-best = temp_quant_bin %>% filter(k==4)%>% slice_min(order_by = bic,n=1,with_ties=FALSE)
+best = temp %>% slice_min(order_by = bic,n=1,with_ties=FALSE)
 
-bics_a0_quant_bin = bics_quant_bin %>% filter(alpha==0)
-best_a0=bics_a0_quant_bin[which.min(bics_a0_quant_bin$bic),]
+bics_a0 = bics%>% filter(alpha==0)
+best_a0=bics_a0[which.min(bics_a0$bic),]
 
 
 
-validation_datasets = "TCGA_PAAD"#c("Dijk","Linehan","Moffitt_GEO_array","PACA_AU_array",
+test_datasets = "Puleo_array"#c("Dijk","Linehan","Moffitt_GEO_array","PACA_AU_array",
 #"PACA_AU_seq","Puleo_array")
-data=load_data(datasets=validation_datasets)
-table(rownames(data$ex) %in% rownames(W))
+data=load_data(datasets=test_datasets)
 
-## best model at k=4
+## best model
 fit_cox=load_model(best)
 tops =get_top_genes(fit_cox$W,ntop)
 W=fit_cox$W
@@ -41,9 +44,11 @@ X=data_filtered$ex
 fit=fit_val_model(X,data_filtered$sampInfo$time,data_filtered$sampInfo$event,tops,W)
 bic_val <- stats::BIC(fit)
 summary(fit)
-# create_table(tops,top_genes,"DECODER",colors)
+cols = which(unlist(lapply(tops, function(x) !is.null(x))))
+tops = as.data.frame(tops[cols])
+create_table(as.data.frame(tops),top_genes,"DECODER",colors)
 
-# alpha 0 at k=4
+# alpha 0 best model
 fit_cox_a0=load_model(best_a0)
 tops_a0 =get_top_genes(fit_cox_a0$W,ntop)
 W_a0=fit_cox_a0$W
@@ -54,19 +59,21 @@ X_a0=data_filtered_a0$ex
 fit_a0=fit_val_model(X_a0,data_filtered$sampInfo$time,data_filtered$sampInfo$event,tops_a0,W_a0)
 bic_val_a0 <- stats::BIC(fit_a0)
 summary(fit_a0)
-# create_table(tops_a0,top_genes,"DECODER",colors,)
+cols = which(unlist(lapply(tops_a0, function(x) !is.null(x))))
+tops_a0 = as.data.frame(tops_a0[cols])
+create_table(tops_a0,top_genes,"DECODER",colors,)
 
 
-# std NMF at k=4
-# tar_load(data_filtered)
-# nmf_fit=NMF::nmf(as.matrix(data_filtered$ex),rank=4,method="lee",nrun=50)
+# std NMF
+tar_load(data_filtered)
+nmf_fit=NMF::nmf(as.matrix(data_filtered$ex),rank=5,method="lee",nrun=50)
 tops_std =get_top_genes(nmf_fit@fit@W,ntop)
 W_std=nmf_fit@fit@W
 
 data_filtered_std = preprocess_data(data,genes=rownames(W_std))
 X_std=data_filtered_std$ex
 
-fit_std=fit_val_model(X_std,data_filtered$sampInfo$time,data_filtered$sampInfo$event,tops_std,W_std)
+fit_std=fit_val_model(X_std,data_filtered_std$sampInfo$time,data_filtered_std$sampInfo$event,tops_std,W_std)
 bic_val_std <- stats::BIC(fit_std)
 summary(fit_std)
-# create_table(tops_std,top_genes,"DECODER",colors,)
+create_table(tops_std,top_genes,"DECODER",colors,)

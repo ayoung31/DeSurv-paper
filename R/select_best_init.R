@@ -11,5 +11,7 @@ select_best_init <- function(df, method_select="surv") {
   
   keep <- df[!df$flag_nan & is.finite(df$loss), ]
   
-  df %>% dplyr::slice_min(order_by = loss, n = 1, with_ties = FALSE)
+  best = df %>% dplyr::slice_min(order_by = loss, n = 1, with_ties = FALSE)
+  
+  return(best$seed)
 }

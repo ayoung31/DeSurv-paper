@@ -1,14 +1,14 @@
 run_warmstarts <- function(
     X, y, delta,
     params,
+    path,
     alpha_vec,
-    verbose = TRUE,
-    path
+    maxit,
+    tol,
+    imaxit,
+    verbose = FALSE
 ){
 
-  maxit              = params$maxit
-  tol                = params$tol
-  imaxit             = params$imaxit
   k                  = params$k
   lambda             = params$lambda
   eta                = params$eta
