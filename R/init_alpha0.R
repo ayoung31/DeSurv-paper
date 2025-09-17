@@ -1,4 +1,4 @@
-init_alpha0 <- function(X, y, delta, param_grid, path, NINIT) {
+init_alpha0 <- function(X, y, delta, param_grid, path) {
   # ensure output directory exists
   dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
   
@@ -30,13 +30,13 @@ init_alpha0 <- function(X, y, delta, param_grid, path, NINIT) {
   eta     <- p$eta
   lambdaW <- p$lambdaW
   lambdaH <- p$lambdaH
-  tol     <- p$tol
-  maxit   <- p$maxit
-  imaxit  <- p$imaxit
+  tol     <- TOL
+  maxit   <- MAXIT
+  imaxit  <- IMAXIT
   
   # optional: stable combo id (useful for joins/debug)
   combo_id <- digest::digest(
-    c(p$train_prefix, p$method_trans_train, p$ngene, k, lambda, eta, lambdaW, lambdaH, tol, maxit, imaxit),
+    c(TRAIN_PREFIX, METHOD_TRANS_TRAIN, NGENE, k, lambda, eta, lambdaW, lambdaH, tol, maxit, imaxit),
     algo = "xxhash64"
   )
   
@@ -61,9 +61,9 @@ init_alpha0 <- function(X, y, delta, param_grid, path, NINIT) {
     
     res_list[[j]] <- tibble::tibble(
       combo_id            = combo_id,
-      train_prefix        = p$train_prefix,
-      method_trans_train  = p$method_trans_train,
-      ngene               = p$ngene,
+      train_prefix        = TRAIN_PREFIX,
+      method_trans_train  = METHOD_TRANS_TRAIN,
+      ngene               = NGENE,
       k = k, lambda = lambda, eta = eta, lambdaW = lambdaW, lambdaH = lambdaH,
       tol = tol, maxit = maxit, imaxit = imaxit,
       seed = seed_j,

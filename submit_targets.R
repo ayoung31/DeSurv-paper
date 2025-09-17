@@ -1,5 +1,5 @@
 library(targets)
 
-tar_config_set(store="_targets")
+tar_config_set(store="no_cv")
 
 tar_make()
