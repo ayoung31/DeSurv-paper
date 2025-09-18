@@ -80,8 +80,8 @@ IMAXIT             = 6000
 TOL                = 1e-6
 MAXIT              = 6000
 NINIT              = 2
-K_VALS             = 2:12#2:16   #= c(2,3,4,5)
-LAMBDA_VALS        = c(0,.1,1)#10^seq(-3,3)#10^seq(-4,4)
+K_VALS             = 6#2:12#2:16   #= c(2,3,4,5)
+LAMBDA_VALS        = 0#c(0,.1)#10^seq(-3,3)#10^seq(-4,4)
 ETA_VALS           = .01#c(.01,.1,.5,.9)#seq(.1,.9,by=.1)
 LAMBDAW_VALS       = 0#10^seq(-3,3)#10^seq(-4,4)
 LAMBDAH_VALS       = 0#10^seq(-3,3)#10^seq(-4,4)
@@ -178,23 +178,23 @@ list(
     resources = tar_resources(
       crew = tar_resources_crew(controller = "model_runs")
     )
-  )
+  ),
   # #
-  # # Compute model metrics
-  # tar_target(
-  #   training_metrics,
-  #   compute_metrics(warmstarts_files,
-  #                   data_filtered$ex,
-  #                   data_filtered$sampInfo$time,
-  #                   data_filtered$sampInfo$event),
-  #   pattern   = map(warmstarts_files),
-  #   iteration = "list"
-  # ),
+  # Compute model metrics
+  tar_target(
+    metrics,
+    compute_metrics(model_runs,
+                    data_filtered$ex,
+                    data_filtered$sampInfo$time,
+                    data_filtered$sampInfo$event),
+    pattern   = map(model_runs),
+    iteration = "list"
+  ),
   # 
-  # tar_target(
-  #   training_metrics_table,
-  #   dplyr::bind_rows(training_metrics)
-  # )
+  tar_target(
+    metrics_table,
+    dplyr::bind_rows(metrics)
+  )
   # 
 
 

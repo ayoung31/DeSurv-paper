@@ -1,13 +1,15 @@
-load("wtx_bics_top25_val_cptac_rank.RData")
+load("wtx_bics_top25_val_CPTAC_bin_rank.RData")
 load("data/derv/cmbSubtypes_formatted.RData")
 
-temp = bics %>% group_by(k) %>% slice_min(order_by = bic,n=1,with_ties = FALSE)
+best = bics %>% slice_min(order_by = bic,n=1,with_ties = FALSE)
+
+temp = bics %>% group_by(k,alpha)%>% slice_max(order_by = c,n=1,with_ties = FALSE)
+
+ggplot(temp, aes(x=k,y=alpha,fill=c))+
+  geom_tile()+
+  labs(title="CPTAC c-index")
 
 plot(temp$k,temp$bic,type='l')
-
-
-
-best = temp[temp$k==5,]
 
 bics_a0 = bics %>% filter(alpha==0)
 best_a0=bics_a0[which.min(bics_a0$bic),]
@@ -50,14 +52,14 @@ load(model_path)
 
 results <- list(ntop = ntop, fit_cox = fit_cox, model.params = model.params)
 
-tops =get_top_genes_v2(results)
-results$tops = tops$tops
+tops =get_top_genes(fit_cox$W,ntop)
+
 create_table_v2(results,top_genes,"DECODER",colors,save=FALSE)
 
 validation_datasets = "Dijk"#c("CPTAC","Dijk","Linehan","Moffitt_GEO_array","PACA_AU_array",
 #"PACA_AU_seq","Puleo_array")
 
-data=load_data(datasets=validation_datasets,save=TRUE,replace=FALSE)
+data=load_data(datasets=validation_datasets)
 dim(data$ex)
 
 X=data$ex
@@ -68,7 +70,7 @@ g_common <- intersect(rownames(W), rownames(X))
 Wc <- W[g_common, , drop = FALSE]
 Xc <- X[g_common, , drop = FALSE]
 
-p <- ncol(results$tops)
+
 idx_list <- lapply(seq_len(p), function(i) {
   m <- match(results$tops[, i], g_common)
   m[!is.na(m)]
