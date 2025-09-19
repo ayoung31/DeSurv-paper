@@ -126,7 +126,7 @@ list(
 
 
   tar_target(param_grid,
-             create_param_grid()
+             create_param_grid_cv()
              ),
   
   tar_target(
@@ -134,25 +134,22 @@ list(
     {
       print("running cv...")
       paths = c()
-      for(f in 1:NFOLD){
-        path_fits = create_filepath_warmstart_runs_CV(params=param_grid,fold = f)
-        path_mets = create_filepath_CV_metrics(params = param_grid,fold=f)
-        X = data_folds$data_train[[f]]$ex
-        y = data_folds$data_train[[f]]$sampInfo$time
-        d = data_folds$data_train[[f]]$sampInfo$event
-        
-        Xtest = data_folds$data_test[[f]]$ex
-        ytest = data_folds$data_test[[f]]$sampInfo$time
-        dtest = data_folds$data_test[[f]]$sampInfo$event
-        
-        path = run_warmstarts_cv(X=X,y=y,delta=d,
-                       Xtest=Xtest,ytest=ytest,dtest=dtest,
-                       params=param_grid,verbose=FALSE,
-                       path_fits = path_fits,path_mets = path_mets)
-        paths=c(paths,path)
-        
-        
-      }
+      path_fits = create_filepath_warmstart_runs_CV(params=param_grid)
+      path_mets = create_filepath_CV_metrics(params = param_grid)
+      f = param_grid$fold
+      X = data_folds$data_train[[f]]$ex
+      y = data_folds$data_train[[f]]$sampInfo$time
+      d = data_folds$data_train[[f]]$sampInfo$event
+      
+      Xtest = data_folds$data_test[[f]]$ex
+      ytest = data_folds$data_test[[f]]$sampInfo$time
+      dtest = data_folds$data_test[[f]]$sampInfo$event
+      
+      path = run_warmstarts_cv(X=X,y=y,delta=d,
+                     Xtest=Xtest,ytest=ytest,dtest=dtest,
+                     params=param_grid,verbose=FALSE,
+                     path_fits = path_fits,path_mets = path_mets)
+
       paths
 
     },

@@ -1,17 +1,8 @@
-create_param_grid_CV = function(TRAIN_PREFIX, METHOD_TRANS_TRAIN, NGENE,
-                             MAXIT, TOL, IMAXIT,
-                             K_VALS, LAMBDA_VALS, ETA_VALS, 
-                             LAMBDAW_VALS, LAMBDAH_VALS, NFOLD){
+create_param_grid_cv = function(){
   # note alpha is not included here because of the warm start
 
   
-  param_tbl <- tidyr::expand_grid(train_prefix = TRAIN_PREFIX,
-                                  method_trans_train = METHOD_TRANS_TRAIN,
-                                  ngene = NGENE,
-                                  maxit = MAXIT,
-                                  tol = TOL,
-                                  imaxit = IMAXIT,
-                                  k       = K_VALS, 
+  param_tbl <- tidyr::expand_grid(k       = K_VALS, 
                                   lambda  = LAMBDA_VALS,
                                   eta     = ETA_VALS,
                                   lambdaW = LAMBDAW_VALS,

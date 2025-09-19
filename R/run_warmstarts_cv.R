@@ -13,13 +13,14 @@ run_warmstarts_cv <- function(
   lambdaH            = params$lambdaH
   seeds              = 1:NINIT
   flag_exist         = FALSE
+  f                  = params$fold
 
   dir.create(dirname(path_fits), recursive = TRUE, showWarnings = FALSE)
   dir.create(dirname(path_mets), recursive = TRUE, showWarnings = FALSE)
   if(file.exists(path_fits) & file.exists(path_mets)){
     bundle_old = readRDS(path_fits)
     load(path_mets)
-    exists = unlist(lapply(bundle_old,function(x) as.numeric(names(x$fits))==ALPHA))
+    exists = unlist(lapply(bundle_old,function(x) names(x$fits)==as.character(ALPHA)))
     if(all(exists)){
       if(length(bundle_old)==NINIT){
         return(path_fits)
@@ -63,10 +64,10 @@ run_warmstarts_cv <- function(
       }
       
       ## compute metrics train
-      mets_train[[j]] = compute_metrics(fit,X,y,delta,a)
+      mets_train[[j]] = compute_metrics(fit,X,y,delta,a,f)
 
       ## compute metrics test
-      mets_test[[j]] = compute_metrics(fit,Xtest,ytest,dtest,a)
+      mets_test[[j]] = compute_metrics(fit,Xtest,ytest,dtest,a,f)
 
       
       fits[[as.character(a)]] <- fit
@@ -79,7 +80,7 @@ run_warmstarts_cv <- function(
     meta <- list(
       k=k, lambda=lambda, eta=eta, lambdaW=lambdaW, lambdaH=lambdaH,
       alpha_vec = ALPHA, maxit=MAXIT, tol=TOL,
-      ngene = nrow(X), nsamples = ncol(X),
+      ngene = nrow(X), nsamples = ncol(X), fold=f,
       seed = i
     )
   

@@ -1,11 +1,12 @@
 # Stable path per (combo, seed [, knobs])
-create_filepath_CV_metrics <- function(params, fold) {
+create_filepath_CV_metrics <- function(params) {
   
   k                  = params$k
   lambda             = params$lambda
   eta                = params$eta
   lambdaW            = params$lambdaW
   lambdaH            = params$lambdaH
+  fold               = params$fold
   
   folder = sprintf("ng%d_tol%.0e_max%d",NGENE,TOL,MAXIT)
   
