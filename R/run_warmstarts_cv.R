@@ -1,80 +1,106 @@
 run_warmstarts_cv <- function(
     X, y, delta,
+    Xtest, ytest, dtest,
     params,
-    alpha_vec,
     verbose = TRUE,
-    path
+    path_fits,
+    path_mets
 ){
-
-  maxit              = params$maxit
-  tol                = params$tol
-  imaxit             = params$imaxit
   k                  = params$k
   lambda             = params$lambda
   eta                = params$eta
   lambdaW            = params$lambdaW
   lambdaH            = params$lambdaH
-  best_seed          = params$seed
+  seeds              = 1:NINIT
+  flag_exist         = FALSE
 
-  dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
-  
-  fit_prev = NULL
-  fits = list()
-  for (a in alpha_vec) {
-    if (verbose) message(sprintf("fit: k=%d λ=%.4g η=%.4g λW=%.4g λH=%.4g α=%.3f",
-                                 k, lambda, eta, lambdaW, lambdaH, a))
-    
-    if (is.null(fit_prev)) {
-      # --- NEW: if no warm start available at the start of a block,
-      #     re-run a single seeded init (the best seed you selected upstream).
-      if (!is.null(best_seed)) {
-        fit <- run_coxNMF(
-          X=X, y=y, delta=delta, k=k,
-          alpha=a, lambda=lambda, eta=eta,
-          lambdaW=lambdaW, lambdaH=lambdaH,
-          seed=best_seed, tol=tol, maxit=maxit, verbose=verbose,
-          ninit=1, imaxit=imaxit
-        )
-      } else {
-        # fall back to your original multi-start behavior
-        fit <- run_coxNMF(
-          X=X, y=y, delta=delta, k=k,
-          alpha=a, lambda=lambda, eta=eta,
-          lambdaW=lambdaW, lambdaH=lambdaH,
-          seed=123, tol=tol, maxit=maxit, verbose=verbose,
-          ninit=100, imaxit=imaxit
-        )
-        warning("best seed not found, starting at seed 123")
+  dir.create(dirname(path_fits), recursive = TRUE, showWarnings = FALSE)
+  dir.create(dirname(path_mets), recursive = TRUE, showWarnings = FALSE)
+  if(file.exists(path_fits) & file.exists(path_mets)){
+    bundle_old = readRDS(path_fits)
+    load(path_mets)
+    exists = unlist(lapply(bundle_old,function(x) as.numeric(names(x$fits))==ALPHA))
+    if(all(exists)){
+      if(length(bundle_old)==NINIT){
+        return(path_fits)
+      }else{
+        seeds = setdiff(1:NINIT,1:length(bundle_old))
+        mets_train_old=mets_train
+        mets_test_old=mets_test
+        rm(mets_train)
+        rm(mets_test)
+        flag_exist = TRUE
       }
-    } else {
-      fit <- run_coxNMF(
-        X=X, y=y, delta=delta, k=k,
-        alpha=a, lambda=lambda, eta=eta,
-        lambdaW=lambdaW, lambdaH=lambdaH,
-        tol=tol, maxit=maxit, verbose=verbose,
-        ninit=1, imaxit=imaxit,
-        W0=fit_prev$W, H0=fit_prev$H, beta0=fit_prev$beta
-      )
     }
     
-    fits[[as.character(a)]] <- fit
-    fit_prev <- fit
   }
+  bundle=list()
+  mets_train=list()
+  mets_test=list()
+  j=1
+  for(i in seeds){
+    fit_prev = NULL
+    fits = list()
+    for (a in ALPHA) {
+      print(sprintf("seed %d, alpha %.2f",i,a))
+      if (is.null(fit_prev)) {
+        fit <- run_coxNMF(
+          X=X, y=y, delta=delta, k=k,
+          alpha=a, lambda=lambda, eta=eta,
+          lambdaW=lambdaW, lambdaH=lambdaH,
+          seed=i, tol=TOL, maxit=MAXIT, verbose=verbose,
+          ninit=1, imaxit=MAXIT
+        )
+      } else {
+        fit <- run_coxNMF(
+          X=X, y=y, delta=delta, k=k,
+          alpha=a, lambda=lambda, eta=eta,
+          lambdaW=lambdaW, lambdaH=lambdaH,
+          tol=TOL, maxit=MAXIT, verbose=verbose,
+          ninit=1, imaxit=MAXIT,
+          W0=fit_prev$W, H0=fit_prev$H, beta0=fit_prev$beta
+        )
+      }
+      
+      ## compute metrics train
+      mets_train[[j]] = compute_metrics(fit,X,y,delta,a)
 
+      ## compute metrics test
+      mets_test[[j]] = compute_metrics(fit,Xtest,ytest,dtest,a)
+
+      
+      fits[[as.character(a)]] <- fit
+      fit_prev <- fit
+      j=j+1
+    }
   
-  # assemble / merge bundle (unchanged, plus best_seed in meta)
-  meta <- list(
-    k=k, lambda=lambda, eta=eta, lambdaW=lambdaW, lambdaH=lambdaH,
-    alpha_vec = alpha_vec, imaxit=imaxit, maxit=maxit, tol=tol,
-    ngene = nrow(X), nsamples = ncol(X),
-    best_seed = best_seed, fold = params$fold
-  )
-
-  bundle <- list(meta = meta, fits = fits)
-
+    
+    # assemble / merge bundle (unchanged, plus best_seed in meta)
+    meta <- list(
+      k=k, lambda=lambda, eta=eta, lambdaW=lambdaW, lambdaH=lambdaH,
+      alpha_vec = ALPHA, maxit=MAXIT, tol=TOL,
+      ngene = nrow(X), nsamples = ncol(X),
+      seed = i
+    )
   
-  tmp <- paste0(path, ".tmp")
+    bundle[[i]] <- list(meta = meta, fits = fits)
+  }
+  
+  mets_train = dplyr::bind_rows(mets_train)
+  mets_test = dplyr::bind_rows(mets_test)
+  
+  if(flag_exist){
+    bundle = c(bundle_old,bundle)
+    mets_train = dplyr::bind_rows(mets_train_old,mets_train)
+    mets_test = dplyr::bind_rows(mets_test_old,mets_test)
+  }
+  
+
+  save(mets_train,mets_test,file=path_mets)
+  
+  tmp <- paste0(path_fits, ".tmp")
   saveRDS(bundle, tmp, compress = "xz")
-  file.rename(tmp, path)
-  path
+  file.rename(tmp, path_fits)
+  
+  path_fits
 }

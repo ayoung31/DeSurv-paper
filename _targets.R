@@ -28,8 +28,8 @@ easy_comp_controller = crew_controller_slurm(
   seconds_idle = 120,
   seconds_interval = 0.25,
   options_cluster = crew_options_slurm(
-    memory_gigabytes_per_cpu = 1,
-    time_minutes = 300,
+    memory_gigabytes_per_cpu = 2,
+    time_minutes = 500,
     log_error = "logs/crew_log_%A.err",
     log_output = "logs/crew_log_%A.out",
     script_lines = "module load r/4.4.0"
@@ -69,26 +69,25 @@ purrr::walk(list.files("R", full.names = TRUE, pattern = "[.]R$"), source)
 VAL_DATASETS       = c("CPTAC","Dijk","Linehan","Moffitt_GEO_array",
                        "PACA_AU_array","PACA_AU_seq","Puleo_array")
 METHOD_SELECT_INIT = "surv" ### method for selecting best initialization surv=PL, nmf=recon
-ALPHA_VALS         = seq(0, .95, by = .05)
+ALPHA         = seq(0, 1, by = .05)
 
 # ---- Training parameters ----
 TRAIN_DATASETS     = c("TCGA_PAAD")  
 TRAIN_PREFIX       = paste0(TRAIN_DATASETS, collapse = ".")
 METHOD_TRANS_TRAIN = "quant"
 NGENE              = 1000
-IMAXIT             = 6000
 TOL                = 1e-6
 MAXIT              = 6000
-NINIT              = 2
-K_VALS             = 6#2:12#2:16   #= c(2,3,4,5)
+NINIT              = 50
+K_VALS             = 2:16#2:16   #= c(2,3,4,5)
 LAMBDA_VALS        = 0#c(0,.1)#10^seq(-3,3)#10^seq(-4,4)
-ETA_VALS           = .01#c(.01,.1,.5,.9)#seq(.1,.9,by=.1)
+ETA_VALS           = 0#c(.01,.1,.5,.9)#seq(.1,.9,by=.1)
 LAMBDAW_VALS       = 0#10^seq(-3,3)#10^seq(-4,4)
 LAMBDAH_VALS       = 0#10^seq(-3,3)#10^seq(-4,4)
 NTOP               = 25
+NFOLD              = 3
 PKG_VERSION        = utils::packageDescription("coxNMF", fields = "RemoteRef")
 GIT_BRANCH         = gert::git_branch()
-
 
 
 # ---- Targets ----
@@ -112,6 +111,13 @@ list(
       load_data(TRAIN_DATASETS) 
     }
   ),
+  
+  tar_target(
+    data_folds,
+    {
+      set_folds(data,NFOLD,seed=123)
+    }
+  ),
 
   # Preprocess data
   tar_target(data_filtered, preprocess_data(data = data,
@@ -120,24 +126,35 @@ list(
 
 
   tar_target(param_grid,
-             create_param_grid_coldstarts()
+             create_param_grid()
              ),
   
   tar_target(
-    inits,
+    cv_runs,
     {
-      print("running inits...")
-      
-      path = create_filepath_inits_coldstarts(param_grid=param_grid)
-      
-      
-      init_coldstarts(
-        X = data_filtered$ex,
-        y = data_filtered$sampInfo$time,
-        delta = data_filtered$sampInfo$event,
-        param_grid = param_grid,
-        path = path
-      )
+      print("running cv...")
+      paths = c()
+      for(f in 1:NFOLD){
+        path_fits = create_filepath_warmstart_runs_CV(params=param_grid,fold = f)
+        path_mets = create_filepath_CV_metrics(params = param_grid,fold=f)
+        X = data_folds$data_train[[f]]$ex
+        y = data_folds$data_train[[f]]$sampInfo$time
+        d = data_folds$data_train[[f]]$sampInfo$event
+        
+        Xtest = data_folds$data_test[[f]]$ex
+        ytest = data_folds$data_test[[f]]$sampInfo$time
+        dtest = data_folds$data_test[[f]]$sampInfo$event
+        
+        path = run_warmstarts_cv(X=X,y=y,delta=d,
+                       Xtest=Xtest,ytest=ytest,dtest=dtest,
+                       params=param_grid,verbose=FALSE,
+                       path_fits = path_fits,path_mets = path_mets)
+        paths=c(paths,path)
+        
+        
+      }
+      paths
+
     },
     pattern = map(param_grid),
     iteration = "list",
@@ -145,56 +162,56 @@ list(
     resources = tar_resources(
       crew = tar_resources_crew(controller = "inits")
     )
-  ),
-
-  tar_target(
-    best_init_per_param_combo,
-    {
-      df = readRDS(inits)
-      select_best_init(df = df, method_select = METHOD_SELECT_INIT)
-    },
-    pattern   = map(inits),
-    iteration = "list"
-  ),
-  
-  tar_target(
-    model_runs,
-    {
-      print("running coldstarts...")
-
-      path = create_filepath_coldstart_runs(params = best_init_per_param_combo)
-
-      run_coldstarts(
-        X = data_filtered$ex, y = data_filtered$sampInfo$time, delta = data_filtered$sampInfo$event,
-        params = best_init_per_param_combo,
-        verbose = FALSE,
-        path = path
-      )
-
-    },
-    pattern   = map(best_init_per_param_combo),
-    iteration = "list",
-    format = "file",
-    resources = tar_resources(
-      crew = tar_resources_crew(controller = "model_runs")
-    )
-  ),
-  # #
-  # Compute model metrics
-  tar_target(
-    metrics,
-    compute_metrics(model_runs,
-                    data_filtered$ex,
-                    data_filtered$sampInfo$time,
-                    data_filtered$sampInfo$event),
-    pattern   = map(model_runs),
-    iteration = "list"
-  ),
-  # 
-  tar_target(
-    metrics_table,
-    dplyr::bind_rows(metrics)
   )
+# 
+#   tar_target(
+#     best_init_per_param_combo,
+#     {
+#       df = readRDS(inits)
+#       select_best_init(df = df, method_select = METHOD_SELECT_INIT)
+#     },
+#     pattern   = map(inits),
+#     iteration = "list"
+#   ),
+#   
+#   tar_target(
+#     model_runs,
+#     {
+#       print("running coldstarts...")
+# 
+#       path = create_filepath_coldstart_runs(params = best_init_per_param_combo)
+# 
+#       run_coldstarts(
+#         X = data_filtered$ex, y = data_filtered$sampInfo$time, delta = data_filtered$sampInfo$event,
+#         params = best_init_per_param_combo,
+#         verbose = FALSE,
+#         path = path
+#       )
+# 
+#     },
+#     pattern   = map(best_init_per_param_combo),
+#     iteration = "list",
+#     format = "file",
+#     resources = tar_resources(
+#       crew = tar_resources_crew(controller = "model_runs")
+#     )
+#   ),
+#   # #
+#   # Compute model metrics
+#   tar_target(
+#     metrics,
+#     compute_metrics(model_runs,
+#                     data_filtered$ex,
+#                     data_filtered$sampInfo$time,
+#                     data_filtered$sampInfo$event),
+#     pattern   = map(model_runs),
+#     iteration = "list"
+#   ),
+#   # 
+#   tar_target(
+#     metrics_table,
+#     dplyr::bind_rows(metrics)
+#   )
   # 
 
 

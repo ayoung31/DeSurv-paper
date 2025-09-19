@@ -51,7 +51,10 @@ make_stratified_folds <- function(time, status, K = 5, seed = 1) {
 
 
 set_folds = function(data, nfold = 5, seed = 123){
-  #set.seed(seed)
+  set.seed(seed)
+  
+  data$ex = data$ex[,data$samp_keeps]
+  data$sampInfo = data$sampInfo[data$samp_keeps,]
   
   folds=caret::createFolds(data$sampInfo$event,nfold,list=FALSE)
   # make_stratified_folds(data$sampInfo$time,data$sampInfo$event,nfold,seed=seed)
@@ -68,22 +71,33 @@ set_folds = function(data, nfold = 5, seed = 123){
     #fiter genes
     data_train[[i]]$ex = gene_filter(data_train[[i]]$ex,1000)
     # #normalize
-    rns = rownames(data_train[[i]]$ex)
-    targets=preprocessCore::normalize.quantiles.determine.target(data_train[[i]]$ex)
-    data_train[[i]]$ex = preprocessCore::normalize.quantiles.use.target(data_train[[i]]$ex,
-                                                                        target=targets)
-    rownames(data_train[[i]]$ex)=rns
-    # data_train[[i]]$ex=apply(data_train[[i]]$ex,2,rank,ties.method="average")
+    if(METHOD_TRANS_TRAIN=="quant"){
+      rns = rownames(data_train[[i]]$ex)
+      targets=preprocessCore::normalize.quantiles.determine.target(data_train[[i]]$ex)
+      data_train[[i]]$ex = preprocessCore::normalize.quantiles.use.target(data_train[[i]]$ex,
+                                                                          target=targets)
+      rownames(data_train[[i]]$ex)=rns
+    }else if(METHOD_TRANS_TRAIN=="rank"){
+      data_train[[i]]$ex=apply(data_train[[i]]$ex,2,rank,ties.method="average")
+    }
+    
+    
     
     data_test[[i]] = list(ex = data$ex[,folds==i,drop=FALSE],
                           sampInfo = data$sampInfo[folds == i,,drop=FALSE],
                           featInfo = data$featInfo,
                           dataname = data$dataname)
     
-    data_test[[i]]$ex = data_test[[i]]$ex[rownames(data_train[[i]]$ex),]
-    data_test[[i]]$ex = preprocessCore::normalize.quantiles.use.target(data_test[[i]]$ex,target = targets)
-    # data_test[[i]]$ex=data_test[[i]]$ex[rownames(data_train[[i]]$ex),]
-    # data_test[[i]]$ex=apply(data_test[[i]]$ex,2,rank,ties.method="average")
+    data_test[[i]]$ex=data_test[[i]]$ex[rownames(data_train[[i]]$ex),]
+    if(METHOD_TRANS_TRAIN=='quant'){
+      rns = rownames(data_test[[i]]$ex)
+      data_test[[i]]$ex = preprocessCore::normalize.quantiles.use.target(data_test[[i]]$ex,target = targets)
+      rownames(data_test[[i]]$ex) = rns
+    }else if(METHOD_TRANS_TRAIN=='rank'){
+      data_test[[i]]$ex=apply(data_test[[i]]$ex,2,rank,ties.method="average")
+    }
+    # 
+    
     
     # maps       <- fit_rank_maps(data_train[[i]]$ex)
     # data_train[[i]]$ex  <- apply_rank_maps(data_train[[i]]$ex, maps)   # train-in, train-out (idempotent up to ties)

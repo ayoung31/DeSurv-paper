@@ -1,28 +1,19 @@
 # Stable path per (combo, seed [, knobs])
-create_filepath_warmstart_runs_CV <- function(params) {
+create_filepath_warmstart_runs_CV <- function(params, fold) {
 
-  train_prefix       = params$train_prefix
-  method_trans_train = params$method_trans_train
-  ngene              = params$ngene
-  maxit              = params$maxit
-  tol                = params$tol
-  imaxit             = params$imaxit
   k                  = params$k
   lambda             = params$lambda
   eta                = params$eta
   lambdaW            = params$lambdaW
   lambdaH            = params$lambdaH
-  seed               = params$seed
-  method_select      = params$method_select
-  fold               = params$fold
 
-  folder = sprintf("ng%d_imax%d_tol%.0e_max%d",ngene,imaxit,tol,maxit)
+  folder = sprintf("ng%d_tol%.0e_max%d",NGENE,TOL,MAXIT)
 
-  filename = sprintf("k%d_l%.0e_e%.0e_w%.0e_h%.0e_i%d_f%d",
-                     k, lambda, eta, lambdaW, lambdaH, seed, fold)
+  filename = sprintf("k%d_l%.0e_e%.0e_w%.0e_h%.0e_f%d_of_%d",
+                     k, lambda, eta, lambdaW, lambdaH, fold, NFOLD)
 
-  dir=file.path("results", train_prefix, method_trans_train, folder, 
-                "model_runs_cv", method_select)
+  dir=file.path("results", paste0("PKG_VERSION=",PKG_VERSION,"_GIT_BRANCH=",GIT_BRANCH), TRAIN_PREFIX, METHOD_TRANS_TRAIN, folder, 
+                "model_runs_cv")
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
   file.path(dir, paste0(filename, ".rds"))
 }
