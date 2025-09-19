@@ -1,5 +1,5 @@
 # Compute metrics from a bundle file (no refitting).
-compute_metrics <- function(fit, X, y, delta, alpha, fold) {
+compute_metrics <- function(fit, X, y, delta, alpha) {
   W <- fit$W
   beta <- fit$beta
   lp <- t(X) %*% W %*% beta
@@ -10,7 +10,6 @@ compute_metrics <- function(fit, X, y, delta, alpha, fold) {
   nl <- loss$nmf_loss
   met <- data.frame(
     alpha = alpha,
-    fold= fold,
     c = cix,
     loss = loss$loss,
     sloss = sl, 

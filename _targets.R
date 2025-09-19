@@ -85,7 +85,6 @@ ETA_VALS           = 0#c(.01,.1,.5,.9)#seq(.1,.9,by=.1)
 LAMBDAW_VALS       = 0#10^seq(-3,3)#10^seq(-4,4)
 LAMBDAH_VALS       = 0#10^seq(-3,3)#10^seq(-4,4)
 NTOP               = 25
-NFOLD              = 3
 PKG_VERSION        = utils::packageDescription("coxNMF", fields = "RemoteRef")
 GIT_BRANCH         = gert::git_branch()
 
@@ -113,44 +112,34 @@ list(
   ),
   
   tar_target(
-    data_folds,
+    data_filtered,
     {
-      set_folds(data,NFOLD,seed=123)
+      preprocess_data(data,ngene=NGENE,method_trans_train=METHOD_TRANS_TRAIN)
     }
   ),
 
-  # Preprocess data
-  tar_target(data_filtered, preprocess_data(data = data,
-                                            ngene = NGENE,
-                                            method_trans_train = METHOD_TRANS_TRAIN)),
-
 
   tar_target(param_grid,
-             create_param_grid_cv()
+             create_param_grid()
              ),
   
   tar_target(
-    cv_runs,
+    full_runs,
     {
       print("running cv...")
       paths = c()
-      path_fits = create_filepath_warmstart_runs_CV(params=param_grid)
-      path_mets = create_filepath_CV_metrics(params = param_grid)
-      f = param_grid$fold
-      X = data_folds$data_train[[f]]$ex
-      y = data_folds$data_train[[f]]$sampInfo$time
-      d = data_folds$data_train[[f]]$sampInfo$event
-      
-      Xtest = data_folds$data_test[[f]]$ex
-      ytest = data_folds$data_test[[f]]$sampInfo$time
-      dtest = data_folds$data_test[[f]]$sampInfo$event
-      
-      path = run_warmstarts_cv(X=X,y=y,delta=d,
-                     Xtest=Xtest,ytest=ytest,dtest=dtest,
+      path_fits = create_filepath_warmstart_runs(params=param_grid)
+      path_mets = create_filepath_metrics(params = param_grid)
+
+      X = data_filtered$ex
+      y = data_filtered$sampInfo$time
+      d = data_filtered$sampInfo$event
+     
+      path = run_warmstarts(X=X,y=y,delta=d,
                      params=param_grid,verbose=FALSE,
                      path_fits = path_fits,path_mets = path_mets)
 
-      paths
+      path
 
     },
     pattern = map(param_grid),
