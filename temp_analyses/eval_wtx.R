@@ -17,6 +17,9 @@ temp = bics%>%group_by(alpha,k) %>%
   slice_min(order_by = bic,n=1,with_ties=FALSE) %>%
   ungroup()
 
+temp2 = temp %>% group_by(k)%>%
+  slice_min(order_by = bic,n=1,with_ties=FALSE) %>%
+  ungroup()
 ggplot(temp,aes(x=k,y=alpha,fill=bic))+
   geom_tile()+
   scale_fill_gradient(low = "red", high = "white")
@@ -25,6 +28,9 @@ ggplot(temp,aes(x=k,y=alpha,fill=bic))+
 best = temp %>% slice_min(order_by = bic,n=1,with_ties=FALSE)
 
 bics_a0 = bics%>% filter(alpha==0)
+temp3 = bics_a0 %>% group_by(k) %>%
+  slice_min(order_by = bic,n=1,with_ties=FALSE) %>%
+  ungroup()
 best_a0=bics_a0[which.min(bics_a0$bic),]
 
 
@@ -34,19 +40,19 @@ test_datasets = "Puleo_array"#c("Dijk","Linehan","Moffitt_GEO_array","PACA_AU_ar
 data=load_data(datasets=test_datasets)
 
 ## best model
-fit_cox=load_model(best)
+fit_cox=load_model(temp2[3,])
 tops =get_top_genes(fit_cox$W,ntop)
 W=fit_cox$W
 
 data_filtered = preprocess_data(data,genes=rownames(W))
 X=data_filtered$ex
 
-fit=fit_val_model(X,data_filtered$sampInfo$time,data_filtered$sampInfo$event,tops,W)
+fit=fit_val_model(X,data_filtered$sampInfo$time,data_filtered$sampInfo$event,tops,W,score_bin=TRUE)
 bic_val <- stats::BIC(fit)
 summary(fit)
 cols = which(unlist(lapply(tops, function(x) !is.null(x))))
 tops = as.data.frame(tops[cols])
-create_table(as.data.frame(tops),top_genes,"DECODER",colors)
+create_table_v2(as.data.frame(tops),top_genes,"DECODER",colors)
 
 # alpha 0 best model
 fit_cox_a0=load_model(best_a0)

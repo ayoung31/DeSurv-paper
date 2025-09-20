@@ -9,6 +9,10 @@ DeSurv-paper.Rproj
 /_targets/           # main cache directory
 stores/             # if you use multiple stores (see tar_config_set)
 streamlined/
+store_PKG_VERSION=project_to_zero_GIT_BRANCH=full_models/
+store_PKG_VERSION=project_to_zero_GIT_BRANCH=no_cv/
+batch_params/
+no_cv/
 
 # ---- results / generated data ----
 results/
