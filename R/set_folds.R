@@ -55,8 +55,8 @@ set_folds = function(data, nfold = 5, seed = 123){
   
   data$ex = data$ex[,data$samp_keeps]
   data$sampInfo = data$sampInfo[data$samp_keeps,]
-  
-  folds=caret::createFolds(data$sampInfo$event,nfold,list=FALSE)
+  strata = interaction(data$sampInfo$event,data$sampInfo$dataset,drop = FALSE)
+  folds=caret::createFolds(strata,nfold,list=FALSE)
   # make_stratified_folds(data$sampInfo$time,data$sampInfo$event,nfold,seed=seed)
   
   data_train = list()

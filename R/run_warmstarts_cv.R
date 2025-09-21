@@ -1,10 +1,8 @@
 run_warmstarts_cv <- function(
     X, y, delta,
-    Xtest, ytest, dtest,
     params,
     verbose = TRUE,
-    path_fits,
-    path_mets
+    path_fits
 ){
   k                  = params$k
   lambda             = params$lambda
@@ -16,30 +14,32 @@ run_warmstarts_cv <- function(
   f                  = params$fold
 
   dir.create(dirname(path_fits), recursive = TRUE, showWarnings = FALSE)
-  dir.create(dirname(path_mets), recursive = TRUE, showWarnings = FALSE)
-  if(file.exists(path_fits) & file.exists(path_mets)){
+  if(file.exists(path_fits)){
     bundle_old = readRDS(path_fits)
-    load(path_mets)
     exists = unlist(lapply(bundle_old,function(x) names(x$fits)==as.character(ALPHA)))
     if(all(exists)){
       if(length(bundle_old)==NINIT){
         return(path_fits)
       }else{
         seeds = setdiff(1:NINIT,1:length(bundle_old))
-        mets_train_old=mets_train
-        mets_test_old=mets_test
-        rm(mets_train)
-        rm(mets_test)
         flag_exist = TRUE
       }
     }
     
   }
-  bundle=list()
-  mets_train=list()
-  mets_test=list()
-  j=1
-  for(i in seeds){
+  
+  # cl <- parallel::makeCluster(NINIT,setup_strategy="sequential")
+  # registerDoParallel(cl)
+  doMC::registerDoMC(cores = NINIT) 
+
+  bundle <- foreach::foreach(
+    i = seeds,
+    .combine  = 'c',
+    .inorder  = FALSE,
+    .export   = c("run_coxNMF", "ALPHA", "TOL", "MAXIT"),
+    .errorhandling = "remove",
+    .packages = c("coxNMF","survival")  # add packages run_coxNMF needs, e.g. "Matrix", "survival"
+  ) %dopar% {
     fit_prev = NULL
     fits = list()
     for (a in ALPHA) {
@@ -63,16 +63,8 @@ run_warmstarts_cv <- function(
         )
       }
       
-      ## compute metrics train
-      mets_train[[j]] = compute_metrics(fit,X,y,delta,a,f)
-
-      ## compute metrics test
-      mets_test[[j]] = compute_metrics(fit,Xtest,ytest,dtest,a,f)
-
-      
       fits[[as.character(a)]] <- fit
       fit_prev <- fit
-      j=j+1
     }
   
     
@@ -84,20 +76,15 @@ run_warmstarts_cv <- function(
       seed = i
     )
   
-    bundle[[i]] <- list(meta = meta, fits = fits)
+    setNames(list(list(meta = meta, fits = fits)), as.character(i))
   }
   
-  mets_train = dplyr::bind_rows(mets_train)
-  mets_test = dplyr::bind_rows(mets_test)
+  # stopCluster(cl)
   
   if(flag_exist){
     bundle = c(bundle_old,bundle)
-    mets_train = dplyr::bind_rows(mets_train_old,mets_train)
-    mets_test = dplyr::bind_rows(mets_test_old,mets_test)
   }
   
-
-  save(mets_train,mets_test,file=path_mets)
   
   tmp <- paste0(path_fits, ".tmp")
   saveRDS(bundle, tmp, compress = "xz")

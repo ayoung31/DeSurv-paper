@@ -7,4 +7,4 @@
 
 module load r/4.4.0
 
-Rscript --max-connections=512 submit_targets.R
+Rscript --max-connections=1012 submit_targets.R
