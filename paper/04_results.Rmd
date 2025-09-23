@@ -1,56 +1,66 @@
-## DeSurv incorporates patient survival information directly into the NMF loss {.unnumbered}
-We developed deSurv, a survival-driven deconvolution framework that integrates bulk RNA-sequencing data with patient outcome information to identify cell-type-enriched gene signatures with prognostic value.
-Unlike standard unsupervised methods that cluster expression patterns without regard to patient survival, deSurv incorporates time-to-event data directly into the signature discovery process. We applied deSurv to bulk RNA-seq profiles from pancreatic, bladder, and colorectal cancer cohorts, each with matched clinical follow-up data, encompassing a total of n = XXXX patients across discovery and validation sets (Table 1).
-An overview of DeSurv can be found in Figure \@ref(fig:fig-schema)
+## The NMF–Cox framework provides an end-to-end workflow for prognostic modeling
 
-```{r fig-schema, fig.cap="DeSurv overview", out.width="80%"}
-knitr::include_graphics("desurv_schematic_v5.pdf")
+We developed an integrated framework that combines nonnegative matrix factorization (NMF) with Cox proportional hazards regression to identify latent gene expression factors associated with survival. As illustrated in Figure 1, the workflow begins with preprocessing and normalization of RNA-seq data, followed by NMF decomposition into patient factor loadings ($W$) and gene weightings ($H$). A Cox model is then fit using projected covariates derived from W. The framework incorporates a balancing parameter $\alpha$ to control the relative influence of reconstruction error versus survival likelihood. Model selection is performed via cross-validation across k, penalty parameters, and $\alpha$, with downstream evaluation focusing on both predictive performance and biological interpretability.
+
+## The NMF–Cox model shows consistent convergence and stability across restarts
+
+Across datasets and initialization schemes, the NMF–Cox algorithm consistently converged to numerically stable solutions within the designated iteration budget. Warm-start strategies, in which solutions at $\alpha=0$ initialized supervised runs, substantially reduced variability across restarts and improved reproducibility. Figure 2 shows representative loss trajectories demonstrating monotone decreases until convergence, while Figure 3 summarizes performance variability across restarts. Compared with naïve random initialization, warm-starts produced tighter distributions of cross-validated C-index and partial likelihood, confirming stability of the optimization procedure.
+
+
+## Cross-validation of NMF–Cox identifies parameter settings that balance prediction and reconstruction
+
+We evaluated performance across a grid of factor ranks (k), penalties, and values of $\alpha$. Cross-validated C-index varied modestly across conditions, with no consistent improvement for 
+$α>0$. Instead, supervised extensions altered the orientation of latent factors while maintaining comparable discrimination. Figure \@ref(fig::fig-cv)A shows a heatmap of mean C-index across k and $\alpha$, and \@ref(fig::fig-cv)B illustrates C-index trends across $\alpha$ stratified by rank. 
+
+```{r fig-cv}
+tar_load(cv_metrics)
+mets_test=cv_metrics$mets_test
+avg_init = mets_test %>% group_by(k,fold,alpha,lambda,eta,lambdaW) %>%
+  summarize(c_mean_f = mean(c), pl_mean_f=mean(sloss))%>%
+  ungroup()
+avg_fold = avg_init %>% group_by(k,alpha,lambda,eta,lambdaW) %>%
+  summarize(c_mean = mean(c_mean_f), pl_mean = mean(pl_mean_f),
+            c_sd = sqrt(sum((c_mean_f-c_mean)^2)/(NFOLD*(NFOLD-1))), 
+            pl_sd = sqrt(sum((pl_mean_f-pl_mean)^2)/(NFOLD*(NFOLD-1))))%>%
+  ungroup()
+avg_fold_fixed_lambda = avg_fold %>% filter(lambda==10)
+
+heat = ggplot(avg_fold_fixed_lambda,aes(x=alpha,y=k,fill=c_mean))+
+  geom_tile()+
+  theme_classic(base_size=12)+theme(panel.grid = element_blank(),
+                                    axis.line  = element_blank(), 
+                                    axis.text = element_text(size=11))+
+  scale_y_continuous(expand=c(0,0),breaks=1:12)+
+  scale_x_continuous(expand=c(0,0),breaks = c(0,.25,.5,.75,1))+
+  labs(fill="CV C-index")+
+  scale_fill_viridis_c(option="magma",direction=-1,labels=scales::label_number(accuracy=0.01))
+
+avg_fold_sub_k = avg_fold_fixed_lambda %>% filter(k %in% c(4,6,8,12))
+avg_fold_sub_k$k_lab = factor(avg_fold_sub_k$k, labels=paste0("k = ",c(4,6,8,12)))
+
+panels = ggplot(avg_fold_sub_k, aes(x=alpha,y=c_mean))+
+  geom_point()+
+  geom_line()+
+  geom_errorbar(aes(ymin=c_mean-c_sd, ymax = c_mean+c_sd))+
+  theme_linedraw(base_size=12)+
+  theme(strip.background = element_rect(fill="white",color=NA),
+        strip.text = element_text(color="black",size=12),
+        axis.text = element_text(size=11))+
+  facet_wrap(~k_lab)+
+  labs(y="CV C-index")
+
+ggpubr::ggarrange(heat,panels,ncol=2,nrow=1,labels=c("A","B"),widths=c(5,4))
+
+
 ```
 
-## DeSurv captures distinct cell-type specific gene signatures {.unnumbered}
-In PDAC, deSurv identified cell-type-specific signatures spanning tumor, stromal, and immune compartments. Many signatures were distinct from those obtained using unsupervised methods (Figure 2a and 2b). Representative heatmaps illustrate the differential expression of these signatures across patients (Figure 2c).
-
-```{r}
-model.params = list(
-  dataset="TCGA_PAAD", # dataset we trained the model on
-  version="TCGA_PAAD",
-  ngene=1000,
-  ninit=100,
-  imaxit=6000,
-  tol=1e-6,
-  maxit=6000,
-  k=9
-)
-datasets = c("CPTAC","Dijk","Linehan","Moffitt_GEO_array","PACA_AU_array",
-             "PACA_AU_seq","Puleo_array")
-
-results_best = model_description(model.params = model.params,which.alpha = "best",
-                                 ntop=ntop,top_genes = top_genes, plot=FALSE,
-                                 top.type = top.type, p.adj=.01, colors=colors)
-
-data=load_data(datasets=datasets,save=TRUE,replace=FALSE)
-
-heatmap_tumor=plot_gg_heatmap(results_best,data,type="tumor",factors=c(1,6),nclus=2)
-
-```
 
 
-## DeSurv extracts prognostic tumor signatures {.unnumbered}
-Tumor signatures derived using deSurv stratified patients into groups with significantly different survival outcomes (log-rank P < 0.001 in all datasets), often outperforming unsupervised methods (Figures 3a-c). For example, a deSurv tumor signature achieved a concordance index (C-index) of 0.72 compared to 0.61 for the nearest unsupervised equivalent (Table 1).
-Performance gains were consistent in independent validation cohorts (Figures 3d-e) , indicating that survival integration during signature discovery enhances prognostic robustness.
+## NMF–Cox uncovers biologically interpretable latent factors associated with clinical outcomes
 
-```{r}
+Despite limited performance gains from supervision, the latent factors identified by NMF–Cox exhibited strong biological interpretability. The projected covariates, $W^TX$, aligned with known clinical and molecular subtypes, including basal-like versus classical subgroups in pancreatic cancer (Figure 7). Kaplan–Meier curves stratified by factor exposures revealed significant survival differences (Figure 8), supporting the prognostic relevance of the factors. At the gene level, W highlighted pathway-level enrichment for immune signaling, stromal activity, and hallmark oncogenic processes. Overlap analysis (Figure 9) demonstrated consistency with external signatures, confirming that NMF–Cox produces reproducible biological features.
 
-```
+## NMF–Cox factors generalize to independent cohorts in external validation
 
-
-## DeSurv extracts prognostic stromal factors {.unnumbered}
-
-Figure: Panel A , Panel B, Panel C, 
-
-At k=9, DeSurv finds an iCAF factor that is not found in standard NMF. When we cluster on this factor in the validation datasets the resulting clusters are prognostic for patient survival. Note that almost all other stromal factors are not associated with survival.
-
-## Cross-cancer robustness of prognostic signatures {.unnumbered}
-Several deSurv-derived signatures retained prognostic value when applied to other cancer types. A tumor signature discovered in PDAC was also prognostic in colorectal cancer (log-rank P = xx), and a stromal signature from pancreatic cancer predicted improved survival in bladder cancer (Figure 4a).
-Heatmaps of hazard ratios across cross-cancer applications revealed that X\% of signatures demonstrated statistically significant associations in at least two cancer types (Figure 4b), suggesting a degree of pan-cancer prognostic relevance.
+To assess generalizability, models trained on TCGA-PAAD and CPTAC were applied to external cohorts including PACA, Moffitt, and Puleo. Factor exposures in validation datasets recapitulated subgroup structures identified in training and stratified patients into groups with distinct survival outcomes (Figure 10). Factor correlation analyses (Figure 11) confirmed reproducibility of core latent dimensions, particularly those separating basal-like and classical subtypes. Predictive accuracy in external cohorts was comparable to cross-validation results, with simpler models (k≤5) showing greater reproducibility. These findings indicate that NMF–Cox captures transferable biological signals across studies.
 

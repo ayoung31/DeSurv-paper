@@ -1,4 +1,4 @@
-run_coldstarts <- function(
+run_coldstarts_cv <- function(
     X, y, delta,
     params,
     verbose = TRUE,
@@ -12,7 +12,8 @@ run_coldstarts <- function(
   lambdaH            = params$lambdaH
   seeds              = 1:ninit
   flag_exist         = FALSE
-  
+  f                  = params$fold
+
   dir.create(dirname(path_fits), recursive = TRUE, showWarnings = FALSE)
   if(file.exists(path_fits)){
     bundle_old = readRDS(path_fits)
@@ -31,7 +32,7 @@ run_coldstarts <- function(
   # cl <- parallel::makeCluster(NINIT,setup_strategy="sequential")
   # registerDoParallel(cl)
   doMC::registerDoMC(cores = ninit) 
-  
+
   bundle <- foreach::foreach(
     i = seeds,
     .combine  = 'c',
@@ -40,7 +41,6 @@ run_coldstarts <- function(
     .errorhandling = "remove",
     .packages = c("coxNMF","survival")  # add packages run_coxNMF needs, e.g. "Matrix", "survival"
   ) %dopar% {
-    
     fits = list()
     for (a in ALPHA) {
       print(sprintf("seed %d, alpha %.2f",i,a))
@@ -52,19 +52,21 @@ run_coldstarts <- function(
         seed=i, tol=TOL, maxit=MAXIT, verbose=verbose,
         ninit=1, imaxit=MAXIT
       )
-       
+      
+      
       fits[[as.character(a)]] <- fit
+
     }
-    
+  
     
     # assemble / merge bundle (unchanged, plus best_seed in meta)
     meta <- list(
       k=k, lambda=lambda, eta=eta, lambdaW=lambdaW, lambdaH=lambdaH,
       alpha_vec = ALPHA, maxit=MAXIT, tol=TOL,
-      ngene = nrow(X), nsamples = ncol(X),
+      ngene = nrow(X), nsamples = ncol(X), fold=f,
       seed = i
     )
-    
+  
     setNames(list(list(meta = meta, fits = fits)), as.character(i))
   }
   

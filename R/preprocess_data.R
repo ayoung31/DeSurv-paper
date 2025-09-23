@@ -3,10 +3,18 @@ preprocess_data = function(data,ngene=1000,genes=NULL,method_trans_train="rank")
   data$ex = data$ex[,data$samp_keeps]
   data$sampInfo = data$sampInfo[data$samp_keeps,]
   
+  
   ### restrict genes
   if(is.null(genes)){
     # if gene list not supplied, restrict to top ngene highly expressed & variable
-    X = gene_filter(X=data$ex,ngene=ngene)
+    D = list()
+    datasets=unique(data$sampInfo$dataset)
+    for(d in 1:length(datasets)){
+      X = data$ex[,data$sampInfo$dataset==datasets[d]]
+      D[[d]] = gene_filter(X=X,ngene=ngene*2)
+    }
+    keep_genes = intersect(rownames(D[[1]]),rownames(D[[2]]))
+    X = data$ex[keep_genes,]
     data$ex = X
     data$featInfo =rownames(X)
   }else{
