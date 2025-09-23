@@ -26,7 +26,7 @@ low_mem_controller = crew_controller_slurm(
 
 cv_comp_controller = crew_controller_slurm(
   name = "cv",
-  workers = 80,
+  workers = 120,
   seconds_idle = 120,
   seconds_interval = 0.25,
   options_cluster = crew_options_slurm(
@@ -43,7 +43,7 @@ cv_comp_controller = crew_controller_slurm(
 # ---- Global options ----
 tar_option_set(
   packages = c("coxNMF","tidyverse","survival","cvwrapr","rmarkdown","dplyr",
-               "parallel","foreach", "doParallel", "doMC"),
+               "parallel","foreach", "doParallel", "doMC", "pec"),
   format = "rds",
   controller = crew_controller_group(default_controller, 
                                      low_mem_controller,
@@ -69,7 +69,7 @@ NGENE              = 1000
 TOL                = 1e-5
 MAXIT              = 6000
 K_VALS             = 2:12#2:16   #= c(2,3,4,5)
-LAMBDA_VALS        = c(0,1e-3,1e-2,.1)#10^seq(-3,3)#10^seq(-4,4)
+LAMBDA_VALS        = c(0,1e-5,1e-4,1e-3,1e-2,.1)#10^seq(-3,3)#10^seq(-4,4)
 ETA_VALS           = c(0,.01)#c(.01,.1,.5,.9)#seq(.1,.9,by=.1)
 LAMBDAW_VALS       = 0#10^seq(-3,3)#10^seq(-4,4)
 LAMBDAH_VALS       = 0#10^seq(-3,3)#10^seq(-4,4)
@@ -150,6 +150,8 @@ list(
       f = param_grid$fold
       k = param_grid$k
       lambda = param_grid$lambda
+      eta = param_grid$eta
+      lambdaW = param_grid$lambdaW
       mets_tr=list()
       mets_te=list()
       j=1
@@ -167,6 +169,8 @@ list(
             m = compute_metrics(fit,X,y,d,alpha,f,test=FALSE)
             m$k = k
             m$lambda = lambda
+            m$eta = eta
+            m$lambdaW=lambdaW
             m$seed = i
             m
           },error=function(e) NULL)
@@ -179,6 +183,8 @@ list(
             m = compute_metrics(fit,Xtest,ytest,dtest,alpha,f,test=TRUE)
             m$k = k
             m$lambda = lambda
+            m$eta = eta
+            m$lambdaW=lambdaW
             m$seed = i
             m
           },error=function(e) NULL)
@@ -207,6 +213,107 @@ list(
     }
 
   )
+  
+  # tar_target(
+  #   best_params,
+  #   {
+  #     mets_test = cv_metrics$mets_test
+  #     avg_init = mets_test %>% group_by(k,fold,alpha,lambda,eta,lambdaW) %>%
+  #       summarize(c_mean_f = mean(c), pl_mean_f=mean(sloss))%>%
+  #       ungroup()
+  #     avg_fold = avg_init %>% group_by(k,alpha,lambda,eta,lambdaW) %>%
+  #       summarize(c_mean = mean(c_mean_f), pl_mean = mean(pl_mean_f),
+  #                 c_sd = sd(c_mean_f), pl_sd = sd(pl_mean_f))%>%
+  #       ungroup()
+  #     avg_fold %>% filter(is.finite(pl_mean)) %>% 
+  #       slice_max(order_by=pl_mean,n=1, with_ties = FALSE)
+  #     
+  #   }
+  # ),
+  # 
+  # tar_target(
+  #   full_model,
+  #   {
+  # 
+  #     path_fits = create_filepath_warmstart_runs(best_params)
+  # 
+  #     X = data_filtered$ex
+  #     y = data_filtered$sampInfo$time
+  #     d = data_filtered$sampInfo$event
+  # 
+  #     run_warmstarts(X=X,y=y,delta=d,
+  #                       params=best_params,verbose=FALSE,
+  #                       path_fits = path_fits)
+  # 
+  #   },
+  #   format="file",
+  #   resources = tar_resources(
+  #     crew = tar_resources_crew(controller = "cv")
+  #   )
+  # ),
+  # 
+  # tar_target(
+  #   full_metrics,
+  #   {
+  #     bundle = readRDS(full_model)
+  #     path_mets = create_filepath_metrics(params = best_params)
+  # 
+  #     k = best_params$k
+  #     lambda = best_params$lambda
+  #     eta = best_params$eta
+  #     lambdaW = best_params$lambdaW
+  #     mets=list()
+  #     j=1
+  #     for(i in 1:length(bundle)){
+  #       print(i)
+  #       b = bundle[[i]]
+  #       for(a in names(b$fits)){
+  #         alpha = as.numeric(a)
+  #         fit = b$fits[[a]]
+  #         
+  #         X = data_filtered$ex
+  #         y = data_filtered$sampInfo$time
+  #         d = data_filtered$sampInfo$event
+  #         
+  #         mets[[j]] = tryCatch({
+  #           m = compute_metrics(fit,X,y,d,alpha,NA,test=FALSE)
+  #           m$k = k
+  #           m$lambda = lambda
+  #           m$eta = eta
+  #           m$lambdaW=lambdaW
+  #           m$seed = i
+  #           m
+  #         },error=function(e) NULL)
+  #         
+  #         j=j+1
+  #       }
+  #     }
+  #     
+  #     dplyr::bind_rows(mets)
+  #   }
+  # )
+
+  # 
+  # tar_load(
+  #   full_model_coldstarts,
+  #   {
+  #     
+  #     path_fits = create_filepath_coldstart_runs(best_params)
+  #     
+  #     X = data_filtered$ex
+  #     y = data_filtered$sampInfo$time
+  #     d = data_fitlered$sampInfo$event
+  #     
+  #     run_coldstarts(X=X,y=y,delta=d,
+  #                    params=best_params,verbose=FALSE,
+  #                    path_fits = path_fits)
+  #     
+  #   },
+  #   resources = tar_resources(
+  #     crew = tar_resources_crew(controller = "cv")
+  #   ),
+  #   format="file"
+  # )
 # 
 #   tar_target(
 #     best_init_per_param_combo,

@@ -1,5 +1,5 @@
 # Stable path per (combo, seed [, knobs])
-create_filepath_warmstart_runs <- function(params) {
+create_filepath_metrics <- function(params) {
   
   k                  = params$k
   lambda             = params$lambda
@@ -13,7 +13,7 @@ create_filepath_warmstart_runs <- function(params) {
                      k, lambda, eta, lambdaW, lambdaH)
   
   dir=file.path("results", paste0("PKG_VERSION=",PKG_VERSION,"_GIT_BRANCH=",GIT_BRANCH), TRAIN_PREFIX, METHOD_TRANS_TRAIN, folder, 
-                "model_runs")
+                "metrics")
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
-  file.path(dir, paste0(filename, ".rds"))
+  file.path(dir, paste0(filename, ".RData"))
 }

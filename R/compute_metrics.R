@@ -12,14 +12,21 @@ compute_metrics <- function(fit, X, y, delta, alpha, fold, test=FALSE) {
   XtW = sweep(XtW,2,sdZ,FUN="/")
   lp <- XtW %*% (beta*sdZ)
   cix <- cvwrapr::getCindex(lp, survival::Surv(y, delta))
-  dat = data.frame(matrix(nrow=length(lp),ncol=0))
-  dat$lp = lp
+  dat = as.data.frame(XtW)
+  colnames(dat) = paste0("xtw",1:ncol(XtW))
+  dat$lp = t(X)%*%W%*%beta
   dat$y = y
   dat$delta = delta
+  dat$lp_bin = dat$lp > median(dat$lp)
   
+  sd_eta = sd(lp)
+
   fit_null = survival::coxph(survival::Surv(y,delta)~1,data=dat,ties = "breslow")
   fit_new = survival::coxph(survival::Surv(y,delta)~offset(lp),data=dat,
                             control = coxph.control(iter.max = 0),ties="breslow")
+  fit_bin = survival::coxph(survival::Surv(y,delta)~lp_bin,data=dat)
+  refit = survival::coxph(as.formula(paste0("Surv(y,delta) ~ ",
+                                            paste(paste0("xtw",1:ncol(XtW)),collapse = " + "))),data=dat)
   if(test){
     sl = 2*logLik(fit_new)/sum(delta)
     dev=-2*(fit_new$loglik - fit_null$loglik)/sum(delta)
@@ -36,7 +43,11 @@ compute_metrics <- function(fit, X, y, delta, alpha, fold, test=FALSE) {
   met <- data.frame(
     alpha = alpha,
     fold= fold,
+    sd_eta = sd_eta,
     c = cix,
+    c_refit = refit$concordance[6],
+    pl_refit = 2*logLik(refit)/sum(delta),
+    hr = summary(fit_bin)[[8]][,1],
     loss = ol,
     sloss = sl,
     dev = dev,
