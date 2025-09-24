@@ -1,114 +1,116 @@
-\documentclass[9pt,twocolumn,twoside,]{pnas-new}
-
-% Use the lineno option to display guide line numbers if required.
-% Note that the use of elements such as single-column equations
-% may affect the guide line number alignment.
-
-
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-
-% tightlist command for lists without linebreak
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Survival driven deconvolution (deSurv) reveals clinically relevant tumor and stromal gene signatures},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
 
-
-
-\providecommand{\pandocbounded}[1]{#1}
-\usepackage{graphicx}
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amssymb}
-\usepackage{bbm}
-\usepackage{algorithm}
-\usepackage{algpseudocode}
-\DeclareMathOperator*{\argmin}{argmin}
-\DeclareMathOperator*{\argmax}{argmax}
-\DeclareMathOperator\diag{diag}
-\renewcommand{\algorithmicrequire}{\textbf{Input:}}
-\renewcommand{\algorithmicensure}{\textbf{Output:}}
-
-\templatetype{pnasresearcharticle}  % Choose template
-
-\title{Survival driven deconvolution (deSurv) reveals prognostic and
-interpretable tumor gene signatures}
-
-\author[a,1,2]{Amber Young}
-\author[b]{Alisa}
-\author[a]{Didong}
-\author[a,c]{Naim}
-
-  \affil[a]{University of North Carolina at Chapel Hill, Department,
-Street, City, State, Zip}
-  \affil[b]{Another University Department, Street, City, State, Zip}
-
-
-% Please give the surname of the lead author for the running footer
-\leadauthor{Anonymous}
-
-% Please add here a significance statement to explain the relevance of your work
-\significancestatement{Authors must submit a 120-word maximum statement
-about the significance of their research paper written at a level
-understandable to an undergraduate educated scientist outside their
-field of speciality. The primary goal of the Significance Statement is
-to explain the relevance of the work in broad context to a broad
-readership. The Significance Statement appears in the paper itself and
-is required for all research papers.}
-
-
-\authorcontributions{Please provide details of author contributions
-here.}
-
-\authordeclaration{Please declare any conflict of interest here.}
-
-
-\correspondingauthor{\textsuperscript{2} To whom correspondence should
-be addressed. E-mail:
-\href{mailto:bob@email.com}{\nolinkurl{bob@email.com}}}
-
-% Keywords are not mandatory, but authors are strongly encouraged to provide them. If provided, please include two to five keywords, separated by the pipe symbol, e.g:
- \keywords{  one |  two |  optional |  optional |  optional  } 
-
-\begin{abstract}
-Molecular subtyping in cancer is an ongoing problem that relies on the
-identification of robust and replicable gene signatures. While
-transcriptomic profiling has revealed recurrent gene expression patterns
-in various types of cancer, the prognostic value of these signatures is
-typically evaluated in retrospect. This is due to the reliance on
-unsupervised learning methods for identifying cell-type-specific signals
-and clustering patients into molecular subtypes. Here we present a
-Survival-driven Deconvolution tool (deSurv) that integrates bulk
-RNA-sequencing data with patient survival information to identify
-cell-type-enriched gene signatures associated with prognosis. Applying
-deSurv to various cohorts in pancreatic, bladder, and colorectal cancer,
-we uncover previously unrecognized gene signatures linked to tumor,
-stromal, and immune compartments, including â€¦ Several identified
-signatures exhibit consistent prognostic value across cohorts and cancer
-types and demonstrate potential as therapeutic targets or biomarkers.
-Our approach highlights the value of using patient outcomes during gene
-signature discovery.
-\end{abstract}
-
-\dates{This manuscript was compiled on \today}
-\doi{\url{www.pnas.org/cgi/doi/10.1073/pnas.XXXXXXXXXX}}
+\title{Survival driven deconvolution (deSurv) reveals clinically
+relevant tumor and stromal gene signatures}
+\author{}
+\date{\vspace{-2.5em}}
 
 \begin{document}
-
-% Optional adjustment to line up main text (after abstract) of first page with line numbers, when using both lineno and twocolumn options.
-% You should only change this length when you've finalised the article contents.
-\verticaladjustment{-2pt}
-
-
-
 \maketitle
-\thispagestyle{firststyle}
-\ifthenelse{\boolean{shortarticle}}{\ifthenelse{\boolean{singlecolumn}}{\abscontentformatted}{\abscontent}}{}
-
-% If your first paragraph (i.e. with the \dropcap) contains a list environment (quote, quotation, theorem, definition, enumerate, itemize...), the line after the list may have some extra indentation. If this is the case, add \parshape=0 to the end of the list environment.
-
-\acknow{Please include your acknowledgments here, set in a single
-paragraph. Please do not include any acknowledgments in the Supporting
-Information, or anywhere else in the manuscript.}
 
 Molecular subtyping has become a cornerstone of precision oncology,
 enabling the stratification of cancer patients based on distinct gene
@@ -165,6 +167,18 @@ framework for outcome-driven molecular subtyping across cancer types.
 \section*{Results}\label{results}
 \addcontentsline{toc}{section}{Results}
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(targets)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\NormalTok{PKG\_VERSION        }\OtherTok{=}\NormalTok{ utils}\SpecialCharTok{::}\FunctionTok{packageDescription}\NormalTok{(}\StringTok{"coxNMF"}\NormalTok{, }\AttributeTok{fields =} \StringTok{"RemoteRef"}\NormalTok{)}
+\NormalTok{GIT\_BRANCH         }\OtherTok{=}\NormalTok{ gert}\SpecialCharTok{::}\FunctionTok{git\_branch}\NormalTok{()}
+\NormalTok{store}\OtherTok{=}\FunctionTok{paste0}\NormalTok{(}\StringTok{"store\_PKG\_VERSION="}\NormalTok{,PKG\_VERSION,}\StringTok{"\_GIT\_BRANCH="}\NormalTok{,GIT\_BRANCH)}
+\FunctionTok{tar\_config\_set}\NormalTok{(}\AttributeTok{store=}\NormalTok{store)}
+\end{Highlighting}
+\end{Shaded}
+
 \subsection{The NMF--Cox framework provides an end-to-end workflow for
 prognostic
 modeling}\label{the-nmfcox-framework-provides-an-end-to-end-workflow-for-prognostic-modeling}
@@ -182,14 +196,15 @@ performed via cross-validation across k, penalty parameters, and
 \(\alpha\), with downstream evaluation focusing on both predictive
 performance and biological interpretability.
 
-\begin{figure*}[t]
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{include\_graphics}\NormalTok{(}\StringTok{"../figures/model\_schematic\_with\_validation.png"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
 
-{\centering \includegraphics[width=\textwidth,height=4in]{../figures/model_schematic_with_validation} 
-
-}
-
-\caption{DeSurv overview}\label{fig:fig-schema}
-\end{figure*}
+\begin{figure}
+\includegraphics[width=0.8\linewidth]{../figures/model_schematic_with_validation} \caption{DeSurv overview}\label{fig:fig-schema}
+\end{figure}
 
 \subsection{The NMF--Cox model shows consistent convergence and
 stability across
@@ -206,15 +221,6 @@ restarts. Compared with naïve random initialization, warm-starts
 produced tighter distributions of cross-validated C-index and partial
 likelihood, confirming stability of the optimization procedure.
 
-\begin{figure*}[t]
-
-{\centering \includegraphics[width=\textwidth,height=4in]{paper_files/figure-latex/fig-converge-1} 
-
-}
-
-\caption{Convergence of model for k=8 alpha=.5}\label{fig:fig-converge}
-\end{figure*}
-
 \subsection{Cross-validation of NMF--Cox identifies parameter settings
 that balance prediction and
 reconstruction}\label{cross-validation-of-nmfcox-identifies-parameter-settings-that-balance-prediction-and-reconstruction}
@@ -227,14 +233,70 @@ maintaining comparable discrimination. Figure @ref(fig::fig-cv)A shows a
 heatmap of mean C-index across k and \(\alpha\), and @ref(fig::fig-cv)B
 illustrates C-index trends across \(\alpha\) stratified by rank.
 
-\begin{figure*}[t]
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{tar\_load\_globals}\NormalTok{()}
+\FunctionTok{tar\_load}\NormalTok{(cv\_metrics)}
+\NormalTok{mets\_test}\OtherTok{=}\NormalTok{cv\_metrics}\SpecialCharTok{$}\NormalTok{mets\_test}
+\NormalTok{avg\_init }\OtherTok{=}\NormalTok{ mets\_test }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{group\_by}\NormalTok{(k,fold,alpha,lambda,eta,lambdaW) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarize}\NormalTok{(}\AttributeTok{c\_mean\_f =} \FunctionTok{mean}\NormalTok{(c), }\AttributeTok{pl\_mean\_f=}\FunctionTok{mean}\NormalTok{(sloss))}\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ungroup}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
 
-{\centering \includegraphics[width=\textwidth,height=4in]{paper_files/figure-latex/fig-cv-1} 
+\begin{verbatim}
+## `summarise()` has grouped output by 'k', 'fold', 'alpha', 'lambda', 'eta'. You can override using
+## the `.groups` argument.
+\end{verbatim}
 
-}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{avg\_fold }\OtherTok{=}\NormalTok{ avg\_init }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{group\_by}\NormalTok{(k,alpha,lambda,eta,lambdaW) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarize}\NormalTok{(}\AttributeTok{c\_mean =} \FunctionTok{mean}\NormalTok{(c\_mean\_f), }\AttributeTok{pl\_mean =} \FunctionTok{mean}\NormalTok{(pl\_mean\_f),}
+            \AttributeTok{c\_sd =} \FunctionTok{sqrt}\NormalTok{(}\FunctionTok{sum}\NormalTok{((c\_mean\_f}\SpecialCharTok{{-}}\NormalTok{c\_mean)}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}\SpecialCharTok{/}\NormalTok{(NFOLD}\SpecialCharTok{*}\NormalTok{(NFOLD}\DecValTok{{-}1}\NormalTok{))), }
+            \AttributeTok{pl\_sd =} \FunctionTok{sqrt}\NormalTok{(}\FunctionTok{sum}\NormalTok{((pl\_mean\_f}\SpecialCharTok{{-}}\NormalTok{pl\_mean)}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}\SpecialCharTok{/}\NormalTok{(NFOLD}\SpecialCharTok{*}\NormalTok{(NFOLD}\DecValTok{{-}1}\NormalTok{))))}\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ungroup}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
 
-\caption{A. Heatmap of cross-validated C-index across key parameters k and alpha. B. Cross validated C-index by alpha with standard error bars, stratified by k.}\label{fig:fig-cv}
-\end{figure*}
+\begin{verbatim}
+## `summarise()` has grouped output by 'k', 'alpha', 'lambda', 'eta'. You can override using the
+## `.groups` argument.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{avg\_fold\_fixed\_lambda }\OtherTok{=}\NormalTok{ avg\_fold }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(lambda}\SpecialCharTok{==}\DecValTok{10}\NormalTok{)}
+
+\NormalTok{heat }\OtherTok{=} \FunctionTok{ggplot}\NormalTok{(avg\_fold\_fixed\_lambda,}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{alpha,}\AttributeTok{y=}\NormalTok{k,}\AttributeTok{fill=}\NormalTok{c\_mean))}\SpecialCharTok{+}
+  \FunctionTok{geom\_tile}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{theme\_classic}\NormalTok{(}\AttributeTok{base\_size=}\DecValTok{12}\NormalTok{)}\SpecialCharTok{+}\FunctionTok{theme}\NormalTok{(}\AttributeTok{panel.grid =} \FunctionTok{element\_blank}\NormalTok{(),}
+                                    \AttributeTok{axis.line  =} \FunctionTok{element\_blank}\NormalTok{(), }
+                                    \AttributeTok{axis.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size=}\DecValTok{11}\NormalTok{))}\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}\AttributeTok{expand=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{),}\AttributeTok{breaks=}\DecValTok{1}\SpecialCharTok{:}\DecValTok{12}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{expand=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{),}\AttributeTok{breaks =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,.}\DecValTok{25}\NormalTok{,.}\DecValTok{5}\NormalTok{,.}\DecValTok{75}\NormalTok{,}\DecValTok{1}\NormalTok{))}\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{fill=}\StringTok{"CV C{-}index"}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_viridis\_c}\NormalTok{(}\AttributeTok{option=}\StringTok{"magma"}\NormalTok{,}\AttributeTok{direction=}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{,}\AttributeTok{labels=}\NormalTok{scales}\SpecialCharTok{::}\FunctionTok{label\_number}\NormalTok{(}\AttributeTok{accuracy=}\FloatTok{0.01}\NormalTok{))}
+
+\NormalTok{avg\_fold\_sub\_k }\OtherTok{=}\NormalTok{ avg\_fold\_fixed\_lambda }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(k }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{,}\DecValTok{6}\NormalTok{,}\DecValTok{8}\NormalTok{,}\DecValTok{12}\NormalTok{))}
+\NormalTok{avg\_fold\_sub\_k}\SpecialCharTok{$}\NormalTok{k\_lab }\OtherTok{=} \FunctionTok{factor}\NormalTok{(avg\_fold\_sub\_k}\SpecialCharTok{$}\NormalTok{k, }\AttributeTok{labels=}\FunctionTok{paste0}\NormalTok{(}\StringTok{"k = "}\NormalTok{,}\FunctionTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{,}\DecValTok{6}\NormalTok{,}\DecValTok{8}\NormalTok{,}\DecValTok{12}\NormalTok{)))}
+
+\NormalTok{panels }\OtherTok{=} \FunctionTok{ggplot}\NormalTok{(avg\_fold\_sub\_k, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{alpha,}\AttributeTok{y=}\NormalTok{c\_mean))}\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{geom\_errorbar}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{ymin=}\NormalTok{c\_mean}\SpecialCharTok{{-}}\NormalTok{c\_sd, }\AttributeTok{ymax =}\NormalTok{ c\_mean}\SpecialCharTok{+}\NormalTok{c\_sd))}\SpecialCharTok{+}
+  \FunctionTok{theme\_linedraw}\NormalTok{(}\AttributeTok{base\_size=}\DecValTok{12}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{strip.background =} \FunctionTok{element\_rect}\NormalTok{(}\AttributeTok{fill=}\StringTok{"white"}\NormalTok{,}\AttributeTok{color=}\ConstantTok{NA}\NormalTok{),}
+        \AttributeTok{strip.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{color=}\StringTok{"black"}\NormalTok{,}\AttributeTok{size=}\DecValTok{12}\NormalTok{),}
+        \AttributeTok{axis.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size=}\DecValTok{11}\NormalTok{))}\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{k\_lab)}\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{y=}\StringTok{"CV C{-}index"}\NormalTok{)}
+
+\NormalTok{ggpubr}\SpecialCharTok{::}\FunctionTok{ggarrange}\NormalTok{(heat,panels,}\AttributeTok{ncol=}\DecValTok{2}\NormalTok{,}\AttributeTok{nrow=}\DecValTok{1}\NormalTok{,}\AttributeTok{labels=}\FunctionTok{c}\NormalTok{(}\StringTok{"A"}\NormalTok{,}\StringTok{"B"}\NormalTok{),}\AttributeTok{widths=}\FunctionTok{c}\NormalTok{(}\DecValTok{5}\NormalTok{,}\DecValTok{4}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=\textwidth]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_edits_to_pdf_files/figure-latex/fig-cv-1}
 
 \subsection{NMF--Cox uncovers biologically interpretable latent factors
 associated with clinical
@@ -267,18 +329,6 @@ external cohorts was comparable to cross-validation results, with
 simpler models (\(k\leq 5\)) showing greater reproducibility. These
 findings indicate that NMF--Cox captures transferable biological signals
 across studies.
-
-\begin{figure*}[t]
-
-{\centering \includegraphics[width=\textwidth,height=4in]{paper_files/figure-latex/fig-external-1} 
-
-}
-
-\caption{Kaplan Meier curves for a median split on A. linear predictor, B. Factor 2, C. Factor 3}\label{fig:fig-external}
-\end{figure*}
-
-\section*{Discussion}\label{discussion}
-\addcontentsline{toc}{section}{Discussion}
 
 \section*{Materials and methods}\label{materials-and-methods}
 \addcontentsline{toc}{section}{Materials and methods}
@@ -334,9 +384,9 @@ convergence.
         \State $W_{jr} \sim Unif(0,\max(X))$ for $j=1,\dots,p$ and $r=1,\dots, k$
         \State $H_{ri} \sim Unif(0, \max(X))$ for $r=1,\dots,k$ and $i=1,\dots,n$
         \While{$eps < tol$ \textbf{and} $iter < maxit$}
-            \State $W \gets \mathop{\mathrm{argmin}}_{W \geq 0} \mathcal{L}(W,H,\beta)$
-            \State $H \gets \mathop{\mathrm{argmin}}_{H \geq 0} \mathcal{L}(W,H,\beta)$
-            \State $\beta \gets \mathop{\mathrm{argmin}}_{\beta} \mathcal{L}(W,H,\beta)$
+            \State $W \gets \argmin_{W \geq 0} \mathcal{L}(W,H,\beta)$
+            \State $H \gets \argmin_{H \geq 0} \mathcal{L}(W,H,\beta)$
+            \State $\beta \gets \argmin_{\beta} \mathcal{L}(W,H,\beta)$
             \State $errNew \gets \mathcal{L}(W,H,\beta)$
             \State $relErr \gets |errNew - err|/err$
             \State $err \gets errNew$
@@ -435,10 +485,5 @@ at each value of \(k\). A top gene was defined as \ldots{}
 \showmatmethods
 \showacknow
 \pnasbreak
-
-
-
-% Bibliography
-% \bibliography{pnas-sample}
 
 \end{document}

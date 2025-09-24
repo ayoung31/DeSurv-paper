@@ -7,7 +7,7 @@ bibliography: references.bib
 lineno: false
 
 output:
-  word_document
+  pdf_document
 ---
 
 

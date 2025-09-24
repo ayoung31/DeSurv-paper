@@ -72,7 +72,7 @@ purrr::walk(list.files("R", full.names = TRUE, pattern = "[.]R$"), source)
 
 # ---- Reusable constants ----
 
-VAL_DATASETS       = c("CPTAC","Dijk","Linehan","Moffitt_GEO_array",
+VAL_DATASETS       = c("Dijk","Linehan","Moffitt_GEO_array",
                        "PACA_AU_array","PACA_AU_seq","Puleo_array")
 METHOD_SELECT_INIT = "surv" ### method for selecting best initialization surv=PL, nmf=recon
 ALPHA         = seq(0, 1, by = .05)
@@ -85,7 +85,7 @@ NGENE              = 1000
 TOL                = 1e-5
 MAXIT              = 6000
 K_VALS             = 2:12#2:16   #= c(2,3,4,5)
-LAMBDA_VALS        = c(0,1e-5,1e-4,1e-3,1e-2,.1,.5,1,10,20,50,100)#10^seq(-3,3)#10^seq(-4,4)
+LAMBDA_VALS        = c(1e-2,.1,1,10,100)#10^seq(-3,3)#10^seq(-4,4)
 ETA_VALS           = 0#c(0,.01)#c(.01,.1,.5,.9)#seq(.1,.9,by=.1)
 LAMBDAW_VALS       = 0#10^seq(-3,3)#10^seq(-4,4)
 LAMBDAH_VALS       = 0#10^seq(-3,3)#10^seq(-4,4)
@@ -490,6 +490,7 @@ list(
       
       dplyr::bind_rows(mets)
     },
+    pattern=map(full_model_cold,param_grid_bonus),
     resources = tar_resources(
       crew = tar_resources_crew(controller = "low_mem")
     )
@@ -563,6 +564,11 @@ list(
       crew = tar_resources_crew(controller = "low_mem")
     )
   )
+  # 
+  # tar_render(
+  #   paper,
+  #   "paper/paper.Rmd"
+  # )
   
   
   # 

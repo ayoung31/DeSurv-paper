@@ -17,7 +17,7 @@ run_coldstarts <- function(
   if(file.exists(path_fits)){
     bundle_old = readRDS(path_fits)
     exists = unlist(lapply(bundle_old,function(x) names(x$fits)==as.character(ALPHA)))
-    if(all(exists)){
+    if(all(exists) & !is.null(exists)){
       if(length(bundle_old)==ninit){
         return(path_fits)
       }else{

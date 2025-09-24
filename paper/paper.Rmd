@@ -1,5 +1,5 @@
 ---
-title: Survival driven deconvolution (deSurv) reveals clinically relevant tumor and stromal gene signatures
+title: Survival driven deconvolution (deSurv) reveals prognostic and interpretable tumor gene signatures
 
 # Use letters for affiliations, numbers to show equal authorship (if applicable) and to indicate the corresponding author
 author:
@@ -75,13 +75,26 @@ header-includes:
   - \renewcommand{\algorithmicensure}{\textbf{Output:}}
 ---
 
-```{r child="02_introduction.Rmd"}
+```{r, echo=FALSE}
+knitr::opts_chunk$set(
+  echo    = FALSE,   # show code (set FALSE to hide)
+  message = FALSE,  # suppress package startup messages
+  warning = FALSE,  # suppress warnings
+  error   = FALSE,  # suppress errors in output
+  fig.align = "center" # center figures
+)
+
+```
+
+
+
+```{r child="paper/02_introduction.Rmd"}
 
 ```
 
 # Results {.unnumbered}
 
-```{r child="04_results.Rmd"}
+```{r child="paper/04_results.Rmd"}
 
 ```
 
@@ -89,7 +102,7 @@ header-includes:
 
 # Materials and methods {.unnumbered}
 
-```{r child="03_methods.Rmd"}
+```{r child="paper/03_methods.Rmd"}
 
 ```
 
