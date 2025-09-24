@@ -18,7 +18,6 @@ temp_analyses/
 # ---- results / generated data ----
 results/
 reports/
-data/
 *.rds
 
 # ---- logs ----
