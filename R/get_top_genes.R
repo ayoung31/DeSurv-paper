@@ -27,7 +27,7 @@ get_top_genes <- function(W,ntop) {
         top_indices <- order(diff_vector, decreasing = TRUE)[1:ntop]
         
         top_genes[[paste0("factor", i)]] <- rownames(W)[top_indices]
-        top_diffs[[paste0("factor", i)]] <- diff_vector[top_indices]
+        top_diffs[[paste0("factor", i)]] <- diff_vector
       } else {
         flag_empty <- TRUE
         top_genes[[paste0("factor", i)]] = NULL
@@ -37,7 +37,7 @@ get_top_genes <- function(W,ntop) {
     if (flag_empty) {
       warning("Some factors had zero weights for all genes.")
     }
-    return(as.data.frame(top_genes))
+    return(list(top_genes = as.data.frame(top_genes), top_diffs=as.data.frame(top_diffs)))
   }
   
 }

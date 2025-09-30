@@ -16,7 +16,7 @@ create_table <- function(tops,gene_lists,which.lists,color.lists,text=NULL,
   
   builder <- function(x, genes){cells_body(columns = !!rlang::sym(x), rows = !!rlang::sym(x) %in% genes)}
   
-  
+  tabs=list()
   for(i in 1:length(gene_lists)){
     filename=paste0("gene.overlap_",names(gene_lists)[i],".png")
     # if(!file.exists(paste0(save_dir,"/",filename))){
@@ -30,7 +30,8 @@ create_table <- function(tops,gene_lists,which.lists,color.lists,text=NULL,
                   locations=lapply(colnames(tops), builder, genes = gene_lists[[i]][[j]]))
       
     }
-    print(tab1)
+    tabs[[i]] = tab1
 
   }
+  return(tabs)
 }

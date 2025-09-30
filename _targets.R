@@ -57,8 +57,8 @@ cv_cold_controller = crew_controller_slurm(
 
 # ---- Global options ----
 tar_option_set(
-  packages = c("coxNMF","tidyverse","survival","cvwrapr","rmarkdown","dplyr",
-               "parallel","foreach", "doParallel", "doMC", "pec"),
+  packages = c("coxNMF","NMF","tidyverse","survival","cvwrapr","rmarkdown","dplyr",
+               "parallel","foreach", "doParallel", "doMC", "pec", "glmnet"),
   format = "rds",
   controller = crew_controller_group(default_controller, 
                                      low_mem_controller,
@@ -74,7 +74,7 @@ purrr::walk(list.files("R", full.names = TRUE, pattern = "[.]R$"), source)
 
 VAL_DATASETS       = c("Dijk","Linehan","Moffitt_GEO_array",
                        "PACA_AU_array","PACA_AU_seq","Puleo_array")
-METHOD_SELECT_INIT = "surv" ### method for selecting best initialization surv=PL, nmf=recon
+METHOD_SELECT_INIT = "loss" ### method for selecting best initialization surv=PL, nmf=recon
 ALPHA         = seq(0, 1, by = .05)
 
 # ---- Training parameters ----
@@ -97,8 +97,10 @@ GIT_BRANCH         = gert::git_branch()
 
 # ---- Targets ----
 list(
-  ##### Training #####
-  # Read data
+  
+  ################# Training ###################
+  
+  # Raw data files for training datasets
   tar_target(
     raw_data,
     c(
@@ -109,6 +111,7 @@ list(
     format = "file"
   ),
   
+  # Load and format raw data
   tar_target(
     data,
     { 
@@ -117,6 +120,13 @@ list(
     }
   ),
   
+  # Preprocess and filter data
+  tar_target(data_filtered, preprocess_data(data = data,
+                                            ngene = NGENE,
+                                            method_trans_train = METHOD_TRANS_TRAIN)),
+  
+  
+  # Split data into folds, preprocess and filter each fold
   tar_target(
     data_folds,
     {
@@ -124,16 +134,12 @@ list(
     }
   ),
   
-  # Preprocess data
-  tar_target(data_filtered, preprocess_data(data = data,
-                                            ngene = NGENE,
-                                            method_trans_train = METHOD_TRANS_TRAIN)),
-  
-  
+  # set up parameter grid
   tar_target(param_grid,
              create_param_grid_cv()
   ),
   
+  # Perform cross validation across parameter grid
   tar_target(
     cv_runs,
     {
@@ -158,6 +164,7 @@ list(
     )
   ),
   
+  # compile cv metrics into list
   tar_target(
     cv_metrics_list,
     {
@@ -220,6 +227,7 @@ list(
     )
   ),
   
+  # create dataframes of training and testing cv metrics
   tar_target(
     cv_metrics,
     {
@@ -230,6 +238,7 @@ list(
     
   ),
   
+  # select the best parameter combo based on cv metrics
   tar_target(
     best_params,
     {
@@ -249,6 +258,7 @@ list(
     }
   ),
 
+  # run multiple seeds of warmstart for selected param combo on full training data
   tar_target(
     full_model,
     {
@@ -270,6 +280,7 @@ list(
     )
   ),
   
+  # compile metrics for full data run 
   tar_target(
     full_metrics,
     {
@@ -310,6 +321,156 @@ list(
       dplyr::bind_rows(mets)
     }
   ), 
+  
+  
+  # reduce to selected alpha and best seed
+  tar_target(
+    fit_train,
+    {
+      alpha_best = full_metrics %>% filter(alpha==best_params$alpha)
+      init_best = select_best_init(alpha_best,method_select=METHOD_SELECT_INIT)
+      fit_all = readRDS(full_model)
+      fit_init = fit_all[[init_best$seed]]
+      meta = fit_init$meta
+      meta$alpha = init_best$alpha
+      fit = fit_init$fits[[as.character(init_best$alpha)]]
+      fit$meta = meta
+      
+      fit
+    }
+  ),
+  
+  # get the top genes for each factor
+  tar_target(
+    tops_best,
+    get_top_genes(fit_train$W,NTOP)
+  ),
+  
+  # visualize overlap of top genes with known lists
+  tar_target(
+    gene_overlap_best,
+    {
+      known_env = new.env()
+      load("data/derv/cmbSubtypes_formatted.RData",envir = known_env)
+      create_table(tops = tops_best$top_genes, gene_lists = known_env$top_genes,
+                   which.lists = "DECODER", color.lists = known_env$colors)
+    }
+  ),
+  
+  
+  
+  
+  #################### competing methods ###############
+  
+  tar_target(
+    fit_a0,
+    {
+      alpha0 = full_metrics %>% filter(alpha==0)
+      init_best = select_best_init(alpha0,method_select="loss")
+      # same k as selected model
+      fit_all = readRDS(full_model)
+      fit_init = fit_all[[init_best$seed]]
+      meta = fit_init$meta
+      meta$alpha = 0
+      fit = fit_init$fits[[as.character(0)]]
+      fit$meta = meta
+      
+      fit
+    }
+  ),
+  
+  # get the top genes for each factor
+  tar_target(
+    tops_a0,
+    get_top_genes(fit_a0$W,NTOP)
+  ),
+  
+  tar_target(
+    gene_overlap_a0,
+    {
+      known_env = new.env()
+      load("data/derv/cmbSubtypes_formatted.RData",envir = known_env)
+      create_table(tops = tops_a0$top_genes, gene_lists = known_env$top_genes,
+                   which.lists = "DECODER", color.lists = known_env$colors)
+    }
+  ),
+  
+  
+  # standard NMF package in R
+  tar_target(
+    fit_std,
+    nmf(data_filtered$ex,K_VALS,nrun=NINIT,method="lee",.options=paste0("p",NINIT)),
+    resources = tar_resources(
+      crew = tar_resources_crew(controller = "cv")
+    )
+  ),
+  
+  # get the top genes for each factor
+  tar_target(
+    tops_std,
+    get_top_genes(fit_std$fit[[best_params$k]]@fit@W,NTOP)
+  ),
+  
+  tar_target(
+    gene_overlap_std,
+    {
+      known_env = new.env()
+      load("data/derv/cmbSubtypes_formatted.RData",envir = known_env)
+      create_table(tops = tops_std$top_genes, gene_lists = known_env$top_genes,
+                   which.lists = "DECODER", color.lists = known_env$colors)
+    }
+  ),
+  
+  # # lasso cox
+  # tar_target(
+  #   fit_lasso_cox,
+  #   {
+  #     
+  #   }
+  # ),
+  
+  
+  
+  
+  
+  ##################### Validation ######################
+  tar_target(
+    raw_data_val,
+    c(
+      file.path("data/original", paste0(VAL_DATASETS, ".rds")),
+      file.path("data/original", paste0(VAL_DATASETS, ".survival_data.rds")),
+      file.path("data/original", paste0(VAL_DATASETS, "_subtype.csv"))
+    ),
+    format = "file"
+  ),
+  
+  # Load and format raw data
+  tar_target(
+    data_val,
+    { 
+      raw_data_val
+      load_data(VAL_DATASETS) 
+    }
+  ),
+  
+  # Preprocess and filter data
+  tar_target(data_val_filtered, 
+    {
+      train_genes = rownames(data_filtered$ex)
+      preprocess_data(data = data_val,
+                      genes = train_genes,
+                      method_trans_train = METHOD_TRANS_TRAIN)
+    }
+  ),
+  
+  
+  
+  
+  
+  
+  ###################### supplementary material ###########################
+  
+  
   
   ### cold starts for paper comp
   tar_target(param_grid_cold_cv,
