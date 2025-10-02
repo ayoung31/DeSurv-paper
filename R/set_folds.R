@@ -66,20 +66,23 @@ set_folds = function(data, nfold = 5, seed = 123){
     data_train[[i]] = list(ex = data$ex[,folds!=i,drop=FALSE], 
                            sampInfo = data$sampInfo[folds != i,,drop=FALSE],
                            featInfo = data$featInfo,
-                           dataname = data$dataname)
+                           dataname = data$dataname,
+                           samp_keeps = 1:sum(folds!=i))
     
     #fiter genes
-    data_train[[i]]$ex = gene_filter(data_train[[i]]$ex,1000)
+    data_train[[i]] = preprocess_data(data_train[[i]], ngene=NGENE, 
+                                      method_trans_train=METHOD_TRANS_TRAIN)
     # #normalize
-    if(METHOD_TRANS_TRAIN=="quant"){
-      rns = rownames(data_train[[i]]$ex)
-      targets=preprocessCore::normalize.quantiles.determine.target(data_train[[i]]$ex)
-      data_train[[i]]$ex = preprocessCore::normalize.quantiles.use.target(data_train[[i]]$ex,
-                                                                          target=targets)
-      rownames(data_train[[i]]$ex)=rns
-    }else if(METHOD_TRANS_TRAIN=="rank"){
-      data_train[[i]]$ex=apply(data_train[[i]]$ex,2,rank,ties.method="average")
-    }
+    # if(METHOD_TRANS_TRAIN=="quant"){
+      # rns = rownames(data_train[[i]]$ex)
+      # targets=preprocessCore::normalize.quantiles.determine.target(data_train[[i]]$ex)
+      # data_train[[i]]$ex = preprocessCore::normalize.quantiles.use.target(data_train[[i]]$ex,
+      #                                                                     target=targets)
+      # rownames(data_train[[i]]$ex)=rns
+      
+    # }else if(METHOD_TRANS_TRAIN=="rank"){
+    #   data_train[[i]]$ex=apply(data_train[[i]]$ex,2,rank,ties.method="average")
+    # }
     
     
     
@@ -90,9 +93,10 @@ set_folds = function(data, nfold = 5, seed = 123){
     
     data_test[[i]]$ex=data_test[[i]]$ex[rownames(data_train[[i]]$ex),]
     if(METHOD_TRANS_TRAIN=='quant'){
-      rns = rownames(data_test[[i]]$ex)
-      data_test[[i]]$ex = preprocessCore::normalize.quantiles.use.target(data_test[[i]]$ex,target = targets)
-      rownames(data_test[[i]]$ex) = rns
+      # rns = rownames(data_test[[i]]$ex)
+      # data_test[[i]]$ex = preprocessCore::normalize.quantiles.use.target(data_test[[i]]$ex,target = targets)
+      # rownames(data_test[[i]]$ex) = rns
+      stop("need to return quantiles of training data from preprocess_data function")
     }else if(METHOD_TRANS_TRAIN=='rank'){
       data_test[[i]]$ex=apply(data_test[[i]]$ex,2,rank,ties.method="average")
     }
@@ -106,5 +110,5 @@ set_folds = function(data, nfold = 5, seed = 123){
     
   }#end for loop
   
-  return(list(data_train = data_train, data_test = data_test))
+  return(list(data_train = data_train, data_test = data_test, folds=folds))
 }

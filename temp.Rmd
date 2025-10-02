@@ -1,0 +1,189 @@
+---
+title: "Untitled"
+author: "Amber Young"
+date: "2025-10-01"
+output: html_document
+---
+
+```{r}
+library(targets)
+library(ConsensusClusterPlus)
+library(coxme)
+library(dplyr)
+library(ggplot2)
+library(survival)
+library(survminer)
+PKG_VERSION        = utils::packageDescription("coxNMF", fields = "RemoteRef")
+GIT_BRANCH         = gert::git_branch()
+store=paste0("store_PKG_VERSION=",PKG_VERSION,"_GIT_BRANCH=",GIT_BRANCH)
+tar_config_set(store=store)
+
+```
+
+```{r fig-external}
+tar_load(fit_train)
+tar_load(tops_best)
+tar_load(data_val_filtered)
+
+W = fit_train$W
+beta = fit_train$beta
+Xval = data_val_filtered$ex
+
+genes = intersect(rownames(W),rownames(Xval))
+W = W[genes,]
+Xval = Xval[genes,]
+
+Z = t(Xval)%*%W
+lp = Z%*%beta
+Z_bin = apply(Z,2,function(x)x>median(x))
+dat = as.data.frame(Z_bin)
+dat$lp=as.numeric(lp)
+dat$lp_bin = as.numeric(lp>median(lp))
+dat$y = data_val_filtered$sampInfo$time
+dat$delta = data_val_filtered$sampInfo$event
+dat$dataset = data_val_filtered$sampInfo$dataset
+dat$decaf = as.numeric(data_val_filtered$sampInfo$DeCAF=="permCAF")
+dat$purist = as.numeric(data_val_filtered$sampInfo$PurIST=="Classical")
+# cvwrapr::getCindex(Surv(dat$y,dat$delta))
+fitph=coxme(Surv(y,delta)~lp+(1|dataset),data=dat)
+print(summary(fitph))
+
+fitsurv1 = survfit(Surv(y,delta)~lp_bin,data=dat)
+names(fitsurv1$strata) = c("high","low")
+p1 = ggsurvplot(fitsurv1,pval=TRUE,risk.table = TRUE)+
+        labs(title="Linear predictor")
+
+fitsurv2 = survfit(Surv(y,delta)~V2,data=dat)
+names(fitsurv2$strata) = c("high","low")
+p2 = ggsurvplot(fitsurv2,pval=TRUE,risk.table = TRUE)+
+        labs(title="Factor 2")
+
+fitsurv3 = survfit(Surv(y,delta)~V3,data=dat)
+names(fitsurv3$strata) = c("high","low")
+p3 = ggsurvplot(fitsurv3,pval=TRUE,risk.table = TRUE)+
+        labs(title="Factor 3")
+
+ggarrange(p1$plot,p2$plot,p3$plot,ncol=3)
+
+
+clus = ConsensusClusterPlus(t(Z),maxK = 6,clusterAlg = "km", distance = "euclidean")
+dat$class = clus[[3]]$consensusClass
+
+fitsurv4 = survfit(Surv(y,delta)~class,data=dat)
+
+p4 = ggsurvplot(fitsurv4,pval=TRUE,risk.table = TRUE)+
+        labs(title="Clusters")
+p4
+
+```
+
+```{r}
+tar_load(fit_a0)
+tar_load(tops_a0)
+
+W = fit_a0$W
+beta = fit_a0$beta
+Xval = data_val_filtered$ex
+
+genes = intersect(rownames(W),rownames(Xval))
+W = W[genes,]
+Xval = Xval[genes,]
+
+Z = t(Xval)%*%W
+lp = Z%*%beta
+Z_bin = apply(Z,2,function(x)x>median(x))
+dat = as.data.frame(Z_bin)
+dat$lp=as.numeric(lp)
+dat$lp_bin = as.numeric(lp>median(lp))
+dat$y = data_val_filtered$sampInfo$time
+dat$delta = data_val_filtered$sampInfo$event
+dat$dataset = data_val_filtered$sampInfo$dataset
+# cvwrapr::getCindex(Surv(dat$y,dat$delta))
+fitph=coxme(Surv(y,delta)~lp+(1|dataset),data=dat)
+print(summary(fitph))
+
+
+fitsurv1 = survfit(Surv(y,delta)~lp_bin,data=dat)
+names(fitsurv1$strata) = c("high","low")
+p1 = ggsurvplot(fitsurv1,pval=TRUE,risk.table = TRUE)+
+        labs(title="Linear predictor")
+
+fitsurv2 = survfit(Surv(y,delta)~V3,data=dat)
+names(fitsurv2$strata) = c("high","low")
+p2 = ggsurvplot(fitsurv2,pval=TRUE,risk.table = TRUE)+
+        labs(title="Factor 3")
+
+fitsurv3 = survfit(Surv(y,delta)~V4,data=dat)
+names(fitsurv3$strata) = c("high","low")
+p3 = ggsurvplot(fitsurv3,pval=TRUE,risk.table = TRUE)+
+        labs(title="Factor 4")
+
+ggarrange(p1$plot,p2$plot,p3$plot,ncol=3)
+
+clus = ConsensusClusterPlus(t(Z),maxK = 6,clusterAlg = "km", distance = "euclidean")
+dat$class = clus[[3]]$consensusClass
+
+fitsurv4 = survfit(Surv(y,delta)~class,data=dat)
+
+p4 = ggsurvplot(fitsurv4,pval=TRUE,risk.table = TRUE)+
+        labs(title="Clusters")
+p4
+
+
+```
+
+```{r}
+tar_load(fit_std)
+tar_load(tops_std)
+
+W = fit_std[[8]]$fit@W
+ph = coxph(Surv())
+beta = fit_std$beta
+Xval = data_val_filtered$ex
+
+genes = intersect(rownames(W),rownames(Xval))
+W = W[genes,]
+Xval = Xval[genes,]
+
+Z = t(Xval)%*%W
+lp = Z%*%beta
+Z_bin = apply(Z,2,function(x)x>median(x))
+dat = as.data.frame(Z_bin)
+dat$lp=as.numeric(lp)
+dat$lp_bin = as.numeric(lp>median(lp))
+dat$y = data_val_filtered$sampInfo$time
+dat$delta = data_val_filtered$sampInfo$event
+dat$dataset = data_val_filtered$sampInfo$dataset
+# cvwrapr::getCindex(Surv(dat$y,dat$delta))
+fitph=coxme(Surv(y,delta)~lp+(1|dataset),data=dat)
+print(summary(fitph))
+
+
+fitsurv1 = survfit(Surv(y,delta)~lp_bin,data=dat)
+names(fitsurv1$strata) = c("high","low")
+p1 = ggsurvplot(fitsurv1,pval=TRUE,risk.table = TRUE)+
+        labs(title="Linear predictor")
+
+fitsurv2 = survfit(Surv(y,delta)~V8,data=dat)
+names(fitsurv2$strata) = c("high","low")
+p2 = ggsurvplot(fitsurv2,pval=TRUE,risk.table = TRUE)+
+        labs(title="Factor 3")
+
+fitsurv3 = survfit(Surv(y,delta)~V4,data=dat)
+names(fitsurv3$strata) = c("high","low")
+p3 = ggsurvplot(fitsurv3,pval=TRUE,risk.table = TRUE)+
+        labs(title="Factor 4")
+
+ggarrange(p1$plot,p2$plot,p3$plot,ncol=3)
+
+clus = ConsensusClusterPlus(t(Z),maxK = 6,clusterAlg = "km", distance = "euclidean")
+dat$class = clus[[3]]$consensusClass
+
+fitsurv4 = survfit(Surv(y,delta)~class,data=dat)
+
+p4 = ggsurvplot(fitsurv4,pval=TRUE,risk.table = TRUE)+
+        labs(title="Clusters")
+p4
+
+
+```

@@ -74,7 +74,7 @@ purrr::walk(list.files("R", full.names = TRUE, pattern = "[.]R$"), source)
 
 VAL_DATASETS       = c("Dijk","Linehan","Moffitt_GEO_array",
                        "PACA_AU_array","PACA_AU_seq","Puleo_array")
-METHOD_SELECT_INIT = "loss" ### method for selecting best initialization surv=PL, nmf=recon
+METHOD_SELECT_INIT = "surv" ### method for selecting best initialization surv=PL, nmf=recon
 ALPHA         = seq(0, 1, by = .05)
 
 # ---- Training parameters ----
@@ -362,6 +362,7 @@ list(
   
   #################### competing methods ###############
   
+  ##### alpha = 0 #####
   tar_target(
     fit_a0,
     {
@@ -385,6 +386,7 @@ list(
     get_top_genes(fit_a0$W,NTOP)
   ),
   
+  # table of top gene overlap
   tar_target(
     gene_overlap_a0,
     {
@@ -396,7 +398,7 @@ list(
   ),
   
   
-  # standard NMF package in R
+  ##### standard NMF package in R #####
   tar_target(
     fit_std,
     nmf(data_filtered$ex,K_VALS,nrun=NINIT,method="lee",.options=paste0("p",NINIT)),
@@ -411,6 +413,12 @@ list(
     get_top_genes(fit_std$fit[[best_params$k]]@fit@W,NTOP)
   ),
   
+  # tar_target(
+  #   fit_std_sup_k8,
+  #   
+  # ),
+  
+  # table of top gene overlap
   tar_target(
     gene_overlap_std,
     {
