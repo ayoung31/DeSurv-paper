@@ -117,12 +117,12 @@ METHOD_TRANS_TRAIN = "rank"
 NGENE              = 5000#c(1000,5000)
 TOL                = 1e-4
 MAXIT              = 6000
-K_VALS             = 5#2:12#2:16   #= c(2,3,4,5)
+K_VALS             = 3#2:12#2:16   #= c(2,3,4,5)
 LAMBDA_VALS        = .1#c(1e-6,1e-5,1e-4,1e-3,1e-2,.1,1,10)#,seq(.2,.9,by=.1)   #10^seq(-3,3)#10^seq(-4,4)
 ETA_VALS           = .6#seq(0,1,by=.2)#c(0,.01,.1,.5,.9)#c(0,.01)#c(.01,.1,.5,.9)#seq(.1,.9,by=.1)
 LAMBDAW_VALS       = 0#10^seq(-3,3)#10^seq(-4,4)
 LAMBDAH_VALS       = 0#10^seq(-3,3)#10^seq(-4,4)
-NTOP               = 50#c(25,50,75)
+NTOP               = c(25,50,75)
 NFOLD              = 5
 PKG_VERSION        = utils::packageDescription("coxNMF", fields = "RemoteRef")
 GIT_BRANCH         = gert::git_branch()
@@ -137,10 +137,14 @@ list(
   ################# Training ###################
   
   # set up parameter grid
-  tar_target(param_grid,
-             create_param_grid_cv(k=K_VALS,lambda=LAMBDA_VALS,eta=ETA_VALS,
-                                  lambdaW=LAMBDAW_VALS,lambdaH=LAMBDAH_VALS,
-                                  nfold=NFOLD)
+  tar_target(
+    param_list,
+    {
+      p = create_param_grid_cv(k=K_VALS,lambda=LAMBDA_VALS,eta=ETA_VALS,
+                           lambdaW=LAMBDAW_VALS,lambdaH=LAMBDAH_VALS,
+                           nfold=NFOLD)
+    }
+             
   ),
   
   # Raw data files for training datasets
@@ -224,6 +228,7 @@ list(
       cv_runs,
       {
         print("running cv...")
+        param_grid = param_list
         path_fits = create_filepath_warmstart_runs_CV(params=param_grid,
                                                       ngene=ngene, tol=TOL, 
                                                       maxit=MAXIT, nfold=NFOLD,
@@ -244,7 +249,7 @@ list(
                           path_fits = path_fits)
         
       },
-      pattern = map(param_grid),
+      pattern = map(param_list),
       iteration = "list",
       format    = "file",
       resources = tar_resources(
@@ -256,21 +261,15 @@ list(
     tar_target(
       cv_metrics_list,
       {
+        browser()
         bundle = readRDS(cv_runs)
-        path_mets = create_filepath_CV_metrics(params = param_grid, ngene=ngene, 
-                                               tol=TOL, maxit=MAXIT, nfold=NFOLD, 
-                                               pkg_version=PKG_VERSION, 
-                                               git_branch=GIT_BRANCH, 
-                                               train_prefix=TRAIN_PREFIX, 
-                                               method_trans_train=METHOD_TRANS_TRAIN)
-        
-        compute_metrics_bundle(data_folds,bundle,param_grid$fold)
+        compute_metrics_bundle(data_folds,bundle,param_list$fold)
         
       },
-      pattern=map(cv_runs,param_grid),
-      resources = tar_resources(
-        crew = tar_resources_crew(controller = "low_mem")
-      )
+      pattern=map(cv_runs,param_list),
+      # resources = tar_resources(
+      #   crew = tar_resources_crew(controller = "low_mem")
+      # )
     ),
     
     # create dataframes of training and testing cv metrics
@@ -308,10 +307,11 @@ list(
     tar_target(
       consensus,
       {
+        # browser()
         mats = collect_W_H(best_params=best_params,data_folds=data_folds,
                            ngene=ngene,tol=TOL,maxit=MAXIT,nfold=NFOLD,
                            pkg_version=PKG_VERSION,git_branch=GIT_BRANCH,
-                           train_prefix=TRAIN_PREFIX,
+                           train_prefix=TRAIN_PREFIX,ninit=NINIT,
                            method_trans_train=METHOD_TRANS_TRAIN)
         Ws = mats$Ws
         Hs = mats$Hs

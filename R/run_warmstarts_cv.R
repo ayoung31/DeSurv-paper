@@ -14,19 +14,19 @@ run_warmstarts_cv <- function(
   f                  = params$fold
 
   dir.create(dirname(path_fits), recursive = TRUE, showWarnings = FALSE)
-  if(file.exists(path_fits)){
-    bundle_old = readRDS(path_fits)
-    exists = unlist(lapply(bundle_old,function(x) names(x$fits)==as.character(alpha)))
-    if(all(exists)){
-      if(length(bundle_old)==ninit){
-        return(path_fits)
-      }else{
-        seeds = setdiff(1:ninit,1:length(bundle_old))
-        flag_exist = TRUE
-      }
-    }
-    
-  }
+  # if(file.exists(path_fits)){
+  #   bundle_old = readRDS(path_fits)
+  #   exists = unlist(lapply(bundle_old,function(x) names(x$fits)==as.character(alpha)))
+  #   if(all(exists)){
+  #     if(length(bundle_old)==ninit){
+  #       return(path_fits)
+  #     }else{
+  #       seeds = setdiff(1:ninit,1:length(bundle_old))
+  #       flag_exist = TRUE
+  #     }
+  #   }
+  #   
+  # }
   
   # cl <- parallel::makeCluster(NINIT,setup_strategy="sequential")
   # registerDoParallel(cl)
