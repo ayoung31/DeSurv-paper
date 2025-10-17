@@ -26,6 +26,8 @@ NMF_*/
 results/
 reports/
 *.rds
+*.gct
+*.txt
 
 # ---- logs ----
 logs/
