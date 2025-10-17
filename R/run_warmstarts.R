@@ -1,6 +1,7 @@
 run_warmstarts <- function(
     X, y, delta,
     params,
+    ninit,alpha,tol,maxit,
     verbose = TRUE,
     path_fits
 ){
@@ -8,19 +9,19 @@ run_warmstarts <- function(
   lambda             = params$lambda
   eta                = params$eta
   lambdaW            = params$lambdaW
-  lambdaH            = 0
-  seeds              = 1:NINIT
+  lambdaH            = params$lambdaH
+  seeds              = 1:ninit
   flag_exist         = FALSE
   
   dir.create(dirname(path_fits), recursive = TRUE, showWarnings = FALSE)
   if(file.exists(path_fits)){
     bundle_old = readRDS(path_fits)
-    exists = unlist(lapply(bundle_old,function(x) names(x$fits)==as.character(ALPHA)))
+    exists = unlist(lapply(bundle_old,function(x) names(x$fits)==as.character(alpha)))
     if(all(exists)){
-      if(length(bundle_old)==NINIT){
+      if(length(bundle_old)==ninit){
         return(path_fits)
       }else{
-        seeds = setdiff(1:NINIT,1:length(bundle_old))
+        seeds = setdiff(1:ninit,1:length(bundle_old))
         flag_exist = TRUE
       }
     }
@@ -29,35 +30,35 @@ run_warmstarts <- function(
   
   # cl <- parallel::makeCluster(NINIT,setup_strategy="sequential")
   # registerDoParallel(cl)
-  doMC::registerDoMC(cores = NINIT) 
+  doMC::registerDoMC(cores = ninit) 
   
   bundle <- foreach::foreach(
     i = seeds,
     .combine  = 'c',
     .inorder  = FALSE,
-    .export   = c("run_coxNMF", "ALPHA", "TOL", "MAXIT"),
+    .export   = c("run_coxNMF", "alpha", "tol", "maxit"),
     .errorhandling = "remove",
     .packages = c("coxNMF","survival")  # add packages run_coxNMF needs, e.g. "Matrix", "survival"
   ) %dopar% {
     fit_prev = NULL
     fits = list()
-    for (a in ALPHA) {
+    for (a in alpha) {
       print(sprintf("seed %d, alpha %.2f",i,a))
       if (is.null(fit_prev)) {
         fit <- run_coxNMF(
           X=X, y=y, delta=delta, k=k,
           alpha=a, lambda=lambda, eta=eta,
           lambdaW=lambdaW, lambdaH=lambdaH,
-          seed=i, tol=TOL, maxit=MAXIT, verbose=verbose,
-          ninit=1, imaxit=MAXIT
+          seed=i, tol=tol, maxit=maxit, verbose=verbose,
+          ninit=1, imaxit=maxit
         )
       } else {
         fit <- run_coxNMF(
           X=X, y=y, delta=delta, k=k,
           alpha=a, lambda=lambda, eta=eta,
           lambdaW=lambdaW, lambdaH=lambdaH,
-          tol=TOL, maxit=MAXIT, verbose=verbose,
-          ninit=1, imaxit=MAXIT,
+          tol=tol, maxit=maxit, verbose=verbose,
+          ninit=1, imaxit=maxit,
           W0=fit_prev$W, H0=fit_prev$H, beta0=fit_prev$beta
         )
       }
@@ -70,7 +71,7 @@ run_warmstarts <- function(
     # assemble / merge bundle (unchanged, plus best_seed in meta)
     meta <- list(
       k=k, lambda=lambda, eta=eta, lambdaW=lambdaW, lambdaH=lambdaH,
-      alpha_vec = ALPHA, maxit=MAXIT, tol=TOL,
+      alpha_vec = alpha, maxit=maxit, tol=tol,
       ngene = nrow(X), nsamples = ncol(X),
       seed = i
     )

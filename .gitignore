@@ -14,8 +14,14 @@ temp_files/
 logs/
 store_PKG_VERSION=project_to_zero_GIT_BRANCH=no_cv/
 store_PKG_VERSION=project_to_zero_std_beta_GIT_BRANCH=no_cv/
+store_PKG_VERSION=project_to_zero_std_beta_GIT_BRANCH=no_cv_interim/
+store_PKG_VERSION=project_to_zero_std_beta_GIT_BRANCH=final_paper/
+store_PKG_VERSION=project_to_zero_GIT_BRANCH=full_models/
+store_PKG_VERSION=lambda_scaling_GIT_BRANCH=fold_filtering/
 streamlined/
 temp_analyses/
+temp_files/
+NMF_*/
 # ---- results / generated data ----
 results/
 reports/

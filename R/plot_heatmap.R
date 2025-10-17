@@ -3,7 +3,7 @@ plot_heatmap <- function(Xtemp, tops, data, clusCol, clusRow = NULL, cluster_nam
   
   # Set up colors
   nclass <- length(unique(clusCol$consensusClass))
-  colors <- determine_colors(factors, nclass)
+  colors <- determine_colors(unique(clusRow$consensusClass), nclass)
   row.colors <- colors$row.colors
   col.colors <- colors$col.colors
   
@@ -23,8 +23,8 @@ plot_heatmap <- function(Xtemp, tops, data, clusCol, clusRow = NULL, cluster_nam
   }
   
   gene_colors <- data.frame(
-    geneSymbol = gene_vec,
-    Color = rep(row.colors, each = ntop),
+    geneSymbol = names(clusRow$consensusClass),
+    Color = row.colors[clusRow$consensusClass],
     stringsAsFactors = FALSE
   )
   

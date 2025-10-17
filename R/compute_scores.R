@@ -25,9 +25,11 @@ compute_scores = function(tops,W,X,y,delta,score_bin=FALSE){
   
   XtW = as.matrix(Matrix::crossprod(as.matrix(Xc), W_eff))
   
-  score_data <- data.frame(XtW,
+  score_data <- data.frame(scale(XtW),
                            time = y,
                            event = delta,
                            check.names = FALSE)
   return(score_data)
 }
+
+

@@ -1,6 +1,8 @@
 ---
 title: Survival driven deconvolution (deSurv) reveals prognostic and interpretable tumor gene signatures
-
+params:
+  ngene:
+  ntop:
 # Use letters for affiliations, numbers to show equal authorship (if applicable) and to indicate the corresponding author
 author:
   - name: Amber Young
@@ -61,6 +63,8 @@ output: rticles::pnas_article
 
 header-includes:
   - \providecommand{\pandocbounded}[1]{#1}
+  - \usepackage{booktabs}
+  - \usepackage{float}
   - \usepackage{graphicx}
   - \usepackage{amsmath}
   - \usepackage{amsfonts}
@@ -92,6 +96,13 @@ knitr::opts_chunk$set(
 
 ```
 
+# Materials and methods {.unnumbered}
+
+```{r child="paper/03_methods.Rmd"}
+
+```
+
+
 # Results {.unnumbered}
 
 ```{r child="paper/04_results.Rmd"}
@@ -100,11 +111,6 @@ knitr::opts_chunk$set(
 
 # Discussion {.unnumbered}
 
-# Materials and methods {.unnumbered}
-
-```{r child="paper/03_methods.Rmd"}
-
-```
 
 
 <!-- Leave these lines as they are at the end of your .Rmd file to ensure placement of methods & acknowledgements sections before the references-->

@@ -1,5 +1,5 @@
 # Compute metrics from a bundle file (no refitting).
-compute_metrics <- function(fit, X, y, delta, alpha, fold, test=FALSE) {
+compute_metrics <- function(fit, X, y, delta, test=FALSE) {
   W <- fit$W
   beta <- fit$beta
   XtW = t(X) %*% W
@@ -41,8 +41,6 @@ compute_metrics <- function(fit, X, y, delta, alpha, fold, test=FALSE) {
   }
 
   met <- data.frame(
-    alpha = alpha,
-    fold= fold,
     sd_eta = sd_eta,
     c = cix,
     c_refit = refit$concordance[6],

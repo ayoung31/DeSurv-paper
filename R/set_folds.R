@@ -50,7 +50,7 @@ make_stratified_folds <- function(time, status, K = 5, seed = 1) {
 }
 
 
-set_folds = function(data, nfold = 5, seed = 123){
+set_folds = function(data, nfold = 5, seed = 123, ngene=1000, method_trans_train="rank"){
   set.seed(seed)
   
   data$ex = data$ex[,data$samp_keeps]
@@ -70,8 +70,8 @@ set_folds = function(data, nfold = 5, seed = 123){
                            samp_keeps = 1:sum(folds!=i))
     
     #fiter genes
-    data_train[[i]] = preprocess_data(data_train[[i]], ngene=NGENE, 
-                                      method_trans_train=METHOD_TRANS_TRAIN)
+    data_train[[i]] = preprocess_data(data_train[[i]], ngene=ngene, 
+                                      method_trans_train=method_trans_train)
     # #normalize
     # if(METHOD_TRANS_TRAIN=="quant"){
       # rns = rownames(data_train[[i]]$ex)
@@ -92,12 +92,12 @@ set_folds = function(data, nfold = 5, seed = 123){
                           dataname = data$dataname)
     
     data_test[[i]]$ex=data_test[[i]]$ex[rownames(data_train[[i]]$ex),]
-    if(METHOD_TRANS_TRAIN=='quant'){
+    if(method_trans_train=='quant'){
       # rns = rownames(data_test[[i]]$ex)
       # data_test[[i]]$ex = preprocessCore::normalize.quantiles.use.target(data_test[[i]]$ex,target = targets)
       # rownames(data_test[[i]]$ex) = rns
       stop("need to return quantiles of training data from preprocess_data function")
-    }else if(METHOD_TRANS_TRAIN=='rank'){
+    }else if(method_trans_train=='rank'){
       data_test[[i]]$ex=apply(data_test[[i]]$ex,2,rank,ties.method="average")
     }
     # 

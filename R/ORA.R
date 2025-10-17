@@ -72,14 +72,9 @@ ORA <- function(tops, gene_lists=NULL, plot = TRUE, p.adj=.05, msigdbr=FALSE) {
   }
   
   
-  # Store into results
-  results=list()
-  results[[table_name]] <- label_table
-  results[[list_name]] = ora_res_list
   
   if (plot) {
-    ORA_plots(results,list_name,msigdbr,p.adj)
+    ORA_plots(ora_res_list,msigdbr,p.adj)
   }
-  
-  return(results)
+  return(ora_res_list)
 }

@@ -18,7 +18,7 @@
 #' @param distance Distance metric
 #' @return data with clustering assignments added
 run_clustering <- function(tops, data, gene_lists, color.lists = NULL, type = "bas/clas",
-                           save = FALSE, plot = TRUE, facs = NULL,
+                           save = FALSE, plot = TRUE, facs = NULL, dir = NULL,
                            maxKcol = NULL, maxKrow = NULL,
                            reps = 1000, pFeature = 0.8, pItem = 1, seed = 9999,
                            clusterAlg = "km", distance = "euclidean",weight=TRUE,replace=TRUE) {
@@ -32,7 +32,8 @@ run_clustering <- function(tops, data, gene_lists, color.lists = NULL, type = "b
   if (type == "each") {
     for (i in seq_len(ncol(tops))) {
       data <- run_clustering_internal(tops, data, gene_lists, color.lists, type = i,
-                                      facs = facs, maxKcol = maxKcol, maxKrow = maxKrow,
+                                      facs = facs, dir = dir,
+                                      maxKcol = maxKcol, maxKrow = maxKrow,
                                       reps = reps, pFeature = pFeature, pItem = pItem,
                                       seed = seed, clusterAlg = clusterAlg, distance = distance,
                                       save = save, plot = plot, weight=weight, replace=replace)
@@ -40,19 +41,22 @@ run_clustering <- function(tops, data, gene_lists, color.lists = NULL, type = "b
   }else if(type == "by tissue type"){
     # id tumor factors
     data <- run_clustering_internal(tops, data, gene_lists, color.lists, type = "tumor",
-                                    facs = facs, maxKcol = maxKcol, maxKrow = maxKrow,
+                                    facs = facs, dir = dir,
+                                    maxKcol = maxKcol, maxKrow = maxKrow,
                                     reps = reps, pFeature = pFeature, pItem = pItem,
                                     seed = seed, clusterAlg = clusterAlg, distance = distance,
                                     save = save, plot = plot, weight=weight, replace=replace)
     # id stromal factors
     data <- run_clustering_internal(tops, data, gene_lists, color.lists, type = "stroma",
-                                    facs = facs, maxKcol = maxKcol, maxKrow = maxKrow,
+                                    facs = facs, dir = dir,
+                                    maxKcol = maxKcol, maxKrow = maxKrow,
                                     reps = reps, pFeature = pFeature, pItem = pItem,
                                     seed = seed, clusterAlg = clusterAlg, distance = distance,
                                     save = save, plot = plot, weight=weight, replace=replace)
   }else{
     data <- run_clustering_internal(tops, data, gene_lists, color.lists, type = type,
-                                    facs = facs, maxKcol = maxKcol, maxKrow = maxKrow,
+                                    facs = facs, dir = dir,
+                                    maxKcol = maxKcol, maxKrow = maxKrow,
                                     reps = reps, pFeature = pFeature, pItem = pItem,
                                     seed = seed, clusterAlg = clusterAlg, distance = distance,
                                     save = save, plot = plot, weight=weight, replace=replace)

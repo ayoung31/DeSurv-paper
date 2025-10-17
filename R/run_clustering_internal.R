@@ -1,6 +1,7 @@
 
 run_clustering_internal <- function(tops, data, gene_lists, color.lists = NULL, type = "bas/clas",
                                     save = TRUE, plot = TRUE, facs = NULL,
+                                    dir = NULL,
                                     maxKcol = NULL, maxKrow = NULL,
                                     reps = 1000, pFeature = 0.8, pItem = 1, seed = 9999,
                                     clusterAlg = "km", distance = "euclidean", 
@@ -29,7 +30,8 @@ run_clustering_internal <- function(tops, data, gene_lists, color.lists = NULL, 
     clusCol <- run_consensus_clustering(
       mat = Xtemp, maxK = maxKcol, reps = reps, pItem = pItem,
       pFeature = pFeature, seed = seed, clusterAlg = clusterAlg,
-      distance = distance, cluster_by = "col", weightsItem = weightsItem
+      distance = distance, cluster_by = "col", weightsItem = weightsItem,
+      dir = dir
     )
     
     # --- Optional gene clustering ---
@@ -38,7 +40,8 @@ run_clustering_internal <- function(tops, data, gene_lists, color.lists = NULL, 
       clusRow <- run_consensus_clustering(
         mat = Xtemp, maxK = maxKrow + 1, reps = reps, pItem = pItem,
         pFeature = pFeature, seed = seed, clusterAlg = clusterAlg,
-        distance = distance, cluster_by = "row", weightsItem=weightsItem
+        distance = distance, cluster_by = "row", weightsItem=weightsItem,
+        dir = dir
       )
     }
     

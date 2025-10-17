@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.9.24)  24 SEP 2025 10:00
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.10.3)  10 OCT 2025 14:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -37,7 +37,7 @@ Package: inputenc 2024/02/08 v1.3d Input encoding file
 \inpenc@prehook=\toks17
 \inpenc@posthook=\toks18
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/generic/babel/babel.sty
-Package: babel 2025/08/03 v25.12 The multilingual framework for LuaLaTeX, pdfLaTeX and XeLaTeX
+Package: babel 2025/10/01 v25.13 The multilingual framework for LuaLaTeX, pdfLaTeX and XeLaTeX
 \babel@savecnt=\count283
 LaTeX Encoding Info:    Redeclaring text command \ij (encoding OT1) on input line 2045.
 LaTeX Encoding Info:    Redeclaring text command \IJ (encoding OT1) on input line 2047.
@@ -239,7 +239,7 @@ File: color.cfg 2016/01/02 v1.6 sample color configuration
 )
 Package xcolor Info: Driver file: pdftex.def on input line 274.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/graphics-def/pdftex.def
-File: pdftex.def 2024/04/13 v1.2c Graphics/color driver for pdftex
+File: pdftex.def 2025/09/29 v1.2d Graphics/color driver for pdftex
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/graphics/mathcolor.ltx)
 Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1349.
 Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1353.
@@ -451,7 +451,7 @@ Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
 )) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/l3packages/xparse/xparse.sty
 Package: xparse 2024-08-16 L3 Experimental document command parser
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/etoolbox/etoolbox.sty
-Package: etoolbox 2025/02/11 v2.5l e-TeX tools for LaTeX (JAW)
+Package: etoolbox 2025/10/02 v2.5m e-TeX tools for LaTeX (JAW)
 \etb@tempcnta=\count323
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/zref/zref-abspage.sty
 Package: zref-abspage 2025-06-08 v2.36 Module abspage for zref (HO)
@@ -935,31 +935,31 @@ Package: pnasresearcharticle 2018/05/06 v1.3 PNAS two column research article st
 ) (./paper.aux)
 \openout1 = `paper.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
-Package hyperref Info: Link coloring ON on input line 95.
+Package hyperref Info: Link coloring ON on input line 97.
 (./paper.out) (./paper.out)
 \@outlinefile=\write4
 \openout4 = `paper.out'.
@@ -1011,15 +1011,15 @@ Package newfloat Info: `sidecap' package detected.
 
 Package sidecap Warning: Package `ragged2e' not found -- expect bad formatting.
 
-LaTeX Info: Redefining \microtypecontext on input line 95.
-Package microtype Info: Applying patch `item' on input line 95.
-Package microtype Info: Applying patch `toc' on input line 95.
+LaTeX Info: Redefining \microtypecontext on input line 97.
+Package microtype Info: Applying patch `item' on input line 97.
+Package microtype Info: Applying patch `toc' on input line 97.
 
-Package microtype Warning: Unable to apply patch `eqnum' on input line 95.
+Package microtype Warning: Unable to apply patch `eqnum' on input line 97.
 
-Package microtype Info: Applying patch `footnote' on input line 95.
-Package microtype Info: Applying patch `verbatim' on input line 95.
-LaTeX Info: Redefining \microtypesetup on input line 95.
+Package microtype Info: Applying patch `footnote' on input line 97.
+Package microtype Info: Applying patch `verbatim' on input line 97.
+LaTeX Info: Redefining \microtypesetup on input line 97.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
@@ -1033,86 +1033,86 @@ Package microtype Info: No adjustment of character kerning.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-cmr.cfg
 File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman (RS)
 )
-LaTeX Font Info:    Trying to load font information for T1+lmss on input line 103.
+LaTeX Font Info:    Trying to load font information for T1+lmss on input line 105.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/t1lmss.fd
 File: t1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Font shape `T1/lmss/b/n' in size <9> not available
-(Font)              Font shape `T1/lmss/bx/n' tried instead on input line 103.
+(Font)              Font shape `T1/lmss/bx/n' tried instead on input line 105.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `lmss' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `T1/lmss/b/n' in size <22> not available
-(Font)              Font shape `T1/lmss/bx/n' tried instead on input line 103.
-LaTeX Font Info:    Trying to load font information for T1+phv on input line 103.
+(Font)              Font shape `T1/lmss/bx/n' tried instead on input line 105.
+LaTeX Font Info:    Trying to load font information for T1+phv on input line 105.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/psnfss/t1phv.fd
 File: t1phv.fd 2020/03/25 scalable font definitions for T1/phv.
 )
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 8.54997pt on input line 103.
+(Font)              scaled to size 8.54997pt on input line 105.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `phv' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 8.54997pt on input line 103.
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 103.
+(Font)              scaled to size 8.54997pt on input line 105.
+LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 105.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 103.
+LaTeX Font Info:    Trying to load font information for OML+lmm on input line 105.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 103.
+LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 105.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 103.
+LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 105.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 103.
+(Font)              <9> on input line 105.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 103.
+(Font)              <6> on input line 105.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 103.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 103.
+(Font)              <5> on input line 105.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 105.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 103.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 105.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 5.69998pt on input line 103.
+(Font)              scaled to size 5.69998pt on input line 105.
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 6.64998pt on input line 103.
+(Font)              scaled to size 6.64998pt on input line 105.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 103.
+(Font)              <7> on input line 105.
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 4.74998pt on input line 103.
+(Font)              scaled to size 4.74998pt on input line 105.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 7.59998pt on input line 105.
-LaTeX Font Info:    Trying to load font information for TS1+phv on input line 105.
+(Font)              scaled to size 7.59998pt on input line 107.
+LaTeX Font Info:    Trying to load font information for TS1+phv on input line 107.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/psnfss/ts1phv.fd
 File: ts1phv.fd 2020/03/25 scalable font definitions for TS1/phv.
 )
 LaTeX Font Info:    Font shape `TS1/phv/b/n' will be
-(Font)              scaled to size 7.59998pt on input line 105.
+(Font)              scaled to size 7.59998pt on input line 107.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `phv' (encoding: TS1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 
-Underfull \hbox (badness 1275) in paragraph at lines 135--153
+Underfull \hbox (badness 1275) in paragraph at lines 137--155
 []\T1/lmr/m/n/9 (+20) High-throughput can-cer tran-scrip-tomic datasets pose
  []
 
@@ -1121,22 +1121,26 @@ Underfull \vbox (badness 1910) has occurred while \output is active []
 
 
 
-Package mdframed Info: mdframed works in twoside mode on input line 153.
+Package mdframed Info: mdframed works in twoside mode on input line 155.
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 9.49997pt on input line 153.
+(Font)              scaled to size 9.49997pt on input line 155.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 9.49997pt on input line 153.
+(Font)              scaled to size 9.49997pt on input line 155.
 Package mdframed Info: mdframed inside float 
- mdframed uses option nobreak mdframed on input line 153.
+ mdframed uses option nobreak mdframed on input line 155.
 Package mdframed Info: mdframed inside a box 
- mdframed uses option nobreak mdframed on input line 153.
+ mdframed uses option nobreak mdframed on input line 155.
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 5.69998pt on input line 153.
+(Font)              scaled to size 5.69998pt on input line 155.
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 171.
+
 
 
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 6.64998pt on input line 184.
-LaTeX Font Info:    Trying to load font information for T1+bch on input line 184.
+(Font)              scaled to size 6.64998pt on input line 178.
+LaTeX Font Info:    Trying to load font information for T1+bch on input line 178.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/psnfss/t1bch.fd
 File: t1bch.fd 2004/10/18 font definitions for T1/bch.
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-bch.cfg
@@ -1144,74 +1148,126 @@ File: mt-bch.cfg 2007/03/03 v1.5 microtype config. file: Bitstream Charter (RS)
 ) [1{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}
 
 
-]
-<../figures/model_schematic_with_validation.pdf, id=102, 1084.05pt x 542.025pt>
-File: ../figures/model_schematic_with_validation.pdf Graphic file (type pdf)
-<use ../figures/model_schematic_with_validation.pdf>
-Package pdftex.def Info: ../figures/model_schematic_with_validation.pdf  used on input line 187.
-(pdftex.def)             Requested size: 505.69908pt x 289.09142pt.
-<paper_files/figure-latex/fig-converge-1.pdf, id=103, 433.62pt x 289.08pt>
-File: paper_files/figure-latex/fig-converge-1.pdf Graphic file (type pdf)
-<use paper_files/figure-latex/fig-converge-1.pdf>
-Package pdftex.def Info: paper_files/figure-latex/fig-converge-1.pdf  used on input line 211.
-(pdftex.def)             Requested size: 505.71893pt x 289.09251pt.
-
-
-<paper_files/figure-latex/fig-cv-1.pdf, id=104, 433.62pt x 289.08pt>
-File: paper_files/figure-latex/fig-cv-1.pdf Graphic file (type pdf)
-<use paper_files/figure-latex/fig-cv-1.pdf>
-Package pdftex.def Info: paper_files/figure-latex/fig-cv-1.pdf  used on input line 232.
-(pdftex.def)             Requested size: 505.71893pt x 289.09251pt.
-<paper_files/figure-latex/fig-external-1.pdf, id=105, 433.62pt x 289.08pt>
-File: paper_files/figure-latex/fig-external-1.pdf Graphic file (type pdf)
-<use paper_files/figure-latex/fig-external-1.pdf>
-Package pdftex.def Info: paper_files/figure-latex/fig-external-1.pdf  used on input line 273.
-(pdftex.def)             Requested size: 505.71893pt x 289.09251pt.
-
-
-LaTeX Font Info:    Font shape `T1/phv/m/it' in size <7> not available
-(Font)              Font shape `T1/phv/m/sl' tried instead on input line 291.
-LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
-(Font)              scaled to size 6.64998pt on input line 291.
-[2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc} <../figures/model_schematic_with_validation.pdf>]
-LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 7.59998pt on input line 296.
-LaTeX Font Info:    Font shape `T1/phv/b/it' in size <8> not available
-(Font)              Font shape `T1/phv/b/sl' tried instead on input line 296.
-LaTeX Font Info:    Font shape `T1/phv/b/sl' will be
-(Font)              scaled to size 7.59998pt on input line 296.
-LaTeX Font Info:    Trying to load font information for U+bbm on input line 317.
-(/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/bbm-macros/ubbm.fd
-File: ubbm.fd 1999/03/15 V 1.2 Font definition for bbm font - TH
-)
-
-Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 328.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 357.
-
-Package natbib Warning: Citation `simon2011regularization' on page 3 undefined on input line 361.
-
-
-
-[3{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc} <./paper_files/figure-latex/fig-converge-1.pdf>]
-LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 378.
+{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}]
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 230.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
+Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 247.
+
+Overfull \hbox (2.43797pt too wide) in paragraph at lines 254--255
+[] $\OML/lmm/m/it/9 W[] \OT1/lmr/m/n/9 (-20) = [][] \OMS/lmsy/m/n/9 L\OT1/lmr/m/n/9 (-20) (\OML/lmm/m/it/9 W[]; H[]; ^^L[]\OT1/lmr/m/n/9 (-20) )$ 
+ []
+
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 7.59998pt on input line 267.
+LaTeX Font Info:    Font shape `T1/phv/b/it' in size <8> not available
+(Font)              Font shape `T1/phv/b/sl' tried instead on input line 267.
+LaTeX Font Info:    Font shape `T1/phv/b/sl' will be
+(Font)              scaled to size 7.59998pt on input line 267.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <8> on input line 267.
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 268.
+
+
+Package natbib Warning: Citation `@lee' on page 2 undefined on input line 272.
 
 
 
-[4{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc} <./paper_files/figure-latex/fig-cv-1.pdf>]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 280.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\beta' on input line 280.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 292.
+
+
+Overfull \hbox (5.73442pt too wide) detected at line 302
+[][][]\OML/lmm/m/it/9 W[] \OT1/lmr/m/n/9 = \OML/lmm/m/it/9 W[] \OMS/lmsy/m/n/9 ^^L [] []
+ []
+
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 7.12497pt on input line 322.
+LaTeX Font Info:    Calculating math sizes for size <7.5> on input line 322.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <7.5> on input line 322.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <5.24997> on input line 322.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <3.75> on input line 322.
+LaTeX Font Info:    Font shape `T1/phv/b/n' will be
+(Font)              scaled to size 7.12497pt on input line 324.
+
+Package natbib Warning: Citation `TCGA2017' on page 2 undefined on input line 326.
+
+
+Package natbib Warning: Citation `Clark2021' on page 2 undefined on input line 327.
+
+LaTeX Font Info:    Font shape `T1/phv/m/it' in size <7.5> not available
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 328.
+LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
+(Font)              scaled to size 7.12497pt on input line 328.
+
+Package natbib Warning: Citation `Dijk2015' on page 2 undefined on input line 328.
+
+
+Package natbib Warning: Citation `Moffitt2015' on page 2 undefined on input line 329.
+
+
+Package natbib Warning: Citation `Bailey2016' on page 2 undefined on input line 330.
+
+
+Package natbib Warning: Citation `Bailey2016' on page 2 undefined on input line 331.
+
+
+Package natbib Warning: Citation `Puleo2018' on page 2 undefined on input line 332.
+
+
+
+LaTeX Font Info:    Font shape `T1/phv/m/it' in size <7> not available
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 345.
+LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
+(Font)              scaled to size 6.64998pt on input line 345.
+[2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}]
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 373.
+
+
+
+<../figures/model_schematic_with_validation.pdf, id=136, 1084.05pt x 542.025pt>
+File: ../figures/model_schematic_with_validation.pdf Graphic file (type pdf)
+<use ../figures/model_schematic_with_validation.pdf>
+Package pdftex.def Info: ../figures/model_schematic_with_validation.pdf  used on input line 458.
+(pdftex.def)             Requested size: 505.69908pt x 289.09142pt.
+
+
+[3]
+<paper_files/figure-latex/fig-cv-1.pdf, id=143, 433.62pt x 397.485pt>
+File: paper_files/figure-latex/fig-cv-1.pdf Graphic file (type pdf)
+<use paper_files/figure-latex/fig-cv-1.pdf>
+Package pdftex.def Info: paper_files/figure-latex/fig-cv-1.pdf  used on input line 479.
+(pdftex.def)             Requested size: 433.63878pt x 397.49614pt.
+<paper_files/figure-latex/fig-external-1.pdf, id=144, 361.35pt x 361.35pt>
+File: paper_files/figure-latex/fig-external-1.pdf Graphic file (type pdf)
+<use paper_files/figure-latex/fig-external-1.pdf>
+Package pdftex.def Info: paper_files/figure-latex/fig-external-1.pdf  used on input line 504.
+(pdftex.def)             Requested size: 361.35463pt x 361.35463pt.
+
+
 
 Package natbib Warning: There were undefined citations.
 
 
 
-
-
-[5
-
- <./paper_files/figure-latex/fig-external-1.pdf>] 
+[4 <../figures/model_schematic_with_validation.pdf>] [5 <./paper_files/figure-latex/fig-cv-1.pdf>] [6 <./paper_files/figure-latex/fig-external-1.pdf>] 
 enddocument/afterlastpage (AED): lastpage setting LastPage.
 (./paper.aux)
  ***********
@@ -1219,21 +1275,21 @@ LaTeX2e <2025-06-01> patch level 1
 L3 programming layer <2025-09-02>
  ***********
 Package rerunfilecheck Info: File `paper.out' has not changed.
-(rerunfilecheck)             Checksum: 51055B5CE658096A5AE501B691093F3F;4713.
+(rerunfilecheck)             Checksum: DB2BB9DB66F0A0D19F07EF3126169C1C;4650.
  ) 
 Here is how much of TeX's memory you used:
- 30742 strings out of 469735
- 574468 string characters out of 5479371
- 1021194 words of memory out of 5000000
- 58190 multiletter control sequences out of 15000+600000
- 726757 words of font info for 276 fonts, out of 8000000 for 9000
+ 30840 strings out of 469686
+ 574951 string characters out of 5474527
+ 1023255 words of memory out of 5000000
+ 58276 multiletter control sequences out of 15000+600000
+ 756063 words of font info for 331 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 117i,14n,121p,1002b,1114s stack positions out of 10000i,1000n,20000p,200000b,200000s
- </nas/longleaf/home/ayoung31/.TinyTeX/texmf-var/fonts/pk/ljfour/public/bbm/bbm9.600pk></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvbo8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on paper.pdf (5 pages, 541580 bytes).
+ 117i,15n,121p,1002b,1114s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvbo8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
+Output written on paper.pdf (6 pages, 509302 bytes).
 PDF statistics:
- 321 PDF objects out of 1000 (max. 8388607)
- 227 compressed objects within 3 object streams
- 32 named destinations out of 1000 (max. 500000)
- 79553 words of extra memory for PDF output out of 89155 (max. 10000000)
+ 339 PDF objects out of 1000 (max. 8388607)
+ 241 compressed objects within 3 object streams
+ 30 named destinations out of 1000 (max. 500000)
+ 102108 words of extra memory for PDF output out of 106986 (max. 10000000)
 

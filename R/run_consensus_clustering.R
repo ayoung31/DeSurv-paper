@@ -1,16 +1,18 @@
 # Run consensus clustering on samples or genes
 run_consensus_clustering <- function(mat, maxK, reps, pItem, pFeature, seed,
                                      clusterAlg, distance, cluster_by = "col",
-                                     weightsItem = NULL) {
+                                     weightsItem = NULL, dir = NULL) {
   if (cluster_by == "row") {
     mat <- t(as.matrix(mat))
+    file = file.path(dir,"genes.pdf")
   } else {
     mat <- as.matrix(mat)
+    file = file.path(dir,"subjects.pdf")
   }
   
   dmat <- as.dist(1 - cor(mat, method = "pearson"))
   
-  pdf(file = NULL)
+  pdf(file = file)
   if(cluster_by=="row"){
     result <- ConsensusClusterPlus::ConsensusClusterPlus(
       dmat, maxK,
