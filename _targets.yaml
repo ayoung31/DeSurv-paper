@@ -1,0 +1,2 @@
+main:
+  store: store_PKG_VERSION=lambda_scaling_GIT_BRANCH=master

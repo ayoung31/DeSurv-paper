@@ -141,10 +141,10 @@ list(
     param_list,
     {
       p = create_param_grid_cv(k=K_VALS,lambda=LAMBDA_VALS,eta=ETA_VALS,
-                               lambdaW=LAMBDAW_VALS,lambdaH=LAMBDAH_VALS,
-                               nfold=NFOLD)
+                           lambdaW=LAMBDAW_VALS,lambdaH=LAMBDAH_VALS,
+                           nfold=NFOLD)
     }
-    
+             
   ),
   
   # Raw data files for training datasets
@@ -184,7 +184,7 @@ list(
     format = "file",
     pattern = map(val_datasets)
   ),
-  
+    
   #note that I map over val datasets here instead of loading them into one merged set
   tar_target(
     data_val,
@@ -201,7 +201,7 @@ list(
       load_data(val_datasets)
     },
   ),
-  
+
   
   tar_map(
     values = tibble(ngene=NGENE),
@@ -287,7 +287,7 @@ list(
     
     # select the best parameter combo based on cv metrics
     tar_target(
-      cv_metrics_summary,
+      best_params,
       {
         mets_test = cv_metrics$mets_test
         avg_init = mets_test %>% group_by(k,fold,alpha,lambda,eta,lambdaW,lambdaH) %>%
@@ -298,21 +298,8 @@ list(
                     c_sd = sqrt(sum((c_mean_f-c_mean)^2)/(NFOLD*(NFOLD-1))), 
                     pl_sd = sqrt(sum((pl_mean_f-pl_mean)^2)/(NFOLD*(NFOLD-1))))%>%
           ungroup()
-        avg_fold
-        
-      }
-    ),
-    
-    tar_target(
-      params_best,
-      cv_metrics_summary[which.max(cv_metrics_summary$c_mean),]
-    ),
-    
-    tar_target(
-      params_1se,
-      {
-        max_c = cv_metrics_summary[which.max(cv_metrics_summary$c_mean),]
-        oneSE =  cv_metrics_summary %>% filter(c_mean > max_c$c_mean - max_c$c_sd)
+        max_c = avg_fold[which.max(avg_fold$c_mean),]
+        oneSE =  avg_fold %>% filter(c_mean > max_c$c_mean - max_c$c_sd)
         oneSE_top = oneSE[order(oneSE$k,oneSE$alpha),]
         oneSE_top[1,]
       }
@@ -323,7 +310,7 @@ list(
       consensus,
       {
         # browser()
-        mats = collect_W_H(best_params = params_1se,data_folds=data_folds,
+        mats = collect_W_H(best_params=best_params,data_folds=data_folds,
                            ngene=ngene,tol=TOL,maxit=MAXIT,nfold=NFOLD,
                            pkg_version=PKG_VERSION,git_branch=GIT_BRANCH,
                            train_prefix=TRAIN_PREFIX,ninit=NINIT,
@@ -358,14 +345,14 @@ list(
                             Surv(data_filtered$sampInfo$time,
                                  data_filtered$sampInfo$event),
                             family="cox",
-                            alpha=params_1se$eta,
+                            alpha=best_params$eta,
                             lambda=LAMBDA_VALS)
-        beta_con = as.vector(coef(glmnet_fit,s=params_1se$lambda))
+        beta_con = as.vector(coef(glmnet_fit,s=best_params$lambda))
         
         run_coxNMF(
           X=X_con, y=data_filtered$sampInfo$time, delta=data_filtered$sampInfo$event, 
-          k=params_1se$k, alpha=params_1se$alpha, 
-          lambda=params_1se$lambda, eta=params_1se$eta,
+          k=best_params$k, alpha=best_params$alpha, 
+          lambda=best_params$lambda, eta=best_params$eta,
           lambdaW=0, lambdaH=0,
           tol=1e-7, maxit=6000, verbose=FALSE,
           ninit=1, imaxit=6000,
@@ -389,61 +376,41 @@ list(
     ),
     
     tar_target(
-      std_nmf_k_selection_plots,
+      std_nmf_k_selection,
       {
-        save_dir=file.path(dirname(dirname(cv_runs[[1]])),"std_nmf_k_selection")
-        dir.create(save_dir,showWarnings = FALSE)
-        path = file.path(save_dir,paste0("std_nmf_k_selection_plots.png"))
+        path <- "data/derv/std_nmf_k_selection.csv"
+        df_new <- build_std_nmf_k_selection_table(clusters_all)
+        
         if (file.exists(path)) {
           # 1. make a timestamped backup of the old file
           timestamp <- format(Sys.time(), "%Y%m%d_%H%M%S")
-          backup_path <- file.path(dirname(path),
-                                   paste0("std_nmf_k_selection_plots_", timestamp, ".png")
-          )
+          backup_path <- paste0("std_nmf_k_selection_", timestamp, ".csv")
           file.copy(from = path, to = backup_path)
+          
+          message("Existing std_nmf_k_selection.csv backed up as: ", backup_path)
+          
+          # 2. overwrite cluster_review.csv with a clean table
+          #    (i.e. you must re-curate for this new clustering)
+          write.csv(df_new, path, row.names = FALSE)
+          
+          message("New std_nmf_k_selection.csv created from current clustering. Please re-curate.")
+        } else {
+          # first time: just create it
+          write.csv(df_new, path, row.names = FALSE)
+          message("std_nmf_k_selection.csv created. Please curate and mark keep_k / global_label.")
         }
-        png(filename=path)
-        print(NMF::plot(fit_std))
-        dev.off()
+        
         path
       },
-      format="file"
-    ),
-    
-    tar_target(
-      std_nmf_k_selection_table,
-      {
-        save_dir=dirname(std_nmf_k_selection_plots)
-        path <- file.path(save_dir,
-                          paste0("std_nmf_k_selection_table.csv")
-                          )
-        if(!file.exists(std_nmf_k_selection_plots)){
-          stop("Standard NMF k selection plots not generated")
-        }
-        build_std_nmf_k_selection_table(K_VALS,path,fit_std)
-      },
-    ),
-    
-    tar_target(
-      fit_std_selected_k,
-      {
-        std_nmf_k_table = read.csv(std_nmf_k_selection_table,
-                                   stringsAsFactors = FALSE)
-        if(all(std_nmf_k_table$selected==FALSE)){
-          stop("Please edit std_nmf_k_selection.csv to select a k")
-        }
-        k_selected = std_nmf_k_table$rank[which(std_nmf_k_table$selected)]
-        print(paste0("You have selected ",k_selected," factors for standard NMF"))
-        fit_std$fit[[as.character(k_selected)]]
-      }
+      format = "file"
     ),
     
     
     tar_target(
       fit_std_beta,
       {
-        W = fit_std_selected_k@fit@W
-        H = fit_std_selected_k@fit@H
+        W = fit_std$fit[[as.character(best_params$k)]]@fit@W
+        H = fit_std$fit[[as.character(best_params$k)]]@fit@H
         X = data_filtered$ex
         genes = intersect(rownames(W),rownames(X))
         W=W[genes,]
@@ -457,8 +424,8 @@ list(
         i=1
         for(e in ETA_VALS){
           cv_fit = cv.glmnet(Z,
-                             Surv(y,d),family="cox",type.measure="C",
-                             alpha=e, lambda=LAMBDA_VALS, foldid=data_folds$folds)
+                                Surv(y,d),family="cox",type.measure="C",
+                                alpha=e, lambda=LAMBDA_VALS, foldid=data_folds$folds)
           
           gfit[[as.character(e)]] = cv_fit
           ind = which(cv_fit$lambda==cv_fit$lambda.1se)
@@ -513,7 +480,7 @@ list(
       {
         genes_train = rownames(data_filtered$ex)
         setNames(
-          lapply(data_val,preprocess_data_val,ngene=ngene,
+          lapply(data_val,preprocess_data_val,ngene=2500,
                  method_trans_train = METHOD_TRANS_TRAIN),
           val_datasets
         )
@@ -540,15 +507,15 @@ list(
       ### DeSurv
       # get the top genes for each factor
       tar_target(
-        tops_desurv,
+        tops_best,
         get_top_genes(W=fit_consensus$W,ntop=ntop)
       ),
       
       # visualize overlap of top genes with known lists
       tar_target(
-        gene_overlap_desurv,
+        gene_overlap_best,
         {
-          create_table(tops = tops_desurv$top_genes, gene_lists = top_genes,
+          create_table(tops = tops_best$top_genes, gene_lists = top_genes,
                        which.lists = "DECODER", color.lists = colors)
         }
       ),
@@ -558,7 +525,15 @@ list(
       tar_target(
         tops_std,
         {
-          W=fit_std_selected_k@fit@W
+          if(length(K_VALS)>1){
+            W=fit_std$fit[[as.character(best_params$k)]]@fit@W
+          }else if(length(K_VALS)==1){
+            W=fit_std@fit@W
+          }else{
+            stop("need at least one k value supplied")
+          }
+          
+          
           get_top_genes(W=W,ntop=ntop)
         }
         
@@ -573,42 +548,19 @@ list(
         }
       ),
       
-      #### select factors ####
-      tar_target(
-        selected_factors_desurv,
-        {
-          browser()
-          save_dir = file.path(dirname(dirname(cv_runs[[1]])),"factor_selection","desurv")
-          dir.create(save_dir,showWarnings = FALSE)
-          path = file.path(save_dir,"factor_selection.csv")
-          build_factor_selection_table(tops_desurv$top_genes,path)
-        },
-        format="file"
-      ),
-
-      tar_target(
-        selected_factors_std,
-        {
-          save_dir = file.path(dirname(dirname(cv_runs[[1]])),"factor_selection","std")
-          dir.create(save_dir,showWarnings = FALSE)
-          path = file.path(save_dir,"factor_selection.csv")
-          build_factor_selection_table(tops_std$top_genes,path)
-        },
-        format="file"
-      ),
-      # 
+      
       ######## clustering #########
       
       ### deSurv model ###
       tar_target(
-        clusters_desurv,
+        clusters_best,
         {
           data=data_val_filtered[[1]]
           val_dataset = data$dataname
           dir = create_filepath_clustering_output(ngene, TOL, MAXIT, PKG_VERSION, 
-                                                  GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN, 
-                                                  ntop, val_dataset, "DeSurv")
-          run_clustering(tops_desurv$top_genes,data,top_genes,colors,
+                        GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN, 
+                        ntop, val_dataset, "DeSurv")
+          run_clustering(tops_best$top_genes,data,top_genes,colors,
                          facs=c(1,3),plot=FALSE,dir=dir,
                          maxKcol = 5, maxKrow = 5)
         },
@@ -638,40 +590,40 @@ list(
         resources = tar_resources(
           crew = tar_resources_crew(controller = "med_mem")
         )
-      )
+      ),
       
       
       ### cox lasso ###
       
       
       ############### generate paper ###################
-      # tar_target(
-      #   paper,
-      #   {
-      #     clusters_desurv
-      #     clusters_std
-      #     out_name =  paste0("paper_ntop=",ntop,"_ngene=",ngene,".pdf")
-      #     rmarkdown::render("paper/paper.Rmd",knit_root_dir = "..",
-      #                       params = list(ntop = ntop,
-      #                                     ngene=ngene),
-      #                       output_dir = "paper",
-      #                       output_file = out_name)
-      #     
-      #   },
-      #   format = "file",
-      #   cue = tar_cue(mode = "always")
-      # )
-      # 
+      tar_target(
+        paper,
+        {
+          clusters_best
+          clusters_std
+          out_name =  paste0("paper_ntop=",ntop,"_ngene=",ngene,".pdf")
+          rmarkdown::render("paper/paper.Rmd",knit_root_dir = "..",
+                            params = list(ntop = ntop,
+                                          ngene=ngene),
+                            output_dir = "paper",
+                            output_file = out_name)
+         
+        },
+        format = "file",
+        cue = tar_cue(mode = "always")
+      )
+      
       
       
     )#end map over ntop
     
     
-    
+
     
   ) #end map over ngene
   
-  
+
   
   ###################### supplementary material ###########################
   
@@ -1018,3 +970,4 @@ list(
   
   ##### Summaries #####
 )
+
