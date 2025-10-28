@@ -1,0 +1,119 @@
+---
+title: Survival driven deconvolution (deSurv) reveals prognostic and interpretable tumor gene signatures
+params:
+  ngene:
+  ntop:
+# Use letters for affiliations, numbers to show equal authorship (if applicable) and to indicate the corresponding author
+author:
+  - name: Amber Young
+    affiliation: a,1,2
+  - name: Alisa
+    affiliation: b
+  - name: Didong
+    affiliation: a
+  - name: Naim
+    affiliation: a,c
+address:
+  - code: a
+    address: University of North Carolina at Chapel Hill, Department, Street, City, State, Zip
+  - code: b
+    address: Another University Department, Street, City, State, Zip
+
+corresponding_author:
+  code: 2
+  text: "To whom correspondence should be addressed. E-mail: bob@email.com"
+
+# For footer text
+lead_author_surname: Anonymous
+
+
+author_contributions: |
+  Please provide details of author contributions here.
+
+## Remove this if not required
+conflict_of_interest: |
+  Please declare any conflict of interest here.
+
+abstract: |
+  Molecular subtyping in cancer is an ongoing problem that relies on the identification of robust and replicable gene signatures. While transcriptomic profiling has revealed recurrent gene expression patterns in various types of cancer, the prognostic value of these signatures is typically evaluated in retrospect. This is due to the reliance on unsupervised learning methods for identifying cell-type-specific signals and clustering patients into molecular subtypes. Here we present a Survival-driven Deconvolution tool (deSurv) that integrates bulk RNA-sequencing data with patient survival information to identify cell-type-enriched gene signatures associated with prognosis. Applying deSurv to various cohorts in pancreatic, bladder, and colorectal cancer, we uncover previously unrecognized gene signatures linked to tumor, stromal, and immune compartments, including â€¦ Several identified signatures exhibit consistent prognostic value across cohorts and cancer types and demonstrate potential as therapeutic targets or biomarkers. Our approach highlights the value of using patient outcomes during gene signature discovery.
+
+significance: |
+  Authors must submit a 120-word maximum statement about the significance of their research paper written at a level understandable to an undergraduate educated scientist outside their field of speciality. The primary goal of the Significance Statement is to explain the relevance of the work in broad context to a broad readership. The Significance Statement appears in the paper itself and is required for all research papers.
+
+acknowledgements: |
+  Please include your acknowledgments here, set in a single paragraph. Please do not include any acknowledgments in the Supporting Information, or anywhere else in the manuscript.
+
+keywords:
+  - one
+  - two
+  - optional
+  - optional
+  - optional
+
+## must be one of: pnasresearcharticle (usual two-column layout), pnasmathematics (one column layout), or pnasinvited (invited submissions only)
+pnas_type: pnasresearcharticle
+
+bibliography: references.bib
+csl: pnas.csl
+
+## change to true to add optional line numbering
+lineno: false
+
+output: rticles::pnas_article
+
+header-includes:
+  - \providecommand{\pandocbounded}[1]{#1}
+  - \usepackage{booktabs}
+  - \usepackage{float}
+  - \usepackage{graphicx}
+  - \usepackage{amsmath}
+  - \usepackage{amsfonts}
+  - \usepackage{amssymb}
+  - \usepackage{bbm}
+  - \usepackage{algorithm}
+  - \usepackage{algpseudocode}
+  - \DeclareMathOperator*{\argmin}{argmin}
+  - \DeclareMathOperator*{\argmax}{argmax}
+  - \DeclareMathOperator\diag{diag}
+  - \renewcommand{\algorithmicrequire}{\textbf{Input:}}
+  - \renewcommand{\algorithmicensure}{\textbf{Output:}}
+---
+
+```{r, echo=FALSE}
+knitr::opts_chunk$set(
+  echo    = FALSE,   # show code (set FALSE to hide)
+  message = FALSE,  # suppress package startup messages
+  warning = FALSE,  # suppress warnings
+  error   = FALSE,  # suppress errors in output
+  fig.align = "center" # center figures
+)
+
+```
+
+
+
+```{r child="paper/02_introduction.Rmd"}
+
+```
+
+# Materials and methods {.unnumbered}
+
+```{r child="paper/03_methods.Rmd"}
+
+```
+
+
+# Results {.unnumbered}
+
+```{r child="paper/04_results.Rmd"}
+
+```
+
+# Discussion {.unnumbered}
+
+
+
+<!-- Leave these lines as they are at the end of your .Rmd file to ensure placement of methods & acknowledgements sections before the references-->
+\showmatmethods
+\showacknow
+\pnasbreak

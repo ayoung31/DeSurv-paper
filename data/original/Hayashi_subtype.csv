@@ -1,0 +1,124 @@
+"ID","SCISSORS_CAF","SCISSORS_CAF_K4","SCISSORS_CAF_ALL","SCISSORS_CAF_K2","MS_K2","Elyada_CAF","PurIST","Maurer","Puleo","DeCAF","CAF_whitelist"
+"MPAM03PT01","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Classical","ECM-rich","Pure Basal-like","permCAF",TRUE
+"MPAM06PT09","restCAF","restCAF","restCAF","restCAF","Activated","iCAF","Basal-like","Immune-rich","Desmoplastic","restCAF",TRUE
+"MPAM06PT10","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"MPAM06PT11","restCAF","restCAF","restCAF","restCAF","Activated","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM02PT09","restCAF","restCAF","restCAF","restCAF","Normal","iCAF","Basal-like","Immune-rich","Pure Basal-like","restCAF",TRUE
+"PAM02PT10","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM02PT11","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM02PT12","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Classical","Immune-rich","Immune Classical","restCAF",TRUE
+"PAM02PT13","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM02PT14",NA,"Mixed","Mixed","restCAF","Activated","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM02PT16","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM02PT17","restCAF","restCAF","restCAF","restCAF","Normal","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM02PT18","restCAF","restCAF","restCAF","restCAF","Activated","iCAF","Classical","Immune-rich","Immune Classical","restCAF",TRUE
+"PAM02PT19",NA,NA,"Absent","restCAF","Activated","iCAF","Classical","ECM-rich","Desmoplastic","restCAF",TRUE
+"PAM02PT20","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Basal-like","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM02PT21","restCAF","restCAF","restCAF","restCAF","Normal","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM02PT22",NA,NA,"Absent","permCAF","Activated","myCAF","Classical","ECM-rich","Desmoplastic","restCAF",TRUE
+"PAM02PT24","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM02PT25",NA,NA,"Absent","restCAF","Activated","myCAF","Classical","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM02PT26","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM02PT27",NA,NA,"Absent","permCAF","Activated","myCAF","Classical","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM02PT28","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM02PT29","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Classical","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM03PT08",NA,"Mixed","Mixed","permCAF","Normal","iCAF","Basal-like","Immune-rich","Stroma Activated","restCAF",TRUE
+"PAM03PT09","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Classical","ECM-rich","Stroma Activated","permCAF",TRUE
+"PAM03PT10",NA,"Mixed","Mixed","restCAF","Activated","iCAF","Classical","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM03PT15","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Classical","ECM-rich","Stroma Activated","restCAF",TRUE
+"PAM03PT16","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM03PT17","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Classical","ECM-rich","Desmoplastic","restCAF",TRUE
+"PAM03PT18","restCAF","restCAF","restCAF","restCAF","Activated","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM03PT19","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Classical","ECM-rich","Stroma Activated","restCAF",TRUE
+"PAM03PT20","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM03PT21","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM03PT22","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Classical","Immune-rich","Pure Classical","restCAF",TRUE
+"PAM03PT23","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM03PT24","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Normal","iCAF","Classical","Immune-rich","Pure Classical","restCAF",TRUE
+"PAM03PT25","restCAF","restCAF","restCAF","restCAF","Normal","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM03PT26","restCAF","restCAF","restCAF","restCAF","Normal","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM04PT06",NA,"Mixed","Mixed","restCAF","Activated","iCAF","Basal-like","ECM-rich","Desmoplastic","restCAF",TRUE
+"PAM04PT07","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Normal","iCAF","Basal-like","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM04PT08","restCAF","restCAF","restCAF","restCAF","Normal","iCAF","Basal-like","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM16PT01","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM16PT02",NA,"Mixed","Mixed","restCAF","Activated","iCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM22PT01",NA,"Mixed","Mixed","restCAF","Activated","iCAF","Classical","ECM-rich","Stroma Activated","restCAF",TRUE
+"PAM22PT02","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM22PT04","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Classical","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM22PT05",NA,"Mixed","Mixed","permCAF","Activated","iCAF","Classical","ECM-rich","Desmoplastic","restCAF",TRUE
+"PAM22PT07",NA,"Mixed","Mixed","permCAF","Activated","iCAF","Classical","ECM-rich","Stroma Activated","restCAF",TRUE
+"PAM22PT08","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Classical","ECM-rich","Pure Classical","restCAF",TRUE
+"PAM22PT10","restCAF","restCAF","restCAF","restCAF","Activated","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM22PT11","restCAF","restCAF","restCAF","restCAF","Activated","iCAF","Classical","Immune-rich","Pure Classical","restCAF",TRUE
+"PAM22PT12","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM24PT01","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Normal","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM25PT01","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Classical","ECM-rich","Pure Classical","restCAF",TRUE
+"PAM27PT01","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Classical","Immune-rich","Immune Classical","restCAF",TRUE
+"PAM27PT02","restCAF","restCAF","restCAF","restCAF","Activated","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM27PT03","restCAF","restCAF","restCAF","restCAF","Activated","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM28PT01","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM28PT02","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM28PT03","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM28PT06","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM28PT07","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM29PT01","restCAF","restCAF","restCAF","restCAF","Normal","iCAF","Basal-like","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM47PT02","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Classical","ECM-rich","Pure Classical","permCAF",TRUE
+"PAM47PT03",NA,"Mixed","Mixed","restCAF","Activated","iCAF","Classical","ECM-rich","Pure Classical","restCAF",TRUE
+"PAM47PT04","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Classical","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM47PT05","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Classical","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM47PT06",NA,"Mixed","Mixed","restCAF","Activated","myCAF","Classical","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM47PT07","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Classical","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM48PT01","restCAF","restCAF","restCAF","restCAF","Normal","iCAF","Basal-like","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM48PT02","restCAF","restCAF","restCAF","restCAF","Activated","iCAF","Classical","Immune-rich","Immune Classical","restCAF",TRUE
+"PAM49PT05","restCAF","restCAF","restCAF","restCAF","Normal","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM49PT06",NA,"Mixed","Mixed","permCAF","Normal","iCAF","Basal-like","Immune-rich","Pure Basal-like","restCAF",TRUE
+"PAM50PT01",NA,"Mixed","Mixed","restCAF","Activated","myCAF","Classical","ECM-rich","Pure Classical","restCAF",TRUE
+"PAM50PT02",NA,NA,"Absent","permCAF","Activated","myCAF","Classical","ECM-rich","Pure Classical","permCAF",TRUE
+"PAM51PT01","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM52PT01","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM52PT02","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM52PT03",NA,"Mixed","Mixed","restCAF","Activated","iCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM53PT04","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM53PT05","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM53PT06",NA,NA,"Absent","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM53PT07",NA,NA,"Absent","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM53PT08","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM53PT09","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM53PT10",NA,"Mixed","Mixed","restCAF","Activated","iCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM53PT11",NA,"Mixed","Mixed","restCAF","Activated","iCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM53PT12",NA,"Mixed","Mixed","restCAF","Activated","iCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM53PT13",NA,NA,"Absent","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM53PT14",NA,"Mixed","Mixed","restCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM53PT15",NA,NA,"Absent","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM53PT16","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM53PT17",NA,NA,"Absent","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM53PT18","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM54PT05","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM54PT06","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM54PT07","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM54PT08","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM54PT09","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM54PT11","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM54PT12","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM54PT13","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM54PT14","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM54PT15","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM54PT16","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM54PT17","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM54PT18","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM54PT19","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM55PT05",NA,"Mixed","Mixed","restCAF","Activated","iCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM55PT06","restCAF","restCAF","restCAF","restCAF","Normal","iCAF","Basal-like","Immune-rich","Pure Basal-like","restCAF",TRUE
+"PAM55PT07",NA,"Mixed","Mixed","restCAF","Activated","iCAF","Basal-like","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM55PT08","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Normal","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM55PT09","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Basal-like","Immune-rich","Pure Basal-like","restCAF",TRUE
+"PAM55PT10",NA,"Mixed","Mixed","restCAF","Activated","iCAF","Classical","ECM-rich","Stroma Activated","restCAF",TRUE
+"PAM55PT11","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Basal-like","Immune-rich","Pure Basal-like","restCAF",TRUE
+"PAM55PT13","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM55PT14","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Activated","iCAF","Basal-like","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM55PT15","restCAF","Mixed.restCAF","Mixed.restCAF","restCAF","Normal","iCAF","Basal-like","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM55PT16",NA,"Mixed","Mixed","permCAF","Activated","iCAF","Basal-like","ECM-rich","Pure Basal-like","restCAF",TRUE
+"PAM55PT17",NA,"Mixed","Mixed","permCAF","Activated","iCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM55PT18","restCAF","restCAF","restCAF","restCAF","Normal","iCAF","Classical","Immune-rich","Desmoplastic","restCAF",TRUE
+"PAM56PT06",NA,NA,"Absent","permCAF","Activated","iCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE
+"PAM56PT07","permCAF","permCAF","permCAF","permCAF","Activated","myCAF","Basal-like","ECM-rich","Pure Basal-like","permCAF",TRUE

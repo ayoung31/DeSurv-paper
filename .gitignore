@@ -1,0 +1,28 @@
+# ---- R specific ----
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+DeSurv-paper.Rproj
+
+# ---- targets package cache ----
+/_targets/           # main cache directory
+stores/             # if you use multiple stores (see tar_config_set)
+logs/
+NMF_*/
+
+# ---- results / generated data ----
+results/
+reports/
+*.rds
+*.gct
+*.txt
+
+# ---- logs ----
+logs/
+*.out
+*.err
+
+# ---- OS junk ----
+.DS_Store
+Thumbs.db
