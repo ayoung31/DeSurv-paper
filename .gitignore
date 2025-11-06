@@ -10,6 +10,8 @@ DeSurv-paper.Rproj
 stores/             # if you use multiple stores (see tar_config_set)
 logs/
 NMF_*/
+store_*/
+data/
 
 # ---- results / generated data ----
 results/

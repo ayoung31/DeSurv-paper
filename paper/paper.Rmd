@@ -1,27 +1,27 @@
 ---
-title: Survival driven deconvolution (deSurv) reveals prognostic and interpretable tumor gene signatures
+title: Survival driven deconvolution (deSurv) reveals prognostic and interpretable cancer subtypes
 params:
   ngene:
   ntop:
-# Use letters for affiliations, numbers to show equal authorship (if applicable) and to indicate the corresponding author
+  # Use letters for affiliations, numbers to show equal authorship (if applicable) and to indicate the corresponding author
 author:
-  - name: Amber Young
+  - name: Amber M. Young
     affiliation: a,1,2
-  - name: Alisa
+  - name: Alisa Yurovsky
     affiliation: b
-  - name: Didong
+  - name: Didong Li
     affiliation: a
-  - name: Naim
+  - name: Naim U. Rashid
     affiliation: a,c
 address:
   - code: a
-    address: University of North Carolina at Chapel Hill, Department, Street, City, State, Zip
+    address: University of North Carolina at Chapel Hill, Biostatistics, Street, City, State, Zip
   - code: b
-    address: Another University Department, Street, City, State, Zip
+    address: Stony Brook University, Street, City, State, Zip
 
 corresponding_author:
   code: 2
-  text: "To whom correspondence should be addressed. E-mail: bob@email.com"
+  text: "To whom correspondence should be addressed. E-mail: ayoung31@live.unc.edu"
 
 # For footer text
 lead_author_surname: Anonymous
@@ -35,10 +35,10 @@ conflict_of_interest: |
   Please declare any conflict of interest here.
 
 abstract: |
-  Molecular subtyping in cancer is an ongoing problem that relies on the identification of robust and replicable gene signatures. While transcriptomic profiling has revealed recurrent gene expression patterns in various types of cancer, the prognostic value of these signatures is typically evaluated in retrospect. This is due to the reliance on unsupervised learning methods for identifying cell-type-specific signals and clustering patients into molecular subtypes. Here we present a Survival-driven Deconvolution tool (deSurv) that integrates bulk RNA-sequencing data with patient survival information to identify cell-type-enriched gene signatures associated with prognosis. Applying deSurv to various cohorts in pancreatic, bladder, and colorectal cancer, we uncover previously unrecognized gene signatures linked to tumor, stromal, and immune compartments, including â€¦ Several identified signatures exhibit consistent prognostic value across cohorts and cancer types and demonstrate potential as therapeutic targets or biomarkers. Our approach highlights the value of using patient outcomes during gene signature discovery.
+  Molecular subtyping in cancer is an ongoing problem that relies on the identification of robust and replicable gene signatures. While transcriptomic profiling has revealed recurrent gene expression patterns in various types of cancer, the prognostic value of these signatures is typically evaluated in retrospect. This is due to the reliance on unsupervised learning methods for identifying cell-type-specific signals and clustering patients into molecular subtypes. Here we present a Survival-driven Deconvolution tool (deSurv) that integrates bulk RNA-sequencing data with patient survival information to identify cell-type-enriched gene signatures associated with prognosis. Applying deSurv to various cohorts in pancreatic cancer, we uncover prognostic and biologically interpretable subtypes that reflect the complex interactions between stroma, tumor, and immune cells in the tumor microenvironment. Our approach highlights the value of using patient outcomes during gene signature discovery.
 
 significance: |
-  Authors must submit a 120-word maximum statement about the significance of their research paper written at a level understandable to an undergraduate educated scientist outside their field of speciality. The primary goal of the Significance Statement is to explain the relevance of the work in broad context to a broad readership. The Significance Statement appears in the paper itself and is required for all research papers.
+  Understanding which molecular programs influence patient survival remains a central challenge in cancer genomics. We developed DeSurv, a survival-driven deconvolution framework that integrates nonnegative matrix factorization with Cox regression to identify latent gene-expression programs directly linked to clinical outcomes. Applied to pancreatic ductal adenocarcinoma, DeSurv uncovered interpretable tumor and stromal factors that generalize across independent cohorts and align with established subtypes. By coupling survival modeling with matrix factorization, DeSurv bridges the gap between biologically descriptive and prognostically relevant signatures, revealing that patient outcomes are shaped by the combined activity of basal and immune-stromal programs. This approach provides a broadly applicable strategy for discovering outcome-associated transcriptional programs in complex cancers.
 
 acknowledgements: |
   Please include your acknowledgments here, set in a single paragraph. Please do not include any acknowledgments in the Supporting Information, or anywhere else in the manuscript.
@@ -53,7 +53,7 @@ keywords:
 ## must be one of: pnasresearcharticle (usual two-column layout), pnasmathematics (one column layout), or pnasinvited (invited submissions only)
 pnas_type: pnasresearcharticle
 
-bibliography: references.bib
+bibliography: references_30102025.bib
 csl: pnas.csl
 
 ## change to true to add optional line numbering
@@ -72,13 +72,13 @@ header-includes:
   - \usepackage{bbm}
   - \usepackage{algorithm}
   - \usepackage{algpseudocode}
+  - \usepackage{setspace} 
   - \DeclareMathOperator*{\argmin}{argmin}
   - \DeclareMathOperator*{\argmax}{argmax}
   - \DeclareMathOperator\diag{diag}
   - \renewcommand{\algorithmicrequire}{\textbf{Input:}}
   - \renewcommand{\algorithmicensure}{\textbf{Output:}}
 ---
-
 ```{r, echo=FALSE}
 knitr::opts_chunk$set(
   echo    = FALSE,   # show code (set FALSE to hide)
@@ -92,7 +92,19 @@ knitr::opts_chunk$set(
 
 
 
-```{r child="paper/02_introduction.Rmd"}
+```{r child="paper/02_introduction_30102025.Rmd"}
+
+```
+
+# Results {.unnumbered}
+
+```{r child="paper/04_results.Rmd"}
+
+```
+
+# Discussion {.unnumbered}
+
+```{r child="paper/05_discussion.Rmd"}
 
 ```
 
@@ -102,14 +114,6 @@ knitr::opts_chunk$set(
 
 ```
 
-
-# Results {.unnumbered}
-
-```{r child="paper/04_results.Rmd"}
-
-```
-
-# Discussion {.unnumbered}
 
 
 

@@ -3,20 +3,20 @@ Let $X \in R^{p \times n}_{\geq 0}$ denote a nonnegative gene expression matrix 
 \begin{equation}
 X \approx WH,
 \end{equation}
-where $W \in R^{p \times k}_{\geq 0}$ contains the gene weights (or "metagenes"),  and $H \in R^{k \times n}_{\geq 0}$ contains the factor scores for each subject. The number of latent factors $k$ determines the dimensionality of the shared low-rank representation. The NMF loss is defined as the residual sum of squares.
+where $W \in R^{p \times k}_{\geq 0}$ contains the gene weights, and $H \in R^{k \times n}_{\geq 0}$ contains the factor scores for each subject. The number of latent factors $k$ determines the dimensionality of the shared low-rank representation. The NMF loss is defined as the residual sum of squares.
 
 \begin{equation}\label{nmf_loss}
     \mathcal{L}(W,H)_{NMF} = ||X - WH||^2_F.
 \end{equation}
 
 
-## Cox partial likelihood {.unnumbered}
+## Cox partial log-likelihood {.unnumbered}
 To incorporate survival outcomes, let $T_i$ denote the event time and $C_i$ the censoring time for subject $i$. The observed time is $y_i = \min(T_i,C_i)$, and the event indicator is $\delta_i$.
 Given that $W$ is shared across datasets, we define a lower dimensional transformation of the data:
 \begin{equation}
 Z=X^TW \in R^{n \times k},
 \end{equation}
-where each row $Z_i^T$ represents the factor scores for subject $i$. These scores serve as covariates in a Cox proportional hazards model:
+where each row $Z_i^T$ represents the factor signature scores for subject $i$. These scores serve as covariates in a Cox proportional hazards model:
 \begin{equation}
 h_i(t) = h_0(t)\exp(Z_i^T\beta),
 \end{equation}
@@ -24,13 +24,12 @@ where $h_0(t)$ is the baseline hazard and $\beta \in R^k$ are the factor specifi
 \begin{equation}\label{loglik}
   \ell(W,\beta) = \sum_{i=1}^n \delta_i \left[Z_i^T\beta - \log\left(\sum_{j:y_j \geq y_i} \exp \left(Z_j^T\beta\right) \right)\right].
 \end{equation}
-Maximizing this quantity ...
 
 ## DeSurv {.unnumbered}
 Building on the definitions above, DeSurv combines the unsupervised NMF reconstruction loss and the supervised Cox partial likelihood into a single joint objective. The combined loss function is
 
 \begin{equation}\label{loss}
-    \mathcal{L}(W,H,\beta) = (1-\alpha) \mathcal{L}(W,H)_{NMF} - \alpha \mathcal{L}(W,\beta)_{cox},
+    \mathcal{L}(W,H,\beta) = (1-\alpha) \mathcal{L}_{NMF}(X \approx WH) - \alpha \mathcal{L}_{cox}(W,\beta),
 \end{equation}
 
 where $\mathcal{L}_{cox}(W,\beta)$ is the elastic net penalized log partial likelihood:
@@ -47,31 +46,33 @@ The hyperparameter $\alpha \in [0,1]$ controls the relative contribution of each
 \end{itemize}
 Intermediate values of $\alpha$ encourage discovery of latent molecular programs that are both biologically coherent and prognostically informative.
 
-## Update Rules {.unnumbered}
+## Optimization framework {.unnumbered}
 DeSurv is optimized using an alternating minimization scheme (Algorithm \ref{deSurv}) that iteratively updates $W$, $H$, and $\beta$ until convergence. The sub-problems for $H$ and $\beta$ are convex in the corresponding parameter conditional on the others.
 
 \begin{algorithm}
 \caption{DeSurv algorithm}\label{deSurv}
+    \begin{spacing}{1.2} 
     \begin{algorithmic}[1]
         \Require $X \in \mathbb{R}_{\geq 0}^{p \times n}$, $y \in \mathbb{R}^n_{\geq 0}$, $\delta \in \mathbb{R}_{0,1}^{n}$, $W^{(0)}$, $H^{(0)}$, $\beta^{(0)}$, $tol$, $maxit$
         \State $eps = \infty$
-        \State $iter = 0$
+        \State $t = 0$
         \State $loss = 0$
-        \While{$eps < tol$ \textbf{and} $iter < maxit$}
-            \State $W^{(iter)} = \argmin_{W \geq 0} \mathcal{L}(W^{(iter-1)},H^{(iter-1)},\beta^{(iter-1)})$
-            \State $H = \argmin_{H \geq 0} \mathcal{L}(W^{(iter)},H^{(iter-1)},\beta^{(iter-1)})$
-            \State $\beta = \argmin_{\beta} \mathcal{L}(W^{(iter)},H^{(iter)},\beta^{(iter-1)})$
-            \State $lossNew = \mathcal{L}(W^{(iter)},H^{(iter)},\beta^{(iter)})$
+        \While{$eps < tol$ \textbf{and} $t < maxit$}
+            \State $W^{(t)} = \argmin_{W \geq 0} \mathcal{L}(W,H^{(t-1)},\beta^{(t-1)})$
+            \State $H^{(t)} = \argmin_{H \geq 0} \mathcal{L}(W^{(t)},H,\beta^{(t-1)})$
+            \State $\beta^{(t)} = \argmin_{\beta} \mathcal{L}(W^{(t)},H^{(t)},\beta)$
+            \State $lossNew = \mathcal{L}(W^{(t)},H^{(t)},\beta^{(t)})$
             \State $eps = |lossNew - loss|/loss$
             \State $loss = lossNew$
-            \State $iter = iter + 1$
+            \State $t = t + 1$
         \EndWhile
         \Return $W$,$H$,$\beta$
     \end{algorithmic}
+    \end{spacing}
 \end{algorithm}
 
 ### Update for $H$ {.unnumbered}
-The nonnegative factor matrix $H$ is updated using standard multiplicative updates that guarantee nonnegativity and monotonic decrease in reconstruction error as derived in \cite{@lee}:
+The nonnegative factor matrix $H$ is updated using standard multiplicative updates that guarantee nonnegativity and monotonic decrease in reconstruction error as derived in @Lee1999:
 \begin{equation}
 \label{H_update}
     H_{ij} = H_{ij} \frac{(W^TX)_{ij}}{(W^TWH)_{ij}}.
@@ -83,19 +84,20 @@ Given $W$, the coefficients $\beta$ are updated by coordinate descent using elas
 \label{beta_update}
     \hat{\beta}_r = \frac{S(\frac{1}{n}\sum_{i=1}^n w(\tilde{\eta})_i v_{i,r} \left[ z(\tilde{\eta})_i - \sum_{j\ne r} v_{ij} \beta_j,\right], \lambda\xi)}{\frac{1}{n}\sum_{i=1}^n w(\tilde{\eta})_i v_{i,r}^2 + \lambda(1-\xi)},
 \end{equation}
-where $S(.,\lambda\xi)$ is the soft-thresholding operator, $w_i$ is blah, and $v_{ij}$ . The parameters $(\lambda,\xi)$ control the strength and type of regularization.
+where $S(.,\lambda\xi)$ is the soft-thresholding operator. The term $w(\tilde{\eta})_i$ is the $i$th diagonal element of the hessian of the partial log-likelihood and $z(\tilde{\eta})_i$ is an approximation of the Newton-Raphson update for $\tilde{\eta}$. Details can be found in @simon2011regularization. The parameters $(\lambda,\xi)$ control the strength and type of regularization.
 
 ### Coupled $W$ update {.unnumbered}
-The shared basis $W$ is updated through a hybrid multiplicative rule that incorporates both NMF reconstruction gradients and Cox partial likelihood gradients. Backtracking and gradient balancing are used in this update to ensure decrease in the overall loss and avoid one component dominating the update. (Add citations for this here)
-\begin{equation}
+The shared basis $W$ is updated through a hybrid multiplicative rule that incorporates both NMF reconstruction gradients and Cox partial likelihood gradients. 
+\begin{align}
 \label{W_update}
-W^{(t+1)} = W^{(t)} \odot \max \left( \frac{\frac{(1-\alpha)}{np}XH^T + \frac{2\alpha}{N_{event}}\nabla_W\ell(W^{(t)}, \beta)}{\frac{(1-\alpha)}{np}W^{(t)}HH^T }, 0 \right)
-\end{equation}
-The quantity $\nabla_W\ell(W^{(t)}, \beta)$ denotes the gradient of the Cox partial likelihood with respect to $W$. This update allows the survival signal to propagate into the latent factors while preserving nonnegativity.
+W^{(t+1)} = &W^{(t)} \odot \nonumber \\
+&\max \left( \frac{\frac{(1-\alpha)}{np}XH^T + \frac{2\alpha}{N_{event}}\nabla_W\ell(W^{(t)}, \beta)}{\frac{(1-\alpha)}{np}W^{(t)}HH^T }, 0 \right)
+\end{align}
+The quantity $\nabla_W\ell(W^{(t)}, \beta)$ denotes the gradient of the Cox partial likelihood with respect to $W$ evaluated at $W^{(t)}$. This update allows the survival signal to propagate into the latent factors while preserving nonnegativity.Backtracking and gradient balancing are used in this update to ensure decrease in the overall loss and avoid one component dominating the update.
 
+## Publicly Available Datasets Preprocessing {.unnumbered}
+We trained and validated DeSurv using seven publicly available pancreatic ductal adenocarcinoma (PDAC) transcriptomic datasets spanning both RNA-seq and microarray platforms (Table \@ref(tab:datasets)). The TCGA and CPTAC datasets were used for training the DeSurv model, and the remaining 5 were used as external validation. Samples from all datasets were filtered to include only non-metastatic primary PDAC samples. All datasets were log2 + 1 transformed and filtered to the top highly expressed and variable genes. The training data were rank transformed by subject to mitigate cross dataset batch effects and combined, restricting to genes that were kept in each dataset.
 
-## Publicly Available Datasets {.unnumbered}
-We trained and validated DeSurv using seven publicly available pancreatic ductal adenocarcinoma (PDAC) transcriptomic datasets spanning both RNA-seq and microarray platforms. Expression data were harmonized to gene-level matrices and transformed to transcripts per million (TPM) where applicable. To reduce platform-specific bias, each dataset was rank-transformed across genes within samples prior to modeling.
 
 \begin{table*}[t]
 \centering
@@ -105,13 +107,13 @@ We trained and validated DeSurv using seven publicly available pancreatic ductal
 \toprule
 \textbf{Dataset} & \textbf{Platform} & \textbf{Samples (n)} & \textbf{Data type} & \textbf{Reference} \\ 
 \midrule
-TCGA-PAAD & RNA-seq (Illumina HiSeq) & $\sim$178 & Discovery / Training & \citep{TCGA2017} \\
-CPTAC-PDAC & RNA-seq (Proteogenomic) & $\sim$138 & Validation & \citep{Clark2021} \\
-Dijk \textit{et al.} & Microarray (Affymetrix) & $\sim$80 & Validation & \citep{Dijk2015} \\
-Moffitt \textit{et al.} & Microarray (Affymetrix) & $\sim$84 & Validation & \citep{Moffitt2015} \\
-PACA-AU (array) & Microarray (Agilent) & $\sim$269 & Validation & \citep{Bailey2016} \\
-PACA-AU (RNA-seq) & RNA-seq (Illumina HiSeq) & $\sim$92 & Validation & \citep{Bailey2016} \\
-Puleo \textit{et al.} & Microarray (Affymetrix) & $\sim$288 & Validation & \citep{Puleo2018} \\ 
+TCGA-PAAD & RNA-seq (Illumina HiSeq) & 144 & Discovery / Training & \citep{Raphael2017integrated} \\
+CPTAC-PDAC & RNA-seq (Proteogenomic) & 129 & Validation & \citep{ellis2013clinical} \\
+Dijk \textit{et al.} & Microarray (Affymetrix) & 90 & Validation & @Dijk2020unsupervised \\
+Moffitt \textit{et al.} & Microarray (Affymetrix) & 123 & Validation & \citep{moffitt2015virtual} \\
+PACA-AU (array) & Microarray (Agilent) & 63 & Validation & \citep{zhao2018gene} \\
+PACA-AU (RNA-seq) & RNA-seq (Illumina HiSeq) & 52 & Validation & \citep{zhao2018gene} \\
+Puleo \textit{et al.} & Microarray (Affymetrix) & 288 & Validation & \citep{puleo2018stratification} \\ 
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -120,33 +122,23 @@ Puleo \textit{et al.} & Microarray (Affymetrix) & $\sim$288 & Validation & \cite
 ## Model Training {.unnumbered}
 The TCGA and CPTAC datasets were used for model training. Each dataset was filtered to the top 2000 highly expressed and variable genes. These gene lists were then intersected, resulting in XXX genes incorporated in model training.
 
-## Cross Validation
+## Cross Validation {.unnumbered}
 To identify optimal hyperparameters, we employed stratified five-fold cross-validation based on event status. An exhaustive search was performed across a grid of hyperparameters $k = 2,\dots,12$, $\alpha \in \{0.1,0.2,\dots,0.9\}$, $\lambda \in 10^{\{-3,...,3\}}$, and $\xi \in \{0,0.1,0.2,\dots,1\}$. Within each fold, models were fit on 80% of the data and evaluated on the held-out 20%. Because NMF solutions are non-unique and sensitive to initialization, each fold was repeated with 20 random seeds for $W$, $H$, and $\beta$, resulting in a total of 100 trained models per parameter configuration of $k$, $lambda$, and $eta$. Warm-start initializations were used across $alpha$ to accelerate convergence.
 
 Final hyperparameters were selected as the combination that produced average C-index (across initializations and folds) within one standard error of the maximum (1 s.e. rule).
 
+## Standard NMF {.unnumbered}
+As an unsupervised baseline, we trained conventional NMF models that minimized only the reconstruction error, corresponding to setting $alpha=0$ in the DeSurv formulation. For each rank $k \in {2,...,12}$, 100 random initializations were performed to address non-uniqueness. The initialization with the smallest reconstruction error for each k was selected. To select the rank, $k$, in the unsupervised setting, we used standard metrics including cophenetic coefficient, dispersion, explained variance, residuals, silhouette score, and sparseness. The resulting gene-factor matrix $W$ and validation data were subsequently used as input to a Cox proportional hazards model to evaluate the prognostic value of the unsupervised factors.
 
-## Comparison Methods {.unnumbered}
-To benchmark the performance of DeSurv, we compared it against several established approaches for molecular subtyping and survival prediction. All comparison models were trained using the same discovery cohort, the same filtered set of 1,000 highly variable genes, and the same preprocessing steps.
-
-### Standard NMF {.unnumbered}
-As an unsupervised baseline, we trained conventional NMF models that minimized only the reconstruction error, corresponding to setting $alpha=0$ in the DeSurv formulation. For each rank $k \in {2,...,12}$, 100 random initializations were performed to address non-uniqueness. The initialization with the smallest reconstruction error for each k was selected. To select the rank, $k$, in the unsupervised setting, we use standard metrics including cophenetic coefficient, dispersion, explained variance, residuals, silhouette score, and sparseness. The resulting gene-factor matrix $W$ and validation data were subsequently used as input to a Cox proportional hazards model to evaluate the prognostic value of the unsupervised factors.
-
-### Cox Elastic Net (CoxNet) {.unnumbered}
-We also compared DeSurv to a standard penalized Cox regression model fit directly to gene-level expression data with elastic net penalty. Five-fold internal cross-validation within the training data was used to select the penalization parameters based on the mean C-index. The final CoxNet model served as a high-dimensional supervised baseline without dimensionality reduction.
-
-## Model Validation {.unnumbered}
-The remaining 6 publicly available PDAC datasets, CPTAC, Dijk, Moffitt, PACA microarray, PACA RNAseq, and Puleo, were used to validate our models. The datasets were restricted to the same highly variable genes in the TCGA dataset, and the fitted model was applied to each dataset individually. The partial likelihood and c-index were calculated for each dataset. Hazard ratios were reported for each factor.
-
-## Score based approach {.unnumbered}
-In a clinical setting, it may not be feasible to sequence all of the genes required to port the full W matrix to future test sets. For this purpose we also propose a score based method, where only the identity of top genes for each factor must be ported to future datasets. To construct the scores we define Wtilde as a binary matrix... To predict patient outcomes in future datasets, we restrict those datasets to these g x k genes, and compute XtWtilde as linear predictor in the survival model.
-
-## Top genes {.unnumbered}
-For a factor $f$ a top gene is defined as a gene that is highly weighted in factor $f$ while being lowly weighted in all other factors. We define $s_{gf}$ as the difference in weights between gene $g$ in factor $f$ and the max weight across all other factors in gene $g$.
-
+## Factor-specific gene signatures {.unnumbered}
+For each factor $f$ and gene $g$, we calculated the difference in weight of gene $g$ in factor $f$ and the maximum weight of gene $g$ across all other factors. We define this difference as $s_{gf}$.
 \begin{equation}
 s_{gf} = W_{gf} - \max_{r \ne f}(W_{gr})
 \end{equation}
+We then rank $s_{gf}$ across all genes $g=1,\dots,p$ from largest to smallest. Genes that appear at the top of this list for each factor are considered to be factor-specific.
 
 ## Clustering {.unnumbered}
+Clustering was performed using the ConsensusClusterPlus package in R @wilkerson2010consensusclusterplus. Each validation dataset was restricted to the top 50 factor-specific genes from all prognostic factors prior to clustering. The number of clusters was selected via inspection of cumulative distribution function (CDF) plots, relative change in area under the CDF curve, consensus heatmaps, and cluster consensus scores (Fig SX). After clustering, clusters were manually aligned across datasets based on expression of the factor-specific signatures in each cluster.
 
+## Survival analysis {.unnumbered}
+For pooled survival analysis, patients with available OS time and censoring indicator were included. Overall survival estimates were calculated using the Kaplan-Meier method. Association between overall survival and cluster membership were evaluated via the cox proportional hazards models using the coxph function from the ‘survival’ R package (version 3.2-13), where cluster was considered as a multi-level categorical predictor. The log-rank test was used to evaluate the association between cluster membership and overall survival and derive the p-values. In the pooled analyses, a stratified cox proportional hazards model was utilized, where dataset of origin was used as a stratification factor to account for variation in baseline hazard across studies.

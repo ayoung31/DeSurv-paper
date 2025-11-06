@@ -88,8 +88,8 @@ cv_cold_controller = crew_controller_slurm(
 
 # ---- Global options ----
 tar_option_set(
-  packages = c("coxNMF","NMF","tidyverse","survival","cvwrapr","rmarkdown","dplyr",
-               "parallel","foreach", "doParallel", "doMC", "pec", "glmnet"),
+  packages = c("DeSurv","pheatmap","NMF","tidyverse","tidyselect","survival","cvwrapr","rmarkdown","dplyr",
+               "parallel","foreach", "doParallel", "doMC", "pec", "glmnet","webshot2"),
   format = "rds",
   controller = crew_controller_group(default_controller, 
                                      low_mem_controller,
@@ -114,17 +114,17 @@ ALPHA         = seq(0, 1, by = .05)
 TRAIN_DATASETS     = c("TCGA_PAAD","CPTAC")  
 TRAIN_PREFIX       = paste0(TRAIN_DATASETS, collapse = ".")
 METHOD_TRANS_TRAIN = "rank"
-NGENE              = 2000#c(1000,2500)#c(1000,5000)
+NGENE              = c(2000,5000)#c(1000,2500)#c(1000,5000)
 TOL                = 1e-4
 MAXIT              = 6000
-K_VALS             = 3:4#2:12#2:16   #= c(2,3,4,5)
-LAMBDA_VALS        = c(.1,1)#c(1e-4,1e-3,1e-2,.1,1,10)#,seq(.2,.9,by=.1)   #10^seq(-3,3)#10^seq(-4,4)
-ETA_VALS           = .7#seq(0,1,by=.1)#c(0,.01,.1,.5,.9)#c(0,.01)#c(.01,.1,.5,.9)#seq(.1,.9,by=.1)
+K_VALS             = 2:12#2:16   #= c(2,3,4,5)
+LAMBDA_VALS        = c(1e-4,1e-3,1e-2,.1,1,10)#,seq(.2,.9,by=.1)   #10^seq(-3,3)#10^seq(-4,4)
+ETA_VALS           = seq(0,1,by=.1)#c(0,.01,.1,.5,.9)#c(0,.01)#c(.01,.1,.5,.9)#seq(.1,.9,by=.1)
 LAMBDAW_VALS       = 0#10^seq(-3,3)#10^seq(-4,4)
 LAMBDAH_VALS       = 0#10^seq(-3,3)#10^seq(-4,4)
 NTOP               = 50#c(25,50,75)
 NFOLD              = 5
-PKG_VERSION        = utils::packageDescription("coxNMF", fields = "RemoteRef")
+PKG_VERSION        = utils::packageDescription("DeSurv", fields = "RemoteRef")
 GIT_BRANCH         = gert::git_branch()
 
 # load top_genes and colors into global environment 
@@ -242,20 +242,23 @@ list(
         X = data_folds$data_train[[f]]$ex
         y = data_folds$data_train[[f]]$sampInfo$time
         d = data_folds$data_train[[f]]$sampInfo$event
-        
-        run_warmstarts_cv(X=X,y=y,delta=d,
-                          params=param_grid,
-                          ninit=NINIT, alpha=ALPHA, tol=TOL, maxit=MAXIT,
-                          verbose=FALSE,
-                          path_fits = path_fits)
-        
+        if(!is_valid_fit(path=path_fits,alpha=ALPHA,ninit=NINIT)){
+          run_warmstarts_cv(X=X,y=y,delta=d,
+                            params=param_grid,
+                            ninit=NINIT, alpha=ALPHA, tol=TOL, maxit=MAXIT,
+                            verbose=FALSE,
+                            path_fits = path_fits)
+        }else{
+          path_fits
+        }
       },
       pattern = map(param_list),
       iteration = "list",
       format    = "file",
       resources = tar_resources(
         crew = tar_resources_crew(controller = "cv")
-      )
+      ),
+      cue = tar_cue(mode = "never")
     ),
     
     # compile cv metrics into list
@@ -577,9 +580,8 @@ list(
       tar_target(
         selected_factors_desurv,
         {
-          browser()
           save_dir = file.path(dirname(dirname(cv_runs[[1]])),"factor_selection","desurv")
-          dir.create(save_dir,showWarnings = FALSE)
+          dir.create(save_dir,showWarnings = FALSE,recursive = TRUE)
           path = file.path(save_dir,"factor_selection.csv")
           build_factor_selection_table(tops_desurv$top_genes,path)
         },
@@ -590,7 +592,7 @@ list(
         selected_factors_std,
         {
           save_dir = file.path(dirname(dirname(cv_runs[[1]])),"factor_selection","std")
-          dir.create(save_dir,showWarnings = FALSE)
+          dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
           path = file.path(save_dir,"factor_selection.csv")
           build_factor_selection_table(tops_std$top_genes,path)
         },
@@ -603,13 +605,21 @@ list(
       tar_target(
         clusters_desurv,
         {
+          if(!file.exists(selected_factors_desurv)){
+            stop("first generate factor selection table for desurv")
+          }
+          tbl = read.csv(selected_factors_desurv)
+          sel = tbl$factor[tbl$selected]
+          if(all(!sel)){
+            stop("No factor selected for desurv clustering, please select at least 1")
+          }
           data=data_val_filtered[[1]]
           val_dataset = data$dataname
           dir = create_filepath_clustering_output(ngene, TOL, MAXIT, PKG_VERSION, 
                                                   GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN, 
                                                   ntop, val_dataset, "DeSurv")
           run_clustering(tops_desurv$top_genes,data,top_genes,colors,
-                         facs=c(1,3),plot=FALSE,dir=dir,
+                         facs=sel,plot=FALSE,dir=dir,
                          maxKcol = 5, maxKrow = 5)
         },
         pattern=map(data_val_filtered),
@@ -624,13 +634,21 @@ list(
       tar_target(
         clusters_std,
         {
+          if(!file.exists(selected_factors_std)){
+            stop("first generate factor selection table for std nmf")
+          }
+          tbl = read.csv(selected_factors_std)
+          sel = tbl$factor[tbl$selected]
+          if(all(!sel)){
+            stop("No factor selected for std nmf clustering, please select at least 1")
+          }
           data=data_val_filtered[[1]]
           val_dataset = data$dataname
           dir = create_filepath_clustering_output(ngene, TOL, MAXIT, PKG_VERSION, 
                                                   GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN, 
                                                   ntop, val_dataset, "stdNMF")
           run_clustering(tops_std$top_genes,data,top_genes,colors,
-                         facs=c(2,3),plot=FALSE,dir=dir,
+                         facs=sel,plot=FALSE,dir=dir,
                          maxKcol = 5, maxKrow = 5)
         },
         pattern=map(data_val_filtered),
@@ -638,6 +656,116 @@ list(
         resources = tar_resources(
           crew = tar_resources_crew(controller = "med_mem")
         )
+      ),
+      
+      tar_target(
+        selected_nclusters_desurv,
+        {
+          save_dir = file.path(dirname(dirname(cv_runs[[1]])),"ncluster_selection","desurv")
+          dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
+          path = file.path(save_dir,"ncluster_selection.csv")
+          build_ncluster_selection_table(clusters_desurv,path)
+        },
+        format="file"
+      ),
+      
+      tar_target(
+        selected_nclusters_std,
+        {
+          save_dir = file.path(dirname(dirname(cv_runs[[1]])),"ncluster_selection","std")
+          dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
+          path = file.path(save_dir,"ncluster_selection.csv")
+          build_ncluster_selection_table(clusters_std,path)
+        },
+        format="file"
+      ),
+      
+      tar_target(
+        cluster_alignment_plot_desurv,
+        {
+          nclus_tbl = read.csv(selected_nclusters_desurv)
+          save_dir = file.path(dirname(dirname(cv_runs[[1]])),"cluster_alignment","desurv")
+          dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
+          path = file.path(save_dir,"cluster_alignment.pdf")
+          pdf(path)
+          plot_cluster_cor(clusters_desurv,tops_desurv$top_genes,nclus_tbl$nclus)
+          dev.off()
+        }
+      ),
+      
+      tar_target(
+        cluster_alignment_plot_std,
+        {
+          nclus_tbl = read.csv(selected_nclusters_std)
+          save_dir = file.path(dirname(dirname(cv_runs[[1]])),"cluster_alignment","std")
+          dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
+          path = file.path(save_dir,"cluster_alignment.pdf")
+          pdf(path)
+          plot_cluster_cor(clusters_std,tops_std$top_genes,nclus_tbl$nclus)
+          dev.off()
+        }
+      ), 
+      
+      tar_target(
+        cluster_alignment_table_desurv,
+        {
+          nclus_tbl = read.csv(selected_nclusters_desurv)
+          save_dir = file.path(dirname(dirname(cv_runs[[1]])),"cluster_alignment","desurv")
+          dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
+          path = file.path(save_dir,"cluster_alignment.csv")
+          build_cluster_alignment_table(nclus_tbl,clusters_desurv,path)
+        },
+        format="file"
+      ),
+      
+      tar_target(
+        cluster_alignment_table_std,
+        {
+          nclus_tbl = read.csv(selected_nclusters_std)
+          save_dir = file.path(dirname(dirname(cv_runs[[1]])),"cluster_alignment","std")
+          dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
+          path = file.path(save_dir,"cluster_alignment.csv")
+          build_cluster_alignment_table(nclus_tbl,clusters_std,path)
+        },
+        format="file"
+      ),
+      
+      tar_target(
+        aligned_clusters_desurv,
+        {
+          nclus_tbl = read.csv(selected_nclusters_desurv)
+          samp_clus = read.csv(cluster_alignment_table_desurv)
+          clus=clusters_desurv
+          for(i in 1:5){
+            dataname=clus[[i]]$data$dataname
+            nms = names(clus[[i]]$clus_res$clusCol[[nclus_tbl$nclus[i]]]$consensusClass)
+            y = samp_clus[clus[[i]]$clus_res$clusCol[[nclus_tbl$nclus[i]]]$consensusClass,dataname]
+            names(y) = nms
+            clus[[i]]$clus_res$clusCol[[nclus_tbl$nclus[i]]]$consensusClass=y
+
+            clus[[i]]$data$sampInfo$samp_cluster = clus[[i]]$clus_res$clusCol[[nclus_tbl$nclus[i]]]$consensusClass
+          }
+          clus
+        }
+      ),
+      
+      tar_target(
+        aligned_clusters_std,
+        {
+          nclus_tbl = read.csv(selected_nclusters_std)
+          samp_clus = read.csv(cluster_alignment_table_std)
+          clus=clusters_std
+          for(i in 1:5){
+            dataname=clus[[i]]$data$dataname
+            nms = names(clus[[i]]$clus_res$clusCol[[nclus_tbl$nclus[i]]]$consensusClass)
+            y = samp_clus[clus[[i]]$clus_res$clusCol[[nclus_tbl$nclus[i]]]$consensusClass,dataname]
+            names(y) = nms
+            clus[[i]]$clus_res$clusCol[[nclus_tbl$nclus[i]]]$consensusClass=y
+            
+            clus[[i]]$data$sampInfo$samp_cluster = clus[[i]]$clus_res$clusCol[[nclus_tbl$nclus[i]]]$consensusClass
+          }
+          clus
+        }
       )
       
       

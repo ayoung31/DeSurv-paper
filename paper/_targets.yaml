@@ -1,2 +1,2 @@
 main:
-  store: store_PKG_VERSION=project_to_zero_std_beta_GIT_BRANCH=final_paper
+  store: store_PKG_VERSION=HEAD_GIT_BRANCH=master

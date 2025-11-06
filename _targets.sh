@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --mem=16g
+#SBATCH --mem=32g
 #SBATCH -t 1-00:00:00
 #SBATCH --output=logs/_targets.out
 #SBATCH --error=logs/_targets.err

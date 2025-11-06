@@ -1,0 +1,437 @@
+```{r}
+library(targets)
+library(dplyr)
+library(ggplot2)
+library(survival)
+library(survminer)
+library(cowplot)
+PKG_VERSION        = utils::packageDescription("coxNMF", fields = "RemoteRef")
+GIT_BRANCH         = gert::git_branch()
+store=paste0("store_PKG_VERSION=",PKG_VERSION,"_GIT_BRANCH=",GIT_BRANCH)
+tar_config_set(store=store)
+
+ntop = params$ntop
+ngene = params$ngene
+
+```
+
+
+## Model Overview
+
+We have developed an integrated framework that combines nonnegative matrix factorization (NMF) with Cox proportional hazards regression to identify latent gene expression factors associated with survival (Fig. 1A). As illustrated in Figure 1, the workflow begins by dividing subjects into training and validation datasets. In the case of cross-validation there are multiple training and validation folds. The training expression matrix ($X_{train}$) is then filtered to highly expressed and variable genes, and normalized. The semi-supervised NMF model is fit to the training data producing patient factor loadings ($H$), gene weights ($W$), and factor specific coefficients ($\beta$). By embedding the gene weights directly into the Cox partial likelihood, the model learns survival-prognostic gene contributions in a unified optimization framework. The model incorporates a balancing parameter $\alpha$ to control the relative influence of reconstruction error versus survival partial likelihood. The learned $W$ and $beta$ can then be directly applied to the validation data to estimate the predictive ability of the learned factors.
+
+
+```{r fig-schema, fig.cap="DeSurv overview. (A) Input data consist of a gene expression matrix ($X$), patient survival times ($t$), and event indicators ($\\delta$). (B) Subjects are divided into training and validation sets (or folds under cross-validation). (C) The training expression data are filtered to retain highly expressed and variable genes, followed by normalization. (D) The survival-driven NMF model is fit to the training data by jointly minimizing reconstruction error and maximizing Cox partial likelihood, thereby learning gene weights ($W$), patient factor loadings ($H$), and factor-specific survival coefficients ($\\beta$). (E) Validation data are restricted to the genes retained from training. (F) The fitted $W$ and $\\beta$ are applied to the validation data to compute a linear predictor ($\\hat{\\eta} = X_{test}^T W \\beta$), representing each patient’s predicted risk score. (G) Model performance is evaluated by comparing $\\hat{\\eta}$ to observed survival outcomes in the validation set, providing an unbiased assessment of prognostic discrimination.", fig.env='figure*', fig.pos='t', out.height= "4in", out.width='\\textwidth'}
+
+knitr::include_graphics("figures/model_schematic_simple.png")
+```
+
+
+
+## Cross-validation of NMF–Cox identifies parameter settings that balance prediction and reconstruction
+
+We evaluated performance across a grid of factor ranks (k), penalties, and values of $\alpha$. Cross-validated C-index varied modestly across conditions, with no consistent improvement for 
+$\alpha>0$. Instead, supervised extensions altered the orientation of latent factors while maintaining comparable discrimination. Figure \@ref(fig::fig-cv)A shows a heatmap of mean C-index across k and $\alpha$, and \@ref(fig::fig-cv)B illustrates C-index trends across $\alpha$ stratified by rank. 
+
+```{r fig-cv, fig.width = 6, fig.height= 5.5, fig.cap="A. Cross validated c-index over rank (k) with panels for various values of the trade-off parameter ($\\alpha$). B. Cross validated c-index over alpha with panels for various values of k. C. Heatmap of cross-validated c-index with columns k and rows alpha. D. Plots of various metrics used to choose k in the standard NMF setting." , fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
+tar_load_globals()
+
+cv_mets = paste0("cv_metrics_",ngene)
+tar_load(cv_mets)
+cv_metrics = get(cv_mets)
+rm(list=cv_mets)
+
+best_p = paste0("params_1se_",ngene)
+tar_load(best_p)
+best_params = get(best_p)
+rm(list=best_p)
+
+fit_s = paste0("fit_std_",ngene)
+tar_load(fit_s)
+fit_std = get(fit_s)
+rm(list=fit_s)
+
+cv_mets = paste0("cv_metrics_summary_",ngene)
+tar_load(cv_mets)
+avg_fold = get(cv_mets)
+rm(list=cv_mets)
+avg_fold$eta = round(avg_fold$eta,1)
+
+l=best_params$lambda
+e=best_params$eta
+avg_fold_fixed_lambda = avg_fold %>% filter(lambda==l & eta==e)
+
+heat = ggplot(avg_fold_fixed_lambda,aes(x=k,y=alpha,fill=c_mean))+
+  geom_tile()+
+  theme_classic(base_size=9)+theme(panel.grid = element_blank(),
+                                    axis.line  = element_blank())+
+  scale_x_continuous(expand=c(0,0),breaks=1:12)+
+  scale_y_continuous(expand=c(0,0),breaks = c(0,.25,.5,.75,1))+
+  labs(fill="CV C-index")+
+  theme(legend.position = "bottom",
+        legend.text = element_text(angle = 45))+
+  scale_fill_viridis_c(option="magma",direction=-1,labels=scales::label_number(accuracy=0.01),
+                       breaks=seq(.52,.62,by=.02),
+                       limits=c(.52,.64))
+# 
+# g <- ggplotGrob(heat)
+# leg = g$grobs[which(g$layout$name == "guide-box-bottom")][[1]]
+# heat = heat + theme(legend.position = "none")
+
+# avg_fold_sub_k = avg_fold_fixed_lambda %>% filter(k %in% c(3,6,9,12))
+# avg_fold_sub_k$k_lab = factor(avg_fold_sub_k$k, labels=paste0("k = ",c(3,6,9,12)))
+# 
+# panels = ggplot(avg_fold_sub_k, aes(x=alpha,y=c_mean))+
+#   geom_point()+
+#   geom_line()+
+#   geom_errorbar(aes(ymin=c_mean-c_sd, ymax = c_mean+c_sd))+
+#   theme_minimal(base_size=9)+
+#   scale_x_continuous(breaks=c(0,.25,.5,.75,1),labels=c("0","0.25","0.50","0.75","1"))+
+#   scale_y_continuous(limits=c(.5,.7))+
+#   theme(strip.background = element_rect(fill="white",color=NA),
+#         strip.text = element_text(color="black"))+
+#   facet_wrap(~k_lab)+
+#   labs(y="CV C-index")
+# 
+# plot_alphas = c(0,.35,.65,.95)
+# avg_fold_sub_alpha = avg_fold_fixed_lambda %>% filter(alpha %in% plot_alphas)
+# avg_fold_sub_alpha$alpha_lab = factor(avg_fold_sub_alpha$alpha, labels=paste0("alpha = ",plot_alphas))
+# 
+# panels_alpha = ggplot(avg_fold_sub_alpha, aes(x=k,y=c_mean))+
+#   geom_point()+
+#   geom_line()+
+#   geom_errorbar(aes(ymin=c_mean-c_sd, ymax = c_mean+c_sd))+
+#   scale_x_continuous(breaks=seq(2,12,by=2))+
+#   theme_minimal(base_size=9)+
+#   scale_y_continuous(limits=c(.5,.7))+
+#   theme(strip.background = element_rect(fill="white",color=NA),
+#         strip.text = element_text(color="black"))+
+#   facet_wrap(~alpha_lab)+
+#   labs(y="CV C-index")
+
+
+plots_std = plot(fit_std,what=c("cophenetic","dispersion","evar","residuals","silhouette","sparseness"),
+                 main=NULL,xlab="Rank (k)")+
+  theme_minimal(base_size = 9)+
+  theme(panel.grid.minor.x = element_blank(),
+        legend.position = "bottom")+
+  scale_x_continuous(breaks=seq(2,12,by=2))+
+  guides(color = guide_legend(nrow = 2, byrow = TRUE))
+
+# g <- ggplotGrob(plots_std)
+# leg_std = g$grobs[which(g$layout$name == "guide-box-bottom")][[1]]
+# plots_std=plots_std+theme(legend.position = "none")
+
+# top=plot_grid(panels_alpha,panels,ncol=2,rel_widths=c(3,3),labels=c("A","B"))
+# mid=plot_grid(heat,plots_std,ncol=2,rel_widths=c(2.5,3.5),labels=c("C","D"))
+# bottom=plot_grid(NULL,leg,NULL,NULL,leg_std,NULL,rel_widths = c(.5,1,.5,1,2,1),ncol=6)
+# plot_grid(top,mid,bottom,ncol=1,rel_heights = c(5,4,1))
+
+plot_grid(heat,plots_std,labels=c("A","B"))
+
+#save individual plots for presentations
+# ggsave(filename=paste0("paper/figures/cv_heatmap_ngene=",ngene,".tiff"),
+#        plot=heat + theme_minimal(base_size=12))
+# ggsave(filename=paste0("paper/figures/cv_panels_k_ngene=",ngene,".tiff"),
+#        plot=panels + theme_minimal(base_size=12),height=4.5)
+# ggsave(filename=paste0("paper/figures/cv_panels_alpha_ngene=",ngene,".tiff"),
+#        plot=panels_alpha + theme_minimal(base_size=12),height=4.5)
+# ggsave(filename=paste0("paper/figures/std_nmf_k_ngene=",ngene,".tiff"),
+#        plot=plots_std + theme_minimal(base_size=12)+theme(panel.grid.minor.x = element_blank(),
+#         legend.position = "bottom"),height=4.5)
+```
+
+## NMF–Cox factors generalize to independent cohorts in external validation
+
+To assess generalizability, models trained on TCGA-PAAD and CPTAC were applied to external cohorts including PACA, Moffitt, and Puleo. Factor exposures in validation datasets recapitulated subgroup structures identified in training and stratified patients into groups with distinct survival outcomes (Figure X). Factor correlation analyses (Figure X) confirmed reproducibility of core latent dimensions, particularly those separating basal-like and classical subtypes. Predictive accuracy in external cohorts was comparable to cross-validation results, with simpler models ($k\leq 5$) showing greater reproducibility. These findings indicate that NMF–Cox captures transferable biological signals across studies. 
+
+```{r fig-external, fig.width = 5, fig.height= 5, fig.cap="Model performance in valiation data. A. C-index for standard NMF vs DeSurv. B. Kaplan Meier curves by quantile of the linear predictor for standard NMF. C. Kaplan Meier curves by quantile of the linear predictor for DeSurv" , fig.env='figure*', fig.pos='t', out.height= "5in", out.width="5in"}
+
+fit_sb = paste0("fit_std_beta_",ngene)
+tar_load(fit_sb)
+fit_std_beta = get(fit_sb)
+rm(list=fit_sb)
+
+data_vcf = paste0("data_val_comb_filtered_",ngene)
+tar_load(data_vcf)
+data_val_filtered = get(data_vcf)
+rm(list=data_vcf)
+
+fit_con = paste0("fit_consensus_",ngene)
+tar_load(fit_con)
+fit_consensus = get(fit_con)
+rm(list=fit_con)
+
+datasets=VAL_DATASETS
+
+W = fit_std_beta$W
+beta = fit_std_beta$beta
+
+Xval = data_val_filtered$ex
+y = data_val_filtered$sampInfo$time
+delta = data_val_filtered$sampInfo$event
+
+genes = intersect(rownames(W),rownames(Xval))
+W = W[genes,]
+Xval = Xval[genes,]
+
+Z = t(Xval)%*%W
+lp = Z%*%beta
+
+c_std=numeric()
+lps_std=list()
+for(d in 1:length(datasets)){
+  idx = which(data_val_filtered$sampInfo$dataset == datasets[d])
+  lp = as.vector(Z[idx,]%*%beta)
+  ycur = y[idx]
+  dcur = delta[idx]
+  lps_std[[d]] = data.frame(lp=lp,dataset=datasets[d],y=ycur,d=dcur)
+  c_std[d] = cvwrapr::getCindex(lp,Surv(ycur,dcur))
+}
+lp_std=bind_rows(lps_std)
+
+
+W = fit_consensus$W
+beta = fit_consensus$beta
+
+Xval = data_val_filtered$ex
+y = data_val_filtered$sampInfo$time
+delta = data_val_filtered$sampInfo$event
+
+genes = intersect(rownames(W),rownames(Xval))
+W = W[genes,]
+Xval = Xval[genes,]
+
+Z = t(Xval)%*%W
+lp = Z%*%beta
+
+c_de=numeric()
+lps_de=list()
+for(d in 1:length(datasets)){
+  idx = which(data_val_filtered$sampInfo$dataset == datasets[d])
+  lp = as.vector(Z[idx,]%*%beta)
+  ycur = y[idx]
+  dcur = delta[idx]
+  lps_de[[d]] = data.frame(lp=lp,dataset=datasets[d],y=ycur,d=dcur)
+  c_de[d] = cvwrapr::getCindex(lp,Surv(ycur,dcur))
+}
+lp_de=bind_rows(lps_de)
+
+pdat = data.frame(std=c_std,desurv=c_de,dataset=datasets)
+df_long <- pdat %>%
+  pivot_longer(cols = c(std,desurv), names_to = "model", values_to = "value")
+df_long$dataset = factor(df_long$dataset,levels=c("Dijk","Moffitt_GEO_array", "PACA_AU_array","PACA_AU_seq","Puleo_array"),labels=c("Dijk","Moffitt","PACA array","PACA seq","Puleo"))
+lolli = ggplot(df_long, aes(y = reorder(dataset, value), x = value, color = model)) +
+  geom_line(aes(group = dataset), color = "grey70", linewidth = 0.8) + # connector line
+  geom_point(size = 3) +
+  theme_minimal(base_size = 9)+
+  theme(panel.grid.minor.x = element_blank(),
+        legend.position = "bottom")+
+  scale_x_continuous(limits=c(.5,.7))+
+  scale_color_discrete(name="",labels=c("DeSurv","NMF"))+
+  labs(x = "c-index", y = "")
+
+lp_std$lp_bin <- 1#cut(
+#   lp_std$lp,
+#   breaks = quantile(lp_std$lp, probs = c(0,.33,.66,1), na.rm = TRUE),  # quartiles
+#   include.lowest = TRUE,
+#   labels = c("low", "med", "high")
+# )
+
+lp_de$lp_bin <- cut(
+  lp_de$lp,
+  breaks = quantile(lp_de$lp, probs = c(0,.33,.66,1), na.rm = TRUE),  # quartiles
+  include.lowest = TRUE,
+  labels = c("low", "med", "high")
+)
+cox_std = coxph(Surv(y,d)~lp_bin,data=lp_std)
+cox_de = coxph(Surv(y,d)~as.factor(lp_bin),data=lp_de)
+
+sfit_std = survfit(Surv(y,d)~lp_bin,data=lp_std)
+sfit_de = survfit(Surv(y,d)~lp_bin,data=lp_de)
+
+qsurv_std = ggsurvplot(sfit_std,data=lp_std,pval = FALSE, legend.labs=c("low"),size=.5,censor=FALSE)
+std_surv = qsurv_std$plot+
+  theme_minimal(base_size = 9)+
+  theme(panel.grid.minor.x = element_blank(),
+        legend.position = "bottom")+
+  labs(title=paste0("NMF (BIC = ",sprintf("%.1f",BIC(cox_std)),")"))
+qsurv_de = ggsurvplot(sfit_de,data=lp_de,pval=FALSE, legend.labs=c("low","med","high"),size=.5,censor=FALSE)
+de_surv = qsurv_de$plot+
+  theme_minimal(base_size = 9)+
+  theme(panel.grid.minor.x = element_blank(),
+        legend.position = "bottom")+
+  labs(title=paste0("DeSurv (BIC = ",sprintf("%.1f",BIC(cox_de)),")"))
+
+bottom = plot_grid(std_surv,de_surv,rel_widths = c(1,1),labels=c("B","C"))
+plot_grid(lolli,bottom,nrow=2,labels=c("A",""),rel_heights = c(2,3))
+
+ggsave(filename="paper/figures/cindex_by_val_dataset.tiff",plot=lolli)
+```
+
+```{r}
+# tar_load(fit_a0)
+# tar_load(tops_a0)
+# 
+# W = fit_a0$W
+# beta = fit_a0$beta
+# Xval = data_val_filtered$ex
+# 
+# genes = intersect(rownames(W),rownames(Xval))
+# W = W[genes,]
+# Xval = Xval[genes,]
+# 
+# Z = t(Xval)%*%W
+# lp = Z%*%beta
+# Z_bin = apply(Z,2,function(x)x>median(x))
+# dat = as.data.frame(Z_bin)
+# dat$lp=as.numeric(lp)
+# dat$lp_bin = as.numeric(lp>median(lp))
+# dat$y = data_val_filtered$sampInfo$time
+# dat$delta = data_val_filtered$sampInfo$event
+# dat$dataset = data_val_filtered$sampInfo$dataset
+# # cvwrapr::getCindex(Surv(dat$y,dat$delta))
+# fitph=coxph(Surv(y,delta)~lp+strata(dataset),data=dat)
+# # print(summary(fitph))
+# 
+# 
+# fitsurv1 = survfit(Surv(y,delta)~lp_bin,data=dat)
+# names(fitsurv1$strata) = c("high","low")
+# p1 = ggsurvplot(fitsurv1,pval=TRUE,risk.table = TRUE)+
+#         labs(title="Linear predictor")
+# 
+# fitsurv2 = survfit(Surv(y,delta)~V8,data=dat)
+# names(fitsurv2$strata) = c("high","low")
+# p2 = ggsurvplot(fitsurv2,pval=TRUE,risk.table = TRUE)+
+#         labs(title="Factor 2")
+
+
+
+```
+
+
+
+
+## NMF–Cox uncovers biologically interpretable latent factors associated with clinical outcomes
+
+Despite limited performance gains from supervision, the latent factors identified by NMF–Cox exhibited strong biological interpretability. The projected covariates, $W^TX$, aligned with known clinical and molecular subtypes, including basal-like versus classical subgroups in pancreatic cancer (Figure X). Kaplan–Meier curves stratified by factor exposures revealed significant survival differences (Figure X), supporting the prognostic relevance of the factors. At the gene level, W highlighted pathway-level enrichment for immune signaling, stromal activity, and hallmark oncogenic processes. Overlap analysis (Figure X) demonstrated consistency with external signatures, confirming that NMF–Cox produces reproducible biological features.
+
+```{r fig-bio}
+# sinfos=list()
+# for(i in 1:5){
+#   sinfos[[i]]=clus[[i]]$data$sampInfo
+# }
+# sampInfo=bind_rows(sinfos)
+# 
+# fit = survfit(Surv(time,event)~samp_cluster,data=sampInfo)
+# p=ggsurvplot(fit,data=sampInfo,pval = TRUE,risk.table = TRUE,
+#              legend.labs=c("1","2","3"),legend.title="Cluster",
+#              pval.coord=c(0,.05))
+# ph1 = coxph(Surv(time,event)~as.factor(samp_cluster)+strata(dataset),data=sampInfo)
+# 
+# bottom=plot_grid(NULL,p$table,ncol=2,rel_widths = c(.2,8))
+# survplot=plot_grid(p$plot,bottom,nrow=2,rel_heights = c(2,1))
+# ggsave(filename="paper/figures/survival_clusters.tiff",plot=survplot,width=7,height=8)
+# 
+# ph2 = coxph(Surv(time,event)~as.factor(PurIST)+as.factor(DeCAF)+strata(dataset),data=sampInfo)
+# 
+# sampInfo$subtype = ifelse(sampInfo$PurIST=="Basal-like","Basal",
+#                           ifelse(sampInfo$DeCAF=="restCAF","restCAF","proCAF"))
+# table(sampInfo$samp_cluster,sampInfo$subtype)
+# table(sampInfo$samp_cluster,sampInfo$Elyada_CAF)
+# table(sampInfo$Puleo,sampInfo$samp_cluster)
+# 
+# tar_load(data_val)
+# for(i in 1:5){
+#   data_val[[i]]$ex = data_val[[i]]$ex[,data_val[[i]]$samp_keeps]
+#   data_val[[i]]$sampInfo = data_val[[i]]$sampInfo[data_val[[i]]$samp_keeps,]
+# }
+# 
+# ex=list()
+# genes = list()
+# samps = list()
+# gene_clus = list()
+# tops = unlist(tops_best_50_1000$top_genes[,c(1,3)])
+# for(i in 1:5){
+#   ex[[i]] = data_val[[i]]$ex
+#   genes[[i]] = intersect(rownames(ex[[i]]),tops)
+#   samps[[i]] = clus[[i]]$data$sampInfo
+#   gene_clus[[i]] = clus[[i]]$clus_res$clusRow[[2]]$consensusClass
+# }
+# 
+# # genes = Reduce(intersect,lapply(gene_clus,function(x) names(x)))
+# genes=Reduce(intersect,genes)
+# ex=lapply(ex,function(x) t(scale(t(x[genes,]))))
+# X = do.call('cbind',ex)
+# X = X[genes,]
+# sampInfo = do.call('rbind',samps)
+# col_anno = data.frame(DeSurv_cluster=as.factor(sampInfo$samp_cluster),
+#                       DeCAF = sampInfo$DeCAF,
+#                       PurIST = sampInfo$PurIST,
+#                       dataset=sampInfo$dataset
+#                       )
+# col_anno$DeCAF = ifelse(col_anno$DeCAF=="permCAF","proCAF","restCAF")
+# rownames(col_anno) = colnames(X)
+# X = X[,order(col_anno$DeSurv_cluster)]
+# col_anno = col_anno[order(col_anno$DeSurv_cluster),]
+# row_anno = data.frame(gene = genes)#,gene_cluster=as.factor(gene_clus[[1]][genes])
+# row_anno$`DeSurv factor` = as.factor(ifelse(genes %in% tops_best_50_1000$top_genes[,1],1,3))
+# rownames(row_anno) = row_anno$gene
+# row_anno$gene = NULL
+# X = X[order(row_anno$`DeSurv factor`),]
+# row_anno = row_anno[order(row_anno$`DeSurv factor`),,drop=FALSE]
+# 
+# min_val = -2
+# max_val = 4
+# ncolors <- 200
+# my_colors <- colorRampPalette(c("blue", "white", "red"))(ncolors)
+# 
+# # Create symmetric breaks centered at 0
+# breaks_centered <- c(
+#   seq(min_val, 0, length.out = ceiling(ncolors / 2) + 1),
+#   seq(0, max_val, length.out = floor(ncolors / 2) + 1)[-1]
+# )
+# annotation_colors = list(
+#   `DeSurv factor`=c(
+#     `1` = "lightgrey",
+#     `3` = "black" 
+#   ),
+#   DeSurv_cluster = c(
+#     `1` = "#F8766D",
+#     `2` = "#00BA38",
+#     `3` = "#619CFF"
+#   ),
+#   DeCAF = c(
+#     `proCAF` = "violetred2",
+#     `restCAF` = "cyan4"
+#   ),
+#   PurIST = c(
+#     `Basal-like` = "orange",
+#     `Classical` = "blue"
+#   ),
+#   dataset = c(
+#     `Dijk` = "slateblue1",
+#     `Moffitt_GEO_array` = "springgreen4",
+#     `PACA_AU_array` = "yellow3",
+#     `PACA_AU_seq` = "coral",
+#     `Puleo_array` = "dodgerblue3"
+#   )
+# )
+# png("paper/figures/heatmap.png",width=8,height=6,units="in",res=600)
+# pheatmap(X,
+#          annotation_col = col_anno,
+#          annotation_row = row_anno,
+#          annotation_colors = annotation_colors,
+#          cluster_rows = FALSE,
+#          cluster_cols = FALSE,
+#          color = my_colors,
+#          breaks = breaks_centered,
+#          show_colnames = FALSE,
+#          annotation_names_row = FALSE,
+#          show_rownames = FALSE)
+# dev.off()
+
+```
+
+
+

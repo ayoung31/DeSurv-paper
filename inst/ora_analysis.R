@@ -1,15 +1,15 @@
-tar_load(tops_best_50_1000)
-tops=tops_best_50_1000$top_genes
+tar_load(tops_desurv_50_2000)
+tops=tops_desurv_50_2000$top_genes
 organism = "org.Hs.eg.db"  #database what to use
-tar_load(data_filtered_1000)
-universe = rownames(data_filtered_1000$ex)
+tar_load(data_filtered_2000)
+universe = rownames(data_filtered_2000$ex)
 library(organism, character.only = TRUE)
 library(clusterProfiler)
 library(xlsx)
 library(ggplot2)
 library(enrichplot)
 
-i=2
+i=3
 gene_list_enrich = tops[,i]
 ego <- enrichGO(gene = gene_list_enrich,
                 OrgDb = organism,
@@ -20,6 +20,7 @@ ego <- enrichGO(gene = gene_list_enrich,
                 pvalueCutoff  = 0.05, 
                 qvalueCutoff  = 0.2, 
                 readable      = FALSE) 
+# dotplot(ego)
 #setwd(dir_data_intersection)
 saveRDS(ego, file = paste0("paper/figures/ORA_GO_",i,".Rds"))
 write.xlsx(ego, paste0("paper/figures/ORA_analysis_",i,".xls"),
@@ -46,7 +47,7 @@ write.xlsx(enrich_KEGG, paste0("paper/figures/ORA_analysis_",i,".xls"),
 ## 4 plot------------------------------------------------------------------
 i=3
 file=paste0("paper/figures/ORA_GO_FIGURES_",i,".pdf")
-ORA_GO <- readRDS(paste0("paper/figures/ORA_GO_",i,".Rds"))
+ORA_GO <- ego#readRDS(paste0("paper/figures/ORA_GO_",i,".Rds"))
 ORA_KEGG <- readRDS(paste0("paper/figures/ORA_KEGG_",i,".Rds"))
 
 if(dim(ORA_GO@result)[1]>0){

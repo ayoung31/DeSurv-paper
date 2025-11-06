@@ -1,10 +1,11 @@
 ntop=50
-method="best"
+ngene=5000
+method="desurv"
 tar_load_globals()
-tar_load(paste0("tops_",method,"_",ntop,"_1000"))
+tar_load(paste0("tops_",method,"_",ntop,"_",ngene))
 # tar_load(paste0("clusters_",method,"_",ntop,"_1000"))
 # clus=get(paste0("clusters_",method,"_",ntop,"_1000"))
-tops = get(paste0("tops_",method,"_",ntop,"_1000"))
+tops = get(paste0("tops_",method,"_",ntop,"_",ngene))
 tops = tops$top_genes
 tar_load(data_val)
 clus=list()
