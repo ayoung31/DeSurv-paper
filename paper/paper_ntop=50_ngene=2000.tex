@@ -419,7 +419,7 @@ any survival information, ensuring an unbiased evaluation of downstream
 prognostic performance.
 
 Expression heatmaps of the DeSurv prognostic signatures revealed three
-distinct transcriptional patterns across the external cohorts (Fig. XA).
+distinct transcriptional patterns across the external cohorts (Fig. 4A).
 Cluster 1 displayed high expression of the basal-like (Factor 3) gene
 set; Cluster 2 showed elevated expression of the immune/iCAF (Factor 1)
 signature and reduced basal activity; and Cluster 3 exhibited
@@ -430,15 +430,15 @@ between basal versus classical tumor states or iCAF versus myCAF stromal
 signatures.
 
 Additionally, DeSurv-derived clusters showed strong correspondence with
-established molecular classifiers. Column annotations in Fig. XA and the
-contingency table in Fig. XB demonstrate substantial overlap with PurIST
+established molecular classifiers. Column annotations in Fig. 4A and the
+contingency table in Fig. 4B demonstrate substantial overlap with PurIST
 and DeCAF subtype labels: for example, X\% of patients in Cluster 1 were
 classified as PurIST Basal-like and DeCAF proCAF, X\% of Cluster 2 as
 Classical + restCAF, and X\% of Cluster 3 as Classical + proCAF. The
 rarity of the Basal + restCAF subtype likely contributes to the
 discovery of 3 rather than 4 clusters. A chi-squared test confirmed a
 significant association between the DeSurv-defined clusters and existing
-classifier labels (\(\chi^2\)=X.XX, p = {[}value{]}).
+classifier labels (\(\chi^2\) = 210.16 p \textless{} 2.2e-16).
 
 We next assessed the prognostic relevance of these clusters using
 overall survival data from the external cohorts (Fig. XC--D). Because
@@ -447,10 +447,10 @@ datasets---without access to the expression or outcome data of the
 external cohorts---this analysis represents an independent validation of
 the model's predictive generalizability. Kaplan--Meier analysis
 demonstrated that the DeSurv-derived clusters were strongly associated
-with survival (p = {[}value{]}). As expected, the Basal-like cluster
-(Cluster X) was associated with the poorest survival, the Classical +
-restCAF cluster (Cluster X) exhibited the most favorable outcomes, and
-the Classical + proCAF cluster (Cluster X) showed intermediate survival.
+with survival (p = 4.8e-6). As expected, the Basal-like cluster (Cluster
+1) was associated with the poorest survival, the Classical + restCAF
+cluster (Cluster 2) exhibited the most favorable outcomes, and the
+Classical + proCAF cluster (Cluster 3) showed intermediate survival.
 This pattern mirrors previous findings describing the interplay between
 tumor-intrinsic and stromal subtypes in PDAC (e.g., (25)), supporting
 the robustness and biological validity of the DeSurv-derived signatures.
@@ -471,18 +471,13 @@ Next, we verify our findings at the cellular level using the Elyada
 scRNA-seq data (cite data). We found that our DeSurv factor 1 signature
 was expressed primarily in iCAF and B cells, factor 2 was expressed in
 Acinar and Classical PDAC 2, and factor 3 was expressed primarily in
-Basal-like PDAC cells (Figures 1B-E). This is consistent with our ORA
+Basal-like PDAC cells (Figures 4B-E). This is consistent with our ORA
 analysis which found that factor 1 was mostly immune and factor 3 was
 basal-like, and with the overlap we saw with published gene lists that
 identified factor 1 as iCAF/classical/immune and factor 3 as basal-like.
 Interestingly, we do not see a large overlap of factor 1 with the
 classical PDAC cell types despite some overlap with classical gene
-lists.
-
-\begin{verbatim}
-## Error in fitdistr(mahalanobis.sq.null[nonzero.values], "gamma", lower = 0.01) : 
-##   optimization failed
-\end{verbatim}
+lists. Need more here\ldots{}
 
 \begin{figure*}[t]
 
@@ -519,9 +514,8 @@ associated with poor survival and enriched for epithelial--mesenchymal
 transition and cell-cycle programs characteristic of aggressive tumor
 phenotypes. The normal/exocrine factor, while not prognostic, captured
 background pancreatic tissue signal and contributed to accurate
-reconstruction, demonstrating that DeSurv can disentangle technical and
-biological sources of variation while preserving those necessary for
-modeling.
+reconstruction, demonstrating that DeSurv can disentangle prognostic
+sources of variation while preserving biology.
 
 Importantly, DeSurv outperformed unsupervised NMF in cross-validated
 concordance index, achieving higher predictive accuracy with fewer
