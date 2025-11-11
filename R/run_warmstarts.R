@@ -13,24 +13,24 @@ run_warmstarts <- function(
   seeds              = 1:ninit
   flag_exist         = FALSE
   
-  dir.create(dirname(path_fits), recursive = TRUE, showWarnings = FALSE)
-  if(file.exists(path_fits)){
-    bundle_old = readRDS(path_fits)
-    exists = unlist(lapply(bundle_old,function(x) names(x$fits)==as.character(alpha)))
-    if(all(exists)){
-      if(length(bundle_old)==ninit){
-        return(path_fits)
-      }else{
-        seeds = setdiff(1:ninit,1:length(bundle_old))
-        flag_exist = TRUE
-      }
-    }
-    
-  }
+  # dir.create(dirname(path_fits), recursive = TRUE, showWarnings = FALSE)
+  # if(file.exists(path_fits)){
+  #   bundle_old = readRDS(path_fits)
+  #   exists = unlist(lapply(bundle_old,function(x) names(x$fits)==as.character(alpha)))
+  #   if(all(exists)){
+  #     if(length(bundle_old)==ninit){
+  #       return(path_fits)
+  #     }else{
+  #       seeds = setdiff(1:ninit,1:length(bundle_old))
+  #       flag_exist = TRUE
+  #     }
+  #   }
+  #   
+  # }
   
   # cl <- parallel::makeCluster(NINIT,setup_strategy="sequential")
   # registerDoParallel(cl)
-  doMC::registerDoMC(cores = ninit) 
+  # doMC::registerDoMC(cores = ninit) 
   
   bundle <- foreach::foreach(
     i = seeds,
@@ -85,10 +85,12 @@ run_warmstarts <- function(
     bundle = c(bundle_old,bundle)
   }
   
+  # 
+  # tmp <- paste0(path_fits, ".tmp")
+  # saveRDS(bundle, tmp, compress = "xz")
+  # file.rename(tmp, path_fits)
+  # 
+  # path_fits
   
-  tmp <- paste0(path_fits, ".tmp")
-  saveRDS(bundle, tmp, compress = "xz")
-  file.rename(tmp, path_fits)
-  
-  path_fits
+  return(bundle)
 }

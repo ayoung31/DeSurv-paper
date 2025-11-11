@@ -256,7 +256,7 @@ list(
       iteration = "list",
       format    = "file",
       resources = tar_resources(
-        crew = tar_resources_crew(controller = "cv")
+        crew = tar_resources_crew(controller = "med_mem")
       ),
       cue = tar_cue(mode = "never")
     ),
@@ -321,58 +321,16 @@ list(
       }
     ),
     
-    # get consensus W,H,beta for seeding at best param combo
     tar_target(
-      consensus,
+      fit_desurv,
       {
-        # browser()
-        mats = collect_W_H(best_params = params_1se,data_folds=data_folds,
-                           ngene=ngene,tol=TOL,maxit=MAXIT,nfold=NFOLD,
-                           pkg_version=PKG_VERSION,git_branch=GIT_BRANCH,
-                           train_prefix=TRAIN_PREFIX,ninit=NINIT,
-                           method_trans_train=METHOD_TRANS_TRAIN)
-        Ws = mats$Ws
-        Hs = mats$Hs
-        
-        res1 <- align_W_folds(Ws, ref = "auto", rows="union",tau = 0.25, 
-                              consensus = "median")
-        res2 <- align_W_folds(Hs, ref = "auto", rows="union",tau = 0.25, 
-                              consensus = "median")
-        
-        W_con = res1$consensus_W
-        H_con = res2$consensus_W
-        
-        list(H_con=H_con,W_con=W_con)
-        
-      }
-    ),
-    
-    tar_target(
-      fit_consensus,
-      {
-        H_con = consensus$H_con
-        W_con = consensus$W_con
-        
-        genes=intersect(rownames(W_con),rownames(data_filtered$ex))
-        X_con = data_filtered$ex[genes,]
-        W_con = W_con[genes,]
-        
-        glmnet_fit = glmnet(t(X_con)%*%W_con,
-                            Surv(data_filtered$sampInfo$time,
-                                 data_filtered$sampInfo$event),
-                            family="cox",
-                            alpha=params_1se$eta,
-                            lambda=LAMBDA_VALS)
-        beta_con = as.vector(coef(glmnet_fit,s=params_1se$lambda))
-        
         run_coxNMF(
-          X=X_con, y=data_filtered$sampInfo$time, delta=data_filtered$sampInfo$event, 
+          X=data_filtered$ex, y=data_filtered$sampInfo$time, delta=data_filtered$sampInfo$event, 
           k=params_1se$k, alpha=params_1se$alpha, 
           lambda=params_1se$lambda, eta=params_1se$eta,
           lambdaW=0, lambdaH=0,
-          tol=1e-7, maxit=6000, verbose=FALSE,
-          ninit=1, imaxit=6000,
-          W0=W_con, H0=t(H_con), beta0=beta_con
+          tol=TOL/100, maxit=MAXIT, verbose=FALSE,
+          ninit=NINIT, imaxit=MAXIT
         )
         
       }
@@ -544,7 +502,7 @@ list(
       # get the top genes for each factor
       tar_target(
         tops_desurv,
-        get_top_genes(W=fit_consensus$W,ntop=ntop)
+        get_top_genes(W=fit_desurv$W,ntop=ntop)
       ),
       
       # visualize overlap of top genes with known lists
