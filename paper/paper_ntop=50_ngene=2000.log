@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.11.4)  5 NOV 2025 19:25
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.11.11)  11 NOV 2025 15:15
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -37,7 +37,7 @@ Package: inputenc 2024/02/08 v1.3d Input encoding file
 \inpenc@prehook=\toks17
 \inpenc@posthook=\toks18
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/generic/babel/babel.sty
-Package: babel 2025/10/22 v25.14 The multilingual framework for LuaLaTeX, pdfLaTeX and XeLaTeX
+Package: babel 2025/11/09 v25.15 The multilingual framework for LuaLaTeX, pdfLaTeX and XeLaTeX
 \babel@savecnt=\count283
 LaTeX Encoding Info:    Redeclaring text command \ij (encoding OT1) on input line 2050.
 LaTeX Encoding Info:    Redeclaring text command \IJ (encoding OT1) on input line 2052.
@@ -53,7 +53,7 @@ LaTeX Encoding Info:    Ignoring declaration for text command \SS (encoding ?) o
 \bbl@dirlevel=\count284
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/generic/babel/locale/en/babel-english.tex)
 Package babel Info: Importing font and identification data for english
-(babel)             from babel-en.ini. Reported on input line 4295.
+(babel)             from babel-en.ini. Reported on input line 4298.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/generic/babel-english/english.ldf
 Language: english 2017/06/06 v3.3r English support from the babel system
 Package babel Info: Hyphen rules for 'canadian' set to \l@english
@@ -1138,7 +1138,7 @@ File: mt-bch.cfg 2007/03/03 v1.5 microtype config. file: Bitstream Charter (RS)
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
 (hyperref)                be the same. Added a new anchor on input line 229.
 
-<../figures/model_schematic_training.pdf, id=106, 1011.78pt x 650.43pt>
+<../figures/model_schematic_training.pdf, id=109, 1011.78pt x 650.43pt>
 File: ../figures/model_schematic_training.pdf Graphic file (type pdf)
 <use ../figures/model_schematic_training.pdf>
 Package pdftex.def Info: ../figures/model_schematic_training.pdf  used on input line 268.
@@ -1155,7 +1155,7 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\alpha' on input line 280.
 
-</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-cv-1.pdf, id=107, 433.62pt x 397.485pt>
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-cv-1.pdf, id=110, 433.62pt x 397.485pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-cv-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-cv-1.pdf>
 Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-cv-1.pdf  used on input line 339.
@@ -1165,7 +1165,7 @@ LaTeX Font Info:    Font shape `T1/phv/m/it' in size <7> not available
 LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
 (Font)              scaled to size 6.64998pt on input line 380.
 [2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
-</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-bio-1.pdf, id=119, 469.755pt x 325.215pt>
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-bio-1.pdf, id=122, 469.755pt x 325.215pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-bio-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-bio-1.pdf>
 Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-bio-1.pdf  used on input line 394.
@@ -1176,12 +1176,12 @@ Underfull \vbox (badness 4752) has occurred while \output is active []
 [3 <../figures/model_schematic_training.pdf>]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-clus-1.pdf, id=154, 469.755pt x 325.215pt>
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-clus-1.pdf, id=157, 469.755pt x 325.215pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-clus-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-clus-1.pdf>
 Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-clus-1.pdf  used on input line 460.
 (pdftex.def)             Requested size: 505.69357pt x 289.103pt.
-</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-sc-1.pdf, id=155, 469.755pt x 325.215pt>
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-sc-1.pdf, id=158, 469.755pt x 325.215pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-sc-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-sc-1.pdf>
 Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-sc-1.pdf  used on input line 484.
@@ -1222,187 +1222,195 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 680.
 
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 7.12497pt on input line 715.
-LaTeX Font Info:    Calculating math sizes for size <7.5> on input line 715.
+(Font)              scaled to size 7.12497pt on input line 716.
+LaTeX Font Info:    Calculating math sizes for size <7.5> on input line 716.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7.5> on input line 715.
+(Font)              <7.5> on input line 716.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5.24997> on input line 715.
+(Font)              <5.24997> on input line 716.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <3.75> on input line 715.
+(Font)              <3.75> on input line 716.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 7.12497pt on input line 717.
+(Font)              scaled to size 7.12497pt on input line 718.
 
-Package natbib Warning: Citation `Raphael2017integrated' on page 7 undefined on input line 719.
+Package natbib Warning: Citation `Raphael2017integrated' on page 7 undefined on input line 720.
 
 
-Package natbib Warning: Citation `ellis2013clinical' on page 7 undefined on input line 720.
+Package natbib Warning: Citation `ellis2013clinical' on page 7 undefined on input line 721.
 
 LaTeX Font Info:    Font shape `T1/phv/m/it' in size <7.5> not available
-(Font)              Font shape `T1/phv/m/sl' tried instead on input line 721.
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 722.
 LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
-(Font)              scaled to size 7.12497pt on input line 721.
+(Font)              scaled to size 7.12497pt on input line 722.
 
-Package natbib Warning: Citation `moffitt2015virtual' on page 7 undefined on input line 722.
-
-
-Package natbib Warning: Citation `zhao2018gene' on page 7 undefined on input line 723.
+Package natbib Warning: Citation `moffitt2015virtual' on page 7 undefined on input line 723.
 
 
 Package natbib Warning: Citation `zhao2018gene' on page 7 undefined on input line 724.
 
 
-Package natbib Warning: Citation `puleo2018stratification' on page 7 undefined on input line 725.
+Package natbib Warning: Citation `zhao2018gene' on page 7 undefined on input line 725.
+
+
+Package natbib Warning: Citation `puleo2018stratification' on page 7 undefined on input line 726.
 
 [7]
-Underfull \hbox (badness 10000) in paragraph at lines 821--825
+Overfull \hbox (30.546pt too wide) detected at line 826
+[]
+ []
+
+
+Overfull \hbox (54.17964pt too wide) detected at line 847
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 859--863
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 827--831
+Underfull \hbox (badness 10000) in paragraph at lines 865--869
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 833--837
+Underfull \hbox (badness 10000) in paragraph at lines 871--875
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 839--843
+Underfull \hbox (badness 10000) in paragraph at lines 877--881
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 845--849
+Underfull \hbox (badness 10000) in paragraph at lines 883--887
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 851--855
+Underfull \hbox (badness 10000) in paragraph at lines 889--893
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 857--861
+Underfull \hbox (badness 10000) in paragraph at lines 895--899
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 863--867
+Underfull \hbox (badness 10000) in paragraph at lines 901--905
+
+ []
+
+[8]
+Underfull \hbox (badness 10000) in paragraph at lines 907--911
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 869--873
+Underfull \hbox (badness 10000) in paragraph at lines 913--917
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 875--879
+Underfull \hbox (badness 10000) in paragraph at lines 919--923
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 881--885
+Underfull \hbox (badness 10000) in paragraph at lines 925--930
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 887--892
+Underfull \hbox (badness 10000) in paragraph at lines 932--936
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 894--898
+Underfull \hbox (badness 10000) in paragraph at lines 938--942
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 900--904
+Underfull \hbox (badness 10000) in paragraph at lines 944--947
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 906--909
+Underfull \hbox (badness 10000) in paragraph at lines 949--954
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 911--916
+Underfull \hbox (badness 10000) in paragraph at lines 956--959
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 918--921
+Underfull \hbox (badness 10000) in paragraph at lines 961--966
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 923--928
+Underfull \hbox (badness 10000) in paragraph at lines 968--972
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 930--934
+Underfull \hbox (badness 10000) in paragraph at lines 974--978
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 936--940
+Underfull \hbox (badness 10000) in paragraph at lines 980--984
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 986--991
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 993--997
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 999--1003
 
  []
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[8]
-Underfull \hbox (badness 10000) in paragraph at lines 942--946
+
+Underfull \hbox (badness 10000) in paragraph at lines 1005--1009
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 948--953
+Underfull \hbox (badness 10000) in paragraph at lines 1011--1015
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 955--959
+Underfull \hbox (badness 10000) in paragraph at lines 1017--1021
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 961--965
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 967--971
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 973--977
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 979--983
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 985--989
+Underfull \hbox (badness 10000) in paragraph at lines 1023--1027
 
  []
 
 
 Package natbib Warning: There were undefined citations.
 
-[9
-
-] [10 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-sc-1.pdf>] 
+[9] [10 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_ntop=50_ngene=2000_files/figure-latex/fig-sc-1.pdf>] 
 enddocument/afterlastpage (AED): lastpage setting LastPage.
 (./paper_ntop=50_ngene=2000.aux)
  ***********
@@ -1410,21 +1418,21 @@ LaTeX2e <2025-11-01>
 L3 programming layer <2025-10-24>
  ***********
 Package rerunfilecheck Info: File `paper_ntop=50_ngene=2000.out' has not changed.
-(rerunfilecheck)             Checksum: 31D76BF8A662E640AB36B737B34031FD;4324.
+(rerunfilecheck)             Checksum: AB24AED0C2AD7B5879EF885504E237AD;4505.
  ) 
 Here is how much of TeX's memory you used:
- 31083 strings out of 469476
- 583249 string characters out of 5467114
- 1026746 words of memory out of 5000000
- 58618 multiletter control sequences out of 15000+600000
- 763732 words of font info for 374 fonts, out of 8000000 for 9000
+ 31103 strings out of 469476
+ 583464 string characters out of 5467113
+ 1030746 words of memory out of 5000000
+ 58619 multiletter control sequences out of 15000+600000
+ 764159 words of font info for 380 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 117i,14n,121p,1065b,1115s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvbo8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on paper_ntop=50_ngene=2000.pdf (10 pages, 7564375 bytes).
+ 117i,15n,121p,1065b,1115s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvbo8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
+Output written on paper_ntop=50_ngene=2000.pdf (10 pages, 7577247 bytes).
 PDF statistics:
- 390 PDF objects out of 1000 (max. 8388607)
- 306 compressed objects within 4 object streams
- 61 named destinations out of 1000 (max. 500000)
- 102102 words of extra memory for PDF output out of 106986 (max. 10000000)
+ 411 PDF objects out of 1000 (max. 8388607)
+ 324 compressed objects within 4 object streams
+ 69 named destinations out of 1000 (max. 500000)
+ 102110 words of extra memory for PDF output out of 106986 (max. 10000000)
 

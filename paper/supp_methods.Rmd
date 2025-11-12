@@ -1,0 +1,38 @@
+## Derivation of W update {.unnumbered}
+The W update can be derived directly from the projected coordinate descent update with a specific step size.
+
+Recall that the overall loss function is
+\begin{align}
+    \mathcal{L}(W,H,\beta) = \frac{(1-\alpha)}{2np} ||X - WH||^2_F - \frac{2 \alpha}{n_{event}} \ell(W,\beta) + \lambda(\xi||\beta||_1 + \frac{(1-\xi)}{2},
+\end{align}
+where $\ell(W,\beta)$ is the log-partial likelihood for the Cox model. Let $\nabla_W \ell$ represent the derivative of $\ell(W,\beta)$ with respect to $W$. Then the derivative of the overall loss with respect to $W$ is
+
+\begin{equation}
+  \frac{\partial L}{\partial W} = \frac{(1-\alpha)}{np}\left( WHH^T - XH^T \right) - \frac{2\alpha}{n_{event}} \nabla_W \ell
+\end{equation}
+
+Then the gradient descent update rule at iteration $t$ is
+\begin{align}
+  W^{(t)} &= W^{(t-1)} - \gamma \left( \frac{\partial L}{\partial W} \right) \nonumber \\
+          &= W^{(t-1)} - \gamma \left( \frac{(1-\alpha)}{np}\left( WHH^T - XH^T \right) - \frac{2\alpha}{n_{event}} \nabla_W \ell \right)\\
+\end{align}
+Let the step size $\gamma$ be defined as in CITE:
+\begin{equation}
+  \gamma = \frac{np}{(1-\alpha)}\frac{W}{WHH^T}
+\end{equation}
+Then the update becomes
+\begin{align}
+  W^{(t)} &= W^{(t-1)} -\frac{np}{(1-\alpha)}\frac{W}{WHH^T} \left( \frac{(1-\alpha)}{np}\left( WHH^T - XH^T \right) - \frac{2\alpha}{n_{event}} \nabla_W \ell \right) \nonumber \\
+          &= \frac{W}{WHH^T} XH^T + \frac{2\alpha np}{n_{event}(1-\alpha)} \nabla_W \ell \nonumber \\
+          &= W \odot \frac{XH^T + \frac{2\alpha np}{n_{event}(1-\alpha)} \nabla_W \ell }{WHH^T} \nonumber \\
+          &= W \odot \frac{\frac{(1-\alpha)}{np} XH^T + \frac{2\alpha}{n_{event}} \nabla_W \ell}{\frac{(1-\alpha)}{np} WHH^T}
+\end{align}
+Finally, projected coordinate descent projects the $W$ update in to the positive space
+\begin{equation}
+  W^{(t)} =  \max \left(W \odot \frac{\frac{(1-\alpha)}{np} XH^T + \frac{2\alpha}{n_{event}} \nabla_W \ell}{\frac{(1-\alpha)}{np}WHH^T}, 0\right)
+\end{equation}
+Since $W \geq 0$ this is equivalent to
+\begin{equation}
+  W^{(t)} =  W \odot \max \left( \frac{\frac{(1-\alpha)}{np} XH^T + \frac{2\alpha}{n_{event}} \nabla_W \ell}{\frac{(1-\alpha)}{np} WHH^T}, 0 \right)
+\end{equation}
+which is the $W$ update defined in \ref{W_update}.

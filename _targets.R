@@ -256,7 +256,7 @@ list(
       iteration = "list",
       format    = "file",
       resources = tar_resources(
-        crew = tar_resources_crew(controller = "med_mem")
+        crew = tar_resources_crew(controller = "cv")
       ),
       cue = tar_cue(mode = "never")
     ),

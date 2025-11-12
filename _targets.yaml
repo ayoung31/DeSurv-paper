@@ -1,2 +1,2 @@
 main:
-  store: store_PKG_VERSION=HEAD_GIT_BRANCH=master
+  store: store_PKG_VERSION=HEAD_GIT_BRANCH=new_init_bladder

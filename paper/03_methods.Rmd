@@ -26,25 +26,18 @@ where $h_0(t)$ is the baseline hazard and $\beta \in R^k$ are the factor specifi
 \end{equation}
 
 ## DeSurv {.unnumbered}
-Building on the definitions above, DeSurv combines the unsupervised NMF reconstruction loss and the supervised Cox partial likelihood into a single joint objective. The combined loss function is
-
+Building on the definitions above, DeSurv integrates the unsupervised NMF reconstruction loss with the supervised Cox partial likelihood into a single joint objective function. Because the NMF aims to minimize reconstruction error, whereas the Cox model aims to maximize partial likelihood, we reformulate the latter as a loss term by taking its negative. Thus, the combined objective to be minimized is:
 \begin{equation}\label{loss}
-    \mathcal{L}(W,H,\beta) = (1-\alpha) \mathcal{L}_{NMF}(X \approx WH) - \alpha \mathcal{L}_{cox}(W,\beta),
+    \mathcal{L}(W,H,\beta) = \frac{(1-\alpha)}{np} \mathcal{L}_{NMF}(X \approx WH) - \frac{2 \alpha}{n_{event}} \mathcal{L}_{cox}(W,\beta),
 \end{equation}
-
-where $\mathcal{L}_{cox}(W,\beta)$ is the elastic net penalized log partial likelihood:
+where $\mathcal{L}_{cox}(W,\beta)$ is the elastic net penalized partial log-likelihood:
 \begin{equation}\label{pen_loglik}
-  \mathcal{L}_{cox}(W,\beta) = \ell(W,\beta) + \lambda(\xi||\beta||_1 + \frac{(1-\xi)}{2} ||\beta||^2_2),
+  \mathcal{L}_{cox}(W,\beta) = \ell(W,\beta) + \lambda(\xi||\beta||_1 + \frac{(1-\xi)}{2} ||\beta||^2_2).
 \end{equation}
 
-where $\lambda$ represents the penalty weight and $\xi$ is the balance parameter between the L1 and L2 penalty terms.
+Here $\lambda$ represents the penalty weight on $\beta$ and $\xi$ is the balance parameter between the L1 and L2 penalty terms.
 
-The hyperparameter $\alpha \in [0,1]$ controls the relative contribution of each component:
-\begin{itemize}
-\item $\alpha=0$ recovers standard NMF, focusing purely on reconstruction;
-\item $\alpha=1$ corresponds to a fully supervised Cox model in the low-dimensional space $Z=X^TW$
-\end{itemize}
-Intermediate values of $\alpha$ encourage discovery of latent molecular programs that are both biologically coherent and prognostically informative.
+The hyperparameter $\alpha \in [0,1]$ controls the relative contribution of each component. When $\alpha=0$, the model reduces to standard unsupervised NMF, focusing purely on reconstruction. When $\alpha>0$ the model encourages discovery of latent molecular programs that are both biologically coherent and prognostically informative.
 
 ## Optimization framework {.unnumbered}
 DeSurv is optimized using an alternating minimization scheme (Algorithm \ref{deSurv}) that iteratively updates $W$, $H$, and $\beta$ until convergence. The sub-problems for $H$ and $\beta$ are convex in the corresponding parameter conditional on the others.
@@ -54,7 +47,7 @@ DeSurv is optimized using an alternating minimization scheme (Algorithm \ref{deS
     \begin{spacing}{1.2} 
     \begin{algorithmic}[1]
         \Require $X \in \mathbb{R}_{\geq 0}^{p \times n}$, $y \in \mathbb{R}^n_{\geq 0}$, $\delta \in \mathbb{R}_{0,1}^{n}$, $W^{(0)}$, $H^{(0)}$, $\beta^{(0)}$, $tol$, $maxit$
-        \State $eps = \infty$
+        \State $eps = 0$
         \State $t = 0$
         \State $loss = 0$
         \While{$eps < tol$ \textbf{and} $t < maxit$}
@@ -87,13 +80,17 @@ Given $W$, the coefficients $\beta$ are updated by coordinate descent using elas
 where $S(.,\lambda\xi)$ is the soft-thresholding operator. The term $w(\tilde{\eta})_i$ is the $i$th diagonal element of the hessian of the partial log-likelihood and $z(\tilde{\eta})_i$ is an approximation of the Newton-Raphson update for $\tilde{\eta}$. Details can be found in @simon2011regularization. The parameters $(\lambda,\xi)$ control the strength and type of regularization.
 
 ### Coupled $W$ update {.unnumbered}
-The shared basis $W$ is updated through a hybrid multiplicative rule that incorporates both NMF reconstruction gradients and Cox partial likelihood gradients. 
+The shared basis $W$ is updated through a hybrid multiplicative rule that incorporates both NMF reconstruction gradients and Cox partial likelihood gradients. This update can also be derived from projected coordinate descent (See Supplemental Methods).
 \begin{align}
 \label{W_update}
 W^{(t+1)} = &W^{(t)} \odot \nonumber \\
 &\max \left( \frac{\frac{(1-\alpha)}{np}XH^T + \frac{2\alpha}{N_{event}}\nabla_W\ell(W^{(t)}, \beta)}{\frac{(1-\alpha)}{np}W^{(t)}HH^T }, 0 \right)
 \end{align}
-The quantity $\nabla_W\ell(W^{(t)}, \beta)$ denotes the gradient of the Cox partial likelihood with respect to $W$ evaluated at $W^{(t)}$. This update allows the survival signal to propagate into the latent factors while preserving nonnegativity.Backtracking and gradient balancing are used in this update to ensure decrease in the overall loss and avoid one component dominating the update.
+The quantity $\nabla_W\ell(W^{(t)}, \beta)$ denotes the gradient of the Cox partial likelihood with respect to $W$ evaluated at $W^{(t)}$. 
+\begin{equation}
+  \nabla_W \ell(W^{(t)}, \beta) = 
+\end{equation}
+This update allows the survival signal to propagate into the latent factors while preserving nonnegativity.Backtracking and gradient balancing are used in this update to ensure decrease in the overall loss and avoid one component dominating the update.
 
 ## Publicly Available Datasets Preprocessing {.unnumbered}
 We trained and validated DeSurv using seven publicly available pancreatic ductal adenocarcinoma (PDAC) transcriptomic datasets spanning both RNA-seq and microarray platforms (Table \@ref(tab:datasets)). The TCGA and CPTAC datasets were used for training the DeSurv model, and the remaining 5 were used as external validation. Samples from all datasets were filtered to include only non-metastatic primary PDAC samples. All datasets were log2 + 1 transformed and filtered to the top highly expressed and variable genes. The training data were rank transformed by subject to mitigate cross dataset batch effects and combined, restricting to genes that were kept in each dataset.
