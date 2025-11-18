@@ -5,7 +5,7 @@ library(ggplot2)
 library(survival)
 library(survminer)
 library(cowplot)
-PKG_VERSION        = utils::packageDescription("coxNMF", fields = "RemoteRef")
+PKG_VERSION        = utils::packageDescription("DeSurv", fields = "RemoteRef")
 GIT_BRANCH         = gert::git_branch()
 store=paste0("store_PKG_VERSION=",PKG_VERSION,"_GIT_BRANCH=",GIT_BRANCH)
 tar_config_set(store=store)
@@ -28,87 +28,68 @@ knitr::include_graphics("figures/model_schematic_simple.png")
 
 
 
-## Cross-validation of NMF–Cox identifies parameter settings that balance prediction and reconstruction
+## Bayesian optimisation replaces exhaustive cross-validation
 
-We evaluated performance across a grid of factor ranks (k), penalties, and values of $\alpha$. Cross-validated C-index varied modestly across conditions, with no consistent improvement for 
-$\alpha>0$. Instead, supervised extensions altered the orientation of latent factors while maintaining comparable discrimination. Figure \@ref(fig::fig-cv)A shows a heatmap of mean C-index across k and $\alpha$, and \@ref(fig::fig-cv)B illustrates C-index trends across $\alpha$ stratified by rank. 
+Rather than scanning a dense cross-validation grid, we rely on Bayesian
+optimisation (BO) to iteratively sample promising $(k, \alpha)$ combinations.
+Each BO step runs a full CV evaluation, and a Gaussian-process surrogate guides
+the search toward configurations that maximise the validation C-index. Figure
+\@ref(fig:fig-bo-old) summarises the optimisation trajectory and the scatter of
+tested hyperparameters.
 
-```{r fig-cv, fig.width = 6, fig.height= 5.5, fig.cap="A. Cross validated c-index over rank (k) with panels for various values of the trade-off parameter ($\\alpha$). B. Cross validated c-index over alpha with panels for various values of k. C. Heatmap of cross-validated c-index with columns k and rows alpha. D. Plots of various metrics used to choose k in the standard NMF setting." , fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
+```{r fig-bo-old, fig.width = 6, fig.height= 5.5, fig.cap="A. Overview of the DeSurv training and Bayesian optimisation workflow. B. Mean validation C-index achieved at each Bayesian-optimisation evaluation. C. Parameter combinations explored by Bayesian optimisation, coloured by validation C-index. D. Conventional NMF diagnostics (cophenetic, dispersion, residuals, explained variance, silhouette, and sparseness)." , fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
 tar_load_globals()
 
-cv_mets = paste0("cv_metrics_",ngene)
-tar_load(cv_mets)
-cv_metrics = get(cv_mets)
-rm(list=cv_mets)
+bo_hist = "desurv_bo_history"
+tar_load(bo_hist)
+bo_history_path = get(bo_hist)
+rm(list=bo_hist)
+bo_history = read.csv(bo_history_path, stringsAsFactors = FALSE)
+bo_history = bo_history[order(bo_history$eval_id), , drop = FALSE]
+bo_history = bo_history[bo_history$status == "ok" & !is.na(bo_history$mean_cindex), , drop = FALSE]
+bo_history$evaluation = seq_len(nrow(bo_history))
+bo_history$stage = factor(
+  bo_history$stage,
+  levels = c("init", "bo"),
+  labels = c("Initial design", "BO iteration")
+)
+bo_history$is_best = FALSE
+if (nrow(bo_history) > 0) {
+  bo_history$is_best[which.max(bo_history$mean_cindex)] = TRUE
+}
 
-best_p = paste0("params_1se_",ngene)
+best_p = "params_best"
 tar_load(best_p)
 best_params = get(best_p)
 rm(list=best_p)
 
-fit_s = paste0("fit_std_",ngene)
+fit_s = "fit_std"
 tar_load(fit_s)
 fit_std = get(fit_s)
 rm(list=fit_s)
 
-cv_mets = paste0("cv_metrics_summary_",ngene)
-tar_load(cv_mets)
-avg_fold = get(cv_mets)
-rm(list=cv_mets)
-avg_fold$eta = round(avg_fold$eta,1)
+traj_plot = ggplot(bo_history, aes(x = evaluation, y = mean_cindex, color = stage)) +
+  geom_line(linewidth = 0.4) +
+  geom_point(size = 2) +
+  geom_point(
+    data = subset(bo_history, is_best),
+    shape = 8,
+    size = 3,
+    color = "black",
+    stroke = 1
+  ) +
+  theme_minimal(base_size = 9) +
+  labs(x = "Evaluation", y = "Mean validation C-index", color = NULL) +
+  theme(legend.position = "bottom")
 
-l=best_params$lambda
-e=best_params$eta
-avg_fold_fixed_lambda = avg_fold %>% filter(lambda==l & eta==e)
+param_plot = ggplot(bo_history, aes(x = k, y = alpha, color = mean_cindex, shape = stage)) +
+  geom_point(size = 2.5) +
+  scale_color_viridis_c(option = "magma", direction = -1) +
+  theme_minimal(base_size = 9) +
+  labs(x = "k", y = expression(alpha), color = "Mean C-index", shape = NULL) +
+  theme(legend.position = "bottom")
 
-heat = ggplot(avg_fold_fixed_lambda,aes(x=k,y=alpha,fill=c_mean))+
-  geom_tile()+
-  theme_classic(base_size=9)+theme(panel.grid = element_blank(),
-                                    axis.line  = element_blank())+
-  scale_x_continuous(expand=c(0,0),breaks=1:12)+
-  scale_y_continuous(expand=c(0,0),breaks = c(0,.25,.5,.75,1))+
-  labs(fill="CV C-index")+
-  theme(legend.position = "bottom",
-        legend.text = element_text(angle = 45))+
-  scale_fill_viridis_c(option="magma",direction=-1,labels=scales::label_number(accuracy=0.01),
-                       breaks=seq(.52,.62,by=.02),
-                       limits=c(.52,.64))
-# 
-# g <- ggplotGrob(heat)
-# leg = g$grobs[which(g$layout$name == "guide-box-bottom")][[1]]
-# heat = heat + theme(legend.position = "none")
-
-# avg_fold_sub_k = avg_fold_fixed_lambda %>% filter(k %in% c(3,6,9,12))
-# avg_fold_sub_k$k_lab = factor(avg_fold_sub_k$k, labels=paste0("k = ",c(3,6,9,12)))
-# 
-# panels = ggplot(avg_fold_sub_k, aes(x=alpha,y=c_mean))+
-#   geom_point()+
-#   geom_line()+
-#   geom_errorbar(aes(ymin=c_mean-c_sd, ymax = c_mean+c_sd))+
-#   theme_minimal(base_size=9)+
-#   scale_x_continuous(breaks=c(0,.25,.5,.75,1),labels=c("0","0.25","0.50","0.75","1"))+
-#   scale_y_continuous(limits=c(.5,.7))+
-#   theme(strip.background = element_rect(fill="white",color=NA),
-#         strip.text = element_text(color="black"))+
-#   facet_wrap(~k_lab)+
-#   labs(y="CV C-index")
-# 
-# plot_alphas = c(0,.35,.65,.95)
-# avg_fold_sub_alpha = avg_fold_fixed_lambda %>% filter(alpha %in% plot_alphas)
-# avg_fold_sub_alpha$alpha_lab = factor(avg_fold_sub_alpha$alpha, labels=paste0("alpha = ",plot_alphas))
-# 
-# panels_alpha = ggplot(avg_fold_sub_alpha, aes(x=k,y=c_mean))+
-#   geom_point()+
-#   geom_line()+
-#   geom_errorbar(aes(ymin=c_mean-c_sd, ymax = c_mean+c_sd))+
-#   scale_x_continuous(breaks=seq(2,12,by=2))+
-#   theme_minimal(base_size=9)+
-#   scale_y_continuous(limits=c(.5,.7))+
-#   theme(strip.background = element_rect(fill="white",color=NA),
-#         strip.text = element_text(color="black"))+
-#   facet_wrap(~alpha_lab)+
-#   labs(y="CV C-index")
-
+bo_panel = plot_grid(traj_plot, param_plot, labels = c("B", "C"), ncol = 2)
 
 plots_std = plot(fit_std,what=c("cophenetic","dispersion","evar","residuals","silhouette","sparseness"),
                  main=NULL,xlab="Rank (k)")+
@@ -118,27 +99,15 @@ plots_std = plot(fit_std,what=c("cophenetic","dispersion","evar","residuals","si
   scale_x_continuous(breaks=seq(2,12,by=2))+
   guides(color = guide_legend(nrow = 2, byrow = TRUE))
 
-# g <- ggplotGrob(plots_std)
-# leg_std = g$grobs[which(g$layout$name == "guide-box-bottom")][[1]]
-# plots_std=plots_std+theme(legend.position = "none")
+img = image_read_pdf("figures/model_schematic_cv.pdf",density=300)
+pdf_panel <- ggdraw() + draw_image(img)
 
-# top=plot_grid(panels_alpha,panels,ncol=2,rel_widths=c(3,3),labels=c("A","B"))
-# mid=plot_grid(heat,plots_std,ncol=2,rel_widths=c(2.5,3.5),labels=c("C","D"))
-# bottom=plot_grid(NULL,leg,NULL,NULL,leg_std,NULL,rel_widths = c(.5,1,.5,1,2,1),ncol=6)
-# plot_grid(top,mid,bottom,ncol=1,rel_heights = c(5,4,1))
-
-plot_grid(heat,plots_std,labels=c("A","B"))
-
-#save individual plots for presentations
-# ggsave(filename=paste0("paper/figures/cv_heatmap_ngene=",ngene,".tiff"),
-#        plot=heat + theme_minimal(base_size=12))
-# ggsave(filename=paste0("paper/figures/cv_panels_k_ngene=",ngene,".tiff"),
-#        plot=panels + theme_minimal(base_size=12),height=4.5)
-# ggsave(filename=paste0("paper/figures/cv_panels_alpha_ngene=",ngene,".tiff"),
-#        plot=panels_alpha + theme_minimal(base_size=12),height=4.5)
-# ggsave(filename=paste0("paper/figures/std_nmf_k_ngene=",ngene,".tiff"),
-#        plot=plots_std + theme_minimal(base_size=12)+theme(panel.grid.minor.x = element_blank(),
-#         legend.position = "bottom"),height=4.5)
+plot_grid(pdf_panel,
+          bo_panel,
+          plots_std,
+          nrow = 3,
+          labels = c("A", "", "D"),
+          rel_heights=c(2,1.5,1.5))
 ```
 
 ## NMF–Cox factors generalize to independent cohorts in external validation
@@ -432,6 +401,4 @@ Despite limited performance gains from supervision, the latent factors identifie
 # dev.off()
 
 ```
-
-
 

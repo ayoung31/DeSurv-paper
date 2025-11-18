@@ -10,7 +10,26 @@ tar_load_globals()
 tar_load(data_val)
 clus=list()
 for(i in 1:5){
-  data_val[[i]] = preprocess_data_val(data_val[[i]],1000,method_trans_train = "quant")
+  dataset <- data_val[[i]]
+  dataset <- DeSurv::preprocess_data(
+    X = dataset$ex,
+    y = dataset$sampInfo$time,
+    d = dataset$sampInfo$event,
+    dataset = dataset$sampInfo$dataset,
+    samp_keeps = dataset$samp_keeps,
+    ngene = 1000,
+    method_trans_train = "quant",
+    verbose = FALSE
+  )
+  dataname <- if (!is.null(names(data_val))) names(data_val)[i] else NULL
+  if (is.null(dataname) || !nzchar(dataname)) {
+    dataname <- dataset$dataname
+  }
+  if (is.null(dataname) || !nzchar(dataname)) {
+    dataname <- paste0("dataset_", i)
+  }
+  dataset$dataname <- dataname
+  data_val[[i]] = dataset
   clus[[i]]=run_clustering_v2(tops,data_val[[i]],top_genes,facs=c(2,6),
                               plot=FALSE,maxKcol = 5,maxKrow = 5)
 }

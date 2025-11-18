@@ -11,6 +11,7 @@ load_data_bladder_vig = function(raw_data){
   
   rownames(dat$ex) = dat$featInfo
   dat$ex = log2(dat$ex+1)
+  dat$dataname = "IMvigor"
   
   dat$samp_keeps = which(dat$sampInfo$Consensus != "NE-like")
   

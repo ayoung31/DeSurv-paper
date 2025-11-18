@@ -44,53 +44,76 @@ knitr::include_graphics("/work/users/a/y/ayoung31/DeSurv-paper/figures/model_sch
 ```
 
 
-## The DeSurv pipeline provides an automated method for choosing the NMF rank (k) and balancing parameter ($\alpha$)
-We implemented a five-fold cross-validation procedure to identify the optimal hyperparameters for the DeSurv model—namely, the number of latent factors ($k$) and the supervision strength ($\alpha$). In each fold, the gene-expression matrix and corresponding survival outcomes were partitioned into training and test sets at the patient level (Fig. 2A). The DeSurv model was trained on the training set to estimate the gene weights ($\hat{W}$) and regression coefficients ($\hat{\beta}$) (Fig. 2B). For each held-out test set, the expression matrix ($X_{Test}$) was projected onto the learned basis ($\hat{W}$) to obtain patient-level factor scores. These scores were multiplied by regression coefficidents ($\hat{\beta}$) to generate the linear predictor for each patient (Fig. 2C), which was then compared against the true survival outcomes to assess predictive performance (Fig. 2D).
+## Bayesian optimisation tunes the NMF rank (k) and supervision parameter ($\alpha$)
+Instead of exhaustively evaluating a cross-validation grid, we now couple DeSurv
+with Bayesian optimisation (BO) to explore the joint space of $k$, $\alpha$,
+and the penalty weights. Each BO evaluation runs a full cross-validation of a
+single parameter setting, and a Gaussian-process surrogate proposes new
+configurations that improve the mean validation C-index. The initial Latin
+hypercube design seeds the surrogate with diverse evaluations, and the
+sequential phase rapidly concentrates on high-performing regions. Figure
+\@ref(fig:fig-bo)B illustrates how C-index improves over the course of the BO
+run, while Figure \@ref(fig:fig-bo)C overlays all tested parameter combinations
+to highlight the neighbourhood around the selected $k=3$ and $\alpha=0.7$.
 
-We evaluated the cross-validated concordance index (C-index) across a grid of model ranks ($k=\{2, \dots,12\}$) and supervision parameters ($\alpha=\{0, 0.05, 0.10, \dots, 1\}$) (Fig. 2E). The cross-validated C-index varied modestly across the parameter space, but models with $\alpha>0$ consistently outperformed the unsupervised baseline ($\alpha=0$). For each value of $k$, there existed at least one $\alpha>0$ yielding higher predictive accuracy than the unsupervised equivalent, indicating that incorporating survival information improves predictive performance. Interestingly, the supervised models achieved their best performance at smaller values of $k$ compared with unsupervised NMF, suggesting that survival-guided factorization produces a more parsimonious yet more prognostic representation. Applying the one–standard error rule identified $k=3$ and $\alpha=0.7$ as the optimal configuration, balancing model simplicity and predictive accuracy.
+For comparison, we still report the standard NMF heuristics that are typically
+used when a supervised objective is unavailable (Fig. \@ref(fig:fig-bo)D). These
+metrics disagree on the optimal rank, underscoring the benefit of the
+Bayesian-optimised DeSurv procedure, which converges on a compact model that
+maximises held-out concordance.
+```{r fig-bo, fig.width = 6, fig.height= 5.5, fig.cap="A. Overview of the DeSurv training and Bayesian optimisation workflow. B. Mean validation C-index achieved at each Bayesian-optimisation evaluation; the star marks the final configuration. C. Parameter combinations explored by Bayesian optimisation, coloured by validation C-index. D. Conventional NMF diagnostics (cophenetic, dispersion, residuals, explained variance, silhouette, and sparseness) illustrating the absence of a clear consensus rank in the unsupervised setting." , fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
+tar_load_globals()
 
-For comparison, we also evaluated standard NMF using the NMF R package, which lacks an objective means for cross-validation. Conventional selection of the factor rank $k$ relies on heuristic metrics such as cophenetic correlation, dispersion, residual error, explained variance, silhouette score, and matrix sparseness (Fig. 2F). In our analysis, cophenetic correlation and dispersion peaked at $k=3$ and declined thereafter, indicating reduced clustering stability at higher ranks. In contrast, explained variance and reconstruction residuals plateaued around $k=7$, suggesting that additional factors beyond this point contribute little new information. The silhouette score was highest at $k=2-3$, implying better cluster separation at smaller ranks, whereas the sparsity of $W$ and $H$ was most balanced near $k=7$, favoring interpretability at moderate rank. These criteria therefore yield conflicting recommendations: stability metrics favor smaller $k$, while reconstruction and interpretability metrics favor moderate $k$. Consistent with this tension, survival prediction under unsupervised NMF did not improve appreciably until $k \geq 5$ and peaked at $k=6$. In contrast, DeSurv’s joint optimization identifies a simpler model ($k=3$) that achieves comparable or superior prognostic performance, underscoring the advantage of integrating survival supervision into the matrix factorization process.
-```{r fig-cv, fig.width = 6, fig.height= 5.5, fig.cap="A. Overview of DeSurv cross-validation pipeline. B. Heatmap of cross-validated c-index with columns k and rows alpha. C. Plots of various metrics used to choose k in the standard NMF setting." , fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
+bo_hist = "desurv_bo_history"
+tar_load(bo_hist)
+bo_history_path = get(bo_hist)
+rm(list=bo_hist)
+bo_history = read.csv(bo_history_path, stringsAsFactors = FALSE)
+bo_history = bo_history[order(bo_history$eval_id), , drop = FALSE]
+bo_history = bo_history[bo_history$status == "ok" & !is.na(bo_history$mean_cindex), , drop = FALSE]
+bo_history$evaluation = seq_len(nrow(bo_history))
+bo_history$stage = factor(
+  bo_history$stage,
+  levels = c("init", "bo"),
+  labels = c("Initial design", "BO iteration")
+)
+bo_history$is_best = FALSE
+if (nrow(bo_history) > 0) {
+  bo_history$is_best[which.max(bo_history$mean_cindex)] = TRUE
+}
 
-
-cv_mets = paste0("cv_metrics_",ngene)
-tar_load(cv_mets)
-cv_metrics = get(cv_mets)
-rm(list=cv_mets)
-
-best_p = paste0("params_1se_",ngene)
+best_p = "params_best"
 tar_load(best_p)
 best_params = get(best_p)
 rm(list=best_p)
 
-fit_s = paste0("fit_std_",ngene)
+fit_s = "fit_std"
 tar_load(fit_s)
 fit_std = get(fit_s)
 rm(list=fit_s)
 
-cv_mets = paste0("cv_metrics_summary_",ngene)
-tar_load(cv_mets)
-avg_fold = get(cv_mets)
-rm(list=cv_mets)
-avg_fold$eta = round(avg_fold$eta,1)
+traj_plot = ggplot(bo_history, aes(x = evaluation, y = mean_cindex, color = stage)) +
+  geom_line(linewidth = 0.4) +
+  geom_point(size = 2) +
+  geom_point(
+    data = subset(bo_history, is_best),
+    shape = 8,
+    size = 3,
+    color = "black",
+    stroke = 1
+  ) +
+  theme_minimal(base_size = 9) +
+  labs(x = "Evaluation", y = "Mean validation C-index", color = NULL) +
+  theme(legend.position = "bottom")
 
-l=best_params$lambda
-e=best_params$eta
-avg_fold_fixed_lambda = avg_fold %>% filter(lambda==l & eta==e)
+param_plot = ggplot(bo_history, aes(x = k, y = alpha, color = mean_cindex, shape = stage)) +
+  geom_point(size = 2.5) +
+  scale_color_viridis_c(option = "magma", direction = -1) +
+  theme_minimal(base_size = 9) +
+  labs(x = "k", y = expression(alpha), color = "Mean C-index", shape = NULL) +
+  theme(legend.position = "bottom")
 
-heat = ggplot(avg_fold_fixed_lambda,aes(x=k,y=alpha,fill=c_mean))+
-  geom_tile()+
-  theme_classic(base_size=9)+theme(panel.grid = element_blank(),
-                                    axis.line  = element_blank())+
-  scale_x_continuous(expand=c(0,0),breaks=1:12)+
-  scale_y_continuous(expand=c(0,0),breaks = c(0,.25,.5,.75,1))+
-  labs(fill="CV C-index")+
-  theme(legend.position = "bottom",
-        legend.text = element_text(angle = 45))+
-  scale_fill_viridis_c(option="magma",direction=-1,labels=scales::label_number(accuracy=0.01),
-                       breaks=seq(.52,.62,by=.02),
-                       limits=c(.52,.64))
-
+bo_panel = plot_grid(traj_plot, param_plot, labels = c("B", "C"), ncol = 2)
 
 plots_std = plot(fit_std,what=c("cophenetic","dispersion","evar","residuals","silhouette","sparseness"),
                  main=NULL,xlab="Rank (k)")+
@@ -100,14 +123,15 @@ plots_std = plot(fit_std,what=c("cophenetic","dispersion","evar","residuals","si
   scale_x_continuous(breaks=seq(2,12,by=2))+
   guides(color = guide_legend(nrow = 2, byrow = TRUE))
 
-
-bottom = plot_grid(heat,plots_std,labels=c("B","C"),ncol=2)
-
-
 img = image_read_pdf("figures/model_schematic_cv.pdf",density=300)
 pdf_panel <- ggdraw() + draw_image(img)
 
-plot_grid(pdf_panel, bottom, nrow = 2, labels = c("A", "B"),rel_heights=c(2,3))
+plot_grid(pdf_panel,
+          bo_panel,
+          plots_std,
+          nrow = 3,
+          labels = c("A", "", "D"),
+          rel_heights=c(2,1.5,1.5))
 ```
 
 ## DeSurv provides biologically interpretable gene signatures
@@ -189,7 +213,7 @@ dplots2=plot_grid(
   rel_widths = c(1, 0.25)
 )
 
-tar_load(fit_consensus_2000)
+tar_load(fit_consensus)
 top_genes$deCAF = list(proCAF=c("IGFL2","NOX4","VSNL1","BICD1","NPR3","ETV1","ITGA11","CNIH3","COL11A1"),                    restCAF=c("CHRDL1","OGN","PI16","ANK2","ABCA8","TGFBR3","FBLN5","SCARA5","KIAA1217"))
 names(top_genes)[3] = "Moffitt"
 names(top_genes)[4] = "Moffitt"
@@ -199,7 +223,7 @@ names(top_genes)[12] = "Elyada"
 temp=purrr::list_flatten(top_genes)
 ref_sigs=temp[!startsWith(names(temp),"Bailey") & !grepl("peri",names(temp)) & !startsWith(names(temp),"DECODER") & !startsWith(names(temp),"MSI") & !startsWith(names(temp),"PurISS")]
 
-W=fit_consensus_2000$W
+W=fit_consensus$W
 common_genes <- Reduce(intersect, list(rownames(W), unique(unlist(ref_sigs))))
 W <- W[common_genes, , drop = FALSE]
 
@@ -241,13 +265,13 @@ Additionally, DeSurv-derived clusters showed strong correspondence with establis
 
 We next assessed the prognostic relevance of these clusters using overall survival data from the external cohorts (Fig. XC–D). Because DeSurv was trained exclusively on the TCGA-PAAD and CPTAC datasets—without access to the expression or outcome data of the external cohorts—this analysis represents an independent validation of the model’s predictive generalizability. Kaplan–Meier analysis demonstrated that the DeSurv-derived clusters were strongly associated with survival (p = [value]). As expected, the Basal-like cluster (Cluster X) was associated with the poorest survival, the Classical + restCAF cluster (Cluster X) exhibited the most favorable outcomes, and the Classical + proCAF cluster (Cluster X) showed intermediate survival. This pattern mirrors previous findings describing the interplay between tumor-intrinsic and stromal subtypes in PDAC (e.g., [cite Decoder]), supporting the robustness and biological validity of the DeSurv-derived signatures.
 ```{r fig-clus}
-tar_load(aligned_clusters_desurv_50_2000)
-clus=aligned_clusters_desurv_50_2000
-tar_load(tops_desurv_50_2000)
-tops_desurv=tops_desurv_50_2000
+tar_load(aligned_clusters_desurv_50)
+clus=aligned_clusters_desurv_50
+tar_load(tops_desurv_50)
+tops_desurv=tops_desurv_50
 tar_load(data_val)
-tar_load(selected_factors_desurv_50_2000)
-tbl=read.csv(selected_factors_desurv_50_2000)
+tar_load(selected_factors_desurv_50)
+tbl=read.csv(selected_factors_desurv_50)
 factors=which(tbl$selected)
 
 sinfos=list()
@@ -445,8 +469,8 @@ sc_all <- RunUMAP(sc_all, dims = 1:20)
 sc_caf= RunUMAP(sc_caf,dims=1:20)
 sc_tum=RunUMAP(sc_tum,dims=1:20)
 
-tar_load(tops_desurv_50_2000)
-tops=tops_desurv_50_2000
+tar_load(tops_desurv_50)
+tops=tops_desurv_50
 
 desurv_genesets = as.list(tops$top_genes)
 factor_names <- paste0("DeSurv Factor ", seq_along(desurv_genesets))
@@ -620,6 +644,3 @@ plot_grid(full,NULL,gght,leg,ncol=4,rel_widths = c(8,.25,3,1),labels=c("","","E.
 
 
 ```
-
-
-

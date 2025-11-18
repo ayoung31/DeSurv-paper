@@ -5,6 +5,17 @@ library(crew.cluster)
 library(crew)
 suppressWarnings(suppressMessages(library(dplyr)))
 
+if (dir.exists("../DeSurv") && requireNamespace("pkgload", quietly = TRUE)) {
+  suppressMessages(
+    pkgload::load_all(
+      path = "../DeSurv",
+      export_all = FALSE,
+      helpers = FALSE,
+      attach_testthat = FALSE
+    )
+  )
+}
+
 NINIT=2
 NINIT_COLD = 5
 NINIT_FULL = 5
@@ -115,15 +126,29 @@ TRAIN_DATASETS     = c("Bladder")
 TRAIN_PREFIX       = paste0(TRAIN_DATASETS, collapse = ".")
 TRAIN_PERC         = .7
 METHOD_TRANS_TRAIN = "rank"
-NGENE              = 2000#c(2000,5000)#c(1000,2500)#c(1000,5000)
+NGENE_CONFIG       = c(2000) # set single value to fix or a range to tune via BO
+NGENE_DEFAULT      = NGENE_CONFIG[[1]]
+TUNE_NGENE         = length(unique(NGENE_CONFIG)) > 1
+NTOP_CONFIG        = c(50) # set length 1 to fix or range to tune via BO
+NTOP_DEFAULT       = NTOP_CONFIG[[1]]
+TUNE_NTOP          = length(unique(NTOP_CONFIG)) > 1
+LAMBDAW_CONFIG     = c(0)
+LAMBDAW_DEFAULT    = LAMBDAW_CONFIG[[1]]
+TUNE_LAMBDAW       = length(unique(LAMBDAW_CONFIG)) > 1
+LAMBDAH_CONFIG     = c(0)
+LAMBDAH_DEFAULT    = LAMBDAH_CONFIG[[1]]
+TUNE_LAMBDAH       = length(unique(LAMBDAH_CONFIG)) > 1
+DESURV_BO_BOUNDS   = list(
+  k_grid = list(lower = 2L, upper = 12L, type = "integer"),
+  alpha_grid = list(lower = 0, upper = 0.95, type = "continuous"),
+  lambda_grid = list(lower = 1e-5, upper = 1e5, scale = "log10"),
+  nu_grid = list(lower = 0, upper = 1, type = "continuous")
+)
 TOL                = 1e-4
 MAXIT              = 6000
-K_VALS             = 2:3#2:8#2:12#2:16   #= c(2,3,4,5)
-LAMBDA_VALS        = c(.01,.1)#c(1e-2,1e-1,1)#c(1e-4,1e-3,1e-2,.1,1,10)#,seq(.2,.9,by=.1)   #10^seq(-3,3)#10^seq(-4,4)
-ETA_VALS           = .7#seq(0,1,by=.2)#c(0,.01,.1,.5,.9)#c(0,.01)#c(.01,.1,.5,.9)#seq(.1,.9,by=.1)
-LAMBDAW_VALS       = 0#10^seq(-3,3)#10^seq(-4,4)
-LAMBDAH_VALS       = 0#10^seq(-3,3)#10^seq(-4,4)
-NTOP               = 50#c(25,50,75)
+STD_NMF_K_GRID     = 2:3#2:8#2:12#2:16   #= c(2,3,4,5)
+COXNET_LAMBDA_GRID = c(.01,.1)#c(1e-2,1e-1,1)#c(1e-4,1e-3,1e-2,.1,1,10)#,seq(.2,.9,by=.1)   #10^seq(-3,3)#10^seq(-4,4)
+COXNET_ALPHA_GRID  = .7#seq(0,1,by=.2)#c(0,.01,.1,.5,.9)#c(0,.01)#c(.01,.1,.5,.9)#seq(.1,.9,by=.1)
 NFOLD              = 5
 PKG_VERSION        = utils::packageDescription("DeSurv", fields = "RemoteRef")
 GIT_BRANCH         = gert::git_branch()
@@ -136,17 +161,6 @@ load("data/derv/cmbSubtypes_formatted.RData")
 list(
   
   ################# Training ###################
-  
-  # set up parameter grid
-  tar_target(
-    param_list,
-    {
-      p = create_param_grid_cv(k=K_VALS,lambda=LAMBDA_VALS,eta=ETA_VALS,
-                               lambdaW=LAMBDAW_VALS,lambdaH=LAMBDAH_VALS,
-                               nfold=NFOLD)
-    }
-    
-  ),
   
   # Raw data files for training datasets
   tar_target(
@@ -195,144 +209,209 @@ list(
   
   tar_target(
     data_val,
-    data_split$test
-  ),
-  
-  tar_map(
-    values = tibble(ngene=NGENE),
-    names = ngene,
-    
-    # Preprocess and filter data
-    tar_target(
-      data_filtered,
-      preprocess_data(data,
-                      ngene = ngene,
-                      method_trans_train = METHOD_TRANS_TRAIN)
-    ),
-    
-    # Split data into folds, preprocess and filter each fold
-    tar_target(
-      data_folds,
-      {
-        set_folds(data = data, nfold = NFOLD, ngene=ngene, seed=123,
-                  method_trans_train = METHOD_TRANS_TRAIN)
+    {
+      dataset <- data_split$test
+      dataname <- dataset$dataname
+      if (is.null(dataname) || !nzchar(dataname)) {
+        dataset_ids <- unique(dataset$sampInfo$dataset)
+        dataset_ids <- dataset_ids[!is.na(dataset_ids)]
+        dataname <- if (length(dataset_ids)) dataset_ids[[1]] else "validation"
       }
-    ),
-    
-    
-    # Perform cross validation across parameter grid
+      setNames(list(dataset), dataname)
+    }
+  ),
     tar_target(
-      cv_runs,
+      desurv_bo_results,
       {
-        print("running cv...")
-        # browser()
-        param_grid = param_list[[1]]
-        path_fits = create_filepath_warmstart_runs_CV(params=param_grid,
-                                                      ngene=ngene, tol=TOL, 
-                                                      maxit=MAXIT, nfold=NFOLD,
-                                                      pkg_version=PKG_VERSION, 
-                                                      git_branch=GIT_BRANCH, 
-                                                      train_prefix=TRAIN_PREFIX,
-                                                      method_trans_train=METHOD_TRANS_TRAIN)
-        
-        f = param_grid$fold
-        X = data_folds$data_train[[f]]$ex
-        y = data_folds$data_train[[f]]$sampInfo$time
-        d = data_folds$data_train[[f]]$sampInfo$event
-        if(!is_valid_fit(path=path_fits,alpha=ALPHA,ninit=NINIT)){
-          run_warmstarts_cv(X=X,y=y,delta=d,
-                            params=param_grid,
-                            ninit=NINIT, alpha=ALPHA, tol=TOL, maxit=MAXIT,
-                            verbose=FALSE,
-                            path_fits = path_fits)
-        }else{
-          path_fits
+        bounds <- DESURV_BO_BOUNDS
+        bounds <- maybe_add_numeric_bound(bounds, NGENE_CONFIG, "ngene", type = "integer")
+        bounds <- maybe_add_numeric_bound(bounds, NTOP_CONFIG, "ntop", type = "integer")
+        bounds <- maybe_add_numeric_bound(bounds, LAMBDAW_CONFIG, "lambdaW_grid", log_scale = TRUE)
+        bounds <- maybe_add_numeric_bound(bounds, LAMBDAH_CONFIG, "lambdaH_grid", log_scale = TRUE)
+        extra_args <- list(n_starts = NINIT)
+        if (!TUNE_NGENE) {
+          extra_args$ngene <- NGENE_DEFAULT
         }
+        if (!TUNE_NTOP) {
+          extra_args$ntop <- NTOP_DEFAULT
+        }
+        if (!TUNE_LAMBDAW) {
+          extra_args$lambdaW_grid <- LAMBDAW_DEFAULT
+        }
+        if (!TUNE_LAMBDAH) {
+          extra_args$lambdaH_grid <- LAMBDAH_DEFAULT
+        }
+
+        do.call(
+          DeSurv::desurv_cv_bayesopt,
+          c(
+            list(
+              X = data$ex,
+              y = data$sampInfo$time,
+              d = data$sampInfo$event,
+              dataset = data$sampInfo$dataset,
+              samp_keeps = data$samp_keeps,
+              preprocess = TRUE,
+              method_trans_train = METHOD_TRANS_TRAIN,
+              engine = "warmstart",
+              nfolds = NFOLD,
+              tol = TOL,
+              maxit = MAXIT,
+              bo_bounds = bounds,
+              n_init = BO_N_INIT,
+              n_iter = BO_N_ITER,
+              candidate_pool = BO_CANDIDATE_POOL,
+              exploration_weight = 0.01,
+              seed = 123,
+              cv_verbose = FALSE,
+              verbose = TRUE
+            ),
+            extra_args
+          )
+        )
       },
-      pattern = map(param_list),
-      iteration = "list",
-      format    = "file",
       resources = tar_resources(
         crew = tar_resources_crew(controller = "cv")
-      ),
-      cue = tar_cue(mode = "never")
-    ),
-    
-    # compile cv metrics into list
-    tar_target(
-      cv_metrics_list,
-      {
-        # browser()
-        param_grid = param_list[[1]]
-        bundle = readRDS(cv_runs)
-        compute_metrics_bundle(data_folds,bundle,param_grid$fold)
-        
-      },
-      pattern=map(cv_runs,param_list),
-      resources = tar_resources(
-        crew = tar_resources_crew(controller = "low_mem")
       )
-    ),
-    
-    # create dataframes of training and testing cv metrics
-    tar_target(
-      cv_metrics,
-      {
-        mets_train = dplyr::bind_rows(lapply(cv_metrics_list,`[[`,"mets_train"))
-        mets_test = dplyr::bind_rows(lapply(cv_metrics_list,`[[`,"mets_test"))
-        list(mets_train=mets_train,mets_test=mets_test)
-      }
-      
-    ),
-    
-    # select the best parameter combo based on cv metrics
-    tar_target(
-      cv_metrics_summary,
-      {
-        mets_test = cv_metrics$mets_test
-        avg_init = mets_test %>% group_by(k,fold,alpha,lambda,eta,lambdaW,lambdaH) %>%
-          summarize(c_mean_f = mean(c), pl_mean_f=mean(sloss))%>%
-          ungroup()
-        avg_fold = avg_init %>% group_by(k,alpha,lambda,eta,lambdaW,lambdaH) %>%
-          summarize(c_mean = mean(c_mean_f), pl_mean = mean(pl_mean_f),
-                    c_sd = sqrt(sum((c_mean_f-c_mean)^2)/(NFOLD*(NFOLD-1))), 
-                    pl_sd = sqrt(sum((pl_mean_f-pl_mean)^2)/(NFOLD*(NFOLD-1))))%>%
-          ungroup()
-        avg_fold
-        
-      }
     ),
     
     tar_target(
       params_best,
-      cv_metrics_summary[which.max(cv_metrics_summary$c_mean),]
+      standardize_bo_params(desurv_bo_results$best$params)
     ),
     
     tar_target(
-      params_1se,
+      ngene_value,
       {
-        max_c = cv_metrics_summary[which.max(cv_metrics_summary$c_mean),]
-        oneSE =  cv_metrics_summary %>% filter(c_mean > max_c$c_mean - max_c$c_sd)
-        oneSE_top = oneSE[order(oneSE$k,oneSE$alpha),]
-        oneSE_top[1,]
+        value <- params_best$ngene
+        if (is.null(value) || is.na(value)) {
+          as.integer(NGENE_DEFAULT)
+        } else {
+          as.integer(round(value))
+        }
+      }
+    ),
+    
+    tar_target(
+      ntop_value,
+      {
+        value <- params_best$ntop
+        if (is.null(value) || is.na(value)) {
+          as.integer(NTOP_DEFAULT)
+        } else {
+          as.integer(round(value))
+        }
+      }
+    ),
+    
+    tar_target(
+      lambdaW_value,
+      {
+        value <- params_best$lambdaW
+        if (is.null(value) || is.na(value)) {
+          as.numeric(LAMBDAW_DEFAULT)
+        } else {
+          as.numeric(value)
+        }
+      }
+    ),
+    
+    tar_target(
+      lambdaH_value,
+      {
+        value <- params_best$lambdaH
+        if (is.null(value) || is.na(value)) {
+          as.numeric(LAMBDAH_DEFAULT)
+        } else {
+          as.numeric(value)
+        }
+      }
+    ),
+    
+    tar_target(
+      training_results_dir,
+      results_root_dir(
+        ngene = ngene_value,
+        tol = TOL,
+        maxit = MAXIT,
+        pkg_version = PKG_VERSION,
+        git_branch = GIT_BRANCH,
+        train_prefix = TRAIN_PREFIX,
+        method_trans_train = METHOD_TRANS_TRAIN
+      )
+    ),
+    
+    tar_target(
+      desurv_bo_history,
+      {
+        path <- file.path(training_results_dir, "desurv_bo_history.csv")
+        utils::write.csv(desurv_bo_results$history, path, row.names = FALSE)
+        path
+      },
+      format = "file"
+    ),
+    
+    tar_target(
+      data_filtered,
+      {
+        prep <- DeSurv::preprocess_data(
+          X = data$ex,
+          y = data$sampInfo$time,
+          d = data$sampInfo$event,
+          dataset = data$sampInfo$dataset,
+          samp_keeps = data$samp_keeps,
+          ngene = ngene_value,
+          method_trans_train = METHOD_TRANS_TRAIN,
+          verbose = FALSE
+        )
+        prep$dataname <- data$dataname
+        prep
       }
     ),
     
     tar_target(
       fit_desurv,
       {
-        run_coxNMF(
-          X=data_filtered$ex, y=data_filtered$sampInfo$time, delta=data_filtered$sampInfo$event, 
-          k=params_1se$k, alpha=params_1se$alpha, 
-          lambda=params_1se$lambda, eta=params_1se$eta,
-          lambdaW=0, lambdaH=0,
-          tol=TOL/100, maxit=MAXIT, verbose=FALSE,
-          ninit=NINIT_FULL, imaxit=MAXIT
-        )
-        
-      }
+        seeds <- seq_len(NINIT_FULL)
+        fits <- vector("list", length(seeds))
+        scores <- rep(NA_real_, length(seeds))
+        for (i in seq_along(seeds)) {
+          fits[[i]] <- try(
+            desurv_fit(
+              X = data_filtered$ex,
+              y = data_filtered$sampInfo$time,
+              d = data_filtered$sampInfo$event,
+          k = params_best$k,
+          alpha = params_best$alpha,
+          lambda = params_best$lambda,
+          nu = params_best$nu,
+          lambdaW = lambdaW_value,
+          lambdaH = lambdaH_value,
+              seed = seeds[i],
+              tol = TOL / 100,
+              tol_init = TOL,
+              maxit = MAXIT,
+              imaxit = MAXIT,
+              ninit = 1,
+              parallel_init = FALSE,
+              verbose = FALSE
+            ),
+            silent = TRUE
+          )
+          if (!inherits(fits[[i]], "try-error") && !is.null(fits[[i]]$cindex)) {
+            scores[i] <- fits[[i]]$cindex
+          }
+        }
+        best_idx <- which.max(scores)
+        if (!length(best_idx) || is.na(scores[best_idx])) {
+          stop("No successful full-model fits were obtained.")
+        }
+        fits[[best_idx]]
+      },
+      resources = tar_resources(
+        crew = tar_resources_crew(controller = "full")
+      )
     ),
-    
     
     #################### competing methods ###############
     
@@ -340,7 +419,7 @@ list(
     ##### standard NMF package in R #####
     tar_target(
       fit_std,
-      nmf(data_filtered$ex,K_VALS,nrun=NINIT,method="lee",.options=paste0("p",NINIT)),
+      nmf(data_filtered$ex,STD_NMF_K_GRID,nrun=NINIT,method="lee",.options=paste0("p",NINIT)),
       resources = tar_resources(
         crew = tar_resources_crew(controller = "cv")
       )
@@ -349,7 +428,7 @@ list(
     tar_target(
       std_nmf_k_selection_plots,
       {
-        save_dir=file.path(dirname(dirname(cv_runs[[1]])),"std_nmf_k_selection")
+        save_dir=file.path(training_results_dir,"std_nmf_k_selection")
         dir.create(save_dir,showWarnings = FALSE)
         path = file.path(save_dir,paste0("std_nmf_k_selection_plots.png"))
         if (file.exists(path)) {
@@ -378,7 +457,7 @@ list(
         if(!file.exists(std_nmf_k_selection_plots)){
           stop("Standard NMF k selection plots not generated")
         }
-        build_std_nmf_k_selection_table(K_VALS,path,fit_std)
+        build_std_nmf_k_selection_table(STD_NMF_K_GRID,path,fit_std)
       },
     ),
     
@@ -409,18 +488,20 @@ list(
         Z = t(X)%*%W
         y = data_filtered$sampInfo$time
         d = data_filtered$sampInfo$event
+        strata <- interaction(d, data_filtered$sampInfo$dataset, drop = FALSE)
+        foldid <- caret::createFolds(strata, NFOLD, list = FALSE)
         
         gfit = list()
         mets = list()
         i=1
-        for(e in ETA_VALS){
+        for(alpha in COXNET_ALPHA_GRID){
           cv_fit = cv.glmnet(Z,
                              Surv(y,d),family="cox",type.measure="C",
-                             alpha=e, lambda=LAMBDA_VALS, foldid=data_folds$folds)
+                             alpha=alpha, lambda=COXNET_LAMBDA_GRID, foldid=foldid)
           
-          gfit[[as.character(e)]] = cv_fit
+          gfit[[as.character(alpha)]] = cv_fit
           ind = which(cv_fit$lambda==cv_fit$lambda.1se)
-          mets[[i]] = data.frame(eta = e, lambda=cv_fit$lambda.1se, cvm = cv_fit$cvm[ind])
+          mets[[i]] = data.frame(eta = alpha, lambda=cv_fit$lambda.1se, cvm = cv_fit$cvm[ind])
           
           i=i+1
         }
@@ -445,8 +526,8 @@ list(
     #                  data_filtered$sampInfo$event)
     #     tune_cox_elasticnet_1se(
     #       x = t(X), y_surv = y_surv, 
-    #       alpha_grid   = ETA_VALS, 
-    #       lambda_grid  = LAMBDA_VALS,        # if NULL, coxnet picks its own decreasing sequence 
+    #       alpha_grid   = COXNET_ALPHA_GRID, 
+    #       lambda_grid  = COXNET_LAMBDA_GRID,        # if NULL, coxnet picks its own decreasing sequence 
     #       nfolds       = 5, 
     #       type_measure = "C", 
     #       parallel     = FALSE, 
@@ -469,277 +550,298 @@ list(
     tar_target(
       data_val_filtered,
       {
-        preprocess_data(data_val,
-                        ngene = ngene,
-                        method_trans_train = METHOD_TRANS_TRAIN)
+        setNames(
+          lapply(
+            seq_along(data_val),
+            function(idx) {
+              dataset <- data_val[[idx]]
+              dataname <- names(data_val)[idx]
+              prep <- DeSurv::preprocess_data(
+                X = dataset$ex,
+                y = dataset$sampInfo$time,
+                d = dataset$sampInfo$event,
+                dataset = dataset$sampInfo$dataset,
+                samp_keeps = dataset$samp_keeps,
+                genes = rownames(data_filtered$ex),
+                ngene = ngene_value,
+                method_trans_train = METHOD_TRANS_TRAIN,
+                verbose = FALSE
+              )
+              prep$dataname <- dataname
+              prep
+            }
+          ),
+          names(data_val)
+        )
       }
     ),
     
     
-    tar_map(
-      values = tibble(ntop=NTOP),
-      names = ntop,
+    
+    #####  get top genes #####
+    
+    ### DeSurv
+    # get the top genes for each factor
+    tar_target(
+      tops_desurv,
+      get_top_genes(W = fit_desurv$W, ntop = ntop_value)
+    ),
+    
+    # visualize overlap of top genes with known lists
+    tar_target(
+      gene_overlap_desurv,
+      {
+        create_table(tops = tops_desurv$top_genes, gene_lists = top_genes,
+                     which.lists = "DECODER", color.lists = colors)
+      }
+    ),
+    
+    ### NMF
+    # get the top genes for each factor
+    tar_target(
+      tops_std,
+      {
+        W=fit_std_selected_k@fit@W
+        get_top_genes(W = W, ntop = ntop_value)
+      }
       
-      #####  get top genes #####
-      
-      ### DeSurv
-      # get the top genes for each factor
-      tar_target(
-        tops_desurv,
-        get_top_genes(W=fit_desurv$W,ntop=ntop)
-      ),
-      
-      # visualize overlap of top genes with known lists
-      tar_target(
-        gene_overlap_desurv,
-        {
-          create_table(tops = tops_desurv$top_genes, gene_lists = top_genes,
-                       which.lists = "DECODER", color.lists = colors)
-        }
-      ),
-      
-      ### NMF
-      # get the top genes for each factor
-      tar_target(
-        tops_std,
-        {
-          W=fit_std_selected_k@fit@W
-          get_top_genes(W=W,ntop=ntop)
-        }
-        
-      ),
-      
-      # table of top gene overlap
-      tar_target(
-        gene_overlap_std,
-        {
-          create_table(tops = tops_std$top_genes, gene_lists = top_genes,
-                       which.lists = "DECODER", color.lists = colors)
-        }
-      ),
-      
-      #### select factors ####
-      tar_target(
-        selected_factors_desurv,
-        {
-          save_dir = file.path(dirname(dirname(cv_runs[[1]])),"factor_selection","desurv")
-          dir.create(save_dir,showWarnings = FALSE,recursive = TRUE)
-          path = file.path(save_dir,"factor_selection.csv")
-          build_factor_selection_table(tops_desurv$top_genes,path)
-        },
-        format="file"
-      ),
+    ),
+    
+    # table of top gene overlap
+    tar_target(
+      gene_overlap_std,
+      {
+        create_table(tops = tops_std$top_genes, gene_lists = top_genes,
+                     which.lists = "DECODER", color.lists = colors)
+      }
+    ),
+    
+    #### select factors ####
+    tar_target(
+      selected_factors_desurv,
+      {
+        save_dir = file.path(training_results_dir,"factor_selection","desurv")
+        dir.create(save_dir,showWarnings = FALSE,recursive = TRUE)
+        path = file.path(save_dir,"factor_selection.csv")
+        build_factor_selection_table(tops_desurv$top_genes,path)
+      },
+      format="file"
+    ),
 
-      tar_target(
-        selected_factors_std,
-        {
-          save_dir = file.path(dirname(dirname(cv_runs[[1]])),"factor_selection","std")
-          dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
-          path = file.path(save_dir,"factor_selection.csv")
-          build_factor_selection_table(tops_std$top_genes,path)
-        },
-        format="file"
-      ),
-      # 
-      ######## clustering #########
-      
-      ### deSurv model ###
-      tar_target(
-        clusters_desurv,
-        {
-          if(!file.exists(selected_factors_desurv)){
-            stop("first generate factor selection table for desurv")
-          }
-          tbl = read.csv(selected_factors_desurv)
-          sel = tbl$factor[tbl$selected]
-          if(all(!sel)){
-            stop("No factor selected for desurv clustering, please select at least 1")
-          }
-          data=data_val_filtered
-          val_dataset = data$dataname
-          dir = create_filepath_clustering_output(ngene, TOL, MAXIT, PKG_VERSION, 
-                                                  GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN, 
-                                                  ntop, val_dataset, "DeSurv")
-          run_clustering(tops_desurv$top_genes,data,top_genes,colors,
-                         facs=sel,plot=FALSE,dir=dir,
-                         maxKcol = 5, maxKrow = 5)
-        },
-        pattern=map(data_val_filtered),
-        iteration = "list",
-        resources = tar_resources(
-          crew = tar_resources_crew(controller = "med_mem")
-        )
-      ),
-      
-      
-      ### std NMF ###
-      tar_target(
-        clusters_std,
-        {
-          if(!file.exists(selected_factors_std)){
-            stop("first generate factor selection table for std nmf")
-          }
-          tbl = read.csv(selected_factors_std)
-          sel = tbl$factor[tbl$selected]
-          if(all(!sel)){
-            stop("No factor selected for std nmf clustering, please select at least 1")
-          }
-          data=data_val_filtered
-          val_dataset = data$dataname
-          dir = create_filepath_clustering_output(ngene, TOL, MAXIT, PKG_VERSION, 
-                                                  GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN, 
-                                                  ntop, val_dataset, "stdNMF")
-          run_clustering(tops_std$top_genes,data,top_genes,colors,
-                         facs=sel,plot=FALSE,dir=dir,
-                         maxKcol = 5, maxKrow = 5)
-        },
-        pattern=map(data_val_filtered),
-        iteration="list",
-        resources = tar_resources(
-          crew = tar_resources_crew(controller = "med_mem")
-        )
-      ),
-      
-      tar_target(
-        selected_nclusters_desurv,
-        {
-          save_dir = file.path(dirname(dirname(cv_runs[[1]])),"ncluster_selection","desurv")
-          dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
-          path = file.path(save_dir,"ncluster_selection.csv")
-          build_ncluster_selection_table(clusters_desurv,path)
-        },
-        format="file"
-      ),
-      
-      tar_target(
-        selected_nclusters_std,
-        {
-          save_dir = file.path(dirname(dirname(cv_runs[[1]])),"ncluster_selection","std")
-          dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
-          path = file.path(save_dir,"ncluster_selection.csv")
-          build_ncluster_selection_table(clusters_std,path)
-        },
-        format="file"
-      ),
-      
-      tar_target(
-        cluster_alignment_plot_desurv,
-        {
-          nclus_tbl = read.csv(selected_nclusters_desurv)
-          save_dir = file.path(dirname(dirname(cv_runs[[1]])),"cluster_alignment","desurv")
-          dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
-          path = file.path(save_dir,"cluster_alignment.pdf")
-          pdf(path)
-          plot_cluster_cor(clusters_desurv,tops_desurv$top_genes,nclus_tbl$nclus)
-          dev.off()
+    tar_target(
+      selected_factors_std,
+      {
+        save_dir = file.path(training_results_dir,"factor_selection","std")
+        dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
+        path = file.path(save_dir,"factor_selection.csv")
+        build_factor_selection_table(tops_std$top_genes,path)
+      },
+      format="file"
+    ),
+    # 
+    ######## clustering #########
+    
+    ### deSurv model ###
+    tar_target(
+      clusters_desurv,
+      {
+        if(!file.exists(selected_factors_desurv)){
+          stop("first generate factor selection table for desurv")
         }
-      ),
-      
-      tar_target(
-        cluster_alignment_plot_std,
-        {
-          nclus_tbl = read.csv(selected_nclusters_std)
-          save_dir = file.path(dirname(dirname(cv_runs[[1]])),"cluster_alignment","std")
-          dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
-          path = file.path(save_dir,"cluster_alignment.pdf")
-          pdf(path)
-          plot_cluster_cor(clusters_std,tops_std$top_genes,nclus_tbl$nclus)
-          dev.off()
+        tbl = read.csv(selected_factors_desurv)
+        sel = tbl$factor[tbl$selected]
+        if(all(!sel)){
+          stop("No factor selected for desurv clustering, please select at least 1")
         }
-      ), 
-      
-      tar_target(
-        cluster_alignment_table_desurv,
-        {
-          nclus_tbl = read.csv(selected_nclusters_desurv)
-          save_dir = file.path(dirname(dirname(cv_runs[[1]])),"cluster_alignment","desurv")
-          dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
-          path = file.path(save_dir,"cluster_alignment.csv")
-          build_cluster_alignment_table(nclus_tbl,clusters_desurv,path)
-        },
-        format="file"
-      ),
-      
-      tar_target(
-        cluster_alignment_table_std,
-        {
-          nclus_tbl = read.csv(selected_nclusters_std)
-          save_dir = file.path(dirname(dirname(cv_runs[[1]])),"cluster_alignment","std")
-          dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
-          path = file.path(save_dir,"cluster_alignment.csv")
-          build_cluster_alignment_table(nclus_tbl,clusters_std,path)
-        },
-        format="file"
-      ),
-      
-      tar_target(
-        aligned_clusters_desurv,
-        {
-          nclus_tbl = read.csv(selected_nclusters_desurv)
-          samp_clus = read.csv(cluster_alignment_table_desurv)
-          clus=clusters_desurv
-          for(i in 1:5){
-            dataname=clus[[i]]$data$dataname
-            nms = names(clus[[i]]$clus_res$clusCol[[nclus_tbl$nclus[i]]]$consensusClass)
-            y = samp_clus[clus[[i]]$clus_res$clusCol[[nclus_tbl$nclus[i]]]$consensusClass,dataname]
-            names(y) = nms
-            clus[[i]]$clus_res$clusCol[[nclus_tbl$nclus[i]]]$consensusClass=y
-
-            clus[[i]]$data$sampInfo$samp_cluster = clus[[i]]$clus_res$clusCol[[nclus_tbl$nclus[i]]]$consensusClass
-          }
-          clus
-        }
-      ),
-      
-      tar_target(
-        aligned_clusters_std,
-        {
-          nclus_tbl = read.csv(selected_nclusters_std)
-          samp_clus = read.csv(cluster_alignment_table_std)
-          clus=clusters_std
-          for(i in 1:5){
-            dataname=clus[[i]]$data$dataname
-            nms = names(clus[[i]]$clus_res$clusCol[[nclus_tbl$nclus[i]]]$consensusClass)
-            y = samp_clus[clus[[i]]$clus_res$clusCol[[nclus_tbl$nclus[i]]]$consensusClass,dataname]
-            names(y) = nms
-            clus[[i]]$clus_res$clusCol[[nclus_tbl$nclus[i]]]$consensusClass=y
-            
-            clus[[i]]$data$sampInfo$samp_cluster = clus[[i]]$clus_res$clusCol[[nclus_tbl$nclus[i]]]$consensusClass
-          }
-          clus
-        }
+        data=data_val_filtered
+        val_dataset = data$dataname
+        dir = create_filepath_clustering_output(ngene_value, TOL, MAXIT, PKG_VERSION, 
+                                                GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN, 
+                                                ntop_value, val_dataset, "DeSurv")
+        run_clustering(tops_desurv$top_genes,data,top_genes,colors,
+                       facs=sel,plot=FALSE,dir=dir,
+                       maxKcol = 5, maxKrow = 5)
+      },
+      pattern=map(data_val_filtered),
+      iteration = "list",
+      resources = tar_resources(
+        crew = tar_resources_crew(controller = "med_mem")
       )
-      
-      
-      ### cox lasso ###
-      
-      
-      ############### generate paper ###################
-      # tar_target(
-      #   paper,
-      #   {
-      #     clusters_desurv
-      #     clusters_std
-      #     out_name =  paste0("paper_ntop=",ntop,"_ngene=",ngene,".pdf")
-      #     rmarkdown::render("paper/paper.Rmd",knit_root_dir = "..",
-      #                       params = list(ntop = ntop,
-      #                                     ngene=ngene),
-      #                       output_dir = "paper",
-      #                       output_file = out_name)
-      #     
-      #   },
-      #   format = "file",
-      #   cue = tar_cue(mode = "always")
-      # )
-      # 
-      
-      
-    )#end map over ntop
+    ),
     
     
+    ### std NMF ###
+    tar_target(
+      clusters_std,
+      {
+        if(!file.exists(selected_factors_std)){
+          stop("first generate factor selection table for std nmf")
+        }
+        tbl = read.csv(selected_factors_std)
+        sel = tbl$factor[tbl$selected]
+        if(all(!sel)){
+          stop("No factor selected for std nmf clustering, please select at least 1")
+        }
+        data=data_val_filtered
+        val_dataset = data$dataname
+        dir = create_filepath_clustering_output(ngene_value, TOL, MAXIT, PKG_VERSION, 
+                                                GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN, 
+                                                ntop_value, val_dataset, "stdNMF")
+        run_clustering(tops_std$top_genes,data,top_genes,colors,
+                       facs=sel,plot=FALSE,dir=dir,
+                       maxKcol = 5, maxKrow = 5)
+      },
+      pattern=map(data_val_filtered),
+      iteration="list",
+      resources = tar_resources(
+        crew = tar_resources_crew(controller = "med_mem")
+      )
+    ),
+    
+    tar_target(
+      selected_nclusters_desurv,
+      {
+        save_dir = file.path(training_results_dir,"ncluster_selection","desurv")
+        dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
+        path = file.path(save_dir,"ncluster_selection.csv")
+        build_ncluster_selection_table(clusters_desurv,path)
+      },
+      format="file"
+    ),
+    
+    tar_target(
+      selected_nclusters_std,
+      {
+        save_dir = file.path(training_results_dir,"ncluster_selection","std")
+        dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
+        path = file.path(save_dir,"ncluster_selection.csv")
+        build_ncluster_selection_table(clusters_std,path)
+      },
+      format="file"
+    ),
+    
+    tar_target(
+      cluster_alignment_plot_desurv,
+      {
+        nclus_tbl = read.csv(selected_nclusters_desurv)
+        nclus_vec <- setNames(nclus_tbl$nclus, nclus_tbl$dataset)
+        save_dir = file.path(training_results_dir,"cluster_alignment","desurv")
+        dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
+        path = file.path(save_dir,"cluster_alignment.pdf")
+        pdf(path)
+        plot_cluster_cor(clusters_desurv,tops_desurv$top_genes,nclus_vec)
+        dev.off()
+      }
+    ),
+    
+    tar_target(
+      cluster_alignment_plot_std,
+      {
+        nclus_tbl = read.csv(selected_nclusters_std)
+        nclus_vec <- setNames(nclus_tbl$nclus, nclus_tbl$dataset)
+        save_dir = file.path(training_results_dir,"cluster_alignment","std")
+        dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
+        path = file.path(save_dir,"cluster_alignment.pdf")
+        pdf(path)
+        plot_cluster_cor(clusters_std,tops_std$top_genes,nclus_vec)
+        dev.off()
+      }
+    ), 
+    
+    tar_target(
+      cluster_alignment_table_desurv,
+      {
+        nclus_tbl = read.csv(selected_nclusters_desurv)
+        save_dir = file.path(training_results_dir,"cluster_alignment","desurv")
+        dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
+        path = file.path(save_dir,"cluster_alignment.csv")
+        build_cluster_alignment_table(nclus_tbl,clusters_desurv,path)
+      },
+      format="file"
+    ),
+    
+    tar_target(
+      cluster_alignment_table_std,
+      {
+        nclus_tbl = read.csv(selected_nclusters_std)
+        save_dir = file.path(training_results_dir,"cluster_alignment","std")
+        dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
+        path = file.path(save_dir,"cluster_alignment.csv")
+        build_cluster_alignment_table(nclus_tbl,clusters_std,path)
+      },
+      format="file"
+    ),
+    
+    tar_target(
+      aligned_clusters_desurv,
+      {
+        nclus_tbl = read.csv(selected_nclusters_desurv)
+        samp_clus = read.csv(cluster_alignment_table_desurv)
+        clus=clusters_desurv
+        datasets <- vapply(clus, function(x) x$data$dataname, character(1))
+        for(i in seq_along(clus)){
+          dataname=datasets[[i]]
+          nclus_i <- nclus_tbl$nclus[nclus_tbl$dataset==dataname]
+          if(length(nclus_i) != 1 || is.na(nclus_i)){
+            stop("Selected ncluster table missing entry for dataset: ", dataname)
+          }
+          nms = names(clus[[i]]$clus_res$clusCol[[nclus_i]]$consensusClass)
+          y = samp_clus[clus[[i]]$clus_res$clusCol[[nclus_i]]$consensusClass,dataname]
+          names(y) = nms
+          clus[[i]]$clus_res$clusCol[[nclus_i]]$consensusClass=y
+
+          clus[[i]]$data$sampInfo$samp_cluster = clus[[i]]$clus_res$clusCol[[nclus_i]]$consensusClass
+        }
+        clus
+      }
+    ),
+    
+    tar_target(
+      aligned_clusters_std,
+      {
+        nclus_tbl = read.csv(selected_nclusters_std)
+        samp_clus = read.csv(cluster_alignment_table_std)
+        clus=clusters_std
+        datasets <- vapply(clus, function(x) x$data$dataname, character(1))
+        for(i in seq_along(clus)){
+          dataname=datasets[[i]]
+          nclus_i <- nclus_tbl$nclus[nclus_tbl$dataset==dataname]
+          if(length(nclus_i) != 1 || is.na(nclus_i)){
+            stop("Selected ncluster table missing entry for dataset: ", dataname)
+          }
+          nms = names(clus[[i]]$clus_res$clusCol[[nclus_i]]$consensusClass)
+          y = samp_clus[clus[[i]]$clus_res$clusCol[[nclus_i]]$consensusClass,dataname]
+          names(y) = nms
+          clus[[i]]$clus_res$clusCol[[nclus_i]]$consensusClass=y
+          
+          clus[[i]]$data$sampInfo$samp_cluster = clus[[i]]$clus_res$clusCol[[nclus_i]]$consensusClass
+        }
+        clus
+      }
+    )
     
     
-  ) #end map over ngene
+    ### cox lasso ###
+    
+    
+    ############### generate paper ###################
+    # tar_target(
+    #   paper,
+    #   {
+    #     clusters_desurv
+    #     clusters_std
+    #     out_name =  paste0("paper_ntop=",ntop_value,"_ngene=",ngene_value,".pdf")
+    #     rmarkdown::render("paper/paper.Rmd",knit_root_dir = "..",
+    #                       params = list(ntop = ntop_value,
+    #                                     ngene=ngene_value),
+    #                       output_dir = "paper",
+    #                       output_file = out_name)
+    #     
+    #   },
+    #   format = "file",
+    #   cue = tar_cue(mode = "always")
+    # )
+    # 
   
   
   
@@ -932,34 +1034,6 @@ list(
   #   )
   # ),
   # 
-  # ## bonus warmstart runs
-  # tar_target(
-  #   full_model_bonus,
-  #   {
-  #     
-  #     path_fits = create_filepath_warmstart_runs(param_grid_bonus)
-  #     
-  #     X = data_filtered$ex
-  #     y = data_filtered$sampInfo$time
-  #     d = data_filtered$sampInfo$event
-  #     
-  #     run_warmstarts(X=X,y=y,delta=d,
-  #                    params=param_grid_bonus,verbose=FALSE,
-  #                    path_fits = path_fits)
-  #     
-  #   },
-  #   format="file",
-  #   pattern = map(param_grid_bonus),
-  #   resources = tar_resources(
-  #     crew = tar_resources_crew(controller = "cv")
-  #   )
-  # ),
-  # 
-  # tar_target(
-  #   full_metrics_bonus,
-  #   {
-  #     bundle = readRDS(full_model_bonus)
-  #     path_mets = create_filepath_metrics(params = param_grid_bonus)
   #     
   #     X = data_filtered$ex
   #     y = data_filtered$sampInfo$time
