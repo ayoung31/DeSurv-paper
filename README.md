@@ -20,10 +20,11 @@ Each `_targets*.R` script will automatically `pkgload::load_all("../DeSurv")`
 when that directory is present, so the local checkout is always used.
 
 Hyperparameter tuning is handled inside the `DeSurv` package via
-`desurv_cv_bayesopt()`, which runs cross-validation evaluations under a Bayesian
-optimisation loop instead of relying on custom grid helpers in this repository.
-All preprocessing, validation filtering, and model-selection logic now flow
-through the package interface.
+`desurv_cv_bayesopt_refine()`, which launches an initial Bayesian optimisation
+run, shrinks the promising region, and iterates until improvements plateau
+instead of relying on custom grid helpers in this repository. All preprocessing,
+validation filtering, and model-selection logic now flow through the package
+interface.
 
 The `_targets*.R` scripts expose configuration constants near the top. Two that
 you will likely edit are:
@@ -45,7 +46,7 @@ you will likely edit are:
 
 The configuration constants above feed directly into the Bayesian optimiser.
 If you set a vector with more than one unique value, the pipeline will add the
-appropriate bound to `desurv_cv_bayesopt()`; otherwise the single value is
+appropriate bound to `desurv_cv_bayesopt_refine()`; otherwise the single value is
 passed as a fixed `_grid` argument. The helper `maybe_add_numeric_bound()`
 (see `R/bo_helpers.R`) handles this logic and is covered by the unit tests under
 `tests/testthat`.
@@ -54,7 +55,19 @@ The shared `DESURV_BO_BOUNDS` list defines the non-dataset-specific search space
 for the optimiser (k, alpha, lambda, nu). Adjust these entries if the default
 range does not match your experiment; the pipeline will merge them with any
 `NGENE_CONFIG`/`NTOP_CONFIG`/`LAMBDA*_CONFIG` ranges automatically before
-calling `desurv_cv_bayesopt()`.
+calling `desurv_cv_bayesopt_refine()`. Additional refinement controls live next
+to the other global constants in each `_targets*.R`: `BO_MAX_REFINEMENTS`
+determines how many shrinks are attempted, while `BO_COARSE_CONTROL` and
+`BO_REFINE_CONTROL` describe the per-stage BO settings (e.g., `n_init`, `n_iter`,
+`candidate_pool`, `seed`, `cv_verbose`). Update them if you need a longer coarse
+search, different seeds, or a quieter optimiser.
+
+### Optional Enrichment Dependencies
+
+The ORA/KEGG helpers in `R/ora_analysis.R` depend on both `clusterProfiler`
+and `org.Hs.eg.db`. Make sure those packages are installed and available when
+running any targets that trigger enrichment; otherwise the pipeline will stop
+early with a clear error message.
 
 ## Running tests
 

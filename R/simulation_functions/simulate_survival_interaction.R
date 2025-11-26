@@ -1,6 +1,6 @@
 simulate_survival_interaction <- function(H,
                                           baseline_hazard = 0.01,
-                                          censor_rate = 0.005,
+                                          censor_rate = 0.2,
                                           pair = c(1,3),
                                           gamma = 1.5) {
   # pair = which programs interact to kill you
@@ -10,12 +10,23 @@ simulate_survival_interaction <- function(H,
   # nonlinear risk: high only if both high
   linpred <- gamma * (h1 * h2)
   
-  event_time <- rexp(length(linpred),
-                     rate = baseline_hazard * exp(linpred))
-  censor_time <- rexp(length(linpred), rate = censor_rate)
-  
-  time <- pmin(event_time, censor_time)
-  status <- as.integer(event_time <= censor_time)
+  n <- length(linpred)
+  event_time <- rexp(n, rate = baseline_hazard * exp(linpred))
+  time <- event_time
+  status <- rep(1L, n)
+  if (censor_rate > 0) {
+    ncensor <- round(censor_rate * n)
+    ncensor <- max(0L, min(n, ncensor))
+    if (ncensor > 0) {
+      censor_idx <- sample.int(n, ncensor)
+      time[censor_idx] <- runif(
+        n = ncensor,
+        min = 0,
+        max = event_time[censor_idx]
+      )
+      status[censor_idx] <- 0L
+    }
+  }
   
   data.frame(
     patient = colnames(H),

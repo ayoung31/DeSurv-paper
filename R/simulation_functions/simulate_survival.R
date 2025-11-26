@@ -1,6 +1,6 @@
 simulate_survival <- function(H, beta = c(1.0, -0.5, 0.8, -1.2),
                               baseline_hazard = 0.01,
-                              censor_rate = 0.005) {
+                              censor_rate = 0.2) {
   
   K <- nrow(H)
   N <- ncol(H)
@@ -12,11 +12,21 @@ simulate_survival <- function(H, beta = c(1.0, -0.5, 0.8, -1.2),
   # T ~ Exp(rate); so T = rexp(1, rate)
   event_time <- rexp(N, rate = baseline_hazard * exp(linpred))
   
-  # Censoring times
-  censor_time <- rexp(N, rate = censor_rate)
-  
-  time <- pmin(event_time, censor_time)
-  status <- as.integer(event_time <= censor_time)  # 1=event, 0=censored
+  time <- event_time
+  status <- rep(1L, N)
+  if (censor_rate > 0) {
+    ncensor <- round(censor_rate * N)
+    ncensor <- max(0L, min(N, ncensor))
+    if (ncensor > 0) {
+      censor_idx <- sample.int(N, ncensor)
+      time[censor_idx] <- runif(
+        n = ncensor,
+        min = 0,
+        max = event_time[censor_idx]
+      )
+      status[censor_idx] <- 0L
+    }
+  }
   
   data.frame(
     patient = colnames(H),

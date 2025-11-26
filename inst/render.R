@@ -1,7 +1,6 @@
-out_name =  paste0("paper_ntop=",50,"_ngene=",2000,".pdf")
-    rmarkdown::render("paper/paper.Rmd",knit_root_dir = "..",
-                      params = list(ntop = 50,
-                                    ngene=2000),
-                      output_dir = "paper",
-                      output_file = out_name)
+#' Render the manuscript via the targets pipeline.
+library(targets)
+
+tar_config_set(store = "store_PKG_VERSION=HEAD_GIT_BRANCH=new_init")
+tar_make(names = "paper")
     

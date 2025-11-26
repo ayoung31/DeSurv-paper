@@ -1,8 +1,4 @@
----
 title: Survival driven deconvolution (deSurv) reveals prognostic and interpretable cancer subtypes
-params:
-  ngene:
-  ntop:
   # Use letters for affiliations, numbers to show equal authorship (if applicable) and to indicate the corresponding author
 author:
   - name: Amber M. Young
@@ -88,6 +84,11 @@ knitr::opts_chunk$set(
   fig.align = "center" # center figures
 )
 
+```
+
+```{r targets-store, include=FALSE}
+library(targets)
+tar_config_set(store = "store_PKG_VERSION=HEAD_GIT_BRANCH=new_init")
 ```
 
 
