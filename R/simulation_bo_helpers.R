@@ -58,17 +58,17 @@ standardize_design_spec <- function(design_spec,
 
 extract_simulation_designs <- function(cfg, scenario_name) {
   base_args <- cfg$args %||% list()
-  design_list <- cfg$designs
+  design_list <- cfg[["designs"]]
   explicit <- !is.null(design_list)
-  if (is.null(design_list) && !is.null(cfg$design)) {
-    design_list <- list(cfg$design)
+  if (is.null(design_list) && !is.null(cfg[["design"]])) {
+    design_list <- list(cfg[["design"]])
     explicit <- TRUE
   }
   if (is.null(design_list)) {
-    params <- cfg$design_params %||% list()
+    params <- cfg[["design_params"]] %||% list()
     args <- merge_simulation_args(base_args, params)
     return(list(list(
-      label = cfg$design_name,
+      label = cfg[["design_name"]],
       params = params,
       args = args,
       explicit = FALSE

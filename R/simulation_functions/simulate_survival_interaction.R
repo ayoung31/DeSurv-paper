@@ -1,11 +1,15 @@
-simulate_survival_interaction <- function(H,
+simulate_survival_interaction <- function(X,
+                                          W,
                                           baseline_hazard = 0.01,
                                           censor_rate = 0.2,
                                           pair = c(1,3),
                                           gamma = 1.5) {
   # pair = which programs interact to kill you
-  h1 <- H[pair[1], ]
-  h2 <- H[pair[2], ]
+  stopifnot(nrow(X) == nrow(W))
+  stopifnot(all(pair %in% seq_len(ncol(W))))
+  patient_scores <- crossprod(X, W)
+  h1 <- patient_scores[, pair[1]]
+  h2 <- patient_scores[, pair[2]]
   
   # nonlinear risk: high only if both high
   linpred <- gamma * (h1 * h2)
@@ -29,7 +33,7 @@ simulate_survival_interaction <- function(H,
   }
   
   data.frame(
-    patient = colnames(H),
+    patient = colnames(X),
     time = time,
     status = status,
     linpred_true = linpred  # true risk driver is interaction

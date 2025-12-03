@@ -1,4 +1,4 @@
-set_folds = function(data, nfold = 5, seed = 123, ngene = 1000, method_trans_train = "rank") {
+set_folds = function(data, nfold = 5, seed = 123, ngene = 1000, method_trans_train = "log2") {
   set.seed(seed)
 
   data$ex = data$ex[, data$samp_keeps, drop = FALSE]

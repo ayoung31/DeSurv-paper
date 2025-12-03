@@ -49,6 +49,7 @@ simulate_desurv_easy <- function(
     big_prog = big_prog,
     big_prog_multiplier = big_prog_multiplier
   )
+  marker_info <- attr(W_true, "marker_info")
   H_true <- simulate_H(
     N = N,
     K = K,
@@ -69,7 +70,8 @@ simulate_desurv_easy <- function(
   beta <- rep(background_effect, K)
   beta[big_prog] <- lethal_effect
   surv_df <- simulate_survival_linear(
-    H_true,
+    X = X_mean,
+    W = W_true,
     beta = beta,
     baseline_hazard = baseline_hazard,
     censor_rate = censor_rate
@@ -81,6 +83,8 @@ simulate_desurv_easy <- function(
     W_true = W_true,
     H_true = H_true,
     beta_true = beta,
+    X_mean = X_mean,
+    marker_info = marker_info,
     scenario  = "easy"
   )
 }

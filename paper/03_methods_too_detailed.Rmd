@@ -1,0 +1,99 @@
+
+
+## Survival-driven matrix factorization {.unnumbered}
+DeSurv integrates the deconvolution and survival supervision into a single objective:
+\begin{equation}\label{eq:desurv_loss}
+\mathcal{L}(W,H,\beta) =
+(1 - \alpha) \mathcal{L}_{\text{NMF}}(W,H) - \alpha\mathcal{L}_{\mathrm{Cox}}(W,\beta),
+\end{equation}
+where $\mathcal{L}_{\text{NMF}}(W,H)$ is the deconvolution term, $\mathcal{L}_{\mathrm{Cox}}(W,\beta)$ is the survival supervision term, and $\alpha \in [0,1)$ controls the balance of these two terms.
+
+<!-- When $\alpha=0$, DeSurv reduces to conventional NMF; as $\alpha \rightarrow 1$, the model approaches a penalized Cox regression on the gene-level expression matrix. -->
+
+The deconvolution term relies on Nonnegative Matrix Factorization (NMF) [@lee1999]. Let $X \in \mathbb{R}_{\geq 0}^{p \times n}$ denote the nonnegative expression matrix with $p$ genes and $n$ subjects. NMF seeks to reconstruct $X$ as the product of two lower dimensional matrices
+\begin{equation}
+X \approx WH,\nonumber
+\end{equation}
+where $W \in \mathbb{R}_{\geq 0}^{p \times k}$ contains gene weights and $H \in \mathbb{R}_{\geq 0}^{k \times n}$ holds sample-specific factor loadings. 
+
+The supervision term relies on Cox regression with covariates
+\begin{equation}
+  Z = W^TX, \nonumber
+\end{equation}
+which can be interpreted factor signature scores. The matrix $W$ is shared between the NMF deconvolution and supervision terms so that survival directly influences the gene signature definitions. This choice also enables the learned gene signatures $W$ to be directly applied to external datasets without refitting sample-level loadings, improving portability relative to supervising through $H$.
+
+### NMF Reconstruction Error {.unnumbered}
+The NMF reconstruction error is the sum of squared residuals between $X$ and $WH$
+\begin{equation}\label{eq:nmf_loss}
+\mathcal{L}_{\text{NMF}}(W,H) = \frac{1}{np}\lVert X - WH \rVert_F^2 + \frac{\lambda_H}{nk} \lVert H \rVert_F^2,
+\end{equation}
+where $\lVert \rVert_F$ represents the frobenius norm and the penalty $ \frac{\lambda_H}{nk}\lVert H \rVert_F^2$  regularizes the sample-specific factor loadings and prevents their magnitudes from becoming arbitrarily large. 
+
+<!-- Although NMF suffers from a scale indeterminacy ($WH = (cW)(H/c)$), an equivalent penalty is not applied to $W$ because we explicitly normalize the columns of $W$ at each iteration of the optimization algorithm (see Supplementary Section~XX). Normalizing $W$ resolves the scale ambiguity of the factorization, while the L2 penalty on $H$ stabilizes the sample-level activations and improves numerical conditioning of the reconstruction term. -->
+
+### Cox Partial Log-Likelihood {.unnumbered}
+<!-- We apply survival supervision through the gene-program matrix $W$ rather than the sample-loading matrix $H$ so that survival direcly impacts the definition of the gene signatures. Placing supervision on $H$ would improve prediction primarily by reshaping patient-specific loadings without altering the underlying biological signatures. This choice enhances identifiability, stabilizes factor solutions across initializations, and yields gene programs that reproducibly encode survival-relevant biology (See supplementary methods).  -->
+The partial log-likelihood for the Cox regression is written as
+\begin{equation}
+\ell(W,\beta) = \sum_{i=1}^n \delta_i \Big[ Z_i^\top \beta - \log \Big( \sum_{j:y_j \ge y_i} \exp(Z_j^\top \beta) \Big) \Big],
+\end{equation}
+where the factor signature scores $Z_i = W^TX_i$ are the covariates and $X_i$ is the expression profile for subject $i$. The coefficients $\beta \in \mathbb{R}^k$ describe the relationship between each gene signature and survival. The observed event or censoring time for each subject is $y_i>\mathbb{R}^N_+$, with event indicators $\delta_i \in {0,1}$. 
+
+Because the factor signature scores can be correlated, and only a subset of factors may be associated with survival, we introduce and elastic net penalty on $\beta$. The penalty improves numerical stability and can shrink the coefficients of non-survival-related factors to zero. The penalized Cox model is
+\begin{equation}
+\mathcal{L}_{\mathrm{Cox}}(W,\beta)= \frac{2\alpha}{n_{\text{event}}}\ell(W,\beta) - \lambda \{ \xi \lVert \beta \rVert_1 + \tfrac{1-\xi}{2} \lVert \beta \rVert_2^2 \},
+\end{equation}
+where $\lambda>0$ is the contribution of the $\beta$ penalty to the loss, and $\xi \subset [0,1]$ is the balance of the L1 and L2 penalty terms.
+
+Hyperparameters $(k, \alpha, \lambda_H, \lambda, \xi)$ are selected using Bayesian optimization of the cross-validated C-index (Methods: Hyperparameter Tuning). See Section XX of the Supplementary Methods for more details on the model setup.
+
+## Optimization {.unnumbered}
+We minimize Equation~\ref{eq:desurv_loss} using an alternating minimization scheme that updates $W$, $H$, and $\beta$ until convergence (Algorithm~S\ref{alg:desurv}). The $H$ update uses standard multiplicative rules [@Lee1999], the $W$ update uses a projected-gradient formulation that incorporates the Cox gradient, and the $\beta$ update solves an elastic-net penalized Cox sub-problem via coordinate descent.  Detailed derivations and pseudocode are provided in the Supplementary Methods to keep the main text concise. 
+
+
+## Convergence and Initializations
+As with all NMF-based models, the DeSurv factorization is non-unique: multiple $(W,H)$ pairs can yield equivalent reconstructions under scaling or nonnegative mixing transformations. Accordingly, NMF algorithms are typically evaluated by their convergence to a stationary point, a standard criterion in non-convex optimization. Under mild regularity conditions, we show that Algorithm S\ref{alg:desurv} converges to such a stationary point of the DeSurv objective in Equation~\ref{eqn:desurv}, with full details provided in the Supplementary Methods. In practice, we mitigate sensitivity to initialization by using multiple random starts.
+
+## Cross Validation and Bayesian Optimization
+Subjects in the training data are split into cross validation folds. For each fold, we use multiple random initialization of $(W,H,\beta)$, and for each initialization, we fit a DeSurv model to the training folds. Each of these models is applied to the validation fold and the c-index is computed. The cross-validated c-index is obtained by first averaging the c-index across initializations within a fold, before averaging across folds. This provides an expected performance at the current parameter combination for any one initialization, and is less variable than the overly optimistic approach of selecting the best initialization per fold. 
+
+We employ Bayesian Optimization (BO) to select optimal hyperparameters for our DeSurv model based on maximizing the cross-validated c-index. 
+
+
+## Seeding the final model run
+To obtain an interpretable final model on the full training dataset, we adopt a consensus-based initialization strategy that stabilizes the latent programs across random starts. As in cross-validation, we generate multiple DeSurv fits from different random initializations. For each run, we record (i) the genes appearing among the top-loading genes of each factor and (ii) the frequency with which each pair of genes co-occurs within the same factor’s top genes. These co-occurrence frequencies form a consensus matrix summarizing how consistently gene pairs associate across plausible solutions.
+
+The intuition is that true underlying programs should give rise to stable patterns of co-selection: genes belonging to the same biological module are repeatedly recovered together, whereas noise-driven associations are not. We perform hierarchical clustering on the consensus matrix, using the same number of clusters as the target number of factors, and treat the resulting gene groups as robust approximations of the latent programs. These clusters are then used to construct an initialization matrix $W_0$, whose columns encode the consensus-derived gene modules. This $W_0$ provides a biologically informed and low-variance starting point for the final DeSurv fit, improving stability and interpretability while mitigating convergence to rotationally equivalent or noisy local optima.
+ 
+## Simulation Studies
+
+## Application to PDAC
+
+
+### Study cohorts and preprocessing {.unnumbered}
+We trained DeSurv on two bulk RNA-seq cohorts with matched overall survival (OS) data: TCGA-PAAD (144 tumors, 75 events) and CPTAC-PDAC (129 tumors, 64 events) [@raphael2017integrated;@ellis2013clinical]. Both cohorts were filtered to primary, non-metastatic PDAC samples and processed through a common pipeline consisting of log$_2$ + 1 transformation and filtering to XXXX (selected via Bayesian optimization) highly expressed and variable genes. To harmonize the datasets, expression matrices were rank-transformed within sample and genes were intersected to only include those present in both studies after filtering. The concatenated matrix $X$ served as the training input for all model fitting.
+
+Within-sample ranking was chosen to mitigate batch effects between TCGA and CPTAC, avoid platform-specific biases, and stabilize the scale of expression values passed to NMF. Rank transformation preserves relative gene ordering, which is the primary signal used in defining factor-specific exclusivity of a gene in $W$ while ensuring that cross-platform values lie on a comparable scale.
+
+Model performance was assessed in five independent PDAC cohorts spanning microarray and RNA-seq technologies [@dijk2020unsupervised;@moffitt2015virtual;@zhao2018gene;@puleo2018stratification]. Each validation dataset underwent the same filtering and rank-transformation steps prior to downstream clustering and prediction.
+
+
+### Hyperparameter selection {.unnumbered}
+Model calibration follows a nested strategy. For any proposed hyperparameter configuration we perform stratified five-fold cross-validation on the combined TCGA and CPTAC training set, run 20 random initializations per fold to account for NMF non-uniqueness, and summarize performance via the held-out concordance index (c-index). A Bayesian optimization layer then treats the cross-validated c-index as the objective function. The surrogate model is a Gaussian process with a Matérn kernel, initially seeded with evaluations from a Latin hypercube design and updated sequentially using an expected improvement acquisition rule. For details about the Bayesian optimization procedure, see the supplementary methods. The search space includes the factor rank $k$, the supervision weight $\alpha$, the elastic-net shrinkage parameters of the Cox component ($\lambda$ and $\xi$), and the penalties applied to $W$ and $H$ ($\lambda_W$ and $\lambda_H$). Optionally, the number of highly expressed and variable genes retained ($n_{\text{gene}}$) and the number of top genes per factor ($n_{\text{top}}$) are also optimized. We select the configuration that provides the largest mean c-index across BO runs. This procedure yields a parsimonious, survival-guided factorization without exhaustively enumerating the entire parameter grid.
+
+
+### External Validation
+We recognize that transporting the entire W matrix to new data is not clinically feasible. Therefore, for each factor $f$, we rank genes by their exclusivity score
+\begin{equation}
+s_{gf} = W_{gf} - \max_{r \ne f} W_{gr},
+\end{equation}
+and designate the top $g$ genes per factor as the factor-specific signature. We denote the matrix $W$ restricted to these $g$ genes as $\tilde{W}_{(g)}$. Assuming $W$ is sparse, there is some $g$ for which $W^TX \approx \tilde{W}_{(G)}^T X$. If $W$ is not sparse, we allow $g \rightarrow p$. The number of top genes is chosen via Bayesian Optimization to maximize c-index.
+
+These signatures were used to apply the fitted model to the validation data and served as features for downstream unsupervised clustering. 
+
+
+#### Clustering {.unnumbered}
+We applied ConsensusClusterPlus [@wilkerson2010consensusclusterplus] to each validation dataset, considered cluster counts $K=2$--4, and selected $K$ based on cumulative distribution function diagnostics, delta area plots, and consensus heatmaps without examining survival outcomes. Cluster labels were aligned across datasets using the dominant DeSurv signatures expressed within each cluster.
+
+#### Survival analysis {.unnumbered}
+Survival analyses were conducted on patients with available OS time and censoring indicator. Dataset-specific survival curves were estimated using the Kaplan–Meier method and compared with log-rank tests. For pooled analyses we fit Cox proportional hazards models with cluster membership as a categorical predictor and stratified on dataset of origin to accommodate baseline hazard differences. Hazard ratios are reported with Wald confidence intervals, and p-values correspond to two-sided tests. All analyses were performed in R (version 4.3) using the `survival` package (version 3.2-13).

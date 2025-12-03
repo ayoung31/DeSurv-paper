@@ -12,18 +12,18 @@ init_one_alpha0 <- function(X, y, delta, param_grid, path) {
   init = p$init
   k       = p$k
   lambda  = p$lambda
-  eta     = p$eta
+  eta     = if (!is.null(p$eta)) p$eta else p$nu
   lambdaW = p$lambdaW
   lambdaH = p$lambdaH
+  nu      = if (!is.null(p$nu)) p$nu else eta
   
   fit = tryCatch({
-    run_coxNMF(
-      X = X, y = y, delta = delta, k = k,
-      alpha = 0, lambda = lambda, eta = eta, lambdaW = lambdaW, lambdaH = lambdaH,
+    DeSurv::desurv_fit(
+      X = X, y = y, d = delta, k = k,
+      alpha = 0, lambda = lambda, nu = nu, lambdaW = lambdaW, lambdaH = lambdaH,
       seed = init, tol = tol, maxit = maxit, verbose = FALSE, ninit = 1, imaxit = imaxit
     )
-  }, error = function(e) NULL
-  )
+  }, error = function(e) NULL)
     
   
   
@@ -43,12 +43,19 @@ init_one_alpha0 <- function(X, y, delta, param_grid, path) {
   )
   
   if(!is.null(fit)){
-    score$surv_loss = -1 * fit$loss$surv_loss
-    score$nmf_loss  = fit$loss$nmf_loss
-    score$flag_nan  = fit$`NaN flag`
+    surv_metric <- if (!is.null(fit$cindex)) fit$cindex else NA_real_
+    score$surv_loss = surv_metric
+    score$nmf_loss  = NA_real_
+    score$sloss     = surv_metric
+    score$nloss     = NA_real_
+    score$loss      = -surv_metric
+    score$flag_nan  = !isTRUE(fit$convergence)
   }else{
-    score$surv_loss = NA
-    score$nmf_loss = NA
+    score$surv_loss = NA_real_
+    score$nmf_loss = NA_real_
+    score$sloss = NA_real_
+    score$nloss = NA_real_
+    score$loss = NA_real_
     score$flag_nan = TRUE
   }
   

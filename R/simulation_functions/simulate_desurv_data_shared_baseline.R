@@ -49,6 +49,7 @@ simulate_desurv_data_shared_baseline <- function(
     bump_genes_per_prog = bump_genes_per_prog,
     noise_sd_baseline = noise_sd_baseline
   )
+  marker_info <- attr(W_true, "marker_info")
   
   # 2. Patient loadings H (program usage per patient)
   H_true <- simulate_H(
@@ -79,7 +80,8 @@ simulate_desurv_data_shared_baseline <- function(
   beta_vec[lethal_prog] <- lethal_effect
   
   surv_df <- simulate_survival_linear(
-    H = H_true,
+    X = X_mean,
+    W = W_true,
     beta = beta_vec,
     baseline_hazard = baseline_hazard,
     censor_rate = censor_rate
@@ -95,6 +97,7 @@ simulate_desurv_data_shared_baseline <- function(
     W_true      = W_true,       # G x K (shared baseline + bumps)
     H_true      = H_true,       # K x N
     beta_true   = beta_vec,     # length K, which program is lethal
+    marker_info = marker_info,
     lethal_prog = lethal_prog,
     params      = list(
       G = G,

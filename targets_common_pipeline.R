@@ -521,19 +521,19 @@ COMMON_DESURV_TARGETS <- list(
     format="file"
   ),
   
-  tar_target(
-    std_nmf_k_selection_table,
-    {
-      save_dir=dirname(std_nmf_k_selection_plots)
-      path <- file.path(save_dir,
-                        paste0("std_nmf_k_selection_table.csv")
-                        )
-      if(!file.exists(std_nmf_k_selection_plots)){
-        stop("Standard NMF k selection plots not generated")
-      }
-      build_std_nmf_k_selection_table(STD_NMF_K_GRID,path,fit_std)
-    },
-  ),
+  # tar_target(
+  #   std_nmf_k_selection_table,
+  #   {
+  #     save_dir=dirname(std_nmf_k_selection_plots)
+  #     path <- file.path(save_dir,
+  #                       paste0("std_nmf_k_selection_table.csv")
+  #                       )
+  #     if(!file.exists(std_nmf_k_selection_plots)){
+  #       stop("Standard NMF k selection plots not generated")
+  #     }
+  #     build_std_nmf_k_selection_table(STD_NMF_K_GRID,path,fit_std)
+  #   },
+  # ),
   
   # tar_target(
   #   fit_std_selected_k,

@@ -6,7 +6,7 @@ test_that("summarize_simulation_config flattens replicate results", {
     results = list(
       list(
         simulator = "simulate_fn",
-        expression_transform = "rank",
+        expression_transform = "log2",
         train_fraction = 0.7,
         replicate = 1L,
         run_id = "run_a",
@@ -19,7 +19,7 @@ test_that("summarize_simulation_config flattens replicate results", {
       ),
       list(
         simulator = "simulate_fn",
-        expression_transform = "rank",
+        expression_transform = "log2",
         train_fraction = 0.7,
         replicate = 2L,
         run_id = "run_b",

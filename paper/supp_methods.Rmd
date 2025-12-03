@@ -11,6 +11,7 @@ header-includes:
 - \usepackage{algorithm}
 - \usepackage{algpseudocode}
 - \usepackage{setspace}
+- \usepackage{enumitem}
 - \DeclareMathOperator*{\argmin}{argmin}
 - \DeclareMathOperator*{\argmax}{argmax}
 - \DeclareMathOperator\diag{diag}
@@ -21,56 +22,56 @@ output: pdf_document
 
 
 
-## Supervision on \(W\) versus \(H\)
 
-Classical nonnegative matrix factorization (NMF) is non-identifiable: for any
-invertible matrix \(R\) with nonnegative entries, the factorization
-\((W, H)\) can be transformed to \((W R, R^{-1} H)\) without changing the
-reconstruction error, yielding multiple valid solutions
-[@donoho2004nmf; @laurberg2008uniqueness; @gillis2014nmf]. Although normalizing
-columns of \(W\) or rows of \(H\) resolves the trivial scaling ambiguity,
-nonnegative mixing transformations persist, and empirical studies consistently
-show that the sample-loading matrix \(H\) is more sensitive to initialization
-and local minima than the program matrix \(W\)
-[@brunet2004metagenes; @kim2007sparse; @gillis2012accelerated].
+\subsection{Model details}
+Let $X \in \mathbb{R}_{\ge 0}^{p \times n}$ denote the nonnegative gene
+expression matrix with $p$ genes and $n$ subjects. DeSurv approximates
+$X \approx WH$ with $W \in \mathbb{R}_{\ge 0}^{p \times k}$ and
+$H \in \mathbb{R}_{\ge 0}^{k \times n}$, and links the shared program matrix
+$W$ to survival via an elastic-net–penalized Cox model.
 
-In DeSurv, survival supervision enters through the projection
-\[
-Z = X^\top W, \qquad \ell_{\mathrm{Cox}} = \ell_{\mathrm{Cox}}(Z),
-\]
-so that the supervised gradient with respect to the programs is
-\[
-\frac{\partial \ell_{\mathrm{Cox}}}{\partial W}
-= X\,\frac{\partial \ell_{\mathrm{Cox}}}{\partial Z},
-\]
-which directly reshapes the gene-program definitions. This mechanism amplifies
-genes aligned with the hazard gradient and suppresses those that dilute
-prognostic structure, ensuring that the learned programs encode survival-relevant
-biological variation.
+Let $y \in \mathbb{R}^n_{\ge 0}$ be the observed survival times,
+$\delta \in \{0,1\}^n$ the event indicators, and
+$Z = X^\top W \in \mathbb{R}^{n \times k}$ the sample-wise program
+loadings. We write $Z_i^\top$ for the $i$th row of $Z$, and
+$n_{\text{event}} = \sum_{i=1}^n \delta_i$. For convenience we recall the
+DeSurv loss from Equation~\ref{eqn:desurv} in the main text and rewrite it as
+\begin{align}
+  \mathcal{L}(W,H,\beta) &=\nonumber \\
+  &(1-\alpha)\left(\frac{1}{2np}\lVert X - WH \rVert_F^2 + \frac{\lambda_H}{2nk} \lVert H \rVert_F^2\right) \nonumber \\
+  -&\alpha \left(\frac{2}{n_{event}}\ell(W,\beta) - \lambda \{ \xi \lVert \beta \rVert_1 + \tfrac{1-\xi}{2} \lVert \beta \rVert_2^2 \} \right) \nonumber
+\end{align}
 
-By contrast, if supervision were applied to the sample loadings \(H\), the model
-could reduce the Cox loss by redistributing patient-specific coefficients while
-leaving the gene-level programs \(W\) nearly unchanged, a behavior documented in
-multiple supervised variants of NMF and supervised topic models, where
-supervision applied only to the coefficient matrix modifies \(H\) but not the
-basis \(W\) [@cai2011graph; @wang2014supervised; @blei2007slda].
+where $\lVert \cdot \rVert_F$ is the Frobenius norm and
+$\beta \in \mathbb{R}^k$ are the Cox coefficients. The Cox log-partial
+likelihood $\ell(W,\beta)$ is
+\begin{equation}
+\ell(W,\beta)
+=
+\sum_{i=1}^n
+\delta_i
+\left[
+  Z_i^\top \beta
+  -
+  \log \left(
+    \sum_{j : y_j \ge y_i}
+    \exp(Z_j^\top \beta)
+  \right)
+\right].
+\end{equation}
+Hyperparameters satisfy $\alpha \in [0,1)$,
+$\lambda_H \ge 0$, $\lambda \ge 0$, and $\xi \in [0,1]$.
+The constants $1/(2np)$, $2/n_{\text{event}}$, and $1/(2nk)$ are chosen
+for numerical convenience and do not affect the minimizer.
 
-Supervising \(W\) also provides a practical advantage for **portability**:
-because \(W\) defines gene-level programs, new samples can be embedded by the
-closed-form projection \(Z_{\text{new}} = X_{\text{new}}^\top W\). In contrast,
-supervising \(H\) would not yield such a mapping; instead, obtaining sample
-loadings for external datasets would require solving a nonnegative least-squares
-(NNLS) problem for each new sample, introducing optimization noise and reducing
-reproducibility.
 
-Together, these considerations motivate supervising through \(W\), which shapes
-the gene programs toward prognostic directions, stabilizes solutions across
-initializations, and yields biologically interpretable signatures that
-generalize across cohorts.
+\subsection{Optimization Algorithm}
 
-## Optimization details {.unnumbered}
-Algorithm~S\ref{alg:desurv} describes the block coordinate descent (BCD) algorithm for optimizing the DeSurv model in Equation~\ref{eqn:desurv}.
-
+\subsubsection{Block coordinate descent scheme}
+Algorithm~\ref{alg:desurv} summarizes the block coordinate descent (BCD)
+scheme used to minimize $\mathcal{L}(W,H,\beta)$. At each outer iteration,
+we update $H$, then $W$, then $\beta$ while holding the other blocks
+fixed.
 
 \begin{algorithm}[H]
 \caption{DeSurv block coordinate descent}
@@ -89,11 +90,8 @@ Algorithm~S\ref{alg:desurv} describes the block coordinate descent (BCD) algorit
             \State \hspace{0.5cm} holding $W^{(t)}$ and $\beta^{(t)}$ fixed.
             \State \textbf{(W-update)} 
             \State \hspace{0.5cm} Update $W^{(t+1)}$ from $W^{(t)}$ using the hybrid multiplicative rule in Eq.~\ref{W_update_convergence},
-            \State \hspace{0.5cm} holding $H^{(t+1)}$ and $\beta^{(t)}$ fixed, and perform Armijo backtracking to ensure 
+            \State \hspace{0.5cm} holding $H^{(t+1)}$ and $\beta^{(t)}$ fixed, and perform backtracking to ensure 
             \State \hspace{0.5cm} $\mathcal{L}$ does not increase.
-            \State \textbf{(Column normalization)}
-            \State \hspace{0.5cm} Compute $D = \mathrm{diag}\!\big(\lVert W^{(t+1)}_{:,1}\rVert_2,\dots,\lVert W^{(t+1)}_{:,k}\rVert_2\big)$
-            \State \hspace{0.5cm} and set $W^{(t+1)} \leftarrow W^{(t+1)} D^{-1}$, $H^{(t+1)} \leftarrow D H^{(t+1)}$, and $\beta^{(t)} \leftarrow D \beta^{(t)}$
             \State \textbf{($\beta$-update)}
             \State \hspace{0.5cm} Update $\beta^{(t+1)}$ from $\beta^{(t)}$ using a Newton-like step for the Cox loss
             \State \hspace{0.5cm} (Eq.~\ref{eqn:beta_update}), holding $W^{(t+1)}$ and $H^{(t+1)}$ fixed.
@@ -106,89 +104,201 @@ Algorithm~S\ref{alg:desurv} describes the block coordinate descent (BCD) algorit
     \end{algorithmic}
 \end{algorithm}
 
-### Update for $H$ {.unnumbered}
-We adopt the standard multiplicative update for NMF @Lee1999,
+\subsubsection{Update for $H$}
+Conditional on $W$, the loss $\mathcal{L}(W,H,\beta)$ reduces to a strictly
+convex quadratic function of $H$. We adopt the standard NMF multiplicative
+update with $\ell_2$ penalty:
 \begin{equation}
-    H \leftarrow H \odot \frac{W^\top X}{W^\top W H},
+\label{eq:supp-Hupdate}
+H \leftarrow
+\max\!\left(
+  H \odot \frac{W^\top X}{
+    W^\top W H + \lambda_H H + \varepsilon_H
+  },
+  \varepsilon_H
+\right),
 \end{equation}
-  which guarantees nonnegativity and monotonic decrease in the reconstruction error conditional on $W$.
+where $\odot$ denotes elementwise multiplication, all divisions are
+elementwise, and $\varepsilon_H > 0$ is a small floor to prevent entries from
+becoming exactly zero. This update is equivalent to a majorization–minimization
+step and guarantees a nonincreasing reconstruction term conditional on $W$
+[@lee2001algorithms; @pascualmontano2006nonsmooth]. The $\varepsilon_H$-floor
+ensures that iterates remain in the interior of the nonnegative orthant, which
+simplifies the convergence analysis.
+
   
-### Update for $W$ {.unnumbered}
-For $W$, we derive a hybrid multiplicative update rule with gradient balancing.
-Let,
+\subsubsection{Update for $W$}
+For $W$, we construct a hybrid multiplicative update that balances the
+contributions of the NMF and Cox gradients. Let
+\[
+\nabla_W \mathcal{L}_{\mathrm{NMF}}(W,H)
+=
+\frac{1}{np}(W H - X)H^\top,
+\]
+and let
+\[
+\nabla_W \mathcal{L}_{\mathrm{Cox}}(W,\beta)
+=
+\frac{2}{n_{event}}\nabla_W \ell(W,\beta).
+\]
+where $\nabla_W \ell(W,\beta)$ denotes the Cox gradient with respect to $W$. A closed-form expression for $\nabla_W \ell$ is
 \begin{equation}
-R^{(t)} = \frac{\frac{(1-\alpha)}{np}XH^T + \delta^{(t)} \nabla_W\ell(W^{(t)}, \beta)}{\frac{(1-\alpha)}{np}W^{(t)}HH^T},
+\nabla_W \ell(W,\beta)
+=
+\sum_{i=1}^n
+\delta_i
+\left(
+  x_i
+  -\frac{
+      \sum_{j : y_j \ge y_i}
+        x_j \exp(x_j^\top W \beta)
+    }{
+      \sum_{j : y_j \ge y_i}
+        \exp(x_j^\top W \beta)
+    }
+\right)\beta^\top,
 \end{equation}
-then we let the update for $W$ be
-\begin{align}
-\label{eqn:W_update}
-W^{(t+1)} = W^{(t)} \odot R^{(t)}
-\end{align}
-where 
-\begin{equation}
-    \delta^{(t)} =\frac{||\frac{(1-\alpha)}{np}\nabla_W L_{NMF}(W^{(t)},H)||^2_F}{||\alpha\nabla_W L_{cox}(W^{(t)},\beta)||^2_F} =
-    \frac{\frac{(1-\alpha)}{np}||\nabla_W L_{NMF}(W^{(t)},H)||^2_F}{\alpha||\nabla_W \ell(W^{(t)},\beta)||^2_F}
-\end{equation}
-balances the contribution of the NMF and Cox gradients to the update. The quantity $\nabla_W\ell(W^{(t)}, \beta)$ denotes the gradient of the Cox partial log-likelihood with respect to $W$ evaluated at $W^{(t)}$
-\begin{equation}
-  \nabla_W \ell(W^{(t)}, \beta) = \frac{2}{n_{event}}\sum_{i=1}^n \delta_i \left(x_i - \frac{\sum_{y_j \geq y_i} x_j e^{x_j^TW^{(t)}\beta}}{\sum_{y_j \geq y_i} e^{x_j^TW^{(t)}\beta}}\right) \beta^T,
-\end{equation}
-and the quantity $\nabla\mathcal{L}_{NMF}(W^{(t)},H)$ is the gradient of the reconstruction error in Equation~\ref{eqn:recon} with respect to $W$ evaluated at $W^{(t)}$
-\begin{equation}
-    \nabla\mathcal{L}_{NMF}(W^{(t)},H) = 2(W^{(t)}H-X)H^T.
-\end{equation}
+where $x_i$ denotes the $i$th column of $X$.
 
-Note that the update rule in Equation~\ref{eqn:W_update} can also be derive from variable metric projected coordinate descent. See Supplementary Section XX.
+We define the gradient-balancing factor
+\begin{equation}
+\label{eq:supp-delta}
+\delta^{(t)}
+=
+\frac{
+  \left\lVert (1-\alpha) \nabla_W \mathcal{L}_{\mathrm{NMF}}(W^{(t)},H^{(t+1)}) \right\rVert_F^2
+}{
+  \left\lVert \alpha \nabla_W \mathcal{L}_{Cox}(W^{(t)},\beta^{(t)}) \right\rVert_F^2
+},
+\end{equation}
+and clip $\delta^{(t)}$ to avoid extreme values:
+$\delta^{(t)} \leftarrow \min(\delta^{(t)}, \delta_{\max})$
+with $\delta_{\max} = 10^6$ in all experiments.
 
-Because the update described above does not guarantee a decrease in the overall loss, we employ Armijo backtracking as follows.
+The multiplicative factor for $W$ is then
+\begin{equation}
+R^{(t)}
+=
+\frac{
+  \frac{(1-\alpha)}{np} X H^{(t+1)\top}
+  +\frac{2\alpha}{n_{\mathrm{event}}}\,\delta^{(t)}\,\nabla_W \ell(W^{(t)},\beta^{(t)})
+}{
+  \frac{(1-\alpha)}{np} W^{(t)} H^{(t+1)}H^{(t+1)\top}
+  +\varepsilon_W
+},
+\end{equation}
+and the proposed update is
+\begin{equation}
+\label{eq:supp-Wupdate}
+W^{(t+1)}
+=
+\max\!\left(
+  W^{(t)} \odot R^{(t)},
+  \varepsilon_W
+\right),
+\end{equation}
+with a small floor $\varepsilon_W > 0$. When $\alpha=0$, this reduces
+to the standard multiplicative update for NMF [@lee2001algorithms];
+for $\alpha>0$, the Cox gradient perturbs the update in a direction that
+decreases the supervised loss.
+
+Because the combined multiplicative step does not, by itself, guarantee a
+nonincrease in the full loss $\mathcal{L}$, we embed it in a backtracking
+line search.
 
 \begin{algorithm}[H]
-\caption{DeSurv block coordinate descent}
-\label{alg:desurv}
+\caption{$W$ update with backtracking}
+\label{alg:backtrack}
     \begin{algorithmic}[1]
-        \Require $W^{(t)}$, $R^{(t)}$
+        \Require Value of $W$ and the previous iteration $t$: $W^{(t)}$, the multiplicative update term at the current iteration $R^{(t+1)}$, the max number of backtracking updates $max\_bt$, the backtracking parameter $\rho \subset (0,1)$
         \Ensure $W^{(t+1)}$
-        
-        \State Compute the overall loss at $W^{(t)}$: $\mathcal{L}(W^{(t)},H^{(t+1)},\beta^{(t)})$
-        \State Compute the candidate update for $W$: $W^{(t+1)}_{cand} = W^{(t)} \odot R^{(t)}$
-        \State Compute the overall loss at $W^{(t+1)}_{cand}$: $\mathcal{L}(W^{(t+1)}_{cand},H^{(t+1)},\beta^{(t)})$
-        \While{$\mathcal{L}(W^{(t+1)}_{cand},H^{(t+1)},\beta^{(t)})$ > $\mathcal{L}(W^{(t)},H^{(t+1)},\beta^{(t)})$}
-            \State Decrease the magnitude of $R^{(t)}$ via: $R^{(t)}_{new} = \tau * R^{(t)}$
-            \State Recompute the $W$ update: $W^{(t+1)}_{cand} = W^{(t)} \odot R^{(t)}_{new}$
-            \State Recompute the overall loss 
+        \State $\theta =1$
+        \State b = 1
+        \State $flag\_accept = FALSE$
+        \While{$b \leq max\_bt$}
+            \State $W^{(t+1)}_{cand} = W^{(t)} \odot [(1-\theta) + \theta R^{(t+1)}]$
+            \State \textbf{(Column normalization)}
+            \State \hspace{0.5cm} Compute $D = \mathrm{diag}\!\big(\lVert W^{(t+1)}_{(:,1)cand}\rVert_2,\dots,\lVert W^{(t+1)}_{(:,k)cand}\rVert_2\big)$
+            \State \hspace{0.5cm} and set $W^{(t+1)}_{cand} \leftarrow W^{(t+1)}_{cand} D^{-1}$, $H^{(t+1)}_{cand} \leftarrow D H^{(t+1)}$, and $\beta^{(t)}_{cand} \leftarrow D \beta^{(t)}$
+            \If{$\mathcal{L}(W^{(t+1)}_{cand},H^{(t+1)},\beta^{(t)}) \leq \mathcal{L}(W^{(t)},H^{(t+1)},\beta^{(t)})$}
+              \State $W^{(t+1)} = W^{(t+1)}_{cand}$
+              \State $H^{(t+1)} = H^{(t+1)}_{cand}$
+              \State $\beta^{(t)} = \beta^{(t)}_{cand}$
+              \State $flag\_accept = TRUE$
+              \State break
+            \EndIf
+            \State $\theta = \theta*\rho$
+            \State $b = b + 1$
+        \EndWhile
+        \If{$flag\_accept = FALSE$}
+            \State $W^{(t+1)}=W^{(t)}$
+        \EndIf
     \end{algorithmic}
 \end{algorithm}
 
+The column normalization preserves both $WH$ and $W\beta$, and therefore
+leaves the loss $\mathcal{L}$ invariant up to numerical error. Backtracking
+guarantees that the accepted $W$ update does not increase $\mathcal{L}$.
 
-### Update for $\beta$ {.unnumbered} 
-Conditional on $(W,H)$ we solve the elastic-net penalized Cox model using coordinate descent as derived in [@simon2011].
+\subsubsection{Update for $\beta$} 
+
+Conditional on $(W,H)$, the loss in $\beta$ reduces to a convex
+elastic-net–penalized Cox problem:
+\[
+\min_{\beta \in \mathbb{R}^k}
+\left\{
+  -\frac{2\alpha}{n_{\mathrm{event}}}\,\ell(W,\beta)
+  +
+  \lambda\left(
+    \xi \lVert \beta \rVert_1
+    +\frac{1-\xi}{2} \lVert \beta \rVert_2^2
+  \right)
+\right\}.
+\]
+We solve this subproblem by cyclic coordinate descent following
+[@simon2011]. Writing $\ell(\beta) = \ell(W,\beta)$ and
+$\tilde{\eta}_i = Z_i^\top \beta$, the update for coordinate $r$ has the
+closed form
 \begin{equation}
-\label{eqn:beta_update}
-    \hat{\beta}_r = \frac{S(\frac{1}{n}\sum_{i=1}^n w(\tilde{\eta})_i z_{i,r} \left[ v(\tilde{\eta})_i - \sum_{j\ne r} z_{ij} \beta_j,\right], \lambda\xi)}{\frac{1}{n}\sum_{i=1}^n w(\tilde{\eta})_i z_{i,r}^2 + \lambda(1-\xi)},
+\label{eq:supp-beta-update}
+\hat{\beta}_r
+=
+\frac{
+  S\!\left(
+    \dfrac{1}{n}
+    \sum_{i=1}^n w(\tilde{\eta})_i
+    z_{i,r}
+    \left[
+      v(\tilde{\eta})_i - \sum_{j \ne r} z_{i,j} \beta_j
+    \right],
+    \lambda \xi
+  \right)
+}{
+  \frac{1}{n} \sum_{i=1}^n w(\tilde{\eta})_i z_{i,r}^2 + \lambda(1-\xi)
+},
 \end{equation}
-The soft-thresholding operator $S(\cdot,\lambda\xi)$ yields closed-form updates for each coefficient. The quantity $w(\tilde{\eta})_i$ is the $i$th diagonal of the Hessian approximation:
-\begin{equation}
-    w(\tilde{\eta})_m = \ell^{''}(\tilde{\eta})_{m,m} = \sum_{i \in C_m} \left[\frac{
-    e^{\tilde{\eta}_m} \sum_{y_j \geq y_i} e^{\tilde{\eta}_j} - (e^{\tilde{\eta}_k})^2
-    }{\left(\sum_{y_j \geq y_i} e^{\tilde{\eta}}_j \right)^2} \right],
-\end{equation}
-and
-\begin{equation}
-    z(\tilde{\eta})_m = \tilde{\eta}_m - \frac{\ell^{'}(\tilde{\eta})_m}{\ell^{''}(\tilde{\eta})_{m,m}} = \tilde{\eta}_m + \frac{1}{w(\tilde{\eta})_m} \left[\delta_m - \sum_{i \in C_m} \left( \frac{e^{\tilde{\eta}_m}}{\sum_{y_j \geq y_i e^{\tilde{\eta}_j}}}\right) \right]
-\end{equation}
-and $C_m$ is the set of unique event times at which observation $m$ is still at risk.
-
-### Normalization of W
-Normalization of W is performed in every iteration of the DeSurv algorithm to improve numerical stability and interpretability. Because the NMF scale is non-identifiable, foregoing such normalization could allow $W$ to blow up to very large magnitudes while $\beta$ and $H$ shrink to almost zero. This has potential for issues such as division by very small values. Normalization keeps $W$, $H$, and $\beta$ on reasonable scales. Additionally, without normalization one factor may contain magnitude information, while the other encodes almost all structure. Normalizing columns of $W$ makes each basis vector comparable in magnitude and keeps $H$'s columns interpretable as "weights" or "usages".
+where $S(a,\tau) = \mathrm{sign}(a)\max(|a|-\tau,0)$ is the soft-thresholding
+operator, and $w(\tilde{\eta})$, $v(\tilde{\eta})$ are standard local
+quadratic approximations of the Cox log-partial likelihood [@simon2011].
+We iterate coordinate updates until the subproblem converges to numerical
+tolerance, yielding a minimizer in $\beta$ for the current $W$.
 
 
-## Proof of Convergence to a Stationary Point
-To prove convergence of Algorithm~S\ref{alg:desurv} to a stationary point of the DeSurv model defined in Equation~\ref{eqn:desurv}, we rely on the theory of @tseng2001convergence, which states: 
+\subsubsection{Normalization of W}
 
-We will likely cite lin 2007 here and mention epsilon floors and adding eps to denom of multiplicative updates
+After each accepted $W$ update, we normalize the columns of $W$ as
+$W \leftarrow W D^{-1}$, and adjust $H$ and $\beta$ as
+\[
+H \leftarrow D H, \qquad \beta \leftarrow D \beta,
+\]
+where $D$ is the diagonal matrix of column $\ell_2$-norms of $W$.
+This preserves the reconstruction $WH$ and the linear predictor $W\beta$,
+leaving both the NMF and Cox terms in the loss unchanged. Normalization
+prevents degeneracy in the scale-nonidentifiable factorization and keeps
+columns of $W$ comparable in magnitude and interpretable as gene programs.
 
 
-## Derivation of W update {.unnumbered}
+\subsubsection{Derivation of W update from projected coordinate descent}
 The W update can be derived directly from the projected coordinate descent update with a specific step size.
 
 Recall that the overall loss function is
@@ -227,7 +337,341 @@ Since $W \geq 0$ this is equivalent to
 \end{equation}
 which matches the multiplicative form used in the software implementation.
 
-## Cross-validation procedure {.unnumbered}
+
+\subsection{Convergence proof}
+
+We show that, under mild regularity conditions, the block coordinate descent
+(BCD) Algorithm~S\ref{alg:desurv} converges to a stationary point of the DeSurv
+loss function
+\[
+\mathcal{L}(W,H,\beta).
+\]
+For clarity, we first analyze the algorithm \emph{without} the column
+normalization of $W$ inside the loop, and then argue in
+Section~\ref{subsec:conv_normalization} that the normalization step preserves
+stationarity of limit points.
+
+Throughout, let $\theta = (W,H,\beta)$ and denote
+\(\mathcal{L}(\theta) = \mathcal{L}(W,H,\beta)\).
+The feasible set is
+\[
+\Theta = \{(W,H,\beta):
+  W \in \mathbb{R}_{\ge 0}^{p\times k},\;
+  H \in \mathbb{R}_{\ge 0}^{k\times n},\;
+  \beta \in \mathbb{R}^k\}.
+\]
+
+\textbf{Assumption 1 (Regularity and parameter space).}
+We assume:
+\begin{enumerate}[label=(\roman*)]
+  \item The data $X \in \mathbb{R}_{\ge 0}^{p\times n}$, $y \in \mathbb{R}^n$, and $\delta \in \{0,1\}^n$ are fixed and bounded.
+  \item The hyperparameters satisfy $\lambda_H > 0$, $\lambda>0$, $\alpha \in [0,1)$, and $\xi \in [0,1]$.
+  \item The initial iterate $\theta^{(0)} = (W^{(0)},H^{(0)},\beta^{(0)})$ lies in $\Theta$ and satisfies $W^{(0)},H^{(0)} > 0$ elementwise.
+\end{enumerate}
+
+\textbf{Assumption 2 (Block updates).}
+At each outer iteration $t$, the three block updates in
+Algorithm~S\ref{alg:desurv} satisfy:
+\begin{enumerate}[label=(\roman*)]
+  \item \emph{$H$-update.} For fixed $(W^{(t)},\beta^{(t)})$, the update
+        $H^{(t)} \mapsto H^{(t+1)}$ is given by the multiplicative rule
+        \[
+        H \leftarrow H \odot \frac{W^\top X}{W^\top W H + \lambda_H H},
+        \]
+        applied at $(W^{(t)},H^{(t)})$. This rule preserves nonnegativity and
+        yields a nonincreasing value of the reconstruction term conditional on
+        $W^{(t)}$ and $\beta^{(t)}$; see e.g.
+        [@lee2001algorithms; @pascualmontano2006nonsmooth; @lin2007multconv].
+  \item \emph{$W$-update.} For fixed $(H^{(t+1)},\beta^{(t)})$, the update
+        $W^{(t)} \mapsto W^{(t+1)}$ is the hybrid multiplicative step
+        followed by backtracking as in Algorithm~S\ref{alg:backtrack}, producing
+        $W^{(t+1)}$ such that
+        \[
+          \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta^{(t)})
+          \le
+          \mathcal{L}(W^{(t)},H^{(t+1)},\beta^{(t)}).
+        \]
+        If no candidate satisfies the Armijo-type condition within the allowed
+        number of backtracking steps, the algorithm sets
+        $W^{(t+1)} := W^{(t)}$.
+  \item \emph{$\beta$-update.} For fixed $(W^{(t+1)},H^{(t+1)})$, the update
+        $\beta^{(t)} \mapsto \beta^{(t+1)}$ is obtained by running the
+        coordinate descent method of [@simon2011] on the convex elastic-net Cox
+        subproblem until convergence. Thus
+        \[
+          \beta^{(t+1)} \in
+          \arg\min_{\beta\in\mathbb{R}^k}
+          \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta),
+        \]
+        and
+        \[
+          \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta^{(t+1)})
+          \le
+          \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta^{(t)}).
+        \]
+\end{enumerate}
+
+\vspace{0.5em}
+\textbf{Lemma 1 (Continuity and bounded level sets).}
+Under Assumption 1, $\mathcal{L}:\Theta\to\mathbb{R}$ is continuous, and the
+initial sublevel set
+\[
+  \mathcal{S}_0 := \{\theta \in \Theta:
+    \mathcal{L}(\theta) \le \mathcal{L}(\theta^{(0)})\}
+\]
+is nonempty, closed, and bounded.
+
+\emph{Proof.}
+The NMF term $\|X-WH\|_F^2$ is a polynomial in the entries of $W$ and $H$, hence
+is continuously differentiable. The penalty $\|H\|_F^2$ is continuous as well.
+The Cox partial log-likelihood is a smooth function of the linear predictor
+$\eta_i = x_i^\top W \beta$, which is linear in $(W,\beta)$, so this term is
+continuously differentiable in $(W,\beta)$. The $\ell_2$ penalty on $\beta$ is
+smooth, and the $\ell_1$ penalty is convex and lower semicontinuous. Therefore
+$\mathcal{L}$ is continuous on $\Theta$.
+
+The constraints $W,H\ge 0$ define closed convex cones, and
+$\beta\in\mathbb{R}^k$ is unconstrained. Because $\lambda_H>0$ and $\lambda>0$,
+the terms $\tfrac{\lambda_H}{nk}\|H\|_F^2$ and
+$\lambda\tfrac{1-\xi}{2}\|\beta\|_2^2$ dominate the objective as
+$\|H\|_F\to\infty$ or $\|\beta\|_2\to\infty$, respectively. Thus the sublevel
+set $\mathcal{S}_0$ is bounded in $(H,\beta)$. Since $W\ge 0$ and $X$ is
+fixed, the reconstruction term and Cox term being bounded prevent $W$ from
+diverging while $\mathcal{L}$ remains below $\mathcal{L}(\theta^{(0)})$, so
+$W$ is bounded on $\mathcal{S}_0$. Because $\Theta$ is closed and
+$\mathcal{L}$ is continuous, $\mathcal{S}_0$ is closed. Nonemptiness follows
+from $\theta^{(0)}\in\mathcal{S}_0$. \hfill$\square$
+
+\vspace{0.5em}
+\textbf{Lemma 2 (Monotone descent and existence of limit points).}
+Under Assumptions 1 and 2, Algorithm~S\ref{alg:desurv} (without $W$
+normalization) generates a sequence $\{\theta^{(t)}\}_{t\ge 0}\subset\mathcal{S}_0$
+such that
+\[
+  \mathcal{L}(\theta^{(t+1)}) \le \mathcal{L}(\theta^{(t)})\quad \forall\,t,
+\]
+and $\{\mathcal{L}(\theta^{(t)})\}$ converges to a finite limit $\mathcal{L}^*$.
+Moreover, $\{\theta^{(t)}\}$ is bounded and therefore admits at least one limit
+point.
+
+\emph{Proof.}
+By Assumption 2(i),
+\[
+  \mathcal{L}(W^{(t)},H^{(t+1)},\beta^{(t)})
+  \le
+  \mathcal{L}(W^{(t)},H^{(t)},\beta^{(t)}).
+\]
+By Assumption 2(ii),
+\[
+  \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta^{(t)})
+  \le
+  \mathcal{L}(W^{(t)},H^{(t+1)},\beta^{(t)}).
+\]
+By Assumption 2(iii),
+\[
+  \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta^{(t+1)})
+  \le
+  \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta^{(t)}).
+\]
+Combining these inequalities gives
+\[
+  \mathcal{L}(\theta^{(t+1)}) \le \mathcal{L}(\theta^{(t)})\quad\forall t,
+\]
+so $\{\mathcal{L}(\theta^{(t)})\}$ is monotonically nonincreasing. Since
+$\mathcal{L}$ is bounded below on $\Theta$, the sequence converges to some
+finite $\mathcal{L}^*$.
+
+Each iterate lies in $\mathcal{S}_0$ by construction, and $\mathcal{S}_0$ is
+bounded by Lemma 1. Therefore $\{\theta^{(t)}\}$ is bounded and has at least
+one limit point by the Bolzano--Weierstrass theorem. \hfill$\square$
+
+\vspace{0.5em}
+\textbf{Lemma 3 (Blockwise optimality of limit points).}
+Let $\theta^*=(W^*,H^*,\beta^*)$ be any limit point of $\{\theta^{(t)}\}$ under
+Assumptions~1–2. Then:
+\begin{enumerate}[label=(\roman*)]
+  \item $H^*$ satisfies the KKT conditions for
+        \[
+          \min_{H\ge 0} \mathcal{L}(W^*,H,\beta^*).
+        \]
+  \item $W^*$ satisfies the KKT conditions for
+        \[
+          \min_{W\ge 0} \mathcal{L}(W,H^*,\beta^*).
+        \]
+  \item $\beta^*$ is the unique minimizer of
+        \[
+          \min_{\beta\in\mathbb{R}^k} \mathcal{L}(W^*,H^*,\beta),
+        \]
+        and satisfies the KKT conditions for the elastic-net Cox subproblem.
+\end{enumerate}
+
+\emph{Proof.}
+Let $\{t_j\}$ be a subsequence such that
+$\theta^{(t_j)}\to\theta^*=(W^*,H^*,\beta^*)$. By continuity of $\mathcal{L}$,
+$\mathcal{L}(\theta^{(t_j)})\to\mathcal{L}^*$.
+
+(i) Conditional on $(W,\beta)$, the $H$-subproblem is
+\begin{equation}
+  \min_{H \geq 0}\frac{(1-\alpha)}{np}(\lVert X-WH \rVert_F^2 + \frac{\lambda_H}{nk}||H||_F^2) + \text{const in $H$},\nonumber
+\end{equation}
+a strictly convex quadratic program. The multiplicative update for $H$ is known
+to be a descent method whose fixed points coincide with the KKT points of this
+constrained subproblem [@lee2001algorithms; @lin2007multconv]. Since the full
+objective $\mathcal{L}(\theta^{(t)})$ converges, the per-iteration decrease
+in $\mathcal{L}$ due to the $H$-update must vanish along $\{t_j\}$.
+If $H^*$ were not KKT for the $H$-subproblem given $(W^*,\beta^*)$, there would
+exist a feasible descent direction for $H$ at $(W^*,\beta^*)$, implying that
+for sufficiently large $j$ the $H$-update would still produce a strict decrease
+in $\mathcal{L}$, contradicting convergence. Hence $H^*$ satisfies the KKT
+conditions.
+
+(ii) Conditional on $(H,\beta)$, the $W$-subproblem is differentiable and
+convex in $W$ (sum of a quadratic term and a negative Cox partial
+log-likelihood in a linear predictor). The hybrid multiplicative step with
+backtracking can be viewed as a projected gradient-like update onto the
+nonnegative orthant. Under mild conditions on the search direction and step
+sizes, any limit point of such a projected gradient scheme is a KKT point for
+the constrained subproblem; see, for example, [@tseng2001; @grippo2000].
+If $W^*$ did not satisfy the KKT conditions, there would be a feasible
+descent direction at $(W^*,H^*,\beta^*)$ and a sufficiently small step that
+reduces $\mathcal{L}$, which the line search would eventually accept. This
+would contradict the fact that $\mathcal{L}(\theta^{(t_j)})\to\mathcal{L}^*$.
+Therefore $W^*$ is KKT for the $W$-subproblem.
+
+(iii) For fixed $(W,H)$, the $\beta$-subproblem is the convex elastic-net
+penalized Cox objective. The coordinate descent algorithm converges to the unique minimizer. By Assumption 2(iii),$\beta^{(t+1)}$ is taken to be this minimizer at each iteration. Passing to the limit along $\{t_j\}$ shows that $\beta^*$ is the unique minimizer of the
+$\beta$-block given $(W^*,H^*)$ and hence satisfies its KKT conditions.
+\hfill$\square$
+
+\vspace{0.5em}
+\textbf{Theorem 1 (Convergence to a stationary point).}
+Under Assumptions 1 and 2, the sequence $\{\theta^{(t)}\}$ produced by
+Algorithm~S\ref{alg:desurv} (without $W$ normalization) satisfies:
+\begin{enumerate}[label=(\alph*)]
+  \item The objective values $\{\mathcal{L}(\theta^{(t)})\}$ are monotonically
+        nonincreasing and converge to a finite limit $\mathcal{L}^*$.
+  \item Every limit point $\theta^* = (W^*,H^*,\beta^*)$ of $\{\theta^{(t)}\}$
+        is a stationary point of $\mathcal{L}$ on $\Theta$, i.e. it satisfies
+        the first-order KKT conditions for
+        \[
+          \min_{\theta\in\Theta} \mathcal{L}(\theta).
+        \]
+\end{enumerate}
+
+\emph{Proof.}
+Part (a) is Lemma 2. For part (b), Lemma 3 shows that any limit point $\theta^*$
+is blockwise optimal: each block is optimal (in the KKT sense) when the others
+are held fixed.
+
+The DeSurv loss can be written as
+\[
+\mathcal{L}(\theta) = f(W,H,\beta) + g(\beta)
+                     + I_{\{W\ge 0\}}(W) + I_{\{H\ge 0\}}(H),
+\]
+where $f$ is continuously differentiable, $g(\beta)=\lambda\xi\|\beta\|_1$ is
+a separable convex (possibly nondifferentiable) penalty, and $I_C$ denotes the
+indicator of a closed convex set $C$. This is the smooth+nonsmooth composite
+form considered in block coordinate descent analyses such as [@tseng2001].
+In this setting, any point that is optimal with respect to each block
+individually (a block coordinatewise minimizer) is a stationary point for the
+full problem: equivalently,
+\[
+0 \in \nabla_{W,H} f(W^*,H^*,\beta^*)
+    + \partial I_{\{W\ge 0\}}(W^*)
+    + \partial I_{\{H\ge 0\}}(H^*),
+\]
+\[
+0 \in \nabla_\beta f(W^*,H^*,\beta^*)
+    + \partial g(\beta^*),
+\]
+which are precisely the KKT conditions for
+$\min_{\theta\in\Theta}\mathcal{L}(\theta)$.
+Hence every limit point of Algorithm~S\ref{alg:desurv} is stationary.
+\hfill$\square$
+
+\subsubsection{Effect of column normalization of $W$}
+\label{subsec:conv_normalization}
+
+The above analysis omits the column-normalization step for $W$ used in
+Algorithm~S\ref{alg:backtrack}. We briefly argue that this normalization does
+not affect stationarity of limit points.
+
+Let $D$ be a diagonal matrix with strictly positive diagonal entries. The
+transformation
+\[
+  (W,H,\beta) \mapsto (W',H',\beta') = (W D^{-1},\, D H,\, D\beta)
+\]
+preserves both the product $WH$ and the linear predictor $W\beta$, and hence
+leaves $\mathcal{L}$ invariant. The column-normalization step is exactly such a
+transformation, with $D$ chosen from the column norms of $W$.
+
+Let $\{\theta^{(t)}\}$ be the sequence generated by the algorithm without
+normalization, and let $\{\tilde{\theta}^{(t)}\}$ be the sequence with
+normalization. For each $t$ there exists a diagonal $D^{(t)}$ with strictly
+positive entries such that
+\[
+  \tilde{\theta}^{(t)} =
+  (W^{(t)} D^{(t),-1},\, D^{(t)} H^{(t)},\, D^{(t)}\beta^{(t)}),
+\]
+and $\mathcal{L}(\tilde{\theta}^{(t)}) = \mathcal{L}(\theta^{(t)})$.
+Thus limit points of $\{\tilde{\theta}^{(t)}\}$ are obtained from limit points
+of $\{\theta^{(t)}\}$ by such invertible diagonal scalings.
+
+Since the KKT conditions are expressed in terms of the gradients with respect
+to $WH$ and $W\beta$, and these quantities are invariant under the above
+scaling, stationarity is preserved under the transformation. Therefore
+Theorem~1 implies that every limit point of the \emph{normalized} algorithm is
+also a stationary point of $\mathcal{L}$ (up to this scaling equivalence), which
+establishes convergence of the implementation used in practice.
+
+\subsubsection{Remark (Coxnet implementation)} 
+Our implementation updates the $\beta$ block using a Coxnet-style coordinate descent that relies on an approximate Hessian. Consequently, the formal optimality proof is established for an idealized version of the $\beta$ update that assumes exact second-order information. Nonetheless, in empirical applications the approximate update is numerically stable and yields a monotone decrease in the objective, consistent with the behavior predicted by the idealized analysis. 
+
+
+\subsection{Supervision on \(W\) versus \(H\)}
+
+Classical nonnegative matrix factorization (NMF) is non-identifiable: for any
+invertible matrix \(R\) with nonnegative entries, the factorization
+\((W, H)\) can be transformed to \((W R, R^{-1} H)\) without changing the
+reconstruction error, yielding multiple valid solutions
+[@donoho2004nmf; @laurberg2008uniqueness; @gillis2014nmf]. Although normalizing
+columns of \(W\) or rows of \(H\) resolves the trivial scaling ambiguity,
+nonnegative mixing transformations persist, and empirical studies consistently
+show that the sample-loading matrix \(H\) is more sensitive to initialization
+and local minima than the program matrix \(W\)
+[@brunet2004metagenes; @kim2007sparse; @gillis2012accelerated].
+
+In DeSurv, survival supervision enters through the projection $Z = X^\top W$ in the partial log-likelihood, so that the gradient of the DeSurv loss with respect to the programs is
+\[
+\nabla \mathcal{L} = (1-\alpha) \nabla_W \mathcal{L}_{\mathrm{Cox}}(W,H) - \alpha\nabla_W \mathcal{L}_{\mathrm{Cox}}(W,\beta),
+\]
+and therefore the update rule for $W$ as in Equation~\ref{eqn:W_update} relies on both the reconstruction term and the supervision term. As such, the gene-program definitions are directly shaped by their association with survival. This mechanism amplifies
+genes aligned with the hazard gradient and suppresses those that dilute
+prognostic structure, ensuring that the learned programs encode survival-relevant
+biological variation.
+
+By contrast, if supervision were applied to the sample loadings \(H\), the model
+could reduce the Cox loss by redistributing patient-specific coefficients while
+leaving the gene-level programs \(W\) nearly unchanged, a behavior documented in
+multiple supervised variants of NMF and supervised topic models, where
+supervision applied only to the coefficient matrix modifies \(H\) but not the
+basis \(W\) [@cai2011graph; @wang2014supervised; @blei2007slda].
+
+Supervising \(W\) also provides a practical advantage for **portability**:
+because \(W\) defines gene-level programs, new samples can be embedded by the
+closed-form projection \(Z_{\text{new}} = X_{\text{new}}^\top W\). In contrast,
+supervising \(H\) would not yield such a mapping; instead, obtaining sample
+loadings for external datasets would require solving a nonnegative least-squares
+(NNLS) problem for each new sample, introducing optimization noise and reducing
+reproducibility.
+
+Together, these considerations motivate supervising through \(W\), which shapes
+the gene programs toward prognostic directions, stabilizes solutions across
+initializations, and yields biologically interpretable signatures that
+generalize across cohorts.
+
+
+\subsection{Cross-validation procedure}
 Algorithm~S\ref{alg:cv} describes the cross validation procedure with $F$ folds and $R$ initializations.
 
 \begin{algorithm}[H]
@@ -271,19 +715,12 @@ $
 \end{algorithm}
 
 
-## Bayesian optimization roadmap {.unnumbered}
-While the current study relies on exhaustive grid search, the calibration problem is well suited to Bayesian Optimization (BO). In future work we plan to model the mapping from hyperparameters $(k, \\alpha, \\lambda, \\xi)$ to the cross-validated c-index using a Gaussian Process surrogate,
-\\[
-f(\\lambda) \\sim \\mathcal{GP}(\\mu(\\lambda), k(\\lambda, \\lambda')),
-\\]
-and select new evaluations via the Expected Improvement acquisition function. Each BO iteration would:
+\subsection{Bayesian Optimization}
 
-\\begin{enumerate}
-  \\item Fit/refresh the surrogate using all previously evaluated configurations and their observed c-indices.
-  \\item Maximize the acquisition function to identify the next configuration $\\lambda_{t+1}$.
-  \\item Launch the cross-validation target for $\\lambda_{t+1}$ within the `targets` pipeline.
-\\end{enumerate}
+\subsection{PDAC Datasets}
 
-This strategy reduces the required number of expensive cross-validation runs while retaining the ability to handle mixed discrete and continuous hyperparameters.
+\subsection{Bladder Datasets}
 
+\subsection{Consensus Clustering}
 
+\subsection{Survival Analysis}

@@ -39,6 +39,7 @@ simulate_desurv_interaction <- function(
     low_mean = low_mean,
     noise_sd = w_noise_sd
   )                 # normal
+  marker_info <- attr(W_true, "marker_info")
   H_true <- simulate_H(
     N = N,
     K = K,
@@ -57,7 +58,8 @@ simulate_desurv_interaction <- function(
   )
   
   surv_df <- simulate_survival_interaction(
-    H_true,
+    X = X_mean,
+    W = W_true,
     pair = interaction_pair,
     gamma = interaction_gamma,
     baseline_hazard = baseline_hazard,
@@ -70,6 +72,7 @@ simulate_desurv_interaction <- function(
     W_true = W_true,
     H_true = H_true,
     beta_true = NA,          # not linear beta anymore
+    marker_info = marker_info,
     scenario  = "interaction"
   )
 }

@@ -8,29 +8,29 @@ USE_TRAIN_GENES_FOR_VAL <- TRUE
 
 # always tuned hyper params
 DESURV_BO_BOUNDS   = list(
-  k_grid = list(lower = 2L, upper = 12L, type = "integer"),
+  k_grid = list(lower = 2L, upper = 10L, type = "integer"),
   alpha_grid = list(lower = 0, upper = 0.95, type = "continuous"),
-  lambda_grid = list(lower = 1e-5, upper = 1e5, scale = "log10"),
+  lambda_grid = list(lower = 1e-3, upper = 1e3, scale = "log10"),
   nu_grid = list(lower = 0, upper = 1, type = "continuous")
 )
 
 # sometimes tuned hyperparams
 # for the following set length 1 to fix, or range to tune via BO
-NGENE_CONFIG       = c(2000,5000) 
-NTOP_CONFIG        = c(50,200) 
+NGENE_CONFIG       = c(3000,8000) 
+NTOP_CONFIG        = c(50,500) 
 LAMBDAW_CONFIG     = c(0)
-LAMBDAH_CONFIG     = c(1e-5,1e5)
+LAMBDAH_CONFIG     = 0#c(1e-5,1e5)
 NINIT <- 50
 NINIT_FULL <- 100
 BO_N_INIT <- 20
 BO_N_ITER <- 100
 BO_CANDIDATE_POOL <- 2000
-BO_MAX_REFINEMENTS <- 2
+BO_MAX_REFINEMENTS <- 3
 BO_TOL_GAIN <- 0.002
 BO_PLATEAU <- 1
 BO_TOP_K <- 10
-BO_SHRINK_BASE <- 0.5
-BO_IMPORTANCE_GAIN <- 0.3
+BO_SHRINK_BASE <- 0.3
+BO_IMPORTANCE_GAIN <- 0.1
 BO_COARSE_CONTROL <- list(
   n_init = BO_N_INIT,
   n_iter = BO_N_ITER,

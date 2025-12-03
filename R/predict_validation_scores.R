@@ -15,25 +15,51 @@ desurv_predict_dataset <- function(fit, dataset) {
 
   W_sub <- fit$W[genes, , drop = FALSE]
   X_sub <- dataset$ex[genes, , drop = FALSE]
-
   Z <- t(X_sub) %*% W_sub
-  ns <- which(fit$sdZ > 1e-12)
-  if (!length(ns)) {
-    warning("No non-zero loadings found for dataset: ", dataset_name)
+  if (ncol(Z) == 0L) {
+    warning("No factors available for dataset: ", dataset_name)
     return(tibble::tibble())
   }
 
-  Z_use <- Z[, ns, drop = FALSE]
-  meanZ <- fit$meanZ[, ns, drop = FALSE]
-  sdZ <- fit$sdZ[, ns, drop = FALSE]
+  beta <- as.numeric(fit$beta)
+  risk <- drop(Z %*% beta)
 
-  Z_centered <- sweep(Z_use, 2, meanZ, FUN = "-")
-  Z_scaled <- sweep(Z_centered, 2, sdZ, FUN = "/")
+  compute_train_stats <- function(fit) {
+    if (is.null(fit$data) || is.null(fit$data$X)) {
+      return(NULL)
+    }
+    train_genes <- intersect(rownames(fit$W), rownames(fit$data$X))
+    if (!length(train_genes)) {
+      return(NULL)
+    }
+    X_train <- fit$data$X[train_genes, , drop = FALSE]
+    W_train <- fit$W[train_genes, , drop = FALSE]
+    Z_train <- t(X_train) %*% W_train
+    list(
+      mean = colMeans(Z_train),
+      sd = apply(Z_train, 2, stats::sd)
+    )
+  }
 
-  beta <- fit$beta[ns]
-  risk <- as.numeric(Z_centered %*% (beta * sdZ))
+  stats <- compute_train_stats(fit)
+  if (!is.null(stats)) {
+    sd_vec <- stats$sd
+    sd_vec[sd_vec < 1e-12] <- 1
+    Z_scaled <- sweep(Z, 2, stats$mean, FUN = "-")
+    Z_scaled <- sweep(Z_scaled, 2, sd_vec, FUN = "/")
+  } else {
+    Z_scaled <- scale(Z)
+    center_attr <- attr(Z_scaled, "scaled:center")
+    scale_attr <- attr(Z_scaled, "scaled:scale")
+    attr(Z_scaled, "scaled:center") <- NULL
+    attr(Z_scaled, "scaled:scale") <- NULL
+    if (any(!is.finite(Z_scaled))) {
+      Z_scaled <- Z
+    }
+  }
 
   score_df <- as.data.frame(Z_scaled)
+  colnames(score_df) <- paste0("X", seq_len(ncol(Z_scaled)))
   score_df$sample_id <- rownames(Z_scaled)
   score_df$risk_score <- risk
   score_df$dataset <- dataset_name

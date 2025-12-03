@@ -75,9 +75,11 @@ simulate_desurv_data <- function(
     lib_sdlog = lib_sdlog,
     dispersion = dispersion
   )
+  marker_info <- attr(W_true, "marker_info")
   
-  surv_df <- simulate_survival(
-    H_true,
+  surv_df <- simulate_survival_linear(
+    X_mean,
+    W_true,
     beta = beta,
     baseline_hazard = baseline_hazard,
     censor_rate = censor_rate
@@ -89,6 +91,7 @@ simulate_desurv_data <- function(
     surv = surv_df,               # time, status
     W_true = W_true,
     H_true = H_true,
-    beta_true = beta
+    beta_true = beta,
+    marker_info = marker_info
   )
 }

@@ -1,12 +1,17 @@
 simulate_survival_linear <- function(
-    H,
+    X,
+    W,
     beta,                # length K, log-hazard weights per program
     baseline_hazard = 0.01,
     censor_rate = 0.2    # fraction of samples to censor
 ) {
-  # linear predictor (risk score)
-  linpred <- as.vector(t(beta) %*% H)  # length N
+  stopifnot(nrow(X) == nrow(W))
+  stopifnot(length(beta) == ncol(W))
+  patient_scores <- crossprod(X, W)        # N x K
+  # linear predictor (risk score) built from X^T W
+  linpred <- as.vector(patient_scores %*% beta)
   
+  linpred = linpred / 1e6
   # event times ~ exponential with rate = baseline_hazard * exp(linpred)
   event_time <- rexp(
     n = length(linpred),
@@ -31,7 +36,7 @@ simulate_survival_linear <- function(
   }
   
   data.frame(
-    patient = colnames(H),
+    patient = colnames(X),
     time = time,
     status = status,
     linpred_true = linpred

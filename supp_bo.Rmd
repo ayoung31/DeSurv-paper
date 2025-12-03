@@ -1,0 +1,27 @@
+## Bayesian Optimization of DeSurv Hyperparameters
+
+To calibrate the latent factor model we treat every candidate hyperparameter vector $\theta = (k, \alpha, \lambda, \xi, \lambda_W, \lambda_H, n_{\text{gene}}, n_{\text{top}})$ as a point in a compact search domain defined by lower/upper bounds or log-scaled intervals for positive parameters. For any $\theta$ we run stratified cross-validation, execute multiple random initializations of the non-negative factorization inside each training fold, and average the held-out concordance index across folds. The resulting smooth but expensive objective is
+\[
+\hat{c}(\theta) = \frac{1}{F}\sum_{f=1}^F c_{(f)}(\theta),
+\]
+where $c_{(f)}(\theta)$ denotes the fold-specific concordance index computed after aggregating the multiple initializations of that fold. The Bayesian optimization layer models $\hat{c}(\theta)$ and proposes new configurations without enumerating the entire grid.
+
+### Gaussian-process surrogate
+
+We place a Gaussian-process prior on the unknown response surface, $f(\theta) \sim \mathcal{GP}(m(\theta), k(\theta, \theta'))$, with zero mean and a Matérn covariance. For inputs $\theta$ and $\theta'$, separated by $r = \lVert \theta - \theta' \rVert_2$, the kernel evaluates to
+\[
+k(\theta, \theta') = \sigma^2\, \frac{2^{1-\nu}}{\Gamma(\nu)} \left( \frac{\sqrt{2\nu} r}{\rho} \right)^{\nu} K_{\nu} \left( \frac{\sqrt{2\nu} r}{\rho} \right),
+\]
+where $\nu$ controls smoothness, $\rho$ is an automatic relevance determination length-scale, and $K_{\nu}(\cdot)$ is the modified Bessel function of the second kind. We seed the surrogate with a Latin hypercube design, refit it after every completed evaluation, and carry forward the predictive posterior mean $\mu_n(\theta)$ and variance $\sigma_n^2(\theta)$.
+
+### Expected improvement policy
+
+Sequential evaluations are chosen by maximizing the expected improvement acquisition function. Let $f_{\star}$ be the best observed cross-validated score and $\Phi$/$\phi$ denote the standard normal cdf/pdf. The expected improvement of a new proposal $\theta$ is
+\[
+\operatorname{EI}(\theta) = \left(\mu_n(\theta) - f_{\star} - \xi\right) \Phi\left(Z(\theta)\right) + \sigma_n(\theta) \phi\left(Z(\theta)\right), \quad Z(\theta) = \frac{\mu_n(\theta) - f_{\star} - \xi}{\sigma_n(\theta)},
+\]
+with $\xi \ge 0$ providing a tunable exploration margin. We evaluate the acquisition over a candidate set sampled from the bounded search region, choose the maximizer as the next experiment, and append the resulting $(\theta, \hat{c}(\theta))$ pair to the GP training set. This loop repeats until the budget of simulations is exhausted or improvement plateaus.
+
+### Practical considerations
+
+The search space couples discrete (rank $k$, gene counts) and continuous (penalties and supervision weights) coordinates, so we handle integer components via rounding inside the evaluator while keeping the surrogate in the continuous domain. Each evaluation reuses the DeSurv training pipeline—cross-validation, multiple NMF restarts, and consensus-based initialization—to ensure the BO objective faithfully reflects the deployed model. Candidate programs are later truncated to the BO-selected $n_{\text{top}}$ genes to define transferable signatures. By combining a Matérn-kernel GP surrogate with expected improvement, the optimization routine efficiently identifies hyperparameters that maximize out-of-sample concordance without explicit enumeration of the combinatorial grid.

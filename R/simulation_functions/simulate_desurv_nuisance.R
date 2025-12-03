@@ -43,6 +43,7 @@ simulate_desurv_nuisance <- function(
     subtle_scale = subtle_scale,
     other_scale = dominant_scale
   )
+  marker_info <- attr(W_true, "marker_info")
   H_true <- simulate_H(
     N = N,
     K = K,
@@ -74,7 +75,8 @@ simulate_desurv_nuisance <- function(
   beta <- rep(background_effect, K)
   beta[subtle_prog] <- lethal_effect
   surv_df <- simulate_survival_linear(
-    H_true,
+    X = X_mean_clean,
+    W = W_true,
     beta = beta,
     baseline_hazard = baseline_hazard,
     censor_rate = censor_rate
@@ -86,6 +88,7 @@ simulate_desurv_nuisance <- function(
     W_true = W_true,
     H_true = H_true,
     beta_true = beta,
+    marker_info = marker_info,
     scenario  = "nuisance"
   )
 }

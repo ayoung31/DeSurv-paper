@@ -47,7 +47,7 @@ SIMULATION_SCENARIOS <- list(
       )
     ),
     n_reps = 5L,
-    expression_transform = "rank",
+    expression_transform = "log2",
     base_seed = 2024L,
     split_seed = 4048L
   )
@@ -144,5 +144,4 @@ SIMULATION_BO_TARGETS <- list(
 )
 
 SIMULATION_BO_TARGETS
-
 

@@ -85,30 +85,59 @@
   sol
 }
 
-.predict_simulation_risk <- function(fit, truth) {
-  stopifnot(!is.null(truth$counts), !is.null(truth$surv))
-  samp <- truth$surv
-  samp$ID <- samp$patient
-  samp$dataset <- .null_coalesce(truth$config_name, "simulation")
-  rownames(samp) <- samp$ID
-  dataset <- list(
-    ex = truth$counts,
-    sampInfo = samp,
-    dataname = samp$dataset[1]
-  )
+.truth_expression_matrix <- function(truth) {
+  expr <- truth$expression
+  if (is.null(expr)) {
+    expr <- truth$counts
+  }
+  if (is.null(expr)) {
+    stop("Truth object must provide either `expression` or `counts`.")
+  }
+  expr
+}
+
+.predict_simulation_risk <- function(fit, truth, dataset = NULL) {
+  stopifnot(!is.null(truth$surv))
+  if (is.null(dataset)) {
+    expr <- .truth_expression_matrix(truth)
+    samp <- truth$surv
+    samp$ID <- samp$patient
+    samp$dataset <- .null_coalesce(truth$config_name, "simulation")
+    rownames(samp) <- samp$ID
+    dataset <- list(
+      ex = expr,
+      sampInfo = samp,
+      dataname = samp$dataset[1]
+    )
+  }
   preds <- desurv_predict_dataset(fit, dataset)
-  dplyr::left_join(
-    preds,
-    truth$surv,
-    by = c("sample_id" = "patient")
+  if (!nrow(preds)) {
+    return(preds)
+  }
+  preds_df <- as.data.frame(preds)
+  preds_df$.order <- seq_len(nrow(preds_df))
+  surv_df <- as.data.frame(truth$surv)
+  merged <- merge(
+    preds_df,
+    surv_df,
+    by.x = "sample_id",
+    by.y = "patient",
+    all.x = TRUE,
+    sort = FALSE
   )
+  merged <- merged[order(merged$.order), , drop = FALSE]
+  merged$.order <- NULL
+  tibble::as_tibble(merged)
 }
 
 .marker_sets_from_W <- function(W, top_n = 200) {
-  apply(W, 2, function(col) {
+  sets <- lapply(seq_len(ncol(W)), function(k) {
+    col <- W[, k]
     genes <- names(sort(col, decreasing = TRUE))
     genes[seq_len(min(top_n, length(genes)))]
   })
+  names(sets) <- colnames(W)
+  sets
 }
 
 # Column-wise correlation metric -------------------------------------------
@@ -140,8 +169,9 @@ metric_survival_subspace_distance <- function(truth, fit, beta_threshold = 1e-3)
 # Reconstruction error -----------------------------------------------------
 
 metric_reconstruction_error <- function(truth, fit) {
-  stopifnot(!is.null(truth$counts), !is.null(fit$W))
-  mats <- .shared_gene_matrix(truth$counts, fit$W)
+  stopifnot(!is.null(fit$W))
+  expr <- .truth_expression_matrix(truth)
+  mats <- .shared_gene_matrix(expr, fit$W)
   H_hat <- .project_expression_onto_W(mats$truth, mats$est)
   recon <- mats$est %*% H_hat
   num <- base::norm(mats$truth - recon, type = "F")
@@ -216,13 +246,16 @@ metric_factor_roc_curve <- function(truth, fit, beta_threshold = 0.1) {
 
 # Patient-level metrics ----------------------------------------------------
 
-metric_test_cindex <- function(truth, fit) {
-  preds <- .predict_simulation_risk(fit, truth)
+metric_test_cindex <- function(truth, fit, dataset = NULL) {
+  preds <- .predict_simulation_risk(fit, truth, dataset = dataset)
   if (!requireNamespace("survival", quietly = TRUE)) {
     stop("Package `survival` is required for C-index.")
   }
   surv_obj <- survival::Surv(preds$time, preds$status)
-  cc <- survival::survConcordance(surv_obj ~ preds$risk_score)
+  cc <- tryCatch(
+    survival::concordance(surv_obj ~ preds$risk_score),
+    error = function(e) survival::survConcordance(surv_obj ~ preds$risk_score)
+  )
   tibble::tibble(c_index = cc$concordance)
 }
 

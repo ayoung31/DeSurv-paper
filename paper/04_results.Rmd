@@ -14,6 +14,7 @@ library(VAM)
 library(grid)
 library(viridis)
 library(ggplotify)
+library(NMF)
 
 store <- "store_PKG_VERSION=HEAD_GIT_BRANCH=dev"
 tar_config_set(store = store)
@@ -283,7 +284,7 @@ keep = sapply(1:nrow(cor_mat),function(j){
   !any(is.na(cor_mat[j,])) & sum(p_mat_adj[j,]<.05)>0
 })
 mat=cor_mat[which(keep),]
-pmat = p_mat_adj[which(keep),]
+pmat = p_mat_adj[which(keep),,drop=FALSE]
 smat = matrix("",ncol=ncol(pmat),nrow=nrow(pmat))
 smat[pmat<.05] = "*"
 my_colors <- colorRampPalette(c("blue", "white", "red"))(100)
@@ -293,7 +294,7 @@ ph = pheatmap::pheatmap(mat,
                    breaks = seq(-.4, .4, length.out = 101),
                    fontsize = 6,
                    silent=TRUE,
-                   display_numbers = smat,
+                   # display_numbers = smat,
                    fontsize_number = 18,
                    treeheight_row = 0)
 ph_grob <- ph$gtable

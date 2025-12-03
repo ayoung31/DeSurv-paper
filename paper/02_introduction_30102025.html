@@ -11,7 +11,7 @@
 
 
 
-<title>03_methods.knit</title>
+<title>02_introduction_30102025.knit</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -352,227 +352,77 @@ display: none;
 </div>
 
 
-<div id="survival-driven-matrix-factorization" class="section level2 unnumbered">
-<h2 class="unnumbered">Survival-driven matrix factorization</h2>
-<p>DeSurv integrates the deconvolution and survival supervision into a
-single objective: <span class="math display">\[\begin{equation}\label{eq:desurv_loss}
-\mathcal{L}(W,H,\beta) =
-(1 - \alpha) \mathcal{L}_{\text{NMF}}(W,H) -
-\alpha\mathcal{L}_{\mathrm{Cox}}(W,\beta),
-\end{equation}\]</span> where <span class="math inline">\(\mathcal{L}_{\text{NMF}}(W,H)\)</span> is the
-deconvolution term, <span class="math inline">\(\mathcal{L}_{\mathrm{Cox}}(W,\beta)\)</span> is
-the survival supervision term, and <span class="math inline">\(\alpha
-\in [0,1)\)</span> controls the balance of these two terms.</p>
-<!-- When $\alpha=0$, DeSurv reduces to conventional NMF; as $\alpha \rightarrow 1$, the model approaches a penalized Cox regression on the gene-level expression matrix. -->
-<p>The deconvolution term relies on Nonnegative Matrix Factorization
-(NMF) <span class="citation">[@lee1999]</span>. Let <span class="math inline">\(X \in \mathbb{R}_{\geq 0}^{p \times n}\)</span>
-denote the nonnegative expression matrix with <span class="math inline">\(p\)</span> genes and <span class="math inline">\(n\)</span> subjects. NMF seeks to reconstruct
-<span class="math inline">\(X\)</span> as the product of two lower
-dimensional matrices <span class="math display">\[\begin{equation}
-X \approx WH,\nonumber
-\end{equation}\]</span> where <span class="math inline">\(W \in
-\mathbb{R}_{\geq 0}^{p \times k}\)</span> contains gene weights and
-<span class="math inline">\(H \in \mathbb{R}_{\geq 0}^{k \times
-n}\)</span> holds sample-specific factor loadings.</p>
-<p>The supervision term relies on Cox regression with covariates <span class="math display">\[\begin{equation}
-  Z = W^TX, \nonumber
-\end{equation}\]</span> which can be interpreted factor signature
-scores. The matrix <span class="math inline">\(W\)</span> is shared
-between the NMF deconvolution and supervision terms so that survival
-directly influences the gene signature definitions. This choice also
-enables the learned gene signatures <span class="math inline">\(W\)</span> to be directly applied to external
-datasets without refitting sample-level loadings, improving portability
-relative to supervising through <span class="math inline">\(H\)</span>.</p>
-<div id="nmf-reconstruction-error" class="section level3 unnumbered">
-<h3 class="unnumbered">NMF Reconstruction Error</h3>
-<p>The NMF reconstruction error is the sum of squared residuals between
-<span class="math inline">\(X\)</span> and <span class="math inline">\(WH\)</span> <span class="math display">\[\begin{equation}\label{eq:nmf_loss}
-\mathcal{L}_{\text{NMF}}(W,H) = \frac{1}{np}\lVert X - WH \rVert_F^2 +
-\frac{\lambda_H}{nk} \lVert H \rVert_F^2,
-\end{equation}\]</span> where <span class="math inline">\(\lVert
-\rVert_F\)</span> represents the frobenius norm and the penalty $ H
-_F^2$ regularizes the sample-specific factor loadings and prevents their
-magnitudes from becoming arbitrarily large.</p>
-<!-- Although NMF suffers from a scale indeterminacy ($WH = (cW)(H/c)$), an equivalent penalty is not applied to $W$ because we explicitly normalize the columns of $W$ at each iteration of the optimization algorithm (see Supplementary Section~XX). Normalizing $W$ resolves the scale ambiguity of the factorization, while the L2 penalty on $H$ stabilizes the sample-level activations and improves numerical conditioning of the reconstruction term. -->
-</div>
-<div id="cox-partial-log-likelihood" class="section level3 unnumbered">
-<h3 class="unnumbered">Cox Partial Log-Likelihood</h3>
-<!-- We apply survival supervision through the gene-program matrix $W$ rather than the sample-loading matrix $H$ so that survival direcly impacts the definition of the gene signatures. Placing supervision on $H$ would improve prediction primarily by reshaping patient-specific loadings without altering the underlying biological signatures. This choice enhances identifiability, stabilizes factor solutions across initializations, and yields gene programs that reproducibly encode survival-relevant biology (See supplementary methods).  -->
-<p>The partial log-likelihood for the Cox regression is written as <span class="math display">\[\begin{equation}
-\ell(W,\beta) = \sum_{i=1}^n \delta_i \Big[ Z_i^\top \beta - \log \Big(
-\sum_{j:y_j \ge y_i} \exp(Z_j^\top \beta) \Big) \Big],
-\end{equation}\]</span> where the factor signature scores <span class="math inline">\(Z_i = W^TX_i\)</span> are the covariates and <span class="math inline">\(X_i\)</span> is the expression profile for subject
-<span class="math inline">\(i\)</span>. The coefficients <span class="math inline">\(\beta \in \mathbb{R}^k\)</span> describe the
-relationship between each gene signature and survival. The observed
-event or censoring time for each subject is <span class="math inline">\(y_i&gt;\mathbb{R}^N_+\)</span>, with event
-indicators <span class="math inline">\(\delta_i \in {0,1}\)</span>.</p>
-<p>Because the factor signature scores can be correlated, and only a
-subset of factors may be associated with survival, we introduce and
-elastic net penalty on <span class="math inline">\(\beta\)</span>. The
-penalty improves numerical stability and can shrink the coefficients of
-non-survival-related factors to zero. The penalized Cox model is <span class="math display">\[\begin{equation}
-\mathcal{L}_{\mathrm{Cox}}(W,\beta)=
-\frac{2\alpha}{n_{\text{event}}}\ell(W,\beta) - \lambda \{ \xi \lVert
-\beta \rVert_1 + \tfrac{1-\xi}{2} \lVert \beta \rVert_2^2 \},
-\end{equation}\]</span> where <span class="math inline">\(\lambda&gt;0\)</span> is the contribution of the
-<span class="math inline">\(\beta\)</span> penalty to the loss, and
-<span class="math inline">\(\xi \subset [0,1]\)</span> is the balance of
-the L1 and L2 penalty terms.</p>
-<p>Hyperparameters <span class="math inline">\((k, \alpha, \lambda_H,
-\lambda, \xi)\)</span> are selected using Bayesian optimization of the
-cross-validated C-index (Methods: Hyperparameter Tuning). See Section XX
-of the Supplementary Methods for more details on the model setup.</p>
-</div>
-</div>
-<div id="optimization" class="section level2 unnumbered">
-<h2 class="unnumbered">Optimization</h2>
-<p>We minimize Equation~<span class="math inline">\(\ref{eq:desurv_loss}\)</span> using an alternating
-minimization scheme that updates <span class="math inline">\(W\)</span>,
-<span class="math inline">\(H\)</span>, and <span class="math inline">\(\beta\)</span> until convergence (Algorithm~S<span class="math inline">\(\ref{alg:desurv}\)</span>). The <span class="math inline">\(H\)</span> update uses standard multiplicative
-rules <span class="citation">[@Lee1999]</span>, the <span class="math inline">\(W\)</span> update uses a projected-gradient
-formulation that incorporates the Cox gradient, and the <span class="math inline">\(\beta\)</span> update solves an elastic-net
-penalized Cox sub-problem via coordinate descent. Detailed derivations
-and pseudocode are provided in the Supplementary Methods to keep the
-main text concise.</p>
-</div>
-<div id="convergence-and-initializations" class="section level2">
-<h2>Convergence and Initializations</h2>
-<p>As with all NMF-based models, the DeSurv factorization is non-unique:
-multiple <span class="math inline">\((W,H)\)</span> pairs can yield
-equivalent reconstructions under scaling or nonnegative mixing
-transformations. Accordingly, NMF algorithms are typically evaluated by
-their convergence to a stationary point, a standard criterion in
-non-convex optimization. Under mild regularity conditions, we show that
-Algorithm S<span class="math inline">\(\ref{alg:desurv}\)</span>
-converges to such a stationary point of the DeSurv objective in
-Equation~<span class="math inline">\(\ref{eqn:desurv}\)</span>, with
-full details provided in the Supplementary Methods. In practice, we
-mitigate sensitivity to initialization by using multiple random
-starts.</p>
-</div>
-<div id="cross-validation-and-bayesian-optimization" class="section level2">
-<h2>Cross Validation and Bayesian Optimization</h2>
-<p>We employ Bayesian Optimization (BO) to Why do we average across
-initializatons</p>
-<p>During hyperparameter tuning, we averaged performance across
-initializations to compute an expected performance for any one run. This
-provides a more robust estimate of model performance compared selecting
-the best performing model, which may be highly variable and overly
-optimistic.</p>
-</div>
-<div id="seeding-the-final-model-run" class="section level2">
-<h2>Seeding the final model run</h2>
-<p>To obtain an interpretable final model on the full training dataset,
-we adopt a consensus-based initialization strategy that stabilizes the
-latent programs across random starts. As in cross-validation, we
-generate multiple DeSurv fits from different initializations. For each
-run, we record (i) the genes appearing among the top-loading genes of
-each factor and (ii) the frequency with which each pair of genes
-co-occurs within the same factor’s top genes. These co-occurrence
-frequencies form a consensus matrix summarizing how consistently gene
-pairs associate across plausible solutions.</p>
-<p>The intuition is that true underlying programs should give rise to
-stable patterns of co-selection: genes belonging to the same biological
-module are repeatedly recovered together, whereas noise-driven
-associations are not. We perform hierarchical clustering on the
-consensus matrix, using the same number of clusters as the target number
-of factors, and treat the resulting gene groups as robust approximations
-of the latent programs. These clusters are then used to construct an
-initialization matrix <span class="math inline">\(W_0\)</span>, whose
-columns encode the consensus-derived gene modules. This <span class="math inline">\(W_0\)</span> provides a biologically informed and
-low-variance starting point for the final DeSurv fit, improving
-stability and interpretability while mitigating convergence to
-rotationally equivalent or noisy local optima.</p>
-</div>
-<div id="simulation-studies" class="section level2">
-<h2>Simulation Studies</h2>
-</div>
-<div id="application-to-pdac" class="section level2">
-<h2>Application to PDAC</h2>
-<div id="study-cohorts-and-preprocessing" class="section level3 unnumbered">
-<h3 class="unnumbered">Study cohorts and preprocessing</h3>
-<p>We trained DeSurv on two bulk RNA-seq cohorts with matched overall
-survival (OS) data: TCGA-PAAD (144 tumors, 75 events) and CPTAC-PDAC
-(129 tumors, 64 events) <span class="citation">[@raphael2017integrated;@ellis2013clinical]</span>.
-Both cohorts were filtered to primary, non-metastatic PDAC samples and
-processed through a common pipeline consisting of log<span class="math inline">\(_2\)</span> + 1 transformation and filtering to
-XXXX (selected via Bayesian optimization) highly expressed and variable
-genes. To harmonize the datasets, expression matrices were
-rank-transformed within sample and genes were intersected to only
-include those present in both studies after filtering. The concatenated
-matrix <span class="math inline">\(X\)</span> served as the training
-input for all model fitting.</p>
-<p>Within-sample ranking was chosen to mitigate batch effects between
-TCGA and CPTAC, avoid platform-specific biases, and stabilize the scale
-of expression values passed to NMF. Rank transformation preserves
-relative gene ordering, which is the primary signal used in defining
-factor-specific exclusivity of a gene in <span class="math inline">\(W\)</span> while ensuring that cross-platform
-values lie on a comparable scale.</p>
-<p>Model performance was assessed in five independent PDAC cohorts
-spanning microarray and RNA-seq technologies <span class="citation">[@dijk2020unsupervised;@moffitt2015virtual;@zhao2018gene;@puleo2018stratification]</span>.
-Each validation dataset underwent the same filtering and
-rank-transformation steps prior to downstream clustering and
-prediction.</p>
-</div>
-<div id="hyperparameter-selection" class="section level3 unnumbered">
-<h3 class="unnumbered">Hyperparameter selection</h3>
-<p>Model calibration follows a nested strategy. For any proposed
-hyperparameter configuration we perform stratified five-fold
-cross-validation on the combined TCGA and CPTAC training set, run 20
-random initializations per fold to account for NMF non-uniqueness, and
-summarize performance via the held-out concordance index (c-index). A
-Bayesian optimization layer then treats the cross-validated c-index as
-the objective function. The surrogate model is a Gaussian process with a
-Matérn kernel, initially seeded with evaluations from a Latin hypercube
-design and updated sequentially using an expected improvement
-acquisition rule. For details about the Bayesian optimization procedure,
-see the supplementary methods. The search space includes the factor rank
-<span class="math inline">\(k\)</span>, the supervision weight <span class="math inline">\(\alpha\)</span>, the elastic-net shrinkage
-parameters of the Cox component (<span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\xi\)</span>), and the penalties applied to <span class="math inline">\(W\)</span> and <span class="math inline">\(H\)</span> (<span class="math inline">\(\lambda_W\)</span> and <span class="math inline">\(\lambda_H\)</span>). Optionally, the number of
-highly expressed and variable genes retained (<span class="math inline">\(n_{\text{gene}}\)</span>) and the number of top
-genes per factor (<span class="math inline">\(n_{\text{top}}\)</span>)
-are also optimized. We select the configuration that provides the
-largest mean c-index across BO runs. This procedure yields a
-parsimonious, survival-guided factorization without exhaustively
-enumerating the entire parameter grid.</p>
-</div>
-<div id="external-validation" class="section level3">
-<h3>External Validation</h3>
-<p>We recognize that transporting the entire W matrix to new data is not
-clinically feasible. Therefore, for each factor <span class="math inline">\(f\)</span>, we rank genes by their exclusivity
-score <span class="math display">\[\begin{equation}
-s_{gf} = W_{gf} - \max_{r \ne f} W_{gr},
-\end{equation}\]</span> and designate the top <span class="math inline">\(g\)</span> genes per factor as the factor-specific
-signature. We denote the matrix <span class="math inline">\(W\)</span>
-restricted to these <span class="math inline">\(g\)</span> genes as
-<span class="math inline">\(\tilde{W}_{(g)}\)</span>. Assuming <span class="math inline">\(W\)</span> is sparse, there is some <span class="math inline">\(g\)</span> for which <span class="math inline">\(W^TX \approx \tilde{W}_{(G)}^T X\)</span>. If
-<span class="math inline">\(W\)</span> is not sparse, we allow <span class="math inline">\(g \rightarrow p\)</span>. The number of top genes
-is chosen via Bayesian Optimization to maximize c-index.</p>
-<p>These signatures were used to apply the fitted model to the
-validation data and served as features for downstream unsupervised
-clustering.</p>
-<div id="clustering" class="section level4 unnumbered">
-<h4 class="unnumbered">Clustering</h4>
-<p>We applied ConsensusClusterPlus <span class="citation">[@wilkerson2010consensusclusterplus]</span> to each
-validation dataset, considered cluster counts <span class="math inline">\(K=2\)</span>–4, and selected <span class="math inline">\(K\)</span> based on cumulative distribution
-function diagnostics, delta area plots, and consensus heatmaps without
-examining survival outcomes. Cluster labels were aligned across datasets
-using the dominant DeSurv signatures expressed within each cluster.</p>
-</div>
-<div id="survival-analysis" class="section level4 unnumbered">
-<h4 class="unnumbered">Survival analysis</h4>
-<p>Survival analyses were conducted on patients with available OS time
-and censoring indicator. Dataset-specific survival curves were estimated
-using the Kaplan–Meier method and compared with log-rank tests. For
-pooled analyses we fit Cox proportional hazards models with cluster
-membership as a categorical predictor and stratified on dataset of
-origin to accommodate baseline hazard differences. Hazard ratios are
-reported with Wald confidence intervals, and p-values correspond to
-two-sided tests. All analyses were performed in R (version 4.3) using
-the <code>survival</code> package (version 3.2-13).</p>
-</div>
-</div>
-</div>
+<p>Molecular subtyping has transformed precision oncology by stratifying
+patients into biologically and clinically meaningful groups that inform
+prognosis and guide therapy <span class="citation">[@pareja2016triple;
+@dienstmann2018molecular; @zhou2021clinical; @seiler2017impact;
+@prat2015clinical]</span>. Subtyping relies on the identification of
+robust biological signals that define subtypes such as transcriptomic
+signatures. However, the tumor microenvironment (TME) contains mixtures
+of diverse cell types such as malignant, stromal, immune, and
+endothelial cells, and disentangling tumor specific signals from this
+mixture can be challenging. As such, subtyping pipelines typically rely
+on the deconvolution of bulk transcriptomic data or single-cell analysis
+to discover distinct cell types and their corresponding signatures.
+Downstream, the signatures are evaluated for clinical relevance such as
+overall survival or response to treatment.</p>
+<p>Separating discovery from validation can risk overfitting and limits
+biological and clinical generalizability. Identified cell types may
+capture dataset-specific noise rather than reproducible biological
+signals, undermining their utility in downstream analyses or therapeutic
+targeting <span class="citation">[@Ou2021, @Planey2016]</span>.
+Moreover, even when discovered cell types are biologically valid and
+reproducible, they may not correspond to the cellular programs most
+relevant for predicting or influencing clinical outcomes <span class="citation">[@Prat2014, @ellrott2025classification]</span>.
+Therefore, there is a clear need for integrative methods that jointly
+uncover biologically meaningful programs while directly incorporating
+clinical endpoints to ensure prognostic relevance.</p>
+<p>However, integrating patient outcomes into the discovery phase is not
+straightforward with current technology and methodology. Single-cell
+transcriptomics can resolve programs at the cellular level, but cohort
+sizes are often too small to support survival analyses. In contrast,
+large bulk transcriptomic cohorts with clinical annotations are
+well-suited for outcome modeling <span class="citation">[@tomczak2015review; @zhang2019international]</span>,
+yet deconvolution is needed to disentangle overlapping cellular signals.
+Reference-based deconvolution methods focus on estimating cell-type
+proportions from predefined signatures, which limits the utility of
+these methods for discovery of novel programs <span class="citation">[@nguyen2024fourteen]</span>.</p>
+<p>Nonnegative matrix factorization (NMF) is a commonly used
+reference-free approach in cancer genomics due to the inherent
+interpretability of the factors as additive parts <span class="citation">[@lee1999learning; @Bailey2016; @moffitt2015virtual;
+@peng2019novo]</span>. Supervised extensions of NMF have been proposed
+for a variety of outcomes, but most have been developed for regression
+or categorical (classification) tasks rather than time‐to‐event
+(survival) data. Although two recent studies have linked NMF to survival
+outcomes, they provide little methodological justification, sparse
+guidance on tuning parameters, and limited demonstration of biologically
+meaningful factors, underscoring the need for more rigorous and
+interpretable survival-aware deconvolution <span class="citation">[@le2025survnmf, @huang2020low]</span>.</p>
+<p>Here we present DeSurv, a Survival-supervised Deconvolution framework
+that integrates non-negative matrix factorization (NMF) with Cox
+proportional hazards modelling. In contrast to fully unsupervised
+approaches that evaluate survival associations only after the
+factorization, and to existing supervised NMF models that link outcomes
+to the subject-level factor loadings, DeSurv integrates survival
+information directly into the gene signature matrix. This design ensures
+that the discovered transcriptional programs are not only biologically
+interpretable but also intrinsically aligned with patient outcomes. To
+enhance robustness and reproducibility, DeSurv performs automatic
+parameter selection via Bayesian optimization, addressing the
+quintessential challenge of rank determination in matrix
+factorization.</p>
+<p>By coupling latent program discovery with direct survival
+supervision, DeSurv resolves longstanding challenges in disentangling
+tumor–microenvironment interactions and aligns molecular heterogeneity
+with clinical outcomes. This unified approach represents a
+methodological advance in translational cancer genomics and provides a
+general framework for deriving actionable insights from high-dimensional
+transcriptomic data.</p>
+<!-- To benchmark DeSurv’s ability to recover prognostic signals, we first evaluated its performance on synthetic datasets that simulate mixtures of tumor and stromal programs with known survival associations. These simulations allowed us to control the degree of signal entanglement, subtype overlap, and censoring rates. DeSurv consistently identified latent programs that aligned with the ground truth survival drivers, outperforming standard NMF followed by downstream Cox regression in both accuracy and stability. Importantly, we observed that incorporating survival supervision during factorization not only improved risk stratification (as measured by concordance index and log-rank p-values) but also enhanced interpretability, producing factor loadings more closely aligned with the true cell-type contributions. Across a range of noise levels and signal sparsity, DeSurv maintained robust performance, highlighting its utility for disentangling prognostically informative programs even under challenging conditions. -->
+<!-- We demonstrate DeSurv on PDAC, a cancer type that has historically resisted consensus on molecular subtypes due to overlapping tumor and stromal signals. DeSurv not only recapitulates the classical–basal-like axis but also reveals prognostic gradients driven by cancer-associated fibroblast (CAF) subtypes. These blended programs align with single-cell–derived CAF phenotypes—including inflammatory, myofibroblastic, and antigen-presenting states—and stratify survival more effectively than previous classifiers developed from tumor or stroma alone [@ohlund2017distinct; @elyada2019cross]. We further extend our analysis to bladder cancer, where subtyping efforts have identified basal, luminal, neuroendocrine-like, and stroma-rich categories [@Fong2020; @Sjodahl2019; @Kamoun2019]. However, variability in tumor purity and classifier definitions has hindered reproducibility [@Schwarzova2023; @Warrick2021]. DeSurv identifies coherent stromal and immune programs that refine these subtypes and improve survival stratification across cohorts [@Sanguedolce2022; @Lindskrog2021; @Lopez2023]. -->
+<!-- Additionally, interactions between tumor and other microenvironmental components has been shown to drive prognosis. Yet in many solid tumors, efforts to define tumor-intrinsic and stromal programs have proceeded independently, making it difficult to understand how their interactions shape disease progression.  -->
+<!-- This limitation is particularly evident in pancreatic ductal adenocarcinoma (PDAC), where a decade of research produced conflicting schemes describing both the number and characterization of tumor and stromal subtypes [@collisson2011subtypes, @bailey2016, @moffitt2015virtual,@elyada2019cross,@Maurer2019, @Chen2021, @Wang2021].  -->
+<!-- Only retrospectively did the field coalesce around a clinically relevant basal-like/classical tumor dichotomy after evaluating the prognostic significance of each schema [@rashid2020purity]. More recently, Peng et al. (2024) showed that a two subtype stromal schema was prognostically informative and the interaction of tumor and stroma further differentiates survival outcomes [@peng2024determination]. This highlights the need for models that directly capture these effects rather than relying on post-hoc evaluation. -->
 
 
 

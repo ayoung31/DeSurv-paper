@@ -14,10 +14,12 @@ simulate_W_shared_baseline <- function(
   
   # 2. Start W as K copies of the baseline
   W <- matrix(rep(baseline, K), nrow = G, ncol = K)
+  marker_indices <- vector("list", K)
   
   # 3. Add small program-specific "bumps"
   for (k in seq_len(K)) {
     bump_genes <- sample(seq_len(G), bump_genes_per_prog)
+    marker_indices[[k]] <- bump_genes
     W[bump_genes, k] <- W[bump_genes, k] +
       pmax(rnorm(bump_genes_per_prog, mean = bump_mean, sd = bump_sd), 0)
   }
@@ -28,5 +30,14 @@ simulate_W_shared_baseline <- function(
   
   rownames(W) <- paste0("gene", seq_len(G))
   colnames(W) <- paste0("prog", seq_len(K))
+  marker_info <- lapply(seq_len(K), function(k) {
+    idx <- marker_indices[[k]]
+    list(
+      index = idx,
+      genes = rownames(W)[idx]
+    )
+  })
+  names(marker_info) <- colnames(W)
+  attr(W, "marker_info") <- marker_info
   W
 }
