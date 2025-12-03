@@ -158,7 +158,7 @@ TUNE_LAMBDAH       = length(unique(LAMBDAH_CONFIG)) > 1
 
 # convergence
 TOL                = 1e-5
-MAXIT              = 2000
+MAXIT              = 4000
 
 # standard NMF
 STD_NMF_K_GRID     = 2:12#2:16   #= c(2,3,4,5)
