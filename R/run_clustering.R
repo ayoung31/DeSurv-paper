@@ -23,6 +23,18 @@ run_clustering <- function(tops, data, gene_lists, color.lists = NULL, type = "b
                            reps = 1000, pFeature = 1, pItem = .8, seed = 9999,
                            clusterAlg = "km", distance = "euclidean",weight=TRUE,replace=TRUE) {
   
+  if (is.null(facs) || !length(facs)) {
+    n_factors <- ncol(tops)
+    if (is.null(n_factors) || n_factors < 1) {
+      stop("Cannot determine factor indices because `tops` has zero columns.")
+    }
+    facs <- seq_len(n_factors)
+  }
+  facs <- clean_factor_ids(facs)
+  if (!length(facs)) {
+    stop("No valid factor indices supplied to run_clustering.")
+  }
+  
   # Load dependency
   if (!requireNamespace("ConsensusClusterPlus", quietly = TRUE)) {
     stop("ConsensusClusterPlus package is required.")

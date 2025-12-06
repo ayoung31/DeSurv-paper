@@ -549,44 +549,70 @@ COMMON_DESURV_TARGETS <- list(
   #   }
   # ),
   # 
-  
+  # 
   # tar_target(
   #   fit_std_beta,
   #   {
-  #     W = fit_std_selected_k@fit@W
-  #     H = fit_std_selected_k@fit@H
-  #     X = data_filtered$ex
-  #     genes = intersect(rownames(W),rownames(X))
-  #     W=W[genes,]
-  #     X=X[genes,]
-  #     Z = t(X)%*%W
-  #     y = data_filtered$sampInfo$time
-  #     d = data_filtered$sampInfo$event
+  #     fit_list <- fit_std$fit
+  #     if (is.null(fit_list) || !length(fit_list)) {
+  #       stop("fit_std does not contain any fits to evaluate")
+  #     }
+  #     k_labels <- names(fit_list)
+  #     if (is.null(k_labels) || any(!nzchar(k_labels))) {
+  #       k_labels <- as.character(seq_along(fit_list))
+  #       names(fit_list) <- k_labels
+  #     }
+  #     X <- data_filtered$ex
+  #     y <- data_filtered$sampInfo$time
+  #     d <- data_filtered$sampInfo$event
   #     strata <- interaction(d, data_filtered$sampInfo$dataset, drop = FALSE)
   #     foldid <- caret::createFolds(strata, NFOLD, list = FALSE)
-  #     
-  #     gfit = list()
-  #     mets = list()
-  #     i=1
-  #     for(alpha in COXNET_ALPHA_GRID){
-  #       cv_fit = cv.glmnet(Z,
-  #                          Surv(y,d),family="cox",type.measure="C",
-  #                          alpha=alpha, lambda=COXNET_LAMBDA_GRID, foldid=foldid)
-  #       
-  #       gfit[[as.character(alpha)]] = cv_fit
-  #       ind = which(cv_fit$lambda==cv_fit$lambda.1se)
-  #       mets[[i]] = data.frame(eta = alpha, lambda=cv_fit$lambda.1se, cvm = cv_fit$cvm[ind])
-  #       
-  #       i=i+1
+  #     results <- setNames(vector("list", length(fit_list)), k_labels)
+  #     for (k_label in k_labels) {
+  #       nmf_fit <- fit_list[[k_label]]
+  #       W <- nmf_fit@fit@W
+  #       H <- nmf_fit@fit@H
+  #       genes <- intersect(rownames(W), rownames(X))
+  #       W_use <- W[genes, , drop = FALSE]
+  #       X_use <- X[genes, , drop = FALSE]
+  #       Z <- t(X_use) %*% W_use
+  #       gfit <- list()
+  #       mets <- vector("list", length(COXNET_ALPHA_GRID))
+  #       for (i in seq_along(COXNET_ALPHA_GRID)) {
+  #         alpha <- COXNET_ALPHA_GRID[[i]]
+  #         alpha_chr <- as.character(alpha)
+  #         cv_fit <- cv.glmnet(
+  #           Z,
+  #           Surv(y, d),
+  #           family = "cox",
+  #           type.measure = "C",
+  #           alpha = alpha,
+  #           lambda = COXNET_LAMBDA_GRID,
+  #           foldid = foldid
+  #         )
+  #         gfit[[alpha_chr]] <- cv_fit
+  #         ind <- which(cv_fit$lambda == cv_fit$lambda.1se)
+  #         mets[[i]] <- data.frame(
+  #           eta = alpha,
+  #           lambda = cv_fit$lambda.1se,
+  #           cvm = cv_fit$cvm[ind]
+  #         )
+  #       }
+  #       mets_all <- dplyr::bind_rows(mets)
+  #       mets_best <- mets_all[which.max(mets_all$cvm), , drop = FALSE]
+  #       best_fit <- gfit[[as.character(mets_best$eta)]]
+  #       beta <- coef(best_fit, s = best_fit$lambda.1se)
+  #       results[[k_label]] <- list(
+  #         k = suppressWarnings(as.numeric(k_label)),
+  #         W = W_use,
+  #         H = H,
+  #         beta = beta,
+  #         metrics = mets_all,
+  #         alpha = mets_best$eta,
+  #         lambda = mets_best$lambda
+  #       )
   #     }
-  #     
-  #     mets_all = dplyr::bind_rows(mets)
-  #     mets_best = mets_all[which.max(mets_all$cvm),]
-  #     
-  #     best_fit = gfit[[as.character(mets_best$eta)]]
-  #     beta = coef(best_fit,s=best_fit$lambda.1se)
-  #     
-  #     list(W = W, H = H, beta = beta)
+  #     results
   #   }
   # ),
   tar_target(
@@ -706,7 +732,7 @@ COMMON_DESURV_TARGETS <- list(
       organism <- org.Hs.eg.db
       ora(tops_desurv_alpha0$top_genes,universe,organism)
     }
-  )
+  ),
   
   # tar_target(
   #   ora_analysis_std,
@@ -718,28 +744,28 @@ COMMON_DESURV_TARGETS <- list(
   # ),
   
   
-  # 
-  # tar_target(
-  #   selected_factors_desurv,
-  #   {
-  #     save_dir = file.path(training_results_dir,"factor_selection","desurv")
-  #     dir.create(save_dir,showWarnings = FALSE,recursive = TRUE)
-  #     path = file.path(save_dir,"factor_selection.csv")
-  #     build_factor_selection_table(tops_desurv$top_genes,path)
-  #   },
-  #   format="file"
-  # ),
-  # 
-  # tar_target(
-  #   selected_factors_desurv_alpha0,
-  #   {
-  #     save_dir = file.path(training_results_dir_alpha0,"factor_selection","desurv_alpha0")
-  #     dir.create(save_dir,showWarnings = FALSE,recursive = TRUE)
-  #     path = file.path(save_dir,"factor_selection.csv")
-  #     build_factor_selection_table(tops_desurv_alpha0$top_genes,path)
-  #   },
-  #   format="file"
-  # ),
+
+  tar_target(
+    selected_factors_desurv,
+    {
+      save_dir = file.path(training_results_dir,"factor_selection","desurv")
+      dir.create(save_dir,showWarnings = FALSE,recursive = TRUE)
+      path = file.path(save_dir,"factor_selection.csv")
+      build_factor_selection_table(tops_desurv$top_genes,path)
+    },
+    format="file"
+  ),
+
+  tar_target(
+    selected_factors_desurv_alpha0,
+    {
+      save_dir = file.path(training_results_dir_alpha0,"factor_selection","desurv_alpha0")
+      dir.create(save_dir,showWarnings = FALSE,recursive = TRUE)
+      path = file.path(save_dir,"factor_selection.csv")
+      build_factor_selection_table(tops_desurv_alpha0$top_genes,path)
+    },
+    format="file"
+  ),
   # 
   # tar_target(
   #   selected_factors_std,
@@ -751,32 +777,56 @@ COMMON_DESURV_TARGETS <- list(
   #   },
   #   format="file"
   # ),
-  #   tar_target(
-  #     clusters_desurv,
-  #     {
-  #       if(!file.exists(selected_factors_desurv)){
-  #         stop("first generate factor selection table for desurv")
-  #       }
-  #       tbl = read.csv(selected_factors_desurv)
-  #       sel = tbl$factor[tbl$selected]
-  #       if(all(!sel)){
-  #         stop("No factor selected for desurv clustering, please select at least 1")
-  #       }
-  #       data <- data_val_filtered
-  #       val_dataset = data$dataname
-  #       dir = create_filepath_clustering_output(ngene_value, TOL, MAXIT, PKG_VERSION, 
-  #                                               GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN, 
-  #                                               ntop_value, val_dataset, "DeSurv")
-  #       run_clustering(tops_desurv$top_genes,data,top_genes,colors,
-  #                      facs=sel,plot=FALSE,dir=dir,
-  #                    maxKcol = 5, maxKrow = 5)
-  #   },
-  #   pattern=map(data_val_filtered),
-  #   iteration = "list",
-  #   resources = tar_resources(
-  #     crew = tar_resources_crew(controller = "med_mem")
-  #   )
-  # ),
+    tar_target(
+      clusters_desurv,
+      {
+        sel = read_selected_factor_indices(
+          selected_factors_desurv,
+          label = "DeSurv factor selection table"
+        )
+        data <- unwrap_validation_dataset(data_val_filtered)
+        val_dataset <- infer_validation_dataset_name(data)
+        dir = create_filepath_clustering_output(ngene_value, TOL, MAXIT, PKG_VERSION,
+                                                GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN,
+                                                ntop_value, val_dataset, "DeSurv")
+        run_clustering(
+          tops_desurv$top_genes, data, top_genes, colors,
+          facs = sel, plot = FALSE, dir = dir,
+          maxKcol = 5, maxKrow = 5
+        )
+      },
+      pattern = map(data_val_filtered),
+      iteration = "list",
+      resources = tar_resources(
+        crew = tar_resources_crew(controller = "med_mem")
+      )
+    ),
+  
+    tar_target(
+      clusters_desurv_alpha0,
+      {
+        sel = read_selected_factor_indices(
+          selected_factors_desurv_alpha0,
+          label = "DeSurv alpha=0 factor selection table"
+        )
+        data <- unwrap_validation_dataset(data_val_filtered)
+        val_dataset <- infer_validation_dataset_name(data)
+        dir = create_filepath_clustering_output(ngene_value_alpha0, TOL, MAXIT, PKG_VERSION,
+                                                GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN,
+                                                ntop_value_alpha0, val_dataset, "DeSurv_alpha0")
+        run_clustering(
+          tops_desurv_alpha0$top_genes, data, top_genes, colors,
+          facs = sel, plot = FALSE, dir = dir,
+          maxKcol = 5, maxKrow = 5
+        )
+      },
+      pattern = map(data_val_filtered),
+      iteration = "list",
+      resources = tar_resources(
+        crew = tar_resources_crew(controller = "med_mem")
+      )
+    )
+
   #   tar_target(
   #     clusters_std,
   #     {

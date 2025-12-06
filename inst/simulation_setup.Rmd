@@ -1,0 +1,211 @@
+---
+title: "simulation_setup"
+author: "Amber Young"
+date: "2025-12-05"
+output: html_document
+---
+
+```{r,echo=FALSE}
+purrr::walk(
+  list.files("../R/simulation_functions", full.names = TRUE, pattern = "[.]R$", recursive = TRUE),
+  source
+)
+
+purrr::walk(
+  list.files("../R", full.names = TRUE, pattern = "[.]R$", recursive = TRUE),
+  source
+)
+
+library(DeSurv)
+library(glmnet)
+```
+
+# simulate data
+```{r}
+# set.seed(123)
+data=simulate_desurv_easy(
+  low_mean =  1,
+  high_mean = 3,
+  lethal_effect =4,
+  # lib_mu = 1,
+  lib_sdlog = .2,
+  # correlated_pairs = list()
+  )
+```
+
+# extract truth
+```{r}
+marker_genes = unlist(lapply(data$marker_info,function(x) x$genes))
+W_true = data$W_true
+H_true = data$H_true
+X_mean = data$X_mean
+beta_true = data$beta_true
+
+```
+
+# distribution of marker and nonmarker genes
+```{r}
+length(marker_genes)
+length(unique(marker_genes))
+nonmarker_genes = setdiff(rownames(data$X_mean),marker_genes)
+summary(data$counts[sample(marker_genes,1),])
+summary(data$counts[sample(nonmarker_genes,1),])
+hist(data$counts[sample(marker_genes,1),],breaks=20)
+hist(data$counts[sample(nonmarker_genes,1),],breaks=20)
+```
+
+# Can we get true markers from W
+```{r}
+#number of unique markers
+nmarker = length(unique(marker_genes))
+nmarker
+
+tops=get_top_genes(W_true,100)
+#number of recovered markers
+nrecover = length(intersect(unlist(tops$top_genes),marker_genes))
+nrecover
+
+#percentage recovered
+100*nrecover/nmarker
+```
+
+
+# get highly expressed and variable genes
+## do they include true marker genes?
+```{r}
+data$surv$dataset = "sim"
+data_clean=preprocess_data(
+  data$counts,
+  data$surv$time,
+  data$surv$status,
+  dataset=data$surv$dataset,
+  ngene=300,
+  method_trans_train = "none")
+kept_genes = rownames(data_clean$ex)
+length(intersect(marker_genes,kept_genes))
+```
+
+# correlation of XtW
+```{r}
+# true
+pairs(t(data$X_mean)%*%data$W_true)
+# counts
+pairs(t(data$counts)%*%data$W_true)
+# preprocessed
+pairs(t(data_clean$ex)%*%data$W_true[kept_genes,])
+# preprocessed, marker only
+pairs(t(data$counts[marker_genes,])%*%data$W_true[marker_genes,])
+```
+
+# survival association
+## true
+```{r}
+Z = t(data$X_mean)%*%data$W_true
+temp = data.frame(scale(Z))
+facs = colnames(temp)
+temp$time = data$surv$time
+temp$event = data$surv$status
+cox_formula <- as.formula(
+  paste0("Surv(", "time", ", ", "event", ") ~ ",
+         paste(facs, collapse = " + "))
+)
+fits=list()
+i=1
+for(a in seq(0,1,.1)){
+  fits[[i]] = cv.glmnet(Z,Surv(temp$time,temp$event),family="cox",type.measure = "C",alpha=a)
+  i=i+1
+}
+
+bests = sapply(fits,function(x) max(x$cvm))
+
+psfit = fits[[which.max(bests)]]
+plot(psfit)
+coef(psfit$glmnet.fit,s=psfit$lambda.min)*apply(Z,2,sd)
+
+```
+
+# survival association
+## counts
+```{r}
+Z=t(data$counts)%*%data$W_true
+temp = data.frame(scale(Z))
+facs = colnames(temp)
+temp$time = data$surv$time
+temp$event = data$surv$status
+cox_formula <- as.formula(
+  paste0("Surv(", "time", ", ", "event", ") ~ ",
+         paste(facs, collapse = " + "))
+)
+fits=list()
+i=1
+alpha=seq(0,1,.1)
+for(a in alpha){
+  fits[[i]] = cv.glmnet(Z,Surv(temp$time,temp$event),family="cox",type.measure = "C",alpha=a)
+  i=i+1
+}
+
+bests = sapply(fits,function(x) max(x$cvm))
+alpha[which.max(bests)]
+psfit = fits[[which.max(bests)]]
+plot(psfit)
+coef(psfit$glmnet.fit,s=psfit$lambda.min)*apply(Z,2,sd)
+
+```
+
+# survival association
+## preprocessed
+```{r}
+Z = t(data_clean$ex)%*%data$W_true[kept_genes,]
+temp = as.data.frame(Z)
+facs = colnames(temp)
+temp$time = data_clean$sampInfo$time
+temp$event = data_clean$sampInfo$event
+cox_formula <- as.formula(
+  paste0("Surv(", "time", ", ", "event", ") ~ ",
+         paste(facs, collapse = " + "))
+)
+fits=list()
+i=1
+for(a in seq(0,1,.1)){
+  fits[[i]] = cv.glmnet(Z,Surv(temp$time,temp$event),family="cox",type.measure = "C",alpha=a)
+  i=i+1
+}
+
+bests = sapply(fits,function(x) max(x$cvm))
+
+psfit = fits[[which.max(bests)]]
+plot(psfit)
+coef(psfit$glmnet.fit,s=psfit$lambda.min)*apply(Z,2,sd)
+
+```
+
+# survival association
+## preprocessed then top
+```{r}
+
+tops = unlist(get_top_genes(data$W_true[kept_genes,],100)$top_genes)
+Z = t(data_clean$ex[tops,])%*%data$W_true[tops,]
+temp = as.data.frame(Z)
+facs = colnames(temp)
+temp$time = data_clean$sampInfo$time
+temp$event = data_clean$sampInfo$event
+cox_formula <- as.formula(
+  paste0("Surv(", "time", ", ", "event", ") ~ ",
+         paste(facs, collapse = " + "))
+)
+
+fits=list()
+i=1
+for(a in seq(0,1,.1)){
+  fits[[i]] = cv.glmnet(Z,Surv(temp$time,temp$event),family="cox",type.measure = "C",alpha=a)
+  i=i+1
+}
+
+bests = sapply(fits,function(x) max(x$cvm))
+
+psfit = fits[[which.max(bests)]]
+plot(psfit)
+coef(psfit$glmnet.fit,s=psfit$lambda.min)*apply(Z,2,sd)
+
+```
+

@@ -7,6 +7,10 @@ run_clustering_internal <- function(tops, data, gene_lists, color.lists = NULL, 
                                     clusterAlg = "km", distance = "euclidean", 
                                     weight=FALSE, replace=TRUE){
   
+  facs <- clean_factor_ids(facs)
+  if (!length(facs)) {
+    stop("run_clustering_internal requires at least one valid factor index.")
+  }
   
   # --- Determine genes and clustering name ---
   name = paste0("facs_",paste(facs,collapse="_"))
@@ -70,4 +74,3 @@ run_clustering_internal <- function(tops, data, gene_lists, color.lists = NULL, 
   
   return(list(data=data,clus_res=clus_res))
 }
-

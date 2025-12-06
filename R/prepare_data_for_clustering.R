@@ -1,11 +1,16 @@
 # Prepare expression matrix based on selected factors
 prepare_data_for_clustering <- function(tops, data, facs, weight) {
   
+  facs <- clean_factor_ids(facs)
+  if (!length(facs)) {
+    stop("No valid factors supplied after filtering invalid selections.")
+  }
+  
   ## pull out key variables
   ex <- data$ex
   
   ## filter to genes of interest
-  genes <- unlist(tops[, facs])
+  genes <- unlist(tops[, facs, drop = FALSE])
   keep_genes <- which(rownames(ex) %in% genes)
   Xtemp <- ex[keep_genes, ]
   if (nrow(Xtemp) == 0) stop("No matching genes found after filtering.")

@@ -7,14 +7,28 @@ simulate_survival_linear <- function(
 ) {
   stopifnot(nrow(X) == nrow(W))
   stopifnot(length(beta) == ncol(W))
-  patient_scores <- crossprod(X, W)        # N x K
-  # linear predictor (risk score) built from X^T W
-  linpred <- as.vector(patient_scores %*% beta)
+
+  # X: G x N, W: G x K
+  patient_scores <- crossprod(X, W)   # N x K (S)
   
-  linpred = linpred / 1e6
-  # event times ~ exponential with rate = baseline_hazard * exp(linpred)
+  # K <- ncol(patient_scores)
+  # if (K < 2L) stop("Need K >= 2 for mean-of-others contrast.")
+  # 
+  # # Per-sample mean of *other* programs: N x K
+  # other_means <- (rowSums(patient_scores) - patient_scores) / (K - 1)
+  
+  # Contrast: each program minus mean of the others in that sample
+  patient_scores_contrast <- patient_scores #- other_means  # N x K
+  
+  # Optional: standardize each contrast column across patients (for stability)
+  patient_scores_contrast <- scale(patient_scores_contrast)
+  
+  # Linear predictor (risk score) built from contrast(X^T W)
+  linpred <- as.vector(patient_scores_contrast %*% beta)
+  
+  # Event times ~ exponential with rate = baseline_hazard * exp(linpred)
   event_time <- rexp(
-    n = length(linpred),
+    n    = length(linpred),
     rate = baseline_hazard * exp(linpred)
   )
   

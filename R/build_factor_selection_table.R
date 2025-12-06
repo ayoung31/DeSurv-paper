@@ -4,12 +4,19 @@ build_factor_selection_table =
     for(i in 1:ncol(tops)){
       genes[i] = paste(unlist(tops[,i]),collapse = ", ")
     }
-    df_new=data.frame(factor=1:ncol(tops), selected=FALSE, genes=genes)
+    df_new = data.frame(
+      factor = seq_len(ncol(tops)),
+      selected = FALSE,
+      genes = genes,
+      stringsAsFactors = FALSE
+    )
     
     if(file.exists(path)){
       df_old = read.csv(path)
-      df_old_comp = df_old %>% select(-selected)
-      df_new_comp = df_new %>% select(-selected)
+      old_cols = setdiff(names(df_old), "selected")
+      new_cols = setdiff(names(df_new), "selected")
+      df_old_comp = df_old[, old_cols, drop = FALSE]
+      df_new_comp = df_new[, new_cols, drop = FALSE]
       if(identical(df_old_comp,df_new_comp)){
         print("Existing factor selection table already corresponds to current runs. Not regenerating.")
         return(path)

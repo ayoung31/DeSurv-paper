@@ -48,11 +48,11 @@ knitr::include_graphics("/work/users/a/y/ayoung31/DeSurv-paper/figures/model_sch
 ## Bayesian optimisation selects the DeSurv hyperparameters ($k$, $\alpha$) {.unnumbered}
 We now tune DeSurv with Bayesian optimisation (BO) rather than enumerating a dense cross-validation grid. Each BO evaluation fits the model for a single combination of $k$, $\alpha$, and penalty weights, measuring the mean validation C-index. A Gaussian-process surrogate models this surface and proposes new evaluations that balance exploration and exploitation, allowing the search to concentrate rapidly on high-performing regions.
 
-Figure \@ref(fig:fig-bo) summarises the optimisation run. Panels A and B report the best cross-validated C-index obtained for each rank and the corresponding supervision weight when $\alpha$ is tuned alongside $k$. Panel C replicates the same diagnostic when the search is constrained to $\alpha=0$, illustrating the loss of prognostic signal in the unsupervised limit. The final configuration of the supervised search converges to $k=3$ and $\alpha=0.7$, which provided the highest cross-validated C-index encountered by BO.
+Figure \@ref(fig:fig-bo) summarises the optimisation run. Panels A and B report the best cross-validated C-index obtained for each rank and the corresponding supervision weight when $\alpha$ is tuned alongside $k$. Panel C visualises the full BO history through a violin plot of all C-index evaluations per rank, revealing the uncertainty around the best-performing $k$, while Panel D mirrors this distribution when the search is constrained to $\alpha=0$. Panels E and F use the Gaussian-process surrogate to show the BO posterior mean C-index and its 95\% confidence interval across $k$ for the supervised and $\alpha=0$ searches, respectively, capturing model-based uncertainty beyond the sampled runs. The final configuration of the supervised search converges to $k=3$ and $\alpha=0.7$, which provided the highest cross-validated C-index encountered by BO.
 
-For reference we still report the standard NMF heuristics (Panel D), which historically guide rank selection when a supervised criterion is unavailable. These diagnostics disagree on the optimal $k$, underscoring the benefit of the BO-guided DeSurv procedure that explicitly maximises prognostic accuracy.
+For reference we still report the standard NMF heuristics (Panel G), which historically guide rank selection when a supervised criterion is unavailable. These diagnostics disagree on the optimal $k$, underscoring the benefit of the BO-guided DeSurv procedure that explicitly maximises prognostic accuracy.
 
-```{r fig-bo, fig.width = 6, fig.height= 5.5, fig.cap="A-B. Best cross-validated C-index per rank and corresponding supervision weight when α is tuned jointly with k. C. Equivalent BO summary when α is fixed to 0. D. Conventional NMF diagnostics (cophenetic, dispersion, residuals, explained variance, silhouette, sparseness) for the unsupervised baseline." , fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
+```{r fig-bo, fig.width = 6, fig.height= 5.5, fig.cap="A-B. Best cross-validated C-index per rank and corresponding supervision weight when α is tuned jointly with k. C. Violin plot showing the distribution of CV C-index across all BO runs per k. D. Equivalent BO violin summary when α is fixed to 0. E-F. GP posterior mean and 95% confidence bands of the CV C-index versus k for the supervised and α = 0 searches. G. Conventional NMF diagnostics (cophenetic, dispersion, residuals, explained variance, silhouette, sparseness) for the unsupervised baseline." , fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
 
 prepare_bo_history <- function(history_path) {
   bo_history <- read.csv(history_path, stringsAsFactors = FALSE)
@@ -129,18 +129,116 @@ make_panel <- function(history_df, labels, include_alpha = TRUE, cindex_label = 
   }
 }
 
+make_cindex_violin <- function(history_df, label) {
+  k_col <- intersect(c("k", "k_grid"), names(history_df))[1]
+  k_levels <- sort(unique(history_df[[k_col]]))
+  history_df <- history_df %>%
+    mutate(k = factor(.data[[k_col]], levels = k_levels))
+
+  ggplot(history_df, aes(x = k, y = mean_cindex)) +
+    geom_violin(fill = "#a6cee3", color = NA, scale = "width", alpha = 0.8) +
+    geom_boxplot(width = 0.12, outlier.size = 0.4, alpha = 0.7, fill = "#1f78b4", color = "#1f78b4") +
+    labs(
+      x = "Rank k",
+      y = "CV C-index distribution",
+      tag = label
+    ) +
+    theme_minimal(base_size = 9)
+}
+
+normalize_gp_params <- function(param_df, bounds_df) {
+  for (param in names(param_df)) {
+    bound_row <- bounds_df[bounds_df$parameter == param, , drop = FALSE]
+    if (!nrow(bound_row)) {
+      next
+    }
+    lower <- as.numeric(bound_row$lower[[1]])
+    upper <- as.numeric(bound_row$upper[[1]])
+    scale_type <- bound_row$scale[[1]]
+    if (!is.na(scale_type) && identical(scale_type, "log10")) {
+      param_df[[param]] <- log10(param_df[[param]])
+      lower <- log10(lower)
+      upper <- log10(upper)
+    }
+    param_df[[param]] <- (param_df[[param]] - lower) / (upper - lower)
+  }
+  param_df
+}
+
+extract_gp_curve <- function(bo_results, history_df) {
+  runs <- bo_results[["runs"]]
+  last_run <- runs[[length(runs)]]
+  km_fit <- last_run[["km_fit"]]
+  bounds <- last_run[["bounds"]]
+  param_names <- colnames(km_fit@X)
+  if (is.null(param_names)) {
+    stop("GP design matrix has no column names.")
+  }
+
+  k_col <- intersect(c("k", "k_grid"), names(history_df))[1]
+  best_per_k <- history_df %>%
+    group_by(.data[[k_col]]) %>%
+    arrange(desc(mean_cindex)) %>%
+    slice_head(n = 1) %>%
+    ungroup() %>%
+    mutate(k_numeric = as.numeric(.data[[k_col]])) %>%
+    arrange(k_numeric)
+
+  newdata_actual <- best_per_k %>%
+    select(all_of(param_names))
+  newdata_scaled <- normalize_gp_params(newdata_actual, bounds)
+
+  preds <- DiceKriging::predict(
+    km_fit,
+    newdata = newdata_scaled,
+    type = "UK",
+    se.compute = TRUE,
+    cov.compute = FALSE
+  )
+
+  tibble(
+    k = best_per_k$k_numeric,
+    mean = preds$mean,
+    lower = preds$mean - 1.96 * preds$sd,
+    upper = preds$mean + 1.96 * preds$sd
+  )
+}
+
+make_gp_curve_plot <- function(curve_df, label) {
+  ggplot(curve_df, aes(x = k, y = mean, group = 1)) +
+    geom_ribbon(
+      aes(ymin = lower, ymax = upper),
+      fill = "#b2df8a",
+      alpha = 0.4
+    ) +
+    geom_line(color = "#33a02c", linewidth = 0.7) +
+    geom_point(color = "#33a02c", size = 2) +
+    scale_x_continuous(breaks = curve_df$k) +
+    labs(
+      x = "Rank k",
+      y = "GP-predicted CV C-index",
+      tag = label
+    ) +
+    theme_minimal(base_size = 9)
+}
+
 bo_history_supervised <- prepare_bo_history(tar_read(desurv_bo_history))
 bo_history_alpha0 <- prepare_bo_history(tar_read(desurv_bo_history_alpha0))
+
+bo_results_supervised <- tar_read(desurv_bo_results)
+bo_results_alpha0 <- tar_read(desurv_bo_results_alpha0)
 
 fit_std <- tar_read(name = "fit_std")
 
 p_panelA <- make_panel(bo_history_supervised, labels = c("A", "B"))
-p_panelA_alpha0 <- make_panel(
-  bo_history_alpha0,
-  labels = "C",
-  include_alpha = FALSE,
-  cindex_label = "Best CV C-index (α = 0)"
-)
+p_cindex_violin <- make_cindex_violin(bo_history_supervised, label = "C")
+p_cindex_violin_alpha0 <- make_cindex_violin(bo_history_alpha0, label = "D")
+
+gp_curve_supervised <- extract_gp_curve(bo_results_supervised, bo_history_supervised)
+gp_curve_alpha0 <- extract_gp_curve(bo_results_alpha0, bo_history_alpha0)
+
+p_gp_supervised <- make_gp_curve_plot(gp_curve_supervised, label = "E")
+p_gp_alpha0 <- make_gp_curve_plot(gp_curve_alpha0, label = "F")
 
 plots_std = plot(fit_std,what=c("cophenetic","dispersion","evar","residuals","silhouette","sparseness"),
                  main=NULL,xlab="Rank (k)")+ 
@@ -150,19 +248,32 @@ plots_std = plot(fit_std,what=c("cophenetic","dispersion","evar","residuals","si
   scale_x_continuous(breaks=seq(2,12,by=2))+
   guides(color = guide_legend(nrow = 2, byrow = TRUE))
 
+panel_right <- plot_grid(
+  p_cindex_violin,
+  p_cindex_violin_alpha0,
+  ncol = 1
+)
+
+panel_gp <- plot_grid(
+  p_gp_supervised,
+  p_gp_alpha0,
+  ncol = 2
+)
+
 panel_top <- plot_grid(
   p_panelA,
-  p_panelA_alpha0,
+  panel_right,
   ncol = 2,
   rel_widths = c(1.2, 0.8)
 )
 
 plot_grid(
   panel_top,
+  panel_gp,
   plots_std,
   ncol = 1,
-  rel_heights = c(2, 1),
-  labels = c("", "D")
+  rel_heights = c(1.8, 0.8, 1),
+  labels = c("", "", "G")
 )
 
 ```

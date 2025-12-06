@@ -24,12 +24,11 @@
 #'
 #' @return A list with counts, survival data, true W/H, beta vector, and the
 #'   scenario label `"easy"`.
-simulate_desurv_easy <- function(
+simulate_desurv_controlled_cor <- function(
     G = 5000,
     N = 200,
     K = 4,
     big_prog = 1,
-    big_prog_multiplier = 3,
     lethal_effect = 2.0,
     background_effect = 0.0,
     high_mean = 8,
@@ -46,15 +45,17 @@ simulate_desurv_easy <- function(
     baseline_hazard = 0.01,
     censor_rate = 0.2
 ) {
-  W_true <- simulate_W_easy(
-    G = G,
-    K = K,
-    high_mean = high_mean,
-    low_mean = low_mean,
-    big_prog = big_prog,
-    big_prog_multiplier = big_prog_multiplier,
-    noise_sd = noise_sd
-  )
+
+  W_true = simulate_W_controlled_cor(
+    G = G, K = K,
+    n_marker = 100,
+    base_sd = 1,
+    mix_strength = 100,    # 0 = more orthogonal, >0 = more correlated
+    shift = 0,           # baseline shift to make entries positive
+    marker_boost = 2.0,    # multiply marker genes in their main program
+    other_shrink = 0.5,    # multiply those marker genes in other programs
+    noise_sd = 0.1
+  ) 
   marker_info <- attr(W_true, "marker_info")
   H_true <- simulate_H(
     N = N,

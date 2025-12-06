@@ -3,7 +3,7 @@
 TRAIN_DATASETS     = c("Bladder")  
 TRAIN_PREFIX       = paste0(TRAIN_DATASETS, collapse = ".")
 TRAIN_PERC         = .7
-METHOD_TRANS_TRAIN = "rank"
+METHOD_TRANS_TRAIN = "none"
 USE_TRAIN_GENES_FOR_VAL <- TRUE
 
 # always tuned hyper params
@@ -16,16 +16,16 @@ DESURV_BO_BOUNDS   = list(
 
 # sometimes tuned hyperparams
 # for the following set length 1 to fix, or range to tune via BO
-NGENE_CONFIG       = c(3000,8000) 
+NGENE_CONFIG       = c(1000,8000) 
 NTOP_CONFIG        = c(50,500) 
 LAMBDAW_CONFIG     = c(0)
 LAMBDAH_CONFIG     = 0#c(1e-5,1e5)
 NINIT <- 50
 NINIT_FULL <- 100
-BO_N_INIT <- 20
-BO_N_ITER <- 100
-BO_CANDIDATE_POOL <- 2000
-BO_MAX_REFINEMENTS <- 3
+BO_N_INIT <- 15
+BO_N_ITER <- 60
+BO_CANDIDATE_POOL <- 4000
+BO_MAX_REFINEMENTS <- 2
 BO_TOL_GAIN <- 0.002
 BO_PLATEAU <- 1
 BO_TOP_K <- 10
