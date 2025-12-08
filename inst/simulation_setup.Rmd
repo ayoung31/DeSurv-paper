@@ -18,40 +18,136 @@ purrr::walk(
 
 library(DeSurv)
 library(glmnet)
+library(ggplot2)
 ```
 
 # simulate data
 ```{r}
-# set.seed(123)
-data=simulate_desurv_easy(
-  low_mean =  1,
-  high_mean = 3,
-  lethal_effect =4,
-  # lib_mu = 1,
-  lib_sdlog = .2,
-  # correlated_pairs = list()
-  )
+data <- simulate_desurv_scenario(scenario = "R1", noise_sd = 1e-2, seed = 1, beta=c(2,0,0))
 ```
 
 # extract truth
 ```{r}
-marker_genes = unlist(lapply(data$marker_info,function(x) x$genes))
-W_true = data$W_true
-H_true = data$H_true
-X_mean = data$X_mean
-beta_true = data$beta_true
+marker_genes = unlist(data$marker_sets)
+```
+
+```{r}
+# Markers are gene names
+str(data$marker_sets)
+
+# No overlap between markers and background/noise beyond what you intended
+all_marker_genes <- sort(unique(unlist(data$marker_sets)))
+
+intersect(all_marker_genes, data$background)   # expect character(0)
+intersect(all_marker_genes, data$noise_genes)  # expect character(0)
+
+# W magnitude patterns
+marker_idx <- match(all_marker_genes, rownames(data$W))
+bg_idx     <- match(data$background,   rownames(data$W))
+noise_idx  <- match(data$noise_genes,  rownames(data$W))
+
+markerW = as.vector(data$W[marker_idx, ])
+bgW = as.vector(data$W[bg_idx, ])
+noiseW = as.vector(data$W[noise_idx, ])
+
+labels = c(rep("markers",length(markerW)),rep("background",length(bgW)),rep("noise",length(noiseW)))
+values = c(markerW,bgW,noiseW)
+
+temp = data.frame(values=values,labels=labels)
+
+ggplot(temp,aes(x=labels,y=values))+
+  geom_boxplot()
+```
+```{r}
+Wtilde <- data$Wtilde
+W      <- data$W
+ms     <- data$marker_sets
+K      <- ncol(W)
+
+# For each factor k, nonzero rows in column k of Wtilde should equal marker_sets[[k]]
+for (k in seq_len(K)) {
+  mk <- ms[[k]]
+  idx_mk <- match(mk, rownames(Wtilde))
+  
+  nz_rows <- which(Wtilde[, k] != 0)
+  
+  cat("Factor", k, "marker mismatch? ",
+      !setequal(idx_mk, nz_rows), "\n")
+}
+
+# Check that Wtilde only contains entries from W
+stopifnot(all(abs(Wtilde) <= abs(W) + 1e-10))
+```
+
+```{r}
+W <- data$W
+H <- data$H
+
+X_signal <- W %*% t(H)   # latent signal (G x N)
+X_obs    <- data$X        # observed log-expression
+
+# Roughly: X_obs ≈ X_signal + gene_baseline (+ noise)
+# So they should be strongly correlated row-wise
+
+cor_per_gene <- sapply(seq_len(nrow(W)), function(g) {
+  cor(X_signal[g, ], X_obs[g, ])
+})
+
+summary(cor_per_gene)
+```
+
+```{r}
+
+W        <- data$W
+H        <- data$H
+X_obs    <- data$X
+Wtilde   <- data$Wtilde
+beta     <- data$beta
+
+X_signal <- W %*% t(H)
+
+scores_signal <- crossprod(X_signal, Wtilde)   # N x K
+scores_obs    <- crossprod(X_obs,    Wtilde)   # N x K
+
+# Per-factor correlations
+sapply(seq_len(ncol(scores_signal)), function(k) {
+  cor(scores_signal[, k], scores_obs[, k])
+})
 
 ```
+
+```{r}
+linpred <- data$linpred
+time    <- data$time
+status  <- data$status
+
+# 1. Distribution of linpred
+summary(linpred)
+sd(linpred)
+
+# 2. HR between low vs high risk
+HR_80_20 <- exp(diff(quantile(linpred, c(0.2, 0.8))))
+HR_80_20
+
+# 3. Check that higher linpred tends to mean shorter times
+cor(linpred, -time)  # expect positive correlation
+
+fit_oracle <- coxph(Surv(time, status) ~ linpred)
+fit_oracle$concordance  # or use survcomp::concordance.index / survAUC package
+
+```
+
+
 
 # distribution of marker and nonmarker genes
 ```{r}
 length(marker_genes)
 length(unique(marker_genes))
-nonmarker_genes = setdiff(rownames(data$X_mean),marker_genes)
-summary(data$counts[sample(marker_genes,1),])
-summary(data$counts[sample(nonmarker_genes,1),])
-hist(data$counts[sample(marker_genes,1),],breaks=20)
-hist(data$counts[sample(nonmarker_genes,1),],breaks=20)
+nonmarker_genes = setdiff(rownames(data$X),marker_genes)
+summary(data$X[sample(marker_genes,1),])
+summary(data$X[sample(nonmarker_genes,1),])
+hist(data$X[sample(marker_genes,1),],breaks=20)
+hist(data$X[sample(nonmarker_genes,1),],breaks=20)
 ```
 
 # Can we get true markers from W
@@ -60,7 +156,7 @@ hist(data$counts[sample(nonmarker_genes,1),],breaks=20)
 nmarker = length(unique(marker_genes))
 nmarker
 
-tops=get_top_genes(W_true,100)
+tops=get_top_genes(data$W,300)
 #number of recovered markers
 nrecover = length(intersect(unlist(tops$top_genes),marker_genes))
 nrecover
@@ -73,13 +169,13 @@ nrecover
 # get highly expressed and variable genes
 ## do they include true marker genes?
 ```{r}
-data$surv$dataset = "sim"
+surv_dat = data.frame(time=data$time,status=data$status,dataset="sim")
 data_clean=preprocess_data(
-  data$counts,
-  data$surv$time,
-  data$surv$status,
-  dataset=data$surv$dataset,
-  ngene=300,
+  data$X,
+  surv_dat$time,
+  surv_dat$status,
+  dataset=surv_dat$dataset,
+  ngene=4000,
   method_trans_train = "none")
 kept_genes = rownames(data_clean$ex)
 length(intersect(marker_genes,kept_genes))
@@ -88,59 +184,53 @@ length(intersect(marker_genes,kept_genes))
 # correlation of XtW
 ```{r}
 # true
-pairs(t(data$X_mean)%*%data$W_true)
-# counts
-pairs(t(data$counts)%*%data$W_true)
+pairs(t(data$X)%*%data$W)
 # preprocessed
-pairs(t(data_clean$ex)%*%data$W_true[kept_genes,])
+pairs(t(data_clean$ex)%*%data$W[kept_genes,])
 # preprocessed, marker only
-pairs(t(data$counts[marker_genes,])%*%data$W_true[marker_genes,])
+pairs(t(data$X[marker_genes,])%*%data$W[marker_genes,])
 ```
 
 # survival association
-## true
+## true Z
 ```{r}
-Z = t(data$X_mean)%*%data$W_true
-temp = data.frame(scale(Z))
-facs = colnames(temp)
-temp$time = data$surv$time
-temp$event = data$surv$status
-cox_formula <- as.formula(
-  paste0("Surv(", "time", ", ", "event", ") ~ ",
-         paste(facs, collapse = " + "))
-)
+Wtilde = matrix(0,nrow=nrow(data$W),ncol=ncol(data$W))
+rownames(Wtilde) = rownames(data$W)
+
+for(k in 1:ncol(Wtilde)){
+  Wtilde[data$marker_sets[[k]],k] = data$W[data$marker_sets[[k]],k]
+}
+
+
+Xtrue = data$W%*%t(data$H)
+Ztrue = t(Xtrue) %*% Wtilde
+
 fits=list()
 i=1
 for(a in seq(0,1,.1)){
-  fits[[i]] = cv.glmnet(Z,Surv(temp$time,temp$event),family="cox",type.measure = "C",alpha=a)
+  fits[[i]] = cv.glmnet(Ztrue,Surv(data$time,data$status),family="cox",type.measure = "C",alpha=a)
   i=i+1
 }
 
 bests = sapply(fits,function(x) max(x$cvm))
-
 psfit = fits[[which.max(bests)]]
+# psfit = cv.glmnet(Z,Surv(temp$time,temp$event),family="cox",type.measure = "C",alpha=.95)
 plot(psfit)
-coef(psfit$glmnet.fit,s=psfit$lambda.min)*apply(Z,2,sd)
+coef(psfit$glmnet.fit,s=psfit$lambda.min)*apply(Ztrue,2,sd)
 
 ```
 
 # survival association
-## counts
+## noisy Z
 ```{r}
-Z=t(data$counts)%*%data$W_true
-temp = data.frame(scale(Z))
-facs = colnames(temp)
-temp$time = data$surv$time
-temp$event = data$surv$status
-cox_formula <- as.formula(
-  paste0("Surv(", "time", ", ", "event", ") ~ ",
-         paste(facs, collapse = " + "))
-)
+Z = t(data$X)%*%Wtilde
+cor(Z,Ztrue)
+
 fits=list()
 i=1
 alpha=seq(0,1,.1)
 for(a in alpha){
-  fits[[i]] = cv.glmnet(Z,Surv(temp$time,temp$event),family="cox",type.measure = "C",alpha=a)
+  fits[[i]] = cv.glmnet(Z,Surv(data$time,data$status),family="cox",type.measure = "C",alpha=a)
   i=i+1
 }
 
@@ -151,61 +241,3 @@ plot(psfit)
 coef(psfit$glmnet.fit,s=psfit$lambda.min)*apply(Z,2,sd)
 
 ```
-
-# survival association
-## preprocessed
-```{r}
-Z = t(data_clean$ex)%*%data$W_true[kept_genes,]
-temp = as.data.frame(Z)
-facs = colnames(temp)
-temp$time = data_clean$sampInfo$time
-temp$event = data_clean$sampInfo$event
-cox_formula <- as.formula(
-  paste0("Surv(", "time", ", ", "event", ") ~ ",
-         paste(facs, collapse = " + "))
-)
-fits=list()
-i=1
-for(a in seq(0,1,.1)){
-  fits[[i]] = cv.glmnet(Z,Surv(temp$time,temp$event),family="cox",type.measure = "C",alpha=a)
-  i=i+1
-}
-
-bests = sapply(fits,function(x) max(x$cvm))
-
-psfit = fits[[which.max(bests)]]
-plot(psfit)
-coef(psfit$glmnet.fit,s=psfit$lambda.min)*apply(Z,2,sd)
-
-```
-
-# survival association
-## preprocessed then top
-```{r}
-
-tops = unlist(get_top_genes(data$W_true[kept_genes,],100)$top_genes)
-Z = t(data_clean$ex[tops,])%*%data$W_true[tops,]
-temp = as.data.frame(Z)
-facs = colnames(temp)
-temp$time = data_clean$sampInfo$time
-temp$event = data_clean$sampInfo$event
-cox_formula <- as.formula(
-  paste0("Surv(", "time", ", ", "event", ") ~ ",
-         paste(facs, collapse = " + "))
-)
-
-fits=list()
-i=1
-for(a in seq(0,1,.1)){
-  fits[[i]] = cv.glmnet(Z,Surv(temp$time,temp$event),family="cox",type.measure = "C",alpha=a)
-  i=i+1
-}
-
-bests = sapply(fits,function(x) max(x$cvm))
-
-psfit = fits[[which.max(bests)]]
-plot(psfit)
-coef(psfit$glmnet.fit,s=psfit$lambda.min)*apply(Z,2,sd)
-
-```
-

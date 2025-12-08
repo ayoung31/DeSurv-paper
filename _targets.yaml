@@ -1,2 +1,2 @@
 main:
-  store: store_PKG_VERSION=HEAD_GIT_BRANCH=dev
+  store: store_PKG_VERSION=HEAD_GIT_BRANCH=dev_sims_test
