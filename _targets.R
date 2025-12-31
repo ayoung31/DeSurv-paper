@@ -7,8 +7,8 @@ BO_MAX_REFINEMENTS <- 2
 BO_TOL_GAIN <- 0.002
 BO_PLATEAU <- 1
 BO_TOP_K <- 10
-BO_SHRINK_BASE <- 0.5
-BO_IMPORTANCE_GAIN <- 0.3
+BO_SHRINK_BASE <- 0.3
+BO_IMPORTANCE_GAIN <- 0.1
 BO_COARSE_CONTROL <- list(
   n_init = BO_N_INIT,
   n_iter = BO_N_ITER,
@@ -26,9 +26,9 @@ BO_REFINE_CONTROL <- list(
   cv_verbose = FALSE
 )
 
-VAL_DATASETS       = c("Dijk","Moffitt_GEO_array",
+VAL_DATASETS       = c("CPTAC","Dijk","Moffitt_GEO_array",
                        "PACA_AU_array","PACA_AU_seq","Puleo_array")
-TRAIN_DATASETS     = c("TCGA_PAAD","CPTAC")  
+TRAIN_DATASETS     = c("TCGA_PAAD")  
 TRAIN_PREFIX       = paste0(TRAIN_DATASETS, collapse = ".")
 USE_TRAIN_GENES_FOR_VAL <- FALSE
 
@@ -133,47 +133,47 @@ targets_list <- list(
 
 c(
   targets_list,
-  COMMON_DESURV_TARGETS,
-  tarchetypes::tar_render(
-    paper,
-    "paper/paper.Rmd",
-    quiet = FALSE,
-    deps = c(
-      "desurv_bo_history",
-      "desurv_bo_history_alpha0",
-      "params_best",
-      "ngene_value",
-      "ntop_value",
-      "fit_desurv",
-      "fit_desurv_alpha0",
-      "fit_std",
-      "fit_std_beta",
-      "tops_desurv",
-      "tops_desurv_alpha0",
-      "tops_std",
-      "gene_overlap_desurv",
-      "gene_overlap_desurv_alpha0",
-      "gene_overlap_std",
-      "ora_analysis_desurv",
-      "ora_analysis_desurv_alpha0",
-      "ora_analysis_std",
-      "selected_factors_desurv",
-      "selected_factors_desurv_alpha0",
-      "selected_factors_std",
-      "clusters_desurv",
-      "clusters_std",
-      "aligned_clusters_desurv",
-      "aligned_clusters_std",
-      "cluster_alignment_plot_desurv",
-      "cluster_alignment_plot_std",
-      "cluster_alignment_table_desurv",
-      "cluster_alignment_table_std",
-      "data_filtered",
-      "data_val",
-      "data_val_filtered",
-      "training_results_dir"
-    )
-  )
+  COMMON_DESURV_TARGETS#,
+  # tarchetypes::tar_render(
+  #   paper,
+  #   "paper/paper.Rmd",
+  #   quiet = FALSE,
+  #   deps = c(
+  #     "desurv_bo_history",
+  #     "desurv_bo_history_alpha0",
+  #     "params_best",
+  #     "ngene_value",
+  #     "ntop_value",
+  #     "fit_desurv",
+  #     "fit_desurv_alpha0",
+  #     "fit_std",
+  #     "fit_std_beta",
+  #     "tops_desurv",
+  #     "tops_desurv_alpha0",
+  #     "tops_std",
+  #     "gene_overlap_desurv",
+  #     "gene_overlap_desurv_alpha0",
+  #     "gene_overlap_std",
+  #     "ora_analysis_desurv",
+  #     "ora_analysis_desurv_alpha0",
+  #     "ora_analysis_std",
+  #     "selected_factors_desurv",
+  #     "selected_factors_desurv_alpha0",
+  #     "selected_factors_std",
+  #     "clusters_desurv",
+  #     "clusters_std",
+  #     "aligned_clusters_desurv",
+  #     "aligned_clusters_std",
+  #     "cluster_alignment_plot_desurv",
+  #     "cluster_alignment_plot_std",
+  #     "cluster_alignment_table_desurv",
+  #     "cluster_alignment_table_std",
+  #     "data_filtered",
+  #     "data_val",
+  #     "data_val_filtered",
+  #     "training_results_dir"
+  #   )
+  # )
 )
 
   # 

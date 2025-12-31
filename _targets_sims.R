@@ -1,6 +1,7 @@
 library(targets)
 library(tarchetypes)
 library(crew)
+library(crew.cluster)
 suppressPackageStartupMessages({
   library(dplyr)
   library(purrr)
@@ -14,13 +15,9 @@ sim_files <- list.files(
   full.names = TRUE
 )
 purrr::walk(sim_files, source)
+source("R/get_top_genes.R")
 
-tar_option_set(
-  packages = c("dplyr", "purrr", "tibble", "DeSurv", "survival"),
-  format = "rds",
-  controller = crew::crew_controller_sequential(),
-  error = "continue"
-)
+
 
 `%||%` <- function(x, y) {
   if (is.null(x)) y else x
@@ -42,31 +39,56 @@ SIM_DATASETS_PER_SCENARIO <- 100L
 SIM_GLOBAL_SEED <- 101L
 SIM_METHOD_TRANSFORM <- "none"
 SIM_DESURV_TOL <- 1e-5
-SIM_DESURV_MAXIT <- 2000L
-SIM_FINAL_NINIT <- 1L
+SIM_DESURV_MAXIT <- 3000L
+# SIM_FINAL_NINIT <- 1L
 SIM_DEFAULT_NGENE <- NULL
-SIM_DEFAULT_NTOP <- NULL
+SIM_DEFAULT_NTOP <- 150L
 SIM_DEFAULT_LAMBDAW <- 0
 SIM_DEFAULT_LAMBDAH <- 0
 SIM_DEFAULT_K <- 3L
 SIM_DEFAULT_ALPHA <- 0.6
 SIM_DEFAULT_LAMBDA <- 0.1
 SIM_DEFAULT_NU <- 0.3
+SIM_BETA_NONZERO_TOL <- 1e-8
 SIM_CV_NFOLDS <- 5L
-SIM_CV_NSTARTS <- 1L
+SIM_CV_NSTARTS <- 30
 SIM_TRAIN_FRACTION <- 0.7
 SIM_SPLIT_SEED_OFFSET <- 10000L
+SIM_ANALYSIS_CONTROLLER <- crew_controller_slurm(
+  name = "sim_analysis",
+  workers = 100,
+  options_cluster = crew_options_slurm(
+    cpus_per_task = SIM_CV_NSTARTS,
+    memory_gigabytes_required = 8,
+    time_minutes = 240,
+    log_error = "logs/crew_log_%A.err",
+    log_output = "logs/crew_log_%A.out",
+    script_lines = "module load r/4.4.0"
+  )
+)
+default_controller = crew_controller_sequential()
+
+active_controller <- crew_controller_group(default_controller, 
+                                           SIM_ANALYSIS_CONTROLLER)
+
+tar_option_set(
+  packages = c("dplyr", "purrr", "tibble", "DeSurv", "survival"),
+  format = "rds",
+  controller = active_controller,
+  error = "continue"
+)
+
 
 SIM_DESURV_BO_BOUNDS <- list(
-  k_grid = list(lower = 2L, upper = 6L, type = "integer"),
-  alpha_grid = list(lower = 0, upper = 1, type = "continuous"),
-  lambda_grid = list(lower = 1e-3, upper = 1e2, scale = "log10"),
+  k_grid = list(lower = 2L, upper = 5L, type = "integer"),
+  alpha_grid = list(lower = 0, upper = .95, type = "continuous"),
+  lambda_grid = list(lower = 1e-2, upper = 1e2, scale = "log10"),
   nu_grid = list(lower = 0, upper = 1, type = "continuous")
 )
 
-SIM_BO_N_INIT <- 8L
-SIM_BO_N_ITER <- 10L
-SIM_BO_CANDIDATE_POOL <- 1000L
+SIM_BO_N_INIT <- 10L
+SIM_BO_N_ITER <- 20L
+SIM_BO_CANDIDATE_POOL <- 1500L
 SIM_BO_EXPLORATION_WEIGHT <- 0.01
 
 SIMULATION_SCENARIOS <- list(
@@ -74,6 +96,14 @@ SIMULATION_SCENARIOS <- list(
     scenario_id = "R0_easy",
     scenario = "R0",
     description = "Default easy/sanity scenario",
+    replicates = SIM_DATASETS_PER_SCENARIO,
+    seed_offset = SIM_GLOBAL_SEED,
+    overrides = list()
+  ),
+  list(
+    scenario_id = "R00_null",
+    scenario = "R00",
+    description = "No survival associated programs",
     replicates = SIM_DATASETS_PER_SCENARIO,
     seed_offset = SIM_GLOBAL_SEED,
     overrides = list()
@@ -130,24 +160,54 @@ SIM_ANALYSIS_SPECS <- list(
       lambdaW_grid = SIM_DEFAULT_LAMBDAW,
       lambdaH_grid = SIM_DEFAULT_LAMBDAH
     )
-  )#,
-  # list(
-  #   analysis_id = "bo_alpha0",
-  #   label = "Bayesian optimization with alpha = 0",
-  #   mode = "bayesopt",
-  #   bounds = modifyList(
-  #     SIM_DESURV_BO_BOUNDS,
-  #     list(alpha_grid = list(lower = 0, upper = 0, type = "continuous"))
-  #   ),
-  #   bo_fixed = list(
-  #     ngene = SIM_DEFAULT_NGENE,
-  #     ntop = SIM_DEFAULT_NTOP,
-  #     alpha_grid = 0,
-  #     lambdaW_grid = SIM_DEFAULT_LAMBDAW,
-  #     lambdaH_grid = SIM_DEFAULT_LAMBDAH
-  #   ),
-  #   final_overrides = list(alpha = 0)
-  # )
+  ),
+  list(
+    analysis_id = "bo_alpha0",
+    label = "Bayesian optimization with alpha = 0",
+    mode = "bayesopt",
+    bounds = modifyList(
+      SIM_DESURV_BO_BOUNDS,
+      list(alpha_grid = list(lower = 0, upper = 0, type = "continuous"))
+    ),
+    bo_fixed = list(
+      ngene = SIM_DEFAULT_NGENE,
+      ntop = SIM_DEFAULT_NTOP,
+      alpha_grid = 0,
+      lambdaW_grid = SIM_DEFAULT_LAMBDAW,
+      lambdaH_grid = SIM_DEFAULT_LAMBDAH
+    ),
+    final_overrides = list(alpha = 0)
+  ),
+  list(
+    analysis_id = "bo_tune_ntop",
+    label = "Bayesian optimization adding ntop to tuning",
+    mode = "bayesopt",
+    bounds = modifyList(
+      SIM_DESURV_BO_BOUNDS,
+      list(ntop = list(lower = 50, upper = 250, type = "integer"))),
+    bo_fixed = list(
+      ngene = SIM_DEFAULT_NGENE,
+      lambdaW_grid = SIM_DEFAULT_LAMBDAW,
+      lambdaH_grid = SIM_DEFAULT_LAMBDAH
+    )
+  ),
+  list(
+    analysis_id = "bo_tune_ntop_alpha0",
+    label = "Bayesian optimization with alpha = 0 adding ntop for tuning",
+    mode = "bayesopt",
+    bounds = modifyList(
+      SIM_DESURV_BO_BOUNDS,
+      list(alpha_grid = list(lower = 0, upper = 0, type = "continuous"),
+           ntop = list(lower = 50, upper = 250, type = "integer"))
+    ),
+    bo_fixed = list(
+      ngene = SIM_DEFAULT_NGENE,
+      alpha_grid = 0,
+      lambdaW_grid = SIM_DEFAULT_LAMBDAW,
+      lambdaH_grid = SIM_DEFAULT_LAMBDAH
+    ),
+    final_overrides = list(alpha = 0)
+  )
 )
 
 build_simulation_dataset_specs <- function(
@@ -416,6 +476,512 @@ coerce_num <- function(value, default) {
   as.numeric(value)
 }
 
+resolve_ntop_value <- function(params, n_genes) {
+  ntop_val <- coerce_int(params$ntop, SIM_DEFAULT_NTOP)
+  if (is.null(ntop_val) || is.na(ntop_val) || ntop_val <= 0) {
+    ntop_val <- SIM_DEFAULT_NTOP
+  }
+  if (is.null(ntop_val) || is.na(ntop_val) || ntop_val <= 0) {
+    ntop_val <- 1L
+  }
+  if (!is.null(n_genes) && !is.na(n_genes)) {
+    ntop_val <- min(ntop_val, as.integer(n_genes))
+  }
+  as.integer(max(ntop_val, 1L))
+}
+
+ensure_gene_names <- function(W, fallback_names) {
+  if (is.null(W) || !is.matrix(W)) {
+    return(W)
+  }
+  if ((is.null(rownames(W)) || any(!nzchar(rownames(W)))) &&
+      !is.null(fallback_names) &&
+        length(fallback_names) >= nrow(W)) {
+    rownames(W) <- fallback_names[seq_len(nrow(W))]
+  }
+  W
+}
+
+extract_top_gene_sets <- function(W, ntop) {
+  if (is.null(W) || !is.matrix(W) || !ncol(W)) {
+    return(list())
+  }
+  n_genes <- nrow(W)
+  if (ntop > n_genes) {
+    ntop <- n_genes
+  }
+  ntop <- max(1L, as.integer(ntop))
+  factor_count <- ncol(W)
+  pseudo_names <- paste0("factor", seq_len(factor_count))
+  col_names <- colnames(W)
+  if (is.null(col_names) || length(col_names) != factor_count) {
+    col_names <- pseudo_names
+  }
+  top_res <- get_top_genes(W, ntop)
+  top_df <- top_res$top_genes
+  result <- vector("list", factor_count)
+  names(result) <- col_names
+  if (!is.null(top_df) && ncol(top_df) > 0) {
+    returned_names <- colnames(top_df)
+    if (is.null(returned_names) || length(returned_names) != ncol(top_df)) {
+      returned_names <- pseudo_names[seq_len(ncol(top_df))]
+    }
+    for (idx in seq_len(ncol(top_df))) {
+      col_label <- returned_names[[idx]]
+      mapped_idx <- match(col_label, pseudo_names)
+      if (is.na(mapped_idx) || mapped_idx < 1 || mapped_idx > factor_count) {
+        mapped_idx <- idx
+      }
+      genes <- top_df[[idx]]
+      genes <- genes[!is.na(genes) & nzchar(genes)]
+      genes <- unique(genes)
+      result[[mapped_idx]] <- genes
+    }
+  }
+  lapply(result, function(x) x %||% character())
+}
+
+align_beta_to_factors <- function(beta_values, factor_names) {
+  n_factors <- length(factor_names)
+  if (!n_factors) {
+    return(numeric())
+  }
+  aligned <- rep(NA_real_, n_factors)
+  if (is.null(beta_values)) {
+    return(aligned)
+  }
+  beta_vec <- as.numeric(beta_values)
+  beta_names <- names(beta_values)
+  if (!is.null(beta_names) && length(beta_names)) {
+    matches <- match(factor_names, beta_names)
+    aligned <- beta_vec[matches]
+  } else {
+    idx <- seq_len(min(length(beta_vec), n_factors))
+    aligned[idx] <- beta_vec[idx]
+  }
+  aligned
+}
+
+calc_f1_value <- function(precision, recall) {
+  if (is.na(precision) || is.na(recall)) {
+    return(NA_real_)
+  }
+  if ((precision + recall) == 0) {
+    return(0)
+  }
+  2 * precision * recall / (precision + recall)
+}
+
+safe_max_value <- function(values, default = NA_real_) {
+  values <- values[!is.na(values)]
+  if (!length(values)) {
+    return(default)
+  }
+  max(values)
+}
+
+build_per_factor_stats <- function(marker_genes, top_sets, beta_values, beta_nonzero) {
+  n_factors <- length(top_sets)
+  if (!n_factors) {
+    return(tibble::tibble(
+      learned_factor = character(),
+      learned_factor_index = integer(),
+      learned_beta = numeric(),
+      beta_nonzero = logical(),
+      n_learned_markers = integer(),
+      overlap = integer(),
+      precision = numeric(),
+      recall = numeric(),
+      f1 = numeric()
+    ))
+  }
+  factor_names <- names(top_sets)
+  if (is.null(factor_names) || length(factor_names) != n_factors) {
+    factor_names <- paste0("factor", seq_len(n_factors))
+  }
+  marker_genes <- unique(stats::na.omit(marker_genes))
+  true_count <- length(marker_genes)
+  learned_counts <- vapply(top_sets, length, integer(1))
+  overlaps <- vapply(
+    top_sets,
+    function(genes) {
+      if (!length(marker_genes) || !length(genes)) {
+        return(0L)
+      }
+      length(intersect(marker_genes, genes))
+    },
+    integer(1)
+  )
+  if (length(beta_values) != n_factors) {
+    beta_values <- rep_len(beta_values, n_factors)
+  }
+  if (length(beta_nonzero) != n_factors) {
+    beta_nonzero <- rep_len(beta_nonzero, n_factors)
+  }
+  precision <- ifelse(learned_counts > 0, overlaps / learned_counts, NA_real_)
+  if (true_count > 0) {
+    recall <- overlaps / true_count
+  } else {
+    recall <- rep(NA_real_, n_factors)
+  }
+  f1 <- mapply(calc_f1_value, precision, recall)
+  tibble::tibble(
+    learned_factor = factor_names,
+    learned_factor_index = seq_len(n_factors),
+    learned_beta = beta_values,
+    beta_nonzero = as.logical(beta_nonzero),
+    n_learned_markers = learned_counts,
+    overlap = overlaps,
+    precision = precision,
+    recall = recall,
+    f1 = f1
+  )
+}
+
+summarize_lethal_metrics <- function(per_factor_stats, true_marker_count) {
+  if (!nrow(per_factor_stats)) {
+    default_val <- if (true_marker_count == 0) NA_real_ else 0
+    recall_any <- if (true_marker_count == 0) NA else FALSE
+    return(list(
+      recall_any = recall_any,
+      best_recall = default_val,
+      best_precision = default_val,
+      best_f1 = default_val,
+      best_recall_nonzero = if (true_marker_count == 0) NA_real_ else NA_real_,
+      best_precision_nonzero = if (true_marker_count == 0) NA_real_ else NA_real_,
+      best_f1_nonzero = if (true_marker_count == 0) NA_real_ else NA_real_
+    ))
+  }
+  default_val <- if (true_marker_count == 0) NA_real_ else 0
+  best_recall <- safe_max_value(per_factor_stats$recall, default_val)
+  best_precision <- safe_max_value(per_factor_stats$precision, default_val)
+  best_f1 <- safe_max_value(per_factor_stats$f1, default_val)
+  nzb <- per_factor_stats[per_factor_stats$beta_nonzero %in% TRUE, , drop = FALSE]
+  if (nrow(nzb)) {
+    best_recall_nzb <- safe_max_value(nzb$recall, default_val)
+    best_precision_nzb <- safe_max_value(nzb$precision, default_val)
+    best_f1_nzb <- safe_max_value(nzb$f1, default_val)
+  } else {
+    best_recall_nzb <- if (true_marker_count == 0) NA_real_ else NA_real_
+    best_precision_nzb <- if (true_marker_count == 0) NA_real_ else NA_real_
+    best_f1_nzb <- if (true_marker_count == 0) NA_real_ else NA_real_
+  }
+  recall_any <- if (true_marker_count == 0) NA else any(per_factor_stats$overlap > 0)
+  list(
+    recall_any = recall_any,
+    best_recall = best_recall,
+    best_precision = best_precision,
+    best_f1 = best_f1,
+    best_recall_nonzero = best_recall_nzb,
+    best_precision_nonzero = best_precision_nzb,
+    best_f1_nonzero = best_f1_nzb
+  )
+}
+
+summarize_purity_values <- function(values) {
+  values <- values[!is.na(values)]
+  if (!length(values)) {
+    return(list(min = NA_real_, max = NA_real_, mean = NA_real_))
+  }
+  list(
+    min = min(values),
+    max = max(values),
+    mean = mean(values)
+  )
+}
+
+compute_purity_metrics <- function(per_factor_long_tbl, n_lethal) {
+  if (!nrow(per_factor_long_tbl)) {
+    return(list(
+      purity_table = tibble::tibble(),
+      min = NA_real_,
+      max = NA_real_,
+      mean = NA_real_,
+      min_nonzero = NA_real_,
+      max_nonzero = NA_real_,
+      mean_nonzero = NA_real_,
+      n_learned_with_lethal_markers = 0L
+    ))
+  }
+  purity_table <- per_factor_long_tbl %>%
+    dplyr::group_by(
+      learned_factor,
+      learned_factor_index,
+      n_learned_markers,
+      learned_beta,
+      beta_nonzero
+    ) %>%
+    dplyr::summarise(
+      max_overlap = max(overlap, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    dplyr::mutate(
+      purity = ifelse(
+        n_learned_markers > 0,
+        max_overlap / n_learned_markers,
+        NA_real_
+      )
+    )
+  n_with_overlap <- sum(purity_table$max_overlap > 0, na.rm = TRUE)
+  summary_all <- summarize_purity_values(purity_table$purity)
+  summary_nonzero <- summarize_purity_values(
+    purity_table$purity[purity_table$beta_nonzero]
+  )
+  list(
+    purity_table = purity_table,
+    min = summary_all$min,
+    max = summary_all$max,
+    mean = summary_all$mean,
+    min_nonzero = summary_nonzero$min,
+    max_nonzero = summary_nonzero$max,
+    mean_nonzero = summary_nonzero$mean,
+    n_learned_with_lethal_markers = as.integer(n_with_overlap)
+  )
+}
+
+assign_sets_to_labels <- function(sets, gene_universe, W = NULL) {
+  n_genes <- length(gene_universe)
+  if (!n_genes) {
+    return(character())
+  }
+  labels <- rep("none", n_genes)
+  names(labels) <- gene_universe
+  if (is.null(sets) || !length(sets)) {
+    return(labels)
+  }
+  set_names <- names(sets)
+  if (is.null(set_names) || length(set_names) != length(sets)) {
+    set_names <- paste0("factor", seq_along(sets))
+  }
+  membership <- setNames(vector("list", n_genes), gene_universe)
+  for (idx in seq_along(sets)) {
+    genes <- sets[[idx]]
+    if (is.null(genes) || !length(genes)) next
+    genes <- intersect(unique(stats::na.omit(genes)), gene_universe)
+    if (!length(genes)) next
+    for (gene in genes) {
+      membership[[gene]] <- c(membership[[gene]], idx)
+    }
+  }
+  if (is.null(W) || !is.matrix(W)) {
+    for (gene in gene_universe) {
+      candidates <- membership[[gene]]
+      if (!length(candidates)) next
+      labels[gene] <- set_names[candidates[1]]
+    }
+    return(labels)
+  }
+  row_names <- rownames(W)
+  col_names <- colnames(W)
+  for (gene in gene_universe) {
+    candidates <- membership[[gene]]
+    if (!length(candidates)) next
+    if (length(candidates) == 1) {
+      labels[gene] <- set_names[candidates]
+      next
+    }
+    row_idx <- match(gene, row_names)
+    if (is.na(row_idx)) {
+      labels[gene] <- set_names[candidates[1]]
+      next
+    }
+    candidate_cols <- match(set_names[candidates], col_names)
+    missing_cols <- which(is.na(candidate_cols))
+    if (length(missing_cols)) {
+      candidate_cols[missing_cols] <- candidates[missing_cols]
+    }
+    weights <- W[row_idx, candidate_cols, drop = TRUE]
+    best <- candidates[which.max(weights)]
+    labels[gene] <- set_names[best]
+  }
+  labels
+}
+
+adjusted_rand_index_vec <- function(labels_true, labels_est) {
+  if (!length(labels_true) || length(labels_true) != length(labels_est)) {
+    return(NA_real_)
+  }
+  n <- length(labels_true)
+  if (n <= 1) {
+    return(NA_real_)
+  }
+  contingency <- table(labels_true, labels_est)
+  comb2 <- function(x) sum(x * (x - 1) / 2)
+  index <- comb2(as.vector(contingency))
+  row_comb <- comb2(rowSums(contingency))
+  col_comb <- comb2(colSums(contingency))
+  total_pairs <- n * (n - 1) / 2
+  if (total_pairs == 0) {
+    return(NA_real_)
+  }
+  expected <- (row_comb * col_comb) / total_pairs
+  max_index <- (row_comb + col_comb) / 2
+  denom <- max_index - expected
+  if (denom == 0) {
+    return(0)
+  }
+  (index - expected) / denom
+}
+
+compute_marker_ari <- function(true_sets, learned_sets, truth_W, fit_W) {
+  true_genes <- unique(unlist(true_sets))
+  learned_genes <- unique(unlist(learned_sets))
+  gene_universe <- union(true_genes, learned_genes)
+  gene_universe <- gene_universe[!is.na(gene_universe) & nzchar(gene_universe)]
+  if (length(gene_universe) < 2) {
+    return(NA_real_)
+  }
+  truth_labels <- assign_sets_to_labels(true_sets, gene_universe, truth_W)
+  learned_labels <- assign_sets_to_labels(learned_sets, gene_universe, fit_W)
+  adjusted_rand_index_vec(truth_labels, learned_labels)
+}
+
+compute_global_marker_recall <- function(truth_entry, learned_sets) {
+  marker_sets <- truth_entry$marker_sets %||% list()
+  true_genes <- unique(unlist(marker_sets))
+  true_genes <- true_genes[!is.na(true_genes) & nzchar(true_genes)]
+  if (!length(true_genes)) {
+    return(NA_real_)
+  }
+  learned_sets <- learned_sets %||% list()
+  learned_genes <- unique(unlist(learned_sets))
+  learned_genes <- learned_genes[!is.na(learned_genes) & nzchar(learned_genes)]
+  if (!length(learned_genes)) {
+    return(0)
+  }
+  length(intersect(true_genes, learned_genes)) / length(true_genes)
+}
+
+compute_lethal_program_metrics <- function(top_sets,
+                                           true_marker_sets,
+                                           true_beta,
+                                           learned_beta) {
+  top_sets <- top_sets %||% list()
+  true_marker_sets <- true_marker_sets %||% list()
+  factor_names <- names(true_marker_sets)
+  if (is.null(factor_names) || length(factor_names) != length(true_marker_sets)) {
+    factor_names <- paste0("true_factor", seq_along(true_marker_sets))
+  }
+  lethal_idx <- which(!is.na(true_beta) & abs(true_beta) > SIM_BETA_NONZERO_TOL)
+  beta_aligned <- align_beta_to_factors(learned_beta, names(top_sets))
+  beta_nonzero <- !is.na(beta_aligned) & abs(beta_aligned) > SIM_BETA_NONZERO_TOL
+  per_program_rows <- list()
+  per_factor_long <- list()
+  if (!length(lethal_idx)) {
+    purity_metrics <- compute_purity_metrics(tibble::tibble(), 0L)
+    return(list(
+      per_program = tibble::tibble(),
+      purity_table = purity_metrics$purity_table,
+      purity_min = purity_metrics$min,
+      purity_max = purity_metrics$max,
+      purity_mean = purity_metrics$mean,
+      purity_min_nonzero = purity_metrics$min_nonzero,
+      purity_max_nonzero = purity_metrics$max_nonzero,
+      purity_mean_nonzero = purity_metrics$mean_nonzero,
+      n_learned_with_lethal_markers = purity_metrics$n_learned_with_lethal_markers
+    ))
+  }
+  for (idx in lethal_idx) {
+    marker_genes <- true_marker_sets[[idx]] %||% character()
+    marker_genes <- unique(stats::na.omit(marker_genes))
+    per_factor <- build_per_factor_stats(marker_genes, top_sets, beta_aligned, beta_nonzero)
+    summary_vals <- summarize_lethal_metrics(per_factor, length(marker_genes))
+    per_program_rows[[length(per_program_rows) + 1L]] <- tibble::tibble(
+      true_factor = factor_names[[idx]],
+      true_factor_index = idx,
+      true_marker_count = length(marker_genes),
+      recall_any = summary_vals$recall_any,
+      concentration = summary_vals$best_recall,
+      best_precision = summary_vals$best_precision,
+      best_f1 = summary_vals$best_f1,
+      concentration_nonzero = summary_vals$best_recall_nonzero,
+      best_precision_nonzero = summary_vals$best_precision_nonzero,
+      best_f1_nonzero = summary_vals$best_f1_nonzero,
+      per_factor_stats = list(per_factor)
+    )
+    if (nrow(per_factor)) {
+      per_factor_long[[length(per_factor_long) + 1L]] <- dplyr::mutate(
+        per_factor,
+        true_factor = factor_names[[idx]],
+        true_factor_index = idx
+      )
+    }
+  }
+  per_program_tbl <- if (length(per_program_rows)) {
+    dplyr::bind_rows(per_program_rows)
+  } else {
+    tibble::tibble()
+  }
+  per_factor_long_tbl <- if (length(per_factor_long)) {
+    dplyr::bind_rows(per_factor_long)
+  } else {
+    tibble::tibble()
+  }
+  purity_metrics <- compute_purity_metrics(per_factor_long_tbl, length(lethal_idx))
+  list(
+    per_program = per_program_tbl,
+    purity_table = purity_metrics$purity_table,
+    purity_min = purity_metrics$min,
+    purity_max = purity_metrics$max,
+    purity_mean = purity_metrics$mean,
+    purity_min_nonzero = purity_metrics$min_nonzero,
+    purity_max_nonzero = purity_metrics$max_nonzero,
+    purity_mean_nonzero = purity_metrics$mean_nonzero,
+    n_learned_with_lethal_markers = purity_metrics$n_learned_with_lethal_markers
+  )
+}
+
+compute_simulation_marker_metrics <- function(fit, processed, truth, params) {
+  processed_train <- processed$train %||% processed
+  result <- list(
+    ntop = NA_integer_,
+    learned_top_genes = list(),
+    lethal_factor_metrics = tibble::tibble(),
+    learned_factor_purity = tibble::tibble(),
+    purity_min = NA_real_,
+    purity_max = NA_real_,
+    purity_mean = NA_real_,
+    purity_min_nonzero = NA_real_,
+    purity_max_nonzero = NA_real_,
+    purity_mean_nonzero = NA_real_,
+    n_learned_with_lethal_markers = 0L,
+    marker_ari = NA_real_
+  )
+  if (is.null(fit)) {
+    return(result)
+  }
+  W <- fit$W
+  if (is.null(W) || !is.matrix(W) || !ncol(W)) {
+    return(result)
+  }
+  gene_names <- processed_train$ex
+  gene_names <- if (is.null(gene_names)) NULL else rownames(gene_names)
+  W <- ensure_gene_names(W, gene_names)
+  ntop_value <- resolve_ntop_value(params, nrow(W))
+  top_sets <- extract_top_gene_sets(W, ntop_value)
+  result$ntop <- ntop_value
+  result$learned_top_genes <- top_sets
+  true_marker_sets <- truth$marker_sets %||% list()
+  true_beta <- truth$beta %||% rep(0, length(true_marker_sets))
+  lethal_metrics <- compute_lethal_program_metrics(
+    top_sets = top_sets,
+    true_marker_sets = true_marker_sets,
+    true_beta = true_beta,
+    learned_beta = fit$beta
+  )
+  result$lethal_factor_metrics <- lethal_metrics$per_program
+  result$learned_factor_purity <- lethal_metrics$purity_table
+  result$purity_min <- lethal_metrics$purity_min
+  result$purity_max <- lethal_metrics$purity_max
+  result$purity_mean <- lethal_metrics$purity_mean
+  result$purity_min_nonzero <- lethal_metrics$purity_min_nonzero
+  result$purity_max_nonzero <- lethal_metrics$purity_max_nonzero
+  result$purity_mean_nonzero <- lethal_metrics$purity_mean_nonzero
+  result$n_learned_with_lethal_markers <- lethal_metrics$n_learned_with_lethal_markers
+  result$marker_ari <- compute_marker_ari(true_marker_sets, top_sets, truth$W, W)
+  result
+}
+
 get_simulation_k <- function(dataset_entry) {
   sim <- dataset_entry$simulation %||% list()
   params <- sim$params %||% list()
@@ -441,11 +1007,19 @@ build_result_row <- function(dataset_entry,
                              split = NULL,
                              train_cindex = NULL,
                              test_cindex = NULL) {
+  bo_details <- bo_details %||% list()
   split_info <- split %||% list()
-  train_val <- if (is.null(train_cindex)) fit$cindex %||% NA_real_ else train_cindex
-  test_val <- if (is.null(test_cindex)) fit$cindex %||% NA_real_ else test_cindex
+  fit_cindex <- if (!is.null(fit)) fit$cindex else NA_real_
+  train_val <- if (is.null(train_cindex)) fit_cindex else train_cindex
+  test_val <- if (is.null(test_cindex)) fit_cindex else test_cindex
   n_train <- if (!is.null(split_info$train_ids)) length(split_info$train_ids) else NA_integer_
   n_test <- if (!is.null(split_info$test_ids)) length(split_info$test_ids) else NA_integer_
+  metric_details <- compute_simulation_marker_metrics(
+    fit = fit,
+    processed = processed,
+    truth = dataset_entry$simulation,
+    params = params
+  )
   tibble::tibble(
     scenario_id = dataset_entry$metadata$scenario_id,
     scenario = dataset_entry$metadata$scenario_name,
@@ -461,10 +1035,23 @@ build_result_row <- function(dataset_entry,
     params = list(params),
     bo_history = list(bo_details$history %||% NULL),
     bo_summary = list(bo_details$summary %||% NULL),
+    bo_final_fit_error = bo_details$final_fit_error %||% NA_character_,
     fit = list(fit),
     processed = list(processed),
     truth = list(dataset_entry$simulation),
-    split = list(split_info)
+    split = list(split_info),
+    ntop_used = metric_details$ntop,
+    learned_top_genes = list(metric_details$learned_top_genes),
+    lethal_factor_metrics = list(metric_details$lethal_factor_metrics),
+    learned_factor_purity = list(metric_details$learned_factor_purity),
+    purity_min = metric_details$purity_min,
+    purity_max = metric_details$purity_max,
+    purity_mean = metric_details$purity_mean,
+    purity_min_nonzero = metric_details$purity_min_nonzero,
+    purity_max_nonzero = metric_details$purity_max_nonzero,
+    purity_mean_nonzero = metric_details$purity_mean_nonzero,
+    n_learned_with_lethal_markers = metric_details$n_learned_with_lethal_markers,
+    marker_ari = metric_details$marker_ari
   )
 }
 
@@ -510,9 +1097,12 @@ format_result_params <- function(params) {
 
 summarize_simulation_results <- function(result_list) {
   empty_tbl <- tibble::tibble(
+    scenario_id = character(),
     scenario = character(),
-    model_run = character(),
-    parameters = character(),
+    replicate = integer(),
+    analysis_id = character(),
+    train_cindex = numeric(),
+    test_cindex = numeric(),
     cindex = numeric()
   )
   result_list <- purrr::compact(result_list)
@@ -557,37 +1147,90 @@ summarize_simulation_results <- function(result_list) {
   if (!nrow(result_tbl)) {
     return(empty_tbl)
   }
-  dataset_name <- result_tbl$dataset_name
-  dataset_valid <- !is.na(dataset_name) & nzchar(dataset_name)
-  scenario_id <- result_tbl$scenario_id
-  scenario_valid <- !is.na(scenario_id) & nzchar(scenario_id)
-  replicate_vals <- result_tbl$replicate
-  replicate_label <- ifelse(
-    !is.na(replicate_vals),
-    sprintf("rep%03d", as.integer(replicate_vals)),
-    NA_character_
-  )
-  scenario_fallback <- scenario_id
-  scenario_fallback[scenario_valid & !is.na(replicate_label)] <- paste0(
-    scenario_fallback[scenario_valid & !is.na(replicate_label)],
-    "_",
-    replicate_label[scenario_valid & !is.na(replicate_label)]
-  )
-  scenario_fallback[!scenario_valid] <- NA_character_
-  default_ids <- sprintf("run_%03d", seq_len(nrow(result_tbl)))
-  base_run <- ifelse(dataset_valid, dataset_name, scenario_fallback)
-  base_missing <- is.na(base_run) | !nzchar(base_run)
-  base_run[base_missing] <- default_ids[base_missing]
-  analysis_id <- result_tbl$analysis_id
-  analysis_valid <- !is.na(analysis_id) & nzchar(analysis_id)
-  model_run <- base_run
-  model_run[analysis_valid] <- paste(model_run[analysis_valid], analysis_id[analysis_valid], sep = "::")
-  tibble::tibble(
+  summary_tbl <- tibble::tibble(
+    scenario_id = result_tbl$scenario_id,
     scenario = result_tbl$scenario,
-    model_run = model_run,
-    parameters = purrr::map_chr(result_tbl$params, format_result_params),
-    cindex = result_tbl$cindex
+    replicate = result_tbl$replicate,
+    analysis_id = result_tbl$analysis_id,
+    train_cindex = as.numeric(result_tbl$train_cindex),
+    test_cindex = as.numeric(result_tbl$cindex),
+    cindex = as.numeric(result_tbl$cindex)
   )
+  summary_tbl$ntop_used <- result_tbl$ntop_used
+  summary_tbl$learned_top_genes <- result_tbl$learned_top_genes
+  summary_tbl$lethal_factor_metrics <- result_tbl$lethal_factor_metrics
+  summary_tbl$learned_factor_purity <- result_tbl$learned_factor_purity
+  summary_tbl$purity_min <- result_tbl$purity_min
+  summary_tbl$purity_max <- result_tbl$purity_max
+  summary_tbl$purity_mean <- result_tbl$purity_mean
+  summary_tbl$purity_min_nonzero <- result_tbl$purity_min_nonzero
+  summary_tbl$purity_max_nonzero <- result_tbl$purity_max_nonzero
+  summary_tbl$purity_mean_nonzero <- result_tbl$purity_mean_nonzero
+  summary_tbl$n_learned_with_lethal_markers <- result_tbl$n_learned_with_lethal_markers
+  summary_tbl$marker_ari <- result_tbl$marker_ari
+  summary_tbl$marker_recall_all <- purrr::map2_dbl(
+    result_tbl$truth,
+    result_tbl$learned_top_genes,
+    compute_global_marker_recall
+  )
+  param_names <- result_tbl$params %>%
+    purrr::map(names) %>%
+    purrr::flatten_chr() %>%
+    unique()
+  param_names <- param_names[!is.na(param_names) & nzchar(param_names)]
+  if (length(param_names)) {
+    param_cols <- purrr::map(param_names, function(param_name) {
+      values <- purrr::map(result_tbl$params, ~ .x[[param_name]])
+      present <- purrr::keep(values, ~ !is.null(.x) && length(.x))
+      scalar <- length(present) > 0 && all(purrr::map_lgl(present, ~ length(.x) == 1))
+      column <- NULL
+      if (!length(present)) {
+        column <- rep(NA_real_, length(values))
+      } else if (scalar && all(purrr::map_lgl(present, ~ is.numeric(.x)))) {
+        column <- purrr::map_dbl(
+          values,
+          ~ if (is.null(.x) || !length(.x)) NA_real_ else as.numeric(.x[[1]])
+        )
+      } else if (scalar && all(purrr::map_lgl(present, ~ is.logical(.x)))) {
+        column <- vapply(
+          values,
+          function(val) {
+            if (is.null(val) || !length(val)) {
+              return(NA)
+            }
+            as.logical(val[[1]])
+          },
+          logical(1)
+        )
+      } else if (scalar && all(purrr::map_lgl(present, ~ is.character(.x)))) {
+        column <- vapply(
+          values,
+          function(val) {
+            if (is.null(val) || !length(val)) {
+              return(NA_character_)
+            }
+            as.character(val[[1]])
+          },
+          character(1)
+        )
+      } else {
+        column <- vapply(
+          values,
+          function(val) {
+            if (is.null(val) || !length(val)) {
+              return(NA_character_)
+            }
+            format_param_value(val)
+          },
+          character(1)
+        )
+      }
+      tibble::tibble(!!param_name := column)
+    })
+    param_tbl <- dplyr::bind_cols(param_cols)
+    summary_tbl <- dplyr::bind_cols(summary_tbl, param_tbl)
+  }
+  summary_tbl
 }
 
 run_fixed_analysis <- function(dataset_entry, analysis_spec) {
@@ -624,8 +1267,9 @@ run_fixed_analysis <- function(dataset_entry, analysis_spec) {
     tol_init = SIM_DESURV_TOL,
     maxit = SIM_DESURV_MAXIT,
     imaxit = SIM_DESURV_MAXIT,
-    ninit = SIM_FINAL_NINIT,
-    parallel_init = FALSE,
+    ninit = SIM_CV_NSTARTS,
+    parallel_init = TRUE,
+    ncores_init = SIM_CV_NSTARTS,
     verbose = TRUE
   )
   fit$data <- list(X = processed_train$ex, sampInfo = processed_train$sampInfo)
@@ -681,6 +1325,9 @@ run_bayesopt_analysis <- function(dataset_entry, analysis_spec) {
     candidate_pool = candidate_pool,
     exploration_weight = exploration_weight,
     seed = dataset_entry$metadata$seed,
+    parallel_grid = TRUE,
+    n_starts = SIM_CV_NSTARTS,
+    ncores_grid = SIM_CV_NSTARTS,
     cv_verbose = analysis_spec$cv_verbose %||% FALSE,
     verbose = TRUE
   )
@@ -706,31 +1353,51 @@ run_bayesopt_analysis <- function(dataset_entry, analysis_spec) {
     transform_method = SIM_METHOD_TRANSFORM,
     genes = rownames(processed_train$ex)
   )
-  fit <- DeSurv::desurv_fit(
-    X = processed_train$ex,
-    y = processed_train$sampInfo$time,
-    d = processed_train$sampInfo$event,
-    k = final_params$k,
-    alpha = final_params$alpha,
-    lambda = final_params$lambda,
-    nu = final_params$nu,
-    lambdaW = final_params$lambdaW,
-    lambdaH = final_params$lambdaH,
-    seed = dataset_entry$metadata$seed,
-    tol = SIM_DESURV_TOL,
-    tol_init = SIM_DESURV_TOL,
-    maxit = SIM_DESURV_MAXIT,
-    imaxit = SIM_DESURV_MAXIT,
-    ninit = SIM_FINAL_NINIT,
-    parallel_init = FALSE,
-    verbose = FALSE
-  )
-  fit$data <- list(X = processed_train$ex, sampInfo = processed_train$sampInfo)
-  train_cindex <- compute_dataset_cindex(fit, processed_train)
-  test_cindex <- compute_dataset_cindex(fit, processed_test)
+  fit_attempt <- tryCatch({
+    fit_obj <- DeSurv::desurv_fit(
+      X = processed_train$ex,
+      y = processed_train$sampInfo$time,
+      d = processed_train$sampInfo$event,
+      k = final_params$k,
+      alpha = final_params$alpha,
+      lambda = final_params$lambda,
+      nu = final_params$nu,
+      lambdaW = final_params$lambdaW,
+      lambdaH = final_params$lambdaH,
+      seed = dataset_entry$metadata$seed,
+      tol = SIM_DESURV_TOL,
+      tol_init = SIM_DESURV_TOL,
+      maxit = SIM_DESURV_MAXIT,
+      imaxit = SIM_DESURV_MAXIT,
+      ninit = SIM_CV_NSTARTS,
+      parallel_init = TRUE,
+      ncores_init = SIM_CV_NSTARTS,
+      verbose = FALSE
+    )
+    fit_obj$data <- list(X = processed_train$ex, sampInfo = processed_train$sampInfo)
+    train_ci <- compute_dataset_cindex(fit_obj, processed_train)
+    test_ci <- compute_dataset_cindex(fit_obj, processed_test)
+    list(fit = fit_obj, train = train_ci, test = test_ci, error = NULL)
+  }, error = function(e) {
+    warning(
+      sprintf(
+        "Final desurv_fit() failed for dataset %s (analysis %s): %s",
+        dataset_entry$data$dataname,
+        analysis_spec$analysis_id,
+        conditionMessage(e)
+      ),
+      call. = FALSE
+    )
+    list(fit = NULL, train = NA_real_, test = NA_real_, error = conditionMessage(e))
+  })
+  fit <- fit_attempt$fit
+  train_cindex <- fit_attempt$train
+  test_cindex <- fit_attempt$test
   bo_details <- list(
     history = bo_results$history,
-    summary = list(best_score = bo_results$best$mean_cindex)
+    summary = list(best_score = bo_results$best$mean_cindex),
+    diagnostics = bo_results$diagnostics,
+    final_fit_error = fit_attempt$error
   )
   build_result_row(
     dataset_entry = dataset_entry,
@@ -768,7 +1435,7 @@ targets_list <- list(
   tar_target(
     sim_dataset,
     {
-      sim_dataset_specs=sim_dataset_specs[[1]]
+      sim_dataset_specs <- sim_dataset_specs[[1]]
       generate_simulation_dataset(sim_dataset_specs)
     },
     pattern = map(sim_dataset_specs),
@@ -782,10 +1449,14 @@ targets_list <- list(
   tar_target(
     sim_analysis_result,
     {
+
       run_simulation_analysis(sim_dataset, sim_analysis_spec)
     },
     pattern = cross(sim_dataset, sim_analysis_spec),
-    iteration = "list"
+    iteration = "list",
+    resources =
+      tar_resources(crew =
+                      tar_resources_crew(controller = "sim_analysis"))
   ),
   tar_target(
     sim_results_table,

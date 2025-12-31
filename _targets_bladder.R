@@ -16,8 +16,8 @@ DESURV_BO_BOUNDS   = list(
 
 # sometimes tuned hyperparams
 # for the following set length 1 to fix, or range to tune via BO
-NGENE_CONFIG       = c(1000,8000) 
-NTOP_CONFIG        = c(50,500) 
+NGENE_CONFIG       = c(500,5000) 
+NTOP_CONFIG        = c(50,250) 
 LAMBDAW_CONFIG     = c(0)
 LAMBDAH_CONFIG     = 0#c(1e-5,1e5)
 NINIT <- 50

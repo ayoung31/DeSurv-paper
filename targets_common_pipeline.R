@@ -665,14 +665,144 @@ COMMON_DESURV_TARGETS <- list(
     val_predictions_desurv,
     desurv_predict_validation(
       fit = fit_desurv,
-      data_list = data_val_filtered
+      data_list = data_val_filtered,
+      top_genes = tops_desurv$top_genes
     )
   ),
   tar_target(
     val_predictions_desurv_alpha0,
     desurv_predict_validation(
       fit = fit_desurv_alpha0,
-      data_list = data_val_filtered
+      data_list = data_val_filtered,
+      top_genes = tops_desurv_alpha0$top_genes
+    )
+  ),
+  tar_target(
+    val_latent_desurv,
+    {
+      latent <- desurv_collect_validation_latent(
+        fit = fit_desurv,
+        data_list = data_val_filtered,
+        top_genes = tops_desurv$top_genes
+      )
+      write_validation_latent_outputs(
+        latent_list = latent,
+        base_dir = file.path(training_results_dir, "validation", "desurv")
+      )
+      latent
+    }
+  ),
+  tar_target(
+    val_latent_desurv_alpha0,
+    {
+      latent <- desurv_collect_validation_latent(
+        fit = fit_desurv_alpha0,
+        data_list = data_val_filtered,
+        top_genes = tops_desurv_alpha0$top_genes
+      )
+      write_validation_latent_outputs(
+        latent_list = latent,
+        base_dir = file.path(training_results_dir_alpha0, "validation", "desurv_alpha0")
+      )
+      latent
+    }
+  ),
+  tar_target(
+    val_cindex_desurv,
+    {
+      summary_tbl <- summarize_validation_cindex(val_latent_desurv)
+      if (nrow(summary_tbl)) {
+        dir.create(file.path(training_results_dir, "validation"), recursive = TRUE, showWarnings = FALSE)
+        utils::write.csv(
+          summary_tbl,
+          file = file.path(training_results_dir, "validation", "val_cindex_desurv.csv"),
+          row.names = FALSE
+        )
+      }
+      summary_tbl
+    }
+  ),
+  tar_target(
+    val_cindex_desurv_alpha0,
+    {
+      summary_tbl <- summarize_validation_cindex(val_latent_desurv_alpha0)
+      if (nrow(summary_tbl)) {
+        dir.create(file.path(training_results_dir_alpha0, "validation"), recursive = TRUE, showWarnings = FALSE)
+        utils::write.csv(
+          summary_tbl,
+          file = file.path(training_results_dir_alpha0, "validation", "val_cindex_desurv_alpha0.csv"),
+          row.names = FALSE
+        )
+      }
+      summary_tbl
+    }
+  ),
+  tar_target(
+    val_clusters_desurv,
+    {
+      base_dir <- file.path(training_results_dir, "validation", "desurv", "clusters")
+      dir.create(base_dir, recursive = TRUE, showWarnings = FALSE)
+      lapply(
+        val_latent_desurv,
+        function(entry) {
+          dataset_dir <- file.path(base_dir, entry$dataset)
+          dir.create(dataset_dir, recursive = TRUE, showWarnings = FALSE)
+          result <- cluster_validation_latent(
+            latent_entry = entry,
+            maxK = VAL_CLUSTER_MAXK,
+            reps = VAL_CLUSTER_REPS,
+            pItem = VAL_CLUSTER_PITEM,
+            pFeature = VAL_CLUSTER_PFEATURE,
+            seed = VAL_CLUSTER_SEED,
+            dir = dataset_dir
+          )
+          if (nrow(result$assignments)) {
+            utils::write.csv(
+              result$assignments,
+              file = file.path(dataset_dir, "cluster_assignments.csv"),
+              row.names = FALSE
+            )
+          }
+          result
+        }
+      )
+    },
+    resources = tar_resources(
+      crew = tar_resources_crew(controller = "med_mem")
+    )
+  ),
+  tar_target(
+    val_clusters_desurv_alpha0,
+    {
+      base_dir <- file.path(training_results_dir_alpha0, "validation", "desurv_alpha0", "clusters")
+      dir.create(base_dir, recursive = TRUE, showWarnings = FALSE)
+      lapply(
+        val_latent_desurv_alpha0,
+        function(entry) {
+          dataset_dir <- file.path(base_dir, entry$dataset)
+          dir.create(dataset_dir, recursive = TRUE, showWarnings = FALSE)
+          result <- cluster_validation_latent(
+            latent_entry = entry,
+            maxK = VAL_CLUSTER_MAXK,
+            reps = VAL_CLUSTER_REPS,
+            pItem = VAL_CLUSTER_PITEM,
+            pFeature = VAL_CLUSTER_PFEATURE,
+            seed = VAL_CLUSTER_SEED,
+            dir = dataset_dir
+          )
+          if (nrow(result$assignments)) {
+            utils::write.csv(
+              result$assignments,
+              file = file.path(dataset_dir, "cluster_assignments.csv"),
+              row.names = FALSE
+            )
+          }
+          result
+        }
+      )
+    },
+    resources = tar_resources(
+      crew = tar_resources_crew(controller = "med_mem")
     )
   ),
   tar_target(
@@ -732,7 +862,7 @@ COMMON_DESURV_TARGETS <- list(
       organism <- org.Hs.eg.db
       ora(tops_desurv_alpha0$top_genes,universe,organism)
     }
-  ),
+  )
   
   # tar_target(
   #   ora_analysis_std,
@@ -743,29 +873,29 @@ COMMON_DESURV_TARGETS <- list(
   #   }
   # ),
   
-  
+  # 
+  # 
+  # tar_target(
+  #   selected_factors_desurv,
+  #   {
+  #     save_dir = file.path(training_results_dir,"factor_selection","desurv")
+  #     dir.create(save_dir,showWarnings = FALSE,recursive = TRUE)
+  #     path = file.path(save_dir,"factor_selection.csv")
+  #     build_factor_selection_table(tops_desurv$top_genes,path)
+  #   },
+  #   format="file"
+  # ),
 
-  tar_target(
-    selected_factors_desurv,
-    {
-      save_dir = file.path(training_results_dir,"factor_selection","desurv")
-      dir.create(save_dir,showWarnings = FALSE,recursive = TRUE)
-      path = file.path(save_dir,"factor_selection.csv")
-      build_factor_selection_table(tops_desurv$top_genes,path)
-    },
-    format="file"
-  ),
-
-  tar_target(
-    selected_factors_desurv_alpha0,
-    {
-      save_dir = file.path(training_results_dir_alpha0,"factor_selection","desurv_alpha0")
-      dir.create(save_dir,showWarnings = FALSE,recursive = TRUE)
-      path = file.path(save_dir,"factor_selection.csv")
-      build_factor_selection_table(tops_desurv_alpha0$top_genes,path)
-    },
-    format="file"
-  ),
+  # tar_target(
+  #   selected_factors_desurv_alpha0,
+  #   {
+  #     save_dir = file.path(training_results_dir_alpha0,"factor_selection","desurv_alpha0")
+  #     dir.create(save_dir,showWarnings = FALSE,recursive = TRUE)
+  #     path = file.path(save_dir,"factor_selection.csv")
+  #     build_factor_selection_table(tops_desurv_alpha0$top_genes,path)
+  #   },
+  #   format="file"
+  # ),
   # 
   # tar_target(
   #   selected_factors_std,
@@ -777,55 +907,55 @@ COMMON_DESURV_TARGETS <- list(
   #   },
   #   format="file"
   # ),
-    tar_target(
-      clusters_desurv,
-      {
-        sel = read_selected_factor_indices(
-          selected_factors_desurv,
-          label = "DeSurv factor selection table"
-        )
-        data <- unwrap_validation_dataset(data_val_filtered)
-        val_dataset <- infer_validation_dataset_name(data)
-        dir = create_filepath_clustering_output(ngene_value, TOL, MAXIT, PKG_VERSION,
-                                                GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN,
-                                                ntop_value, val_dataset, "DeSurv")
-        run_clustering(
-          tops_desurv$top_genes, data, top_genes, colors,
-          facs = sel, plot = FALSE, dir = dir,
-          maxKcol = 5, maxKrow = 5
-        )
-      },
-      pattern = map(data_val_filtered),
-      iteration = "list",
-      resources = tar_resources(
-        crew = tar_resources_crew(controller = "med_mem")
-      )
-    ),
-  
-    tar_target(
-      clusters_desurv_alpha0,
-      {
-        sel = read_selected_factor_indices(
-          selected_factors_desurv_alpha0,
-          label = "DeSurv alpha=0 factor selection table"
-        )
-        data <- unwrap_validation_dataset(data_val_filtered)
-        val_dataset <- infer_validation_dataset_name(data)
-        dir = create_filepath_clustering_output(ngene_value_alpha0, TOL, MAXIT, PKG_VERSION,
-                                                GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN,
-                                                ntop_value_alpha0, val_dataset, "DeSurv_alpha0")
-        run_clustering(
-          tops_desurv_alpha0$top_genes, data, top_genes, colors,
-          facs = sel, plot = FALSE, dir = dir,
-          maxKcol = 5, maxKrow = 5
-        )
-      },
-      pattern = map(data_val_filtered),
-      iteration = "list",
-      resources = tar_resources(
-        crew = tar_resources_crew(controller = "med_mem")
-      )
-    )
+    # tar_target(
+    #   clusters_desurv,
+    #   {
+    #     sel = read_selected_factor_indices(
+    #       selected_factors_desurv,
+    #       label = "DeSurv factor selection table"
+    #     )
+    #     data <- unwrap_validation_dataset(data_val_filtered)
+    #     val_dataset <- infer_validation_dataset_name(data)
+    #     dir = create_filepath_clustering_output(ngene_value, TOL, MAXIT, PKG_VERSION,
+    #                                             GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN,
+    #                                             ntop_value, val_dataset, "DeSurv")
+    #     run_clustering(
+    #       tops_desurv$top_genes, data, top_genes, colors,
+    #       facs = sel, plot = FALSE, dir = dir,
+    #       maxKcol = 5, maxKrow = 5
+    #     )
+    #   },
+    #   pattern = map(data_val_filtered),
+    #   iteration = "list",
+    #   resources = tar_resources(
+    #     crew = tar_resources_crew(controller = "med_mem")
+    #   )
+    # ),
+    # 
+    # tar_target(
+    #   clusters_desurv_alpha0,
+    #   {
+    #     sel = read_selected_factor_indices(
+    #       selected_factors_desurv_alpha0,
+    #       label = "DeSurv alpha=0 factor selection table"
+    #     )
+    #     data <- unwrap_validation_dataset(data_val_filtered)
+    #     val_dataset <- infer_validation_dataset_name(data)
+    #     dir = create_filepath_clustering_output(ngene_value_alpha0, TOL, MAXIT, PKG_VERSION,
+    #                                             GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN,
+    #                                             ntop_value_alpha0, val_dataset, "DeSurv_alpha0")
+    #     run_clustering(
+    #       tops_desurv_alpha0$top_genes, data, top_genes, colors,
+    #       facs = sel, plot = FALSE, dir = dir,
+    #       maxKcol = 5, maxKrow = 5
+    #     )
+    #   },
+    #   pattern = map(data_val_filtered),
+    #   iteration = "list",
+    #   resources = tar_resources(
+    #     crew = tar_resources_crew(controller = "med_mem")
+    #   )
+    # )
 
   #   tar_target(
   #     clusters_std,

@@ -1,10 +1,11 @@
-tar_load(clusters_desurv_50_2000)
-clus=clusters_desurv_50_2000
+tar_load(clusters_desurv)
+clus=clusters_desurv
 tops=tops_desurv$top_genes
+
 for(i in 1:length(clus)){
   dat=data.frame(matrix(ncol=3,nrow=0))
   colnames(dat) = c("cluster","immune","basal")
-  nc=nclus_tbl$nclus[i]
+  nc=2
   classes = clus[[i]]$clus_res$clusCol[[4]]$consensusClass
   nc=unique(classes)
   for(j in 1:4){

@@ -67,7 +67,7 @@ prepare_bo_history <- function(history_path) {
   bo_history
 }
 
-make_panel <- function(history_df, labels, include_alpha = TRUE, cindex_label = "Best CV C-index across α") {
+make_panel <- function(history_df, labels, include_alpha = TRUE, cindex_label = "Best CV C-index across k") {
   k_col <- intersect(c("k", "k_grid"), names(history_df))[1]
   alpha_col <- intersect(c("alpha", "alpha_grid"), names(history_df))[1]
   if (is.na(alpha_col)) {
@@ -104,7 +104,7 @@ make_panel <- function(history_df, labels, include_alpha = TRUE, cindex_label = 
     geom_line(color = "#1f78b4", linewidth = 0.6) +
     geom_point(color = "#1f78b4", size = 2.2) +
     labs(x = x_lab, y = cindex_label) +
-    theme_minimal(base_size = 9) +
+    theme_minimal(base_size = 12) +
     theme(legend.position = "none")
 
   if (include_alpha) {
@@ -113,7 +113,7 @@ make_panel <- function(history_df, labels, include_alpha = TRUE, cindex_label = 
       geom_point(color = "#33a02c", size = 2.2) +
       scale_y_continuous(limits = c(0, 1)) +
       labs(x = "Rank k", y = "Selected α") +
-      theme_minimal(base_size = 9) +
+      theme_minimal(base_size = 12) +
       theme(legend.position = "none")
 
     plot_grid(

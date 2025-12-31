@@ -81,7 +81,7 @@ if (LOCAL_RENDER) {
     options_cluster = crew_options_slurm(
       memory_gigabytes_per_cpu = 2,
       cpus_per_task = NINIT,
-      time_minutes = 720,
+      time_minutes = 1440,
       log_error = "logs/crew_log_%A.err",
       log_output = "logs/crew_log_%A.out",
       script_lines = "module load r/4.4.0"
@@ -170,6 +170,12 @@ NFOLD              = 5
 
 DESURV_PARALLEL_GRID <- pipeline_param("DESURV_PARALLEL_GRID", TRUE)
 DESURV_NCORES_GRID <- pipeline_param("DESURV_NCORES_GRID", NINIT)
+
+VAL_CLUSTER_MAXK <- pipeline_param("VAL_CLUSTER_MAXK", 6L)
+VAL_CLUSTER_REPS <- pipeline_param("VAL_CLUSTER_REPS", 1000L)
+VAL_CLUSTER_PITEM <- pipeline_param("VAL_CLUSTER_PITEM", 0.8)
+VAL_CLUSTER_PFEATURE <- pipeline_param("VAL_CLUSTER_PFEATURE", 1)
+VAL_CLUSTER_SEED <- pipeline_param("VAL_CLUSTER_SEED", 9999L)
 
 # ---- Source helper functions ----
 purrr::walk(list.files("R", full.names = TRUE, pattern = "[.]R$"), source)

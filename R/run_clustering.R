@@ -18,10 +18,10 @@
 #' @param distance Distance metric
 #' @return data with clustering assignments added
 run_clustering <- function(tops, data, gene_lists, color.lists = NULL, type = "bas/clas",
-                           save = FALSE, plot = TRUE, facs = NULL, dir = NULL,
-                           maxKcol = NULL, maxKrow = NULL,
-                           reps = 1000, pFeature = 1, pItem = .8, seed = 9999,
-                           clusterAlg = "km", distance = "euclidean",weight=TRUE,replace=TRUE) {
+                            save = FALSE, plot = TRUE, facs = NULL, dir = NULL,
+                            maxKcol = NULL, maxKrow = NULL,
+                            reps = 1000, pFeature = 1, pItem = .8, seed = 9999,
+                            clusterAlg = "km", distance = "euclidean",weight=TRUE,replace=TRUE) {
   
   if (is.null(facs) || !length(facs)) {
     n_factors <- ncol(tops)

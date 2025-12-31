@@ -3,11 +3,15 @@ purrr::walk(
   list.files("R/simulation_functions", full.names = TRUE, pattern = "[.]R$", recursive = TRUE),
   source
 )
+tar_load_globals(script="_targets_sims.R")
 
-data=simulate_desurv_scenario(scenario = "R0",seed=14537)
+data=simulate_desurv_scenario(scenario = "R1",seed=14537)
 markers = data$marker_sets
-split=split_simulation_samples(sim_dataset[[1]],.7,10000)
-dat=prepare_simulation_data(sim_dataset[[1]],sample_ids = split$train_ids,ngene=NULL,transform_method = "none")
+
+hist(data$X)
+
+split=split_simulation_samples(data,.7,10000)
+dat=prepare_simulation_data(data,sample_ids = split$train_ids,ngene=NULL,transform_method = "none")
 #oracle
 temp=data.frame(time=data$time,status=data$status,linpred=data$linpred)
 sfit = coxph(Surv(time,status)~linpred,data=temp)
@@ -120,10 +124,11 @@ recon = norm(data$X - dfit$W %*% dfit$H, "F")
 
 
 ## specific alpha>0 fit
+dat=data
 ids=sample(1:ncol(data$X),140,replace = FALSE)
-data$X = data$X[,ids]
-data$time = data$time[ids]
-data$status=data$status[ids]
+data$X = dat$X[,ids]
+data$time = dat$time[ids]
+data$status=dat$status[ids]
 c=numeric()
 i=1
 for(a in seq(0,.95,by=.05)){
@@ -132,7 +137,8 @@ for(a in seq(0,.95,by=.05)){
                     alpha=.6,
                     lambda=.1,
                     nu=.3,
-                    lambdaW=0,lambdaH=0,
+                    tol_init=1e-5,
+                    lambdaW=0,lambdaH=0,imaxit=2000,
                     ninit = 1, maxit=2000,tol=1e-5)
   c[i] = dfit$cindex
   i=i+1
@@ -154,3 +160,34 @@ precision_recall(list(unlist(tops[,2])),list(unlist(markers[[1]])))
 dfit$beta*apply(t(data$X)%*%dfit$W,2,sd)
 
 recon = norm(data$X - dfit$W %*% dfit$H, "F")
+
+
+
+
+
+
+
+#testing
+data=simulate_desurv_scenario(scenario = "R1",seed=14537)
+markers = data$marker_sets
+temp=data.frame(time=data$time,status=data$status,linpred=data$linpred)
+sfit = coxph(Surv(time,status)~linpred,data=temp)
+summary(sfit)
+
+dfit0 = desurv_fit(X=data$X,y=data$time,d=data$status,
+                   k=3,
+                   alpha=0,
+                   lambda=.05,
+                   nu=.3,
+                   lambdaW=0,lambdaH=0,
+                   ninit=20,maxit=5000,tol=1e-6)
+dfit0$cindex
+
+dfit = desurv_fit(X=data$X,y=data$time,d=data$status,
+                   k=3,
+                   alpha=.7,
+                   lambda=.05,
+                   nu=.3,
+                   lambdaW=0,lambdaH=0,
+                   ninit=20,maxit=5000,tol=1e-5)
+dfit$cindex
