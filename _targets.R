@@ -1,83 +1,105 @@
-NINIT <- 50
-NINIT_FULL <- 100
-BO_N_INIT <- 15
-BO_N_ITER <- 60
-BO_CANDIDATE_POOL <- 4000
-BO_MAX_REFINEMENTS <- 2
-BO_TOL_GAIN <- 0.002
-BO_PLATEAU <- 1
-BO_TOP_K <- 10
-BO_SHRINK_BASE <- 0.3
-BO_IMPORTANCE_GAIN <- 0.1
-BO_COARSE_CONTROL <- list(
-  n_init = BO_N_INIT,
-  n_iter = BO_N_ITER,
-  candidate_pool = BO_CANDIDATE_POOL,
-  exploration_weight = 0.01,
-  seed = 123,
-  cv_verbose = FALSE
-)
-BO_REFINE_CONTROL <- list(
-  n_init = BO_N_INIT,
-  n_iter = BO_N_ITER,
-  candidate_pool = BO_CANDIDATE_POOL,
-  exploration_weight = 0.01,
-  seed = 456,
-  cv_verbose = FALSE
-)
-
-VAL_DATASETS       = c("CPTAC","Dijk","Moffitt_GEO_array",
-                       "PACA_AU_array","PACA_AU_seq","Puleo_array")
-TRAIN_DATASETS     = c("TCGA_PAAD")  
-TRAIN_PREFIX       = paste0(TRAIN_DATASETS, collapse = ".")
-USE_TRAIN_GENES_FOR_VAL <- FALSE
-
-##### hyperparameters #####
-
-# always tuned hyperparams
-DESURV_BO_BOUNDS   = list(
-  k_grid = list(lower = 2L, upper = 10L, type = "integer"),
-  alpha_grid = list(lower = 0, upper = 1, type = "continuous"),
-  lambda_grid = list(lower = 1e-3, upper = 1e3, scale = "log10"),
-  nu_grid = list(lower = 0, upper = 1, type = "continuous")
-)
-
-# sometimes tuned hyperparams
-# for the following set length 1 to fix, or range to tune via BO
-NGENE_CONFIG       = c(500,5000) 
-NTOP_CONFIG        = c(50,250) 
-LAMBDAW_CONFIG     = c(0)
-LAMBDAH_CONFIG     = c(1e-7,1e2)
-
+source("targets_configs.R")
+BO_CONFIGS_RAW <- targets_bo_configs()
+RUN_CONFIGS_RAW <- targets_run_configs()
+VAL_CONFIGS_RAW <- targets_val_configs()
+DEFAULT_NINIT <- if (length(BO_CONFIGS_RAW)) {
+  max(vapply(BO_CONFIGS_RAW, function(cfg) if (is.null(cfg$ninit)) 50 else cfg$ninit, numeric(1)))
+} else {
+  50
+}
+DEFAULT_NINIT_FULL <- if (length(RUN_CONFIGS_RAW)) {
+  max(vapply(RUN_CONFIGS_RAW, function(cfg) if (is.null(cfg$ninit_full)) 100 else cfg$ninit_full, numeric(1)))
+} else {
+  100
+}
 
 source("targets_setup.R")
 source("targets_common_pipeline.R")
 
+RESOLVED_BO_CONFIGS <- resolve_desurv_bo_configs(BO_CONFIGS_RAW)
+RESOLVED_RUN_CONFIGS <- resolve_desurv_run_configs(RUN_CONFIGS_RAW)
+RESOLVED_VAL_CONFIGS <- resolve_desurv_val_configs(VAL_CONFIGS_RAW)
+validate_desurv_configs(RESOLVED_BO_CONFIGS, RESOLVED_RUN_CONFIGS, RESOLVED_VAL_CONFIGS)
+
 
 # ---- Targets ----
 targets_list <- list(
+  tar_target(
+    bo_config,
+    RESOLVED_BO_CONFIGS,
+    iteration = "list"
+  ),
+  tar_target(
+    run_config,
+    RESOLVED_RUN_CONFIGS,
+    iteration = "list"
+  ),
+  tar_target(
+    val_config,
+    RESOLVED_VAL_CONFIGS,
+    iteration = "list"
+  ),
 
   ################# Training ###################
 
   tar_target(
     raw_data,
-    c(
-      file.path("data/original", paste0(TRAIN_DATASETS, ".rds")),
-      file.path("data/original", paste0(TRAIN_DATASETS, ".survival_data.rds")),
-      file.path("data/original", paste0(TRAIN_DATASETS, "_subtype.csv"))
-    ),
+    {
+      if (bo_config$data_mode == "external") {
+        train_datasets <- bo_config$train_datasets
+        c(
+          file.path("data/original", paste0(train_datasets, ".rds")),
+          file.path("data/original", paste0(train_datasets, ".survival_data.rds")),
+          file.path("data/original", paste0(train_datasets, "_subtype.csv"))
+        )
+      } else {
+        bo_config$split_raw_files
+      }
+    },
     format = "file"
+  ),
+  tar_target(
+    data_input,
+    {
+      raw_data
+      if (bo_config$data_mode == "split") {
+        loader <- get(bo_config$data_loader, mode = "function")
+        loader(raw_data)
+      } else {
+        NULL
+      }
+    }
+  ),
+  tar_target(
+    data_split,
+    {
+      if (bo_config$data_mode == "split") {
+        split_train_validation(
+          data = data_input,
+          train_frac = bo_config$split_train_frac,
+          seed = bo_config$split_seed,
+          strata_vars = bo_config$split_strata_vars
+        )
+      } else {
+        NULL
+      }
+    }
   ),
   tar_target(
     data,
     { 
       raw_data
-      load_data(TRAIN_DATASETS) 
+      if (bo_config$data_mode == "split") {
+        data_split$train
+      } else {
+        loader <- get(bo_config$data_loader, mode = "function")
+        loader(bo_config$train_datasets)
+      }
     }
   ),
   tar_target(
     val_datasets,
-    VAL_DATASETS
+    val_config$val_datasets
   ),
   tar_target(
     val_dataset_name,
@@ -87,53 +109,68 @@ targets_list <- list(
   
   tar_target(
     raw_data_val,
-    c(
-      file.path("data/original", paste0(val_dataset_name, ".rds")),
-      file.path("data/original", paste0(val_dataset_name, ".survival_data.rds")),
-      file.path("data/original", paste0(val_dataset_name, "_subtype.csv"))
-    ),
+    if (val_config$mode == "external") {
+      c(
+        file.path("data/original", paste0(val_dataset_name, ".rds")),
+        file.path("data/original", paste0(val_dataset_name, ".survival_data.rds")),
+        file.path("data/original", paste0(val_dataset_name, "_subtype.csv"))
+      )
+    } else {
+      character(0)
+    },
     format = "file",
     pattern = map(val_dataset_name)
   ),
   tar_target(
     data_val,
-    setNames(
-      lapply(val_datasets, load_data),
-      val_datasets
-    )
+    {
+      if (val_config$mode == "train_split") {
+        dataset <- val_run_bundle$bo_bundle$data_split$test
+        dataname <- infer_dataset_name(dataset)
+        setNames(list(dataset), dataname)
+      } else {
+        setNames(
+          lapply(val_datasets, load_data),
+          val_datasets
+        )
+      }
+    }
   ),
   
   tar_target(
     data_val_comb,
     {
-      raw_data_val
-      load_data(val_datasets)
+      if (val_config$mode == "external") {
+        raw_data_val
+        load_data(val_datasets)
+      } else {
+        NULL
+      }
     },
   ),
   
   tar_target(
     data_val_comb_filtered,
     {
-      genes_train = rownames(data_filtered$ex)
-      prep <- DeSurv::preprocess_data(
-        X = data_val_comb$ex,
-        y = data_val_comb$sampInfo$time,
-        d = data_val_comb$sampInfo$event,
-        dataset = data_val_comb$sampInfo$dataset,
-        samp_keeps = data_val_comb$samp_keeps,
-        genes = genes_train,
-        method_trans_train = METHOD_TRANS_TRAIN,
-        verbose = FALSE
-      )
-      prep$dataname <- data_val_comb$dataname
-      prep
+      if (val_config$mode == "external") {
+        genes_train = rownames(val_run_bundle$bo_bundle$data_filtered$ex)
+        preprocess_validation_data(
+          dataset = data_val_comb,
+          genes = genes_train,
+          method_trans_train = val_run_bundle$bo_bundle$config$method_trans_train,
+          dataname = data_val_comb$dataname
+        )
+      } else {
+        NULL
+      }
     },
   )
 )
 
 c(
   targets_list,
-  COMMON_DESURV_TARGETS#,
+  COMMON_DESURV_BO_TARGETS,
+  COMMON_DESURV_RUN_TARGETS#,
   # tarchetypes::tar_render(
   #   paper,
   #   "paper/paper.Rmd",

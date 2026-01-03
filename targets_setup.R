@@ -11,47 +11,8 @@ suppressWarnings(suppressMessages(library(dplyr)))
 PKG_VERSION        = "HEAD"#utils::packageDescription("DeSurv", fields = "RemoteRef")
 GIT_BRANCH         = gert::git_branch()
 
-pipeline_param <- function(name, default) {
-  if (exists(name, inherits = TRUE)) {
-    get(name, inherits = TRUE)
-  } else {
-    default
-  }
-}
-
-NINIT <- pipeline_param("NINIT", 50)
-NINIT_FULL <- pipeline_param("NINIT_FULL", 100)
-BO_N_INIT <- pipeline_param("BO_N_INIT", 20)
-BO_N_ITER <- pipeline_param("BO_N_ITER", 100)
-BO_CANDIDATE_POOL <- pipeline_param("BO_CANDIDATE_POOL", 2000)
-BO_MAX_REFINEMENTS <- pipeline_param("BO_MAX_REFINEMENTS", 2)
-BO_TOL_GAIN <- pipeline_param("BO_TOL_GAIN", 0.002)
-BO_PLATEAU <- pipeline_param("BO_PLATEAU", 1)
-BO_TOP_K <- pipeline_param("BO_TOP_K", 10)
-BO_SHRINK_BASE <- pipeline_param("BO_SHRINK_BASE", 0.5)
-BO_IMPORTANCE_GAIN <- pipeline_param("BO_IMPORTANCE_GAIN", 0.3)
-BO_COARSE_CONTROL <- pipeline_param(
-  "BO_COARSE_CONTROL",
-  list(
-    n_init = BO_N_INIT,
-    n_iter = BO_N_ITER,
-    candidate_pool = BO_CANDIDATE_POOL,
-    exploration_weight = 0.01,
-    seed = 123,
-    cv_verbose = FALSE
-  )
-)
-BO_REFINE_CONTROL <- pipeline_param(
-  "BO_REFINE_CONTROL",
-  list(
-    n_init = BO_N_INIT,
-    n_iter = BO_N_ITER,
-    candidate_pool = BO_CANDIDATE_POOL,
-    exploration_weight = 0.01,
-    seed = 456,
-    cv_verbose = FALSE
-  )
-)
+DEFAULT_NINIT <- if (exists("DEFAULT_NINIT", inherits = TRUE)) DEFAULT_NINIT else 50
+DEFAULT_NINIT_FULL <- if (exists("DEFAULT_NINIT_FULL", inherits = TRUE)) DEFAULT_NINIT_FULL else 100
 
 # ------ Slurm controllers ------
 default_controller = crew_controller_sequential()
@@ -80,7 +41,7 @@ if (LOCAL_RENDER) {
     seconds_interval = 0.25,
     options_cluster = crew_options_slurm(
       memory_gigabytes_per_cpu = 2,
-      cpus_per_task = NINIT,
+      cpus_per_task = DEFAULT_NINIT,
       time_minutes = 1440,
       log_error = "logs/crew_log_%A.err",
       log_output = "logs/crew_log_%A.out",
@@ -95,7 +56,7 @@ if (LOCAL_RENDER) {
     seconds_interval = 0.25,
     options_cluster = crew_options_slurm(
       memory_gigabytes_required = 32,
-      cpus_per_task = NINIT_FULL,
+      cpus_per_task = DEFAULT_NINIT_FULL,
       time_minutes = 600,
       log_error = "logs/crew_log_%A.err",
       log_output = "logs/crew_log_%A.out",
@@ -127,8 +88,8 @@ if (LOCAL_RENDER) {
 
 # ---- Global options ----
 TARGET_PACKAGES = c(
-  "clusterProfiler","org.Hs.eg.db","DeSurv","pheatmap","NMF","tidyverse","tidyselect","survival","cvwrapr","rmarkdown","dplyr",
-  "parallel","foreach","doParallel","doMC","pec","glmnet","webshot2"
+  "clusterProfiler","org.Hs.eg.db","DeSurv","pheatmap","NMF","tidyverse","tidyselect","survival","cvwrapr","rmarkdown","dplyr","digest",
+  "parallel","foreach","doParallel","doMC","pec","glmnet","webshot2","caret"
 )
 
 tar_option_set(
@@ -137,45 +98,6 @@ tar_option_set(
   controller = active_controller,
   error = "continue"
 )
-
-
-# ---- Training parameters ----
-METHOD_TRANS_TRAIN = "rank"
-
-NGENE_DEFAULT      = NGENE_CONFIG[[1]]
-TUNE_NGENE         = length(unique(NGENE_CONFIG)) > 1
-
-NTOP_DEFAULT       = NTOP_CONFIG[[1]]
-TUNE_NTOP          = length(unique(NTOP_CONFIG)) > 1
-
-LAMBDAW_DEFAULT    = LAMBDAW_CONFIG[[1]]
-TUNE_LAMBDAW       = length(unique(LAMBDAW_CONFIG)) > 1
-
-LAMBDAH_DEFAULT    = LAMBDAH_CONFIG[[1]]
-TUNE_LAMBDAH       = length(unique(LAMBDAH_CONFIG)) > 1
-
-
-
-# convergence
-TOL                = 1e-5
-MAXIT              = 4000
-
-# standard NMF
-STD_NMF_K_GRID     = 2:12#2:16   #= c(2,3,4,5)
-COXNET_LAMBDA_GRID = c(1e-4,1e-3,1e-2,.1,1,10)#,seq(.2,.9,by=.1)   #10^seq(-3,3)#10^seq(-4,4)
-COXNET_ALPHA_GRID  = seq(0,1,by=.1)#c(0,.01,.1,.5,.9)#c(0,.01)#c(.01,.1,.5,.9)#seq(.1,.9,by=.1)
-
-# cross validation
-NFOLD              = 5
-
-DESURV_PARALLEL_GRID <- pipeline_param("DESURV_PARALLEL_GRID", TRUE)
-DESURV_NCORES_GRID <- pipeline_param("DESURV_NCORES_GRID", NINIT)
-
-VAL_CLUSTER_MAXK <- pipeline_param("VAL_CLUSTER_MAXK", 6L)
-VAL_CLUSTER_REPS <- pipeline_param("VAL_CLUSTER_REPS", 1000L)
-VAL_CLUSTER_PITEM <- pipeline_param("VAL_CLUSTER_PITEM", 0.8)
-VAL_CLUSTER_PFEATURE <- pipeline_param("VAL_CLUSTER_PFEATURE", 1)
-VAL_CLUSTER_SEED <- pipeline_param("VAL_CLUSTER_SEED", 9999L)
 
 # ---- Source helper functions ----
 purrr::walk(list.files("R", full.names = TRUE, pattern = "[.]R$"), source)

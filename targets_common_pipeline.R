@@ -1,25 +1,46 @@
-COMMON_DESURV_TARGETS <- list(
+bo_bundle_target <- tar_target(
+  bo_bundle,
+  list(
+    label = bo_config$label,
+    config = bo_config,
+    data = data,
+    data_split = data_split,
+    data_filtered = data_filtered,
+    data_filtered_alpha0 = data_filtered_alpha0,
+    params_best = params_best,
+    params_best_alpha0 = params_best_alpha0,
+    ngene_value = ngene_value,
+    ngene_value_alpha0 = ngene_value_alpha0,
+    lambdaW_value = lambdaW_value,
+    lambdaH_value = lambdaH_value,
+    lambdaW_value_alpha0 = lambdaW_value_alpha0,
+    lambdaH_value_alpha0 = lambdaH_value_alpha0
+  )
+)
+
+bo_bundles_target <- tarchetypes::tar_combine(
+  bo_bundles,
+  bo_bundle_target
+)
+
+COMMON_DESURV_BO_TARGETS <- list(
   tar_target(
     desurv_bo_results,
     {
-      bounds <- DESURV_BO_BOUNDS
-      bounds <- maybe_add_numeric_bound(bounds, NGENE_CONFIG, "ngene", type = "integer")
-      bounds <- maybe_add_numeric_bound(bounds, NTOP_CONFIG, "ntop", type = "integer")
-      bounds <- maybe_add_numeric_bound(bounds, LAMBDAW_CONFIG, "lambdaW_grid", log_scale = TRUE)
-      bounds <- maybe_add_numeric_bound(bounds, LAMBDAH_CONFIG, "lambdaH_grid", log_scale = TRUE)
+      bounds <- bo_config$desurv_bo_bounds
+      bounds <- maybe_add_numeric_bound(bounds, bo_config$ngene_config, "ngene", type = "integer")
+      bounds <- maybe_add_numeric_bound(bounds, bo_config$lambdaw_config, "lambdaW_grid", log_scale = TRUE)
+      bounds <- maybe_add_numeric_bound(bounds, bo_config$lambdah_config, "lambdaH_grid", log_scale = TRUE)
 
-      bo_fixed <- list(n_starts = NINIT)
-      if (!TUNE_NGENE) {
-        bo_fixed$ngene <- NGENE_DEFAULT
+      bo_fixed <- list(n_starts = bo_config$ninit)
+      if (!bo_config$tune_ngene) {
+        bo_fixed$ngene <- bo_config$ngene_default
       }
-      if (!TUNE_NTOP) {
-        bo_fixed$ntop <- NTOP_DEFAULT
+      if (!bo_config$tune_lambdaw) {
+        bo_fixed$lambdaW_grid <- bo_config$lambdaw_default
       }
-      if (!TUNE_LAMBDAW) {
-        bo_fixed$lambdaW_grid <- LAMBDAW_DEFAULT
-      }
-      if (!TUNE_LAMBDAH) {
-        bo_fixed$lambdaH_grid <- LAMBDAH_DEFAULT
+      if (!bo_config$tune_lambdah) {
+        bo_fixed$lambdaH_grid <- bo_config$lambdah_default
       }
 
       DeSurv::desurv_cv_bayesopt_refine(
@@ -29,24 +50,24 @@ COMMON_DESURV_TARGETS <- list(
         dataset = data$sampInfo$dataset,
         samp_keeps = data$samp_keeps,
         preprocess = TRUE,
-        method_trans_train = METHOD_TRANS_TRAIN,
+        method_trans_train = bo_config$method_trans_train,
         engine = "warmstart",
-        nfolds = NFOLD,
-        tol = TOL,
-        maxit = MAXIT,
+        nfolds = bo_config$nfold,
+        tol = bo_config$bo_tol,
+        maxit = bo_config$bo_maxit,
         coarse_bounds = bounds,
         bo_fixed = bo_fixed,
-        max_refinements = BO_MAX_REFINEMENTS,
-        tol_gain = BO_TOL_GAIN,
-        plateau = BO_PLATEAU,
-        top_k = BO_TOP_K,
-        shrink_base = BO_SHRINK_BASE,
-        importance_gain = BO_IMPORTANCE_GAIN,
-        coarse_control = BO_COARSE_CONTROL,
-        refine_control = BO_REFINE_CONTROL,
+        max_refinements = bo_config$bo_max_refinements,
+        tol_gain = bo_config$bo_tol_gain,
+        plateau = bo_config$bo_plateau,
+        top_k = bo_config$bo_top_k,
+        shrink_base = bo_config$bo_shrink_base,
+        importance_gain = bo_config$bo_importance_gain,
+        coarse_control = bo_config$bo_coarse_control,
+        refine_control = bo_config$bo_refine_control,
         verbose = TRUE,
-        parallel_grid = TRUE,
-        ncores_grid = NINIT
+        parallel_grid = bo_config$desurv_parallel_grid,
+        ncores_grid = bo_config$desurv_ncores_grid
       )
     },
     resources = tar_resources(
@@ -64,19 +85,7 @@ COMMON_DESURV_TARGETS <- list(
     {
       value <- params_best$ngene
       if (is.null(value) || is.na(value)) {
-        as.integer(NGENE_DEFAULT)
-      } else {
-        as.integer(round(value))
-      }
-    }
-  ),
-
-  tar_target(
-    ntop_value,
-    {
-      value <- params_best$ntop
-      if (is.null(value) || is.na(value)) {
-        as.integer(NTOP_DEFAULT)
+        as.integer(bo_config$ngene_default)
       } else {
         as.integer(round(value))
       }
@@ -88,7 +97,7 @@ COMMON_DESURV_TARGETS <- list(
     {
       value <- params_best$lambdaW
       if (is.null(value) || is.na(value)) {
-        as.numeric(LAMBDAW_DEFAULT)
+        as.numeric(bo_config$lambdaw_default)
       } else {
         as.numeric(value)
       }
@@ -100,7 +109,7 @@ COMMON_DESURV_TARGETS <- list(
     {
       value <- params_best$lambdaH
       if (is.null(value) || is.na(value)) {
-        as.numeric(LAMBDAH_DEFAULT)
+        as.numeric(bo_config$lambdah_default)
       } else {
         as.numeric(value)
       }
@@ -108,22 +117,21 @@ COMMON_DESURV_TARGETS <- list(
   ),
   
   tar_target(
-    training_results_dir,
-    results_root_dir(
-      ngene = ngene_value,
-      tol = TOL,
-      maxit = MAXIT,
+    bo_results_dir,
+    get_bo_results_dir(
       pkg_version = PKG_VERSION,
       git_branch = GIT_BRANCH,
-      train_prefix = TRAIN_PREFIX,
-      method_trans_train = METHOD_TRANS_TRAIN
+      train_prefix = bo_config$train_prefix,
+      method_trans_train = bo_config$method_trans_train,
+      bo_config_tag = bo_config$path_tag,
+      bo_config_id = bo_config$config_id
     )
   ),
   
   tar_target(
     desurv_bo_history,
     {
-      path <- file.path(training_results_dir, "desurv_bo_history.csv")
+      path <- file.path(bo_results_dir, "desurv_bo_history.csv")
       utils::write.csv(desurv_bo_results$history, path, row.names = FALSE)
       path
     },
@@ -132,45 +140,234 @@ COMMON_DESURV_TARGETS <- list(
   
   tar_target(
     data_filtered,
+    preprocess_training_data(
+      data = data,
+      ngene = ngene_value,
+      method_trans_train = bo_config$method_trans_train
+    )
+  ),
+
+  tar_target(
+    desurv_bo_results_alpha0,
     {
-      prep <- DeSurv::preprocess_data(
+      bounds <- bo_config$desurv_bo_bounds
+      bounds$alpha_grid <- NULL
+      bounds <- maybe_add_numeric_bound(bounds, bo_config$ngene_config, "ngene", type = "integer")
+      bounds <- maybe_add_numeric_bound(bounds, bo_config$lambdaw_config, "lambdaW_grid", log_scale = TRUE)
+      bounds <- maybe_add_numeric_bound(bounds, bo_config$lambdah_config, "lambdaH_grid", log_scale = TRUE)
+
+      bo_fixed <- list(
+        n_starts = bo_config$ninit,
+        alpha_grid = 0
+      )
+      if (!bo_config$tune_ngene) {
+        bo_fixed$ngene <- bo_config$ngene_default
+      }
+      if (!bo_config$tune_lambdaw) {
+        bo_fixed$lambdaW_grid <- bo_config$lambdaw_default
+      }
+      if (!bo_config$tune_lambdah) {
+        bo_fixed$lambdaH_grid <- bo_config$lambdah_default
+      }
+
+      DeSurv::desurv_cv_bayesopt_refine(
         X = data$ex,
         y = data$sampInfo$time,
         d = data$sampInfo$event,
         dataset = data$sampInfo$dataset,
         samp_keeps = data$samp_keeps,
-        ngene = ngene_value,
-        method_trans_train = METHOD_TRANS_TRAIN,
-        verbose = FALSE
+        preprocess = TRUE,
+        method_trans_train = bo_config$method_trans_train,
+        engine = "warmstart",
+        nfolds = bo_config$nfold,
+        tol = bo_config$bo_tol,
+        maxit = bo_config$bo_maxit,
+        coarse_bounds = bounds,
+        bo_fixed = bo_fixed,
+        max_refinements = bo_config$bo_max_refinements,
+        tol_gain = bo_config$bo_tol_gain,
+        plateau = bo_config$bo_plateau,
+        top_k = bo_config$bo_top_k,
+        shrink_base = bo_config$bo_shrink_base,
+        importance_gain = bo_config$bo_importance_gain,
+        coarse_control = bo_config$bo_coarse_control,
+        refine_control = bo_config$bo_refine_control,
+        verbose = TRUE,
+        parallel_grid = bo_config$desurv_parallel_grid,
+        ncores_grid = bo_config$desurv_ncores_grid
       )
-      prep$dataname <- data$dataname
-      prep
+    },
+    resources = tar_resources(
+      crew = tar_resources_crew(controller = "cv")
+    )
+  ),
+
+  tar_target(
+    params_best_alpha0,
+    {
+      params <- standardize_bo_params(desurv_bo_results_alpha0$overall_best$params)
+      params$alpha <- 0
+      params
     }
   ),
 
   tar_target(
+    ngene_value_alpha0,
+    {
+      value <- params_best_alpha0$ngene
+      if (is.null(value) || is.na(value)) {
+        as.integer(bo_config$ngene_default)
+      } else {
+        as.integer(round(value))
+      }
+    }
+  ),
+
+  tar_target(
+    lambdaW_value_alpha0,
+    {
+      value <- params_best_alpha0$lambdaW
+      if (is.null(value) || is.na(value)) {
+        as.numeric(bo_config$lambdaw_default)
+      } else {
+        as.numeric(value)
+      }
+    }
+  ),
+
+  tar_target(
+    lambdaH_value_alpha0,
+    {
+      value <- params_best_alpha0$lambdaH
+      if (is.null(value) || is.na(value)) {
+        as.numeric(bo_config$lambdah_default)
+      } else {
+        as.numeric(value)
+      }
+    }
+  ),
+
+  tar_target(
+    desurv_bo_history_alpha0,
+    {
+      path <- file.path(bo_results_dir, "desurv_bo_history_alpha0.csv")
+      utils::write.csv(desurv_bo_results_alpha0$history, path, row.names = FALSE)
+      path
+    },
+    format = "file"
+  ),
+
+  tar_target(
+    data_filtered_alpha0,
+    preprocess_training_data(
+      data = data,
+      ngene = ngene_value_alpha0,
+      method_trans_train = bo_config$method_trans_train
+    )
+  ),
+
+  bo_bundle_target,
+  bo_bundles_target
+)
+
+run_bundle_target <- tar_target(
+  run_bundle,
+  list(
+    label = run_config$label,
+    config = run_config,
+    bo_bundle = bo_bundle_selected,
+    ntop_value = ntop_value,
+    ntop_value_alpha0 = ntop_value_alpha0,
+    training_results_dir = training_results_dir,
+    training_results_dir_alpha0 = training_results_dir_alpha0,
+    fit_desurv = fit_desurv,
+    fit_desurv_alpha0 = fit_desurv_alpha0,
+    tops_desurv = tops_desurv,
+    tops_desurv_alpha0 = tops_desurv_alpha0
+  )
+)
+
+run_bundles_target <- tarchetypes::tar_combine(
+  run_bundles,
+  run_bundle_target
+)
+
+COMMON_DESURV_RUN_TARGETS <- list(
+  tar_target(
+    bo_bundle_selected,
+    select_bundle_by_label(bo_bundles, run_config$bo_key)
+  ),
+  tar_target(
+    ntop_value,
+    {
+      value <- bo_bundle_selected$params_best$ntop
+      if (is.null(value) || is.na(value)) {
+        as.integer(run_config$ntop_default)
+      } else {
+        as.integer(round(value))
+      }
+    }
+  ),
+  tar_target(
+    ntop_value_alpha0,
+    {
+      value <- bo_bundle_selected$params_best_alpha0$ntop
+      if (is.null(value) || is.na(value)) {
+        as.integer(run_config$ntop_default)
+      } else {
+        as.integer(round(value))
+      }
+    }
+  ),
+  tar_target(
+    training_results_dir,
+    results_root_dir(
+      ngene = bo_bundle_selected$ngene_value,
+      tol = run_config$run_tol,
+      maxit = run_config$run_maxit,
+      pkg_version = PKG_VERSION,
+      git_branch = GIT_BRANCH,
+      train_prefix = bo_bundle_selected$config$train_prefix,
+      method_trans_train = bo_bundle_selected$config$method_trans_train,
+      config_tag = run_config$path_tag
+    )
+  ),
+  tar_target(
+    training_results_dir_alpha0,
+    results_root_dir(
+      ngene = bo_bundle_selected$ngene_value_alpha0,
+      tol = run_config$run_tol,
+      maxit = run_config$run_maxit,
+      pkg_version = PKG_VERSION,
+      git_branch = GIT_BRANCH,
+      train_prefix = paste0(bo_bundle_selected$config$train_prefix, "_alpha0"),
+      method_trans_train = bo_bundle_selected$config$method_trans_train,
+      config_tag = run_config$path_tag
+    )
+  ),
+  tar_target(
     desurv_seed_fits,
     {
-      seeds <- seq_len(NINIT_FULL)
+      seeds <- seq_len(run_config$ninit_full)
       fits <- vector("list", length(seeds))
       scores <- rep(NA_real_, length(seeds))
       for (i in seq_along(seeds)) {
         fit_i <- try(
           desurv_fit(
-            X = data_filtered$ex,
-            y = data_filtered$sampInfo$time,
-            d = data_filtered$sampInfo$event,
-            k = params_best$k,
-            alpha = params_best$alpha,
-            lambda = params_best$lambda,
-            nu = params_best$nu,
-            lambdaW = lambdaW_value,
-            lambdaH = lambdaH_value,
+            X = bo_bundle_selected$data_filtered$ex,
+            y = bo_bundle_selected$data_filtered$sampInfo$time,
+            d = bo_bundle_selected$data_filtered$sampInfo$event,
+            k = bo_bundle_selected$params_best$k,
+            alpha = bo_bundle_selected$params_best$alpha,
+            lambda = bo_bundle_selected$params_best$lambda,
+            nu = bo_bundle_selected$params_best$nu,
+            lambdaW = bo_bundle_selected$lambdaW_value,
+            lambdaH = bo_bundle_selected$lambdaH_value,
             seed = seeds[i],
-            tol = TOL / 100,
-            tol_init = TOL,
-            maxit = MAXIT,
-            imaxit = MAXIT,
+            tol = run_config$run_tol / 100,
+            tol_init = run_config$run_tol,
+            maxit = run_config$run_maxit,
+            imaxit = run_config$run_maxit,
             ninit = 1,
             parallel_init = FALSE,
             verbose = FALSE
@@ -196,7 +393,6 @@ COMMON_DESURV_TARGETS <- list(
       crew = tar_resources_crew(controller = "med_mem")
     )
   ),
-
   tar_target(
     desurv_consensus_init,
     {
@@ -205,34 +401,33 @@ COMMON_DESURV_TARGETS <- list(
       }
       DeSurv::desurv_consensus_seed(
         fits = desurv_seed_fits$fits,
-        X = data_filtered$ex,
+        X = bo_bundle_selected$data_filtered$ex,
         ntop = ntop_value,
-        k = params_best$k,
-        min_frequency = 0.3*NINIT_FULL
+        k = bo_bundle_selected$params_best$k,
+        min_frequency = 0.3 * run_config$ninit_full
       )
     }
   ),
-  
   tar_target(
     fit_desurv,
     {
       init_vals <- desurv_consensus_init
       desurv_fit(
-        X = data_filtered$ex,
-        y = data_filtered$sampInfo$time,
-        d = data_filtered$sampInfo$event,
-        k = params_best$k,
-        alpha = params_best$alpha,
-        lambda = params_best$lambda,
-        nu = params_best$nu,
-        lambdaW = lambdaW_value,
-        lambdaH = lambdaH_value,
+        X = bo_bundle_selected$data_filtered$ex,
+        y = bo_bundle_selected$data_filtered$sampInfo$time,
+        d = bo_bundle_selected$data_filtered$sampInfo$event,
+        k = bo_bundle_selected$params_best$k,
+        alpha = bo_bundle_selected$params_best$alpha,
+        lambda = bo_bundle_selected$params_best$lambda,
+        nu = bo_bundle_selected$params_best$nu,
+        lambdaW = bo_bundle_selected$lambdaW_value,
+        lambdaH = bo_bundle_selected$lambdaH_value,
         W0 = init_vals$W0,
         H0 = init_vals$H0,
         beta0 = init_vals$beta0,
         seed = NULL,
-        tol = TOL / 100,
-        maxit = MAXIT,
+        tol = run_config$run_tol / 100,
+        maxit = run_config$run_maxit,
         verbose = FALSE
       )
     },
@@ -242,185 +437,28 @@ COMMON_DESURV_TARGETS <- list(
   ),
 
   tar_target(
-    desurv_bo_results_alpha0,
-    {
-      bounds <- DESURV_BO_BOUNDS
-      bounds$alpha_grid <- NULL
-      bounds <- maybe_add_numeric_bound(bounds, NGENE_CONFIG, "ngene", type = "integer")
-      bounds <- maybe_add_numeric_bound(bounds, NTOP_CONFIG, "ntop", type = "integer")
-      bounds <- maybe_add_numeric_bound(bounds, LAMBDAW_CONFIG, "lambdaW_grid", log_scale = TRUE)
-      bounds <- maybe_add_numeric_bound(bounds, LAMBDAH_CONFIG, "lambdaH_grid", log_scale = TRUE)
-
-      bo_fixed <- list(
-        n_starts = NINIT,
-        alpha_grid = 0
-      )
-      if (!TUNE_NGENE) {
-        bo_fixed$ngene <- NGENE_DEFAULT
-      }
-      if (!TUNE_NTOP) {
-        bo_fixed$ntop <- NTOP_DEFAULT
-      }
-      if (!TUNE_LAMBDAW) {
-        bo_fixed$lambdaW_grid <- LAMBDAW_DEFAULT
-      }
-      if (!TUNE_LAMBDAH) {
-        bo_fixed$lambdaH_grid <- LAMBDAH_DEFAULT
-      }
-
-      DeSurv::desurv_cv_bayesopt_refine(
-        X = data$ex,
-        y = data$sampInfo$time,
-        d = data$sampInfo$event,
-        dataset = data$sampInfo$dataset,
-        samp_keeps = data$samp_keeps,
-        preprocess = TRUE,
-        method_trans_train = METHOD_TRANS_TRAIN,
-        engine = "warmstart",
-        nfolds = NFOLD,
-        tol = TOL,
-        maxit = MAXIT,
-        coarse_bounds = bounds,
-        bo_fixed = bo_fixed,
-        max_refinements = BO_MAX_REFINEMENTS,
-        tol_gain = BO_TOL_GAIN,
-        plateau = BO_PLATEAU,
-        top_k = BO_TOP_K,
-        shrink_base = BO_SHRINK_BASE,
-        importance_gain = BO_IMPORTANCE_GAIN,
-        coarse_control = BO_COARSE_CONTROL,
-        refine_control = BO_REFINE_CONTROL,
-        verbose = TRUE,
-        parallel_grid = TRUE,
-        ncores_grid = NINIT
-      )
-    },
-    resources = tar_resources(
-      crew = tar_resources_crew(controller = "cv")
-    )
-  ),
-
-  tar_target(
-    params_best_alpha0,
-    {
-      params <- standardize_bo_params(desurv_bo_results_alpha0$overall_best$params)
-      params$alpha <- 0
-      params
-    }
-  ),
-
-  tar_target(
-    ngene_value_alpha0,
-    {
-      value <- params_best_alpha0$ngene
-      if (is.null(value) || is.na(value)) {
-        as.integer(NGENE_DEFAULT)
-      } else {
-        as.integer(round(value))
-      }
-    }
-  ),
-
-  tar_target(
-    ntop_value_alpha0,
-    {
-      value <- params_best_alpha0$ntop
-      if (is.null(value) || is.na(value)) {
-        as.integer(NTOP_DEFAULT)
-      } else {
-        as.integer(round(value))
-      }
-    }
-  ),
-
-  tar_target(
-    lambdaW_value_alpha0,
-    {
-      value <- params_best_alpha0$lambdaW
-      if (is.null(value) || is.na(value)) {
-        as.numeric(LAMBDAW_DEFAULT)
-      } else {
-        as.numeric(value)
-      }
-    }
-  ),
-
-  tar_target(
-    lambdaH_value_alpha0,
-    {
-      value <- params_best_alpha0$lambdaH
-      if (is.null(value) || is.na(value)) {
-        as.numeric(LAMBDAH_DEFAULT)
-      } else {
-        as.numeric(value)
-      }
-    }
-  ),
-
-  tar_target(
-    training_results_dir_alpha0,
-    results_root_dir(
-      ngene = ngene_value_alpha0,
-      tol = TOL,
-      maxit = MAXIT,
-      pkg_version = PKG_VERSION,
-      git_branch = GIT_BRANCH,
-      train_prefix = paste0(TRAIN_PREFIX, "_alpha0"),
-      method_trans_train = METHOD_TRANS_TRAIN
-    )
-  ),
-
-  tar_target(
-    desurv_bo_history_alpha0,
-    {
-      path <- file.path(training_results_dir_alpha0, "desurv_bo_history_alpha0.csv")
-      utils::write.csv(desurv_bo_results_alpha0$history, path, row.names = FALSE)
-      path
-    },
-    format = "file"
-  ),
-
-  tar_target(
-    data_filtered_alpha0,
-    {
-      prep <- DeSurv::preprocess_data(
-        X = data$ex,
-        y = data$sampInfo$time,
-        d = data$sampInfo$event,
-        dataset = data$sampInfo$dataset,
-        samp_keeps = data$samp_keeps,
-        ngene = ngene_value_alpha0,
-        method_trans_train = METHOD_TRANS_TRAIN,
-        verbose = FALSE
-      )
-      prep$dataname <- data$dataname
-      prep
-    }
-  ),
-
-  tar_target(
     desurv_seed_fits_alpha0,
     {
-      seeds <- seq_len(NINIT_FULL)
+      seeds <- seq_len(run_config$ninit_full)
       fits <- vector("list", length(seeds))
       scores <- rep(NA_real_, length(seeds))
       for (i in seq_along(seeds)) {
         fit_i <- try(
           desurv_fit(
-            X = data_filtered_alpha0$ex,
-            y = data_filtered_alpha0$sampInfo$time,
-            d = data_filtered_alpha0$sampInfo$event,
-            k = params_best_alpha0$k,
-            alpha = params_best_alpha0$alpha,
-            lambda = params_best_alpha0$lambda,
-            nu = params_best_alpha0$nu,
-            lambdaW = lambdaW_value_alpha0,
-            lambdaH = lambdaH_value_alpha0,
+            X = bo_bundle_selected$data_filtered_alpha0$ex,
+            y = bo_bundle_selected$data_filtered_alpha0$sampInfo$time,
+            d = bo_bundle_selected$data_filtered_alpha0$sampInfo$event,
+            k = bo_bundle_selected$params_best_alpha0$k,
+            alpha = bo_bundle_selected$params_best_alpha0$alpha,
+            lambda = bo_bundle_selected$params_best_alpha0$lambda,
+            nu = bo_bundle_selected$params_best_alpha0$nu,
+            lambdaW = bo_bundle_selected$lambdaW_value_alpha0,
+            lambdaH = bo_bundle_selected$lambdaH_value_alpha0,
             seed = seeds[i],
-            tol = TOL / 100,
-            tol_init = TOL,
-            maxit = MAXIT,
-            imaxit = MAXIT,
+            tol = run_config$run_tol / 100,
+            tol_init = run_config$run_tol,
+            maxit = run_config$run_maxit,
+            imaxit = run_config$run_maxit,
             ninit = 1,
             parallel_init = FALSE,
             verbose = FALSE
@@ -455,10 +493,10 @@ COMMON_DESURV_TARGETS <- list(
       }
       DeSurv::desurv_consensus_seed(
         fits = desurv_seed_fits_alpha0$fits,
-        X = data_filtered_alpha0$ex,
+        X = bo_bundle_selected$data_filtered_alpha0$ex,
         ntop = ntop_value_alpha0,
-        k = params_best_alpha0$k,
-        min_frequency = 0.3 * NINIT_FULL
+        k = bo_bundle_selected$params_best_alpha0$k,
+        min_frequency = 0.3 * run_config$ninit_full
       )
     }
   ),
@@ -468,21 +506,21 @@ COMMON_DESURV_TARGETS <- list(
     {
       init_vals <- desurv_consensus_init_alpha0
       desurv_fit(
-        X = data_filtered_alpha0$ex,
-        y = data_filtered_alpha0$sampInfo$time,
-        d = data_filtered_alpha0$sampInfo$event,
-        k = params_best_alpha0$k,
-        alpha = params_best_alpha0$alpha,
-        lambda = params_best_alpha0$lambda,
-        nu = params_best_alpha0$nu,
-        lambdaW = lambdaW_value_alpha0,
-        lambdaH = lambdaH_value_alpha0,
+        X = bo_bundle_selected$data_filtered_alpha0$ex,
+        y = bo_bundle_selected$data_filtered_alpha0$sampInfo$time,
+        d = bo_bundle_selected$data_filtered_alpha0$sampInfo$event,
+        k = bo_bundle_selected$params_best_alpha0$k,
+        alpha = bo_bundle_selected$params_best_alpha0$alpha,
+        lambda = bo_bundle_selected$params_best_alpha0$lambda,
+        nu = bo_bundle_selected$params_best_alpha0$nu,
+        lambdaW = bo_bundle_selected$lambdaW_value_alpha0,
+        lambdaH = bo_bundle_selected$lambdaH_value_alpha0,
         W0 = init_vals$W0,
         H0 = init_vals$H0,
         beta0 = init_vals$beta0,
         seed = NULL,
-        tol = TOL / 100,
-        maxit = MAXIT,
+        tol = run_config$run_tol / 100,
+        maxit = run_config$run_maxit,
         verbose = FALSE
       )
     },
@@ -493,7 +531,13 @@ COMMON_DESURV_TARGETS <- list(
 
   tar_target(
     fit_std,
-    nmf(data_filtered$ex,STD_NMF_K_GRID,nrun=NINIT,method="lee",.options=paste0("p",NINIT)),
+    nmf(
+      bo_bundle_selected$data_filtered$ex,
+      run_config$std_nmf_k_grid,
+      nrun = run_config$std_nmf_nrun,
+      method = "lee",
+      .options = paste0("p", run_config$std_nmf_nrun)
+    ),
     resources = tar_resources(
       crew = tar_resources_crew(controller = "cv")
     )
@@ -615,46 +659,34 @@ COMMON_DESURV_TARGETS <- list(
   #     results
   #   }
   # ),
+  run_bundle_target,
+  run_bundles_target,
+  tar_target(
+    val_run_bundle,
+    select_bundle_by_label(run_bundles, val_config$run_key)
+  ),
   tar_target(
     data_val_filtered,
     {
-      datasets_named <- data_val
-      if (is.null(names(datasets_named)) || any(!nzchar(names(datasets_named)))) {
-        names(datasets_named) <- vapply(
-          datasets_named,
-          function(dataset) {
-            dataname <- dataset$dataname
-            if (!is.null(dataname) && nzchar(dataname)) {
-              dataname
-            } else {
-              dataset_ids <- unique(dataset$sampInfo$dataset)
-              dataset_ids <- dataset_ids[!is.na(dataset_ids)]
-              if (length(dataset_ids)) dataset_ids[[1]] else "validation"
-            }
-          },
-          character(1)
-        )
-      }
+      datasets_named <- ensure_named_datasets(data_val)
       setNames(
         lapply(
           seq_along(datasets_named),
           function(idx) {
             dataset <- datasets_named[[idx]]
             dataname <- names(datasets_named)[idx]
-            gene_arg <- if (USE_TRAIN_GENES_FOR_VAL) rownames(data_filtered$ex) else NULL
-            prep <- DeSurv::preprocess_data(
-              X = dataset$ex,
-              y = dataset$sampInfo$time,
-              d = dataset$sampInfo$event,
-              dataset = dataset$sampInfo$dataset,
-              samp_keeps = dataset$samp_keeps,
+            gene_arg <- if (val_config$use_train_genes_for_val) {
+              rownames(val_run_bundle$bo_bundle$data_filtered$ex)
+            } else {
+              NULL
+            }
+            preprocess_validation_data(
+              dataset = dataset,
               genes = gene_arg,
-              ngene = ngene_value,
-              method_trans_train = METHOD_TRANS_TRAIN,
-              verbose = FALSE
+              ngene = val_run_bundle$bo_bundle$ngene_value,
+              method_trans_train = val_run_bundle$bo_bundle$config$method_trans_train,
+              dataname = dataname
             )
-            prep$dataname <- dataname
-            prep
           }
         ),
         names(datasets_named)
@@ -664,30 +696,35 @@ COMMON_DESURV_TARGETS <- list(
   tar_target(
     val_predictions_desurv,
     desurv_predict_validation(
-      fit = fit_desurv,
+      fit = val_run_bundle$fit_desurv,
       data_list = data_val_filtered,
-      top_genes = tops_desurv$top_genes
+      top_genes = val_run_bundle$tops_desurv$top_genes
     )
   ),
   tar_target(
     val_predictions_desurv_alpha0,
     desurv_predict_validation(
-      fit = fit_desurv_alpha0,
+      fit = val_run_bundle$fit_desurv_alpha0,
       data_list = data_val_filtered,
-      top_genes = tops_desurv_alpha0$top_genes
+      top_genes = val_run_bundle$tops_desurv_alpha0$top_genes
     )
   ),
   tar_target(
     val_latent_desurv,
     {
       latent <- desurv_collect_validation_latent(
-        fit = fit_desurv,
+        fit = val_run_bundle$fit_desurv,
         data_list = data_val_filtered,
-        top_genes = tops_desurv$top_genes
+        top_genes = val_run_bundle$tops_desurv$top_genes
       )
       write_validation_latent_outputs(
         latent_list = latent,
-        base_dir = file.path(training_results_dir, "validation", "desurv")
+        base_dir = file.path(
+          val_run_bundle$training_results_dir,
+          "validation",
+          val_config$config_id,
+          "desurv"
+        )
       )
       latent
     }
@@ -696,13 +733,18 @@ COMMON_DESURV_TARGETS <- list(
     val_latent_desurv_alpha0,
     {
       latent <- desurv_collect_validation_latent(
-        fit = fit_desurv_alpha0,
+        fit = val_run_bundle$fit_desurv_alpha0,
         data_list = data_val_filtered,
-        top_genes = tops_desurv_alpha0$top_genes
+        top_genes = val_run_bundle$tops_desurv_alpha0$top_genes
       )
       write_validation_latent_outputs(
         latent_list = latent,
-        base_dir = file.path(training_results_dir_alpha0, "validation", "desurv_alpha0")
+        base_dir = file.path(
+          val_run_bundle$training_results_dir_alpha0,
+          "validation",
+          val_config$config_id,
+          "desurv_alpha0"
+        )
       )
       latent
     }
@@ -712,10 +754,19 @@ COMMON_DESURV_TARGETS <- list(
     {
       summary_tbl <- summarize_validation_cindex(val_latent_desurv)
       if (nrow(summary_tbl)) {
-        dir.create(file.path(training_results_dir, "validation"), recursive = TRUE, showWarnings = FALSE)
+        dir.create(
+          file.path(val_run_bundle$training_results_dir, "validation", val_config$config_id),
+          recursive = TRUE,
+          showWarnings = FALSE
+        )
         utils::write.csv(
           summary_tbl,
-          file = file.path(training_results_dir, "validation", "val_cindex_desurv.csv"),
+          file = file.path(
+            val_run_bundle$training_results_dir,
+            "validation",
+            val_config$config_id,
+            "val_cindex_desurv.csv"
+          ),
           row.names = FALSE
         )
       }
@@ -727,10 +778,19 @@ COMMON_DESURV_TARGETS <- list(
     {
       summary_tbl <- summarize_validation_cindex(val_latent_desurv_alpha0)
       if (nrow(summary_tbl)) {
-        dir.create(file.path(training_results_dir_alpha0, "validation"), recursive = TRUE, showWarnings = FALSE)
+        dir.create(
+          file.path(val_run_bundle$training_results_dir_alpha0, "validation", val_config$config_id),
+          recursive = TRUE,
+          showWarnings = FALSE
+        )
         utils::write.csv(
           summary_tbl,
-          file = file.path(training_results_dir_alpha0, "validation", "val_cindex_desurv_alpha0.csv"),
+          file = file.path(
+            val_run_bundle$training_results_dir_alpha0,
+            "validation",
+            val_config$config_id,
+            "val_cindex_desurv_alpha0.csv"
+          ),
           row.names = FALSE
         )
       }
@@ -740,7 +800,13 @@ COMMON_DESURV_TARGETS <- list(
   tar_target(
     val_clusters_desurv,
     {
-      base_dir <- file.path(training_results_dir, "validation", "desurv", "clusters")
+      base_dir <- file.path(
+        val_run_bundle$training_results_dir,
+        "validation",
+        val_config$config_id,
+        "desurv",
+        "clusters"
+      )
       dir.create(base_dir, recursive = TRUE, showWarnings = FALSE)
       lapply(
         val_latent_desurv,
@@ -749,11 +815,11 @@ COMMON_DESURV_TARGETS <- list(
           dir.create(dataset_dir, recursive = TRUE, showWarnings = FALSE)
           result <- cluster_validation_latent(
             latent_entry = entry,
-            maxK = VAL_CLUSTER_MAXK,
-            reps = VAL_CLUSTER_REPS,
-            pItem = VAL_CLUSTER_PITEM,
-            pFeature = VAL_CLUSTER_PFEATURE,
-            seed = VAL_CLUSTER_SEED,
+            maxK = val_config$val_cluster_maxk,
+            reps = val_config$val_cluster_reps,
+            pItem = val_config$val_cluster_pitem,
+            pFeature = val_config$val_cluster_pfeature,
+            seed = val_config$val_cluster_seed,
             dir = dataset_dir
           )
           if (nrow(result$assignments)) {
@@ -774,7 +840,13 @@ COMMON_DESURV_TARGETS <- list(
   tar_target(
     val_clusters_desurv_alpha0,
     {
-      base_dir <- file.path(training_results_dir_alpha0, "validation", "desurv_alpha0", "clusters")
+      base_dir <- file.path(
+        val_run_bundle$training_results_dir_alpha0,
+        "validation",
+        val_config$config_id,
+        "desurv_alpha0",
+        "clusters"
+      )
       dir.create(base_dir, recursive = TRUE, showWarnings = FALSE)
       lapply(
         val_latent_desurv_alpha0,
@@ -783,11 +855,11 @@ COMMON_DESURV_TARGETS <- list(
           dir.create(dataset_dir, recursive = TRUE, showWarnings = FALSE)
           result <- cluster_validation_latent(
             latent_entry = entry,
-            maxK = VAL_CLUSTER_MAXK,
-            reps = VAL_CLUSTER_REPS,
-            pItem = VAL_CLUSTER_PITEM,
-            pFeature = VAL_CLUSTER_PFEATURE,
-            seed = VAL_CLUSTER_SEED,
+            maxK = val_config$val_cluster_maxk,
+            reps = val_config$val_cluster_reps,
+            pItem = val_config$val_cluster_pitem,
+            pFeature = val_config$val_cluster_pfeature,
+            seed = val_config$val_cluster_seed,
             dir = dataset_dir
           )
           if (nrow(result$assignments)) {
@@ -849,7 +921,7 @@ COMMON_DESURV_TARGETS <- list(
   tar_target(
     ora_analysis_desurv,
     {
-      universe = rownames(data_filtered$ex)
+      universe = rownames(bo_bundle_selected$data_filtered$ex)
       organism <- org.Hs.eg.db
       ora(tops_desurv$top_genes,universe,organism)
     }
@@ -858,7 +930,7 @@ COMMON_DESURV_TARGETS <- list(
   tar_target(
     ora_analysis_desurv_alpha0,
     {
-      universe = rownames(data_filtered_alpha0$ex)
+      universe = rownames(bo_bundle_selected$data_filtered_alpha0$ex)
       organism <- org.Hs.eg.db
       ora(tops_desurv_alpha0$top_genes,universe,organism)
     }
