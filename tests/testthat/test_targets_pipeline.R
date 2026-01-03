@@ -15,7 +15,8 @@ skip_if_packages_unavailable <- function(pkgs) {
 }
 
 skip_if_pipeline_data_missing <- function() {
-  path <- file.path("data", "derv", "cmbSubtypes_formatted.RData")
+  project_root <- normalizePath(file.path(testthat::test_path(), "..", ".."))
+  path <- file.path(project_root, "data", "derv", "cmbSubtypes_formatted.RData")
   if (!file.exists(path)) {
     skip(sprintf("Required pipeline data missing at %s", path))
   }
@@ -36,7 +37,10 @@ test_that("targets manifest loads and includes core pipeline targets", {
       }
     }, add = TRUE)
     Sys.setenv(DESURV_LOCAL_RENDER = "1")
-    targets::tar_manifest(script = "_targets.R")
+    project_root <- normalizePath(file.path(testthat::test_path(), "..", ".."))
+    withr::with_dir(project_root, {
+      targets::tar_manifest(script = file.path(project_root, "_targets.R"))
+    })
   })
 
   target_names <- manifest$name
@@ -71,7 +75,10 @@ test_that("targets manifest captures split/external validation behavior", {
       }
     }, add = TRUE)
     Sys.setenv(DESURV_LOCAL_RENDER = "1")
-    targets::tar_manifest(script = "_targets.R")
+    project_root <- normalizePath(file.path(testthat::test_path(), "..", ".."))
+    withr::with_dir(project_root, {
+      targets::tar_manifest(script = file.path(project_root, "_targets.R"))
+    })
   })
 
   data_val_cmd <- manifest$command[manifest$name == "data_val"]
@@ -93,7 +100,10 @@ test_that("targets manifest includes tagged results paths", {
       }
     }, add = TRUE)
     Sys.setenv(DESURV_LOCAL_RENDER = "1")
-    targets::tar_manifest(script = "_targets.R")
+    project_root <- normalizePath(file.path(testthat::test_path(), "..", ".."))
+    withr::with_dir(project_root, {
+      targets::tar_manifest(script = file.path(project_root, "_targets.R"))
+    })
   })
 
   training_cmd <- manifest$command[manifest$name == "training_results_dir"]
