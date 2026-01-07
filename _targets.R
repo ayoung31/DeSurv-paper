@@ -23,25 +23,18 @@ validate_desurv_configs(RESOLVED_BO_CONFIGS, RESOLVED_RUN_CONFIGS, RESOLVED_VAL_
 
 
 # ---- Targets ----
-targets_list <- list(
+targets_list <- tar_map(
+  values = data.frame(
+    bo_config_value = I(RESOLVED_BO_CONFIGS),
+    bo_label = names(RESOLVED_BO_CONFIGS),
+    stringsAsFactors = FALSE
+  ),
+  names = "bo_label",
   tar_target(
     bo_config,
-    RESOLVED_BO_CONFIGS,
-    iteration = "list"
+    bo_config_value
   ),
-  tar_target(
-    run_config,
-    RESOLVED_RUN_CONFIGS,
-    iteration = "list"
-  ),
-  tar_target(
-    val_config,
-    RESOLVED_VAL_CONFIGS,
-    iteration = "list"
-  ),
-
   ################# Training ###################
-
   tar_target(
     raw_data,
     {
@@ -71,7 +64,7 @@ targets_list <- list(
     }
   ),
   tar_target(
-    data_split,
+    tar_data_split,
     {
       if (bo_config$data_mode == "split") {
         split_train_validation(
@@ -86,91 +79,183 @@ targets_list <- list(
     }
   ),
   tar_target(
-    data,
+    tar_data,
     { 
       raw_data
       if (bo_config$data_mode == "split") {
-        data_split$train
+        tar_data_split$train
       } else {
         loader <- get(bo_config$data_loader, mode = "function")
         loader(bo_config$train_datasets)
       }
     }
   ),
+  COMMON_DESURV_BO_TARGETS,
+  tar_map(
+    values = data.frame(
+      run_config_value = I(RESOLVED_RUN_CONFIGS),
+      run_label = names(RESOLVED_RUN_CONFIGS),
+      stringsAsFactors = FALSE
+    ),
+    names = "run_label",
+    tar_target(
+      run_config,
+      run_config_value
+    ),
+    COMMON_DESURV_RUN_TARGETS,
+    tar_map(
+          values = data.frame(
+            val_config_value = I(unname(RESOLVED_VAL_CONFIGS)),
+            val_label = names(RESOLVED_VAL_CONFIGS),
+            stringsAsFactors = FALSE
+          ),
+      names = "val_label",
+      tar_target(
+        val_config,
+        val_config_value
+      ),
+      tar_target(
+        val_config_effective,
+        {
+          cfg <- val_config
+          if (identical(bo_config$data_mode, "split")) {
+            cfg$mode <- "train_split"
+            cfg$val_datasets <- character(0)
+          } else if (identical(bo_config$data_mode, "external")) {
+            cfg$mode <- "external"
+            val_datasets <- cfg$val_datasets
+            if (is.null(val_datasets)) {
+              val_datasets <- character(0)
+            }
+            if (!length(val_datasets)) {
+              stop(sprintf(
+                "val_config '%s' must define val_datasets for external validation.",
+                cfg$label
+              ))
+            }
+            overlap <- intersect(val_datasets, bo_config$train_datasets)
+            if (length(overlap)) {
+              val_datasets <- setdiff(val_datasets, overlap)
+            }
+            if (!length(val_datasets)) {
+              stop(sprintf(
+                "val_config '%s' has no external datasets after removing training data.",
+                cfg$label
+              ))
+            }
+            cfg$val_datasets <- val_datasets
+          } else {
+            stop(sprintf(
+              "bo_config '%s' has unsupported data_mode '%s'.",
+              bo_config$label,
+              bo_config$data_mode
+            ))
+          }
+
+          cfg$use_train_genes_for_val <- NULL
+          cfg$val_cluster_maxk <- NULL
+          cfg$val_cluster_reps <- NULL
+          cfg$val_cluster_pitem <- NULL
+          cfg$val_cluster_pfeature <- NULL
+          cfg$val_cluster_seed <- NULL
+
+          cfg$config_id <- desurv_val_config_hash(cfg)
+          cfg$short_id <- substr(cfg$config_id, 1, 8)
+          cfg$path_tag <- build_config_tag(cfg$label, cfg$config_id)
+          cfg
+        }
+      ),
+      tar_target(
+        val_datasets_raw,
+        val_config_effective$val_datasets
+      ),
   tar_target(
-    val_datasets,
-    val_config$val_datasets
+    tar_val_datasets,
+    if (length(val_datasets_raw)) val_datasets_raw else NA_character_
   ),
   tar_target(
     val_dataset_name,
-    val_datasets,
+    tar_val_datasets,
     iteration = "vector"
   ),
-  
-  tar_target(
-    raw_data_val,
-    if (val_config$mode == "external") {
-      c(
-        file.path("data/original", paste0(val_dataset_name, ".rds")),
-        file.path("data/original", paste0(val_dataset_name, ".survival_data.rds")),
-        file.path("data/original", paste0(val_dataset_name, "_subtype.csv"))
-      )
-    } else {
-      character(0)
-    },
-    format = "file",
-    pattern = map(val_dataset_name)
-  ),
-  tar_target(
-    data_val,
-    {
-      if (val_config$mode == "train_split") {
-        dataset <- val_run_bundle$bo_bundle$data_split$test
-        dataname <- infer_dataset_name(dataset)
-        setNames(list(dataset), dataname)
-      } else {
-        setNames(
-          lapply(val_datasets, load_data),
-          val_datasets
-        )
-      }
-    }
-  ),
-  
-  tar_target(
-    data_val_comb,
-    {
-      if (val_config$mode == "external") {
-        raw_data_val
-        load_data(val_datasets)
-      } else {
-        NULL
-      }
-    },
-  ),
-  
-  tar_target(
-    data_val_comb_filtered,
-    {
-      if (val_config$mode == "external") {
-        genes_train = rownames(val_run_bundle$bo_bundle$data_filtered$ex)
-        preprocess_validation_data(
-          dataset = data_val_comb,
-          genes = genes_train,
-          method_trans_train = val_run_bundle$bo_bundle$config$method_trans_train,
-          dataname = data_val_comb$dataname
-        )
-      } else {
-        NULL
-      }
-    },
+      tar_target(
+        raw_data_val,
+        if (val_config_effective$mode == "external") {
+          if (is.na(val_dataset_name) || !nzchar(val_dataset_name)) {
+            character(0)
+          } else {
+            c(
+              file.path("data/original", paste0(val_dataset_name, ".rds")),
+              file.path("data/original", paste0(val_dataset_name, ".survival_data.rds")),
+              file.path("data/original", paste0(val_dataset_name, "_subtype.csv"))
+            )
+          }
+        } else {
+          character(0)
+        },
+        format = "file",
+        pattern = map(val_dataset_name)
+      ),
+      tar_target(
+        data_val,
+        {
+          if (val_config_effective$mode == "train_split") {
+            dataset <- val_run_bundle$bo_bundle$data_split$test
+            dataname <- infer_dataset_name(dataset)
+            setNames(list(dataset), dataname)
+          } else {
+            if (length(val_datasets_raw)) {
+              setNames(
+                lapply(val_datasets_raw, load_data),
+                val_datasets_raw
+              )
+            } else {
+              list()
+            }
+          }
+        }
+      ),
+      tar_target(
+        data_val_comb,
+        {
+          if (val_config_effective$mode == "external") {
+            if (length(val_datasets_raw)) {
+              raw_data_val
+              load_data(val_datasets_raw)
+            } else {
+              NULL
+            }
+          } else {
+            NULL
+          }
+        },
+      ),
+      tar_target(
+        data_val_comb_filtered,
+        {
+          if (val_config_effective$mode == "external") {
+            genes_train = rownames(val_run_bundle$bo_bundle$data_filtered$ex)
+            preprocess_validation_data(
+              dataset = data_val_comb,
+              genes = genes_train,
+              method_trans_train = val_run_bundle$bo_bundle$config$method_trans_train,
+              dataname = data_val_comb$dataname
+            )
+          } else {
+            NULL
+          }
+        },
+      ),
+      COMMON_DESURV_VAL_TARGETS
+    )
   )
 )
 
 c(
-  targets_list,
-  COMMON_DESURV_BO_TARGETS,
-  COMMON_DESURV_RUN_TARGETS#,
+  targets_list
+  # COMMON_DESURV_BO_TARGETS,
+  # COMMON_DESURV_RUN_TARGETS,
+  # COMMON_DESURV_VAL_TARGETS#,
   # tarchetypes::tar_render(
   #   paper,
   #   "paper/paper.Rmd",
@@ -178,15 +263,15 @@ c(
   #   deps = c(
   #     "desurv_bo_history",
   #     "desurv_bo_history_alpha0",
-  #     "params_best",
-  #     "ngene_value",
+  #     "tar_params_best",
+  #     "tar_ngene_value",
   #     "ntop_value",
-  #     "fit_desurv",
-  #     "fit_desurv_alpha0",
+  #     "tar_fit_desurv",
+  #     "tar_fit_desurv_alpha0",
   #     "fit_std",
   #     "fit_std_beta",
-  #     "tops_desurv",
-  #     "tops_desurv_alpha0",
+  #     "tar_tops_desurv",
+  #     "tar_tops_desurv_alpha0",
   #     "tops_std",
   #     "gene_overlap_desurv",
   #     "gene_overlap_desurv_alpha0",
@@ -205,10 +290,10 @@ c(
   #     "cluster_alignment_plot_std",
   #     "cluster_alignment_table_desurv",
   #     "cluster_alignment_table_std",
-  #     "data_filtered",
+  #     "tar_data_filtered",
   #     "data_val",
   #     "data_val_filtered",
-  #     "training_results_dir"
+  #     "tar_training_results_dir"
   #   )
   # )
 )
@@ -239,7 +324,7 @@ c(
   #       path = create_filepath_coldstart_runs(params = best_init_per_param_combo)
   # 
   #       run_coldstarts(
-  #         X = data_filtered$ex, y = data_filtered$sampInfo$time, delta = data_filtered$sampInfo$event,
+  #         X = tar_data_filtered$ex, y = tar_data_filtered$sampInfo$time, delta = tar_data_filtered$sampInfo$event,
   #         params = best_init_per_param_combo,
   #         verbose = FALSE,
   #         path = path
@@ -258,9 +343,9 @@ c(
   #   tar_target(
   #     metrics,
   #     compute_metrics(model_runs,
-  #                     data_filtered$ex,
-  #                     data_filtered$sampInfo$time,
-  #                     data_filtered$sampInfo$event),
+  #                     tar_data_filtered$ex,
+  #                     tar_data_filtered$sampInfo$time,
+  #                     tar_data_filtered$sampInfo$event),
   #     pattern   = map(model_runs),
   #     iteration = "list"
   #   ),

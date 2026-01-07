@@ -15,6 +15,7 @@ desurv_default_bo_config <- function() {
       nu_grid = list(lower = 0, upper = 1, type = "continuous")
     ),
     ngene_config = c(500, 5000),
+    ntop_config = c(50, 250),
     lambdaw_config = c(0),
     lambdah_config = c(1e-7, 1e2),
     ninit = 50,
@@ -41,7 +42,6 @@ desurv_default_run_config <- function() {
   list(
     bo_key = "default",
     ninit_full = 100,
-    ntop_config = c(50, 250),
     run_tol = 1e-5,
     run_maxit = 4000,
     std_nmf_k_grid = 2:12,
@@ -62,13 +62,7 @@ desurv_default_val_config <- function() {
       "PACA_AU_array",
       "PACA_AU_seq",
       "Puleo_array"
-    ),
-    use_train_genes_for_val = FALSE,
-    val_cluster_maxk = 6L,
-    val_cluster_reps = 1000L,
-    val_cluster_pitem = 0.8,
-    val_cluster_pfeature = 1,
-    val_cluster_seed = 9999L
+    )
   )
 }
 
@@ -88,11 +82,12 @@ desurv_bo_config_hash_input <- function(config) {
   hash_input$train_prefix <- NULL
   hash_input$short_id <- NULL
   hash_input$path_tag <- NULL
-  hash_input$ntop_config <- NULL
   hash_input$ngene_default <- NULL
+  hash_input$ntop_default <- NULL
   hash_input$lambdaw_default <- NULL
   hash_input$lambdah_default <- NULL
   hash_input$tune_ngene <- NULL
+  hash_input$tune_ntop <- NULL
   hash_input$tune_lambdaw <- NULL
   hash_input$tune_lambdah <- NULL
   hash_input
@@ -106,8 +101,6 @@ desurv_run_config_hash_input <- function(config) {
   hash_input <- config
   hash_input$config_id <- NULL
   hash_input$label <- NULL
-  hash_input$ntop_default <- NULL
-  hash_input$tune_ntop <- NULL
   hash_input$short_id <- NULL
   hash_input$path_tag <- NULL
   hash_input
@@ -168,6 +161,8 @@ resolve_desurv_bo_config <- function(config, label = NULL) {
   merged$train_prefix <- paste0(merged$train_datasets, collapse = ".")
   merged$ngene_default <- merged$ngene_config[[1]]
   merged$tune_ngene <- length(unique(merged$ngene_config)) > 1
+  merged$ntop_default <- merged$ntop_config[[1]]
+  merged$tune_ntop <- length(unique(merged$ntop_config)) > 1
   merged$lambdaw_default <- merged$lambdaw_config[[1]]
   merged$tune_lambdaw <- length(unique(merged$lambdaw_config)) > 1
   merged$lambdah_default <- merged$lambdah_config[[1]]
@@ -188,8 +183,6 @@ resolve_desurv_run_config <- function(config, label = NULL) {
   if (is.null(merged$std_nmf_nrun)) {
     merged$std_nmf_nrun <- merged$ninit_full
   }
-  merged$ntop_default <- merged$ntop_config[[1]]
-  merged$tune_ntop <- length(unique(merged$ntop_config)) > 1
   merged$config_id <- desurv_run_config_hash(merged)
   merged$short_id <- substr(merged$config_id, 1, 8)
   merged$path_tag <- build_config_tag(merged$label, merged$config_id)
@@ -205,6 +198,12 @@ resolve_desurv_val_config <- function(config, label = NULL) {
   if (identical(merged$mode, "train_split") && is.null(merged$val_datasets)) {
     merged$val_datasets <- character(0)
   }
+  merged$use_train_genes_for_val <- NULL
+  merged$val_cluster_maxk <- NULL
+  merged$val_cluster_reps <- NULL
+  merged$val_cluster_pitem <- NULL
+  merged$val_cluster_pfeature <- NULL
+  merged$val_cluster_seed <- NULL
   merged$config_id <- desurv_val_config_hash(merged)
   merged$short_id <- substr(merged$config_id, 1, 8)
   merged$path_tag <- build_config_tag(merged$label, merged$config_id)
@@ -295,6 +294,9 @@ validate_desurv_bo_config <- function(config) {
   if (!is.numeric(config$ngene_config) || !length(config$ngene_config)) {
     errors <- c(errors, "bo_config$ngene_config must be a numeric vector.")
   }
+  if (!is.numeric(config$ntop_config) || !length(config$ntop_config)) {
+    errors <- c(errors, "bo_config$ntop_config must be a numeric vector.")
+  }
   if (length(errors)) {
     stop(paste(errors, collapse = "\n"))
   }
@@ -303,11 +305,8 @@ validate_desurv_bo_config <- function(config) {
 
 validate_desurv_run_config <- function(config) {
   errors <- character(0)
-  if (is.null(config$bo_key) || !nzchar(config$bo_key)) {
+  if (is.null(config$bo_key) || !length(config$bo_key) || any(!nzchar(config$bo_key))) {
     errors <- c(errors, "run_config$bo_key must be provided.")
-  }
-  if (!is.numeric(config$ntop_config) || !length(config$ntop_config)) {
-    errors <- c(errors, "run_config$ntop_config must be a numeric vector.")
   }
   if (length(errors)) {
     stop(paste(errors, collapse = "\n"))
@@ -351,7 +350,9 @@ validate_desurv_configs <- function(bo_configs, run_configs, val_configs) {
   bo_labels <- vapply(bo_configs, function(entry) entry$label, character(1))
   run_labels <- vapply(run_configs, function(entry) entry$label, character(1))
   if (length(run_configs)) {
-    missing_bo <- setdiff(vapply(run_configs, function(entry) entry$bo_key, character(1)), bo_labels)
+    run_bo_keys <- unlist(lapply(run_configs, function(entry) entry$bo_key))
+    run_bo_keys <- run_bo_keys[!is.na(run_bo_keys)]
+    missing_bo <- setdiff(run_bo_keys, bo_labels)
     if (length(missing_bo)) {
       stop(sprintf("Unknown bo_key in run configs: %s", paste(unique(missing_bo), collapse = ", ")))
     }
@@ -377,6 +378,14 @@ validate_desurv_configs <- function(bo_configs, run_configs, val_configs) {
     for (entry in val_configs) {
       if (identical(entry$mode, "train_split")) {
         run_cfg <- run_by_label[[entry$run_key]]
+        if (length(run_cfg$bo_key) != 1L) {
+          stop(sprintf(
+            "val_config '%s' uses train_split but run_config '%s' has %s bo_key values.",
+            entry$label,
+            run_cfg$label,
+            length(run_cfg$bo_key)
+          ))
+        }
         bo_cfg <- bo_by_label[[run_cfg$bo_key]]
         if (!identical(bo_cfg$data_mode, "split")) {
           stop(sprintf(

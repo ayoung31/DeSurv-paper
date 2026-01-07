@@ -14,6 +14,8 @@ simulate_desurv_scenario <- function(
     beta = NULL,
     baseline_hazard = NULL,
     censor_rate = NULL,
+    survival_gene_n = NULL,
+    survival_marker_frac = NULL,
     # W-distribution parameters
     shape_B = NULL,  rate_B = NULL,
     shape_M = NULL,  rate_M = NULL,
@@ -40,6 +42,8 @@ simulate_desurv_scenario <- function(
       beta = c(0.8, 0.0, 0.0),
       baseline_hazard = 0.05,
       censor_rate = 0.02,
+      survival_gene_n = NULL,
+      survival_marker_frac = NULL,
       shape_B = 2,  rate_B = 0.5,
       shape_M = 2,  rate_M = 2.0,
       shape_cross = 1, rate_cross = 20,
@@ -60,6 +64,16 @@ simulate_desurv_scenario <- function(
   beta            <- if (is.null(beta))            defaults$beta            else beta
   baseline_hazard <- if (is.null(baseline_hazard)) defaults$baseline_hazard else baseline_hazard
   censor_rate     <- if (is.null(censor_rate))     defaults$censor_rate     else censor_rate
+  survival_gene_n <- if (is.null(survival_gene_n)) {
+    defaults$survival_gene_n
+  } else {
+    survival_gene_n
+  }
+  survival_marker_frac <- if (is.null(survival_marker_frac)) {
+    defaults$survival_marker_frac
+  } else {
+    survival_marker_frac
+  }
   
   shape_B     <- if (is.null(shape_B))     defaults$shape_B     else shape_B
   rate_B      <- if (is.null(rate_B))      defaults$rate_B      else rate_B
@@ -106,7 +120,10 @@ simulate_desurv_scenario <- function(
     marker_sets = marker_sets,
     beta = beta,
     baseline_hazard = baseline_hazard,
-    censor_rate = censor_rate
+    censor_rate = censor_rate,
+    background_genes = W_out$background,
+    survival_gene_n = survival_gene_n,
+    survival_marker_frac = survival_marker_frac
   )
   
   ## 5. Simulate X (log-expression)
@@ -123,6 +140,7 @@ simulate_desurv_scenario <- function(
     marker_sets = marker_sets,
     background = W_out$background,
     noise_genes = W_out$noise_genes,
+    survival_gene_sets = surv_out$survival_gene_sets,
     beta = beta,
     time = surv_out$time,
     status = surv_out$status,
@@ -140,6 +158,8 @@ simulate_desurv_scenario <- function(
       beta = beta,
       baseline_hazard = baseline_hazard,
       censor_rate = censor_rate,
+      survival_gene_n = survival_gene_n,
+      survival_marker_frac = survival_marker_frac,
       shape_B = shape_B, rate_B = rate_B,
       shape_M = shape_M, rate_M = rate_M,
       shape_cross = shape_cross, rate_cross = rate_cross,

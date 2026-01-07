@@ -69,7 +69,7 @@ targets_list <- list(
   ),
   
   tar_target(
-    data_split,
+    tar_data_split,
     {
       data = data_input
       samp_keeps = data$samp_keeps
@@ -94,14 +94,14 @@ targets_list <- list(
   ),
   
   tar_target(
-    data,
-    data_split$train
+    tar_data,
+    tar_data_split$train
   ),
   
   tar_target(
     data_val,
     {
-      dataset <- data_split$test
+      dataset <- tar_data_split$test
       dataname <- dataset$dataname
       if (is.null(dataname) || !nzchar(dataname)) {
         dataset_ids <- unique(dataset$sampInfo$dataset)

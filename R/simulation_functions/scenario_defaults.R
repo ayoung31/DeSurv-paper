@@ -2,9 +2,9 @@
 ## 5. Scenario-specific defaults
 ## -----------------------------
 get_desurv_defaults <- function(scenario) {
-  scenario <- match.arg(scenario, c("R00","R0", "R1", "R2", "R3", "R4"))
+  scenario <- match.arg(scenario, c("R00", "R0", "R_mixed", "R1", "R2", "R3", "R4"))
   
-  switch(
+  defaults <- switch(
     scenario,
     
     #null. same as R0 but no survival association
@@ -19,7 +19,7 @@ get_desurv_defaults <- function(scenario) {
       rho_H = 0.0,
       beta = c(0.0, 0.0, 0.0),  # lethal = Factor1
       baseline_hazard = 0.05,
-      censor_rate = 0.02,
+      censor_rate = 0.02,lp
       shape_B = 2,  rate_B = 1.0,   # modest background
       shape_M = 3,  rate_M = 0.8,   # strong markers
       shape_cross = 1, rate_cross = 20,
@@ -40,6 +40,28 @@ get_desurv_defaults <- function(scenario) {
       beta = c(2.0, 0.0, 0.0),  # lethal = Factor1
       baseline_hazard = 0.05,
       censor_rate = 0.02,
+      shape_B = 2,  rate_B = 1.0,   # modest background
+      shape_M = 3,  rate_M = 0.8,   # strong markers
+      shape_cross = 1, rate_cross = 20,
+      shape_noise = 1, rate_noise = 20,
+      marker_overlap = 0.0
+    ),
+
+    ## R_mixed — R0 with mixed marker/background survival genes
+    "R_mixed" = list(
+      G = 3000,
+      N = 200,
+      K = 3,
+      markers_per_factor = 150,
+      B_size = 500,
+      noise_sd = 0.01,
+      correlated_H = FALSE,
+      rho_H = 0.0,
+      beta = c(2.0, 0.0, 0.0),  # lethal = Factor1
+      baseline_hazard = 0.05,
+      censor_rate = 0.02,
+      survival_gene_n = 300,
+      survival_marker_frac = 0.5,
       shape_B = 2,  rate_B = 1.0,   # modest background
       shape_M = 3,  rate_M = 0.8,   # strong markers
       shape_cross = 1, rate_cross = 20,
@@ -127,4 +149,12 @@ get_desurv_defaults <- function(scenario) {
       marker_overlap = 0.0
     )
   )
+  defaults <- modifyList(
+    list(
+      survival_gene_n = NULL,
+      survival_marker_frac = NULL
+    ),
+    defaults
+  )
+  defaults
 }

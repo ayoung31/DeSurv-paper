@@ -1,11 +1,8 @@
 # _targets.R
 library(targets)
 library(tarchetypes)  
-LOCAL_RENDER <- identical(Sys.getenv("DESURV_LOCAL_RENDER"), "1")
 library(crew)
-if (!LOCAL_RENDER) {
-  library(crew.cluster)
-}
+library(crew.cluster)
 suppressWarnings(suppressMessages(library(dplyr)))
 
 PKG_VERSION        = "HEAD"#utils::packageDescription("DeSurv", fields = "RemoteRef")
@@ -17,74 +14,70 @@ DEFAULT_NINIT_FULL <- if (exists("DEFAULT_NINIT_FULL", inherits = TRUE)) DEFAULT
 # ------ Slurm controllers ------
 default_controller = crew_controller_sequential()
 
-if (LOCAL_RENDER) {
-  active_controller <- default_controller
-} else {
-  low_mem_controller = crew_controller_slurm(
-    name = "low_mem",
-    workers = 202,
-    seconds_idle = 120,
-    seconds_interval = 0.25,
-    options_cluster = crew_options_slurm(
-      memory_gigabytes_per_cpu = 1,
-      time_minutes = 120,
-      log_error = "logs/crew_log_%A.err",
-      log_output = "logs/crew_log_%A.out",
-      script_lines = "module load r/4.4.0"
-    )
+low_mem_controller = crew_controller_slurm(
+  name = "low_mem",
+  workers = 202,
+  seconds_idle = 120,
+  seconds_interval = 0.25,
+  options_cluster = crew_options_slurm(
+    memory_gigabytes_per_cpu = 1,
+    time_minutes = 120,
+    log_error = "logs/crew_log_%A.err",
+    log_output = "logs/crew_log_%A.out",
+    script_lines = "module load r/4.4.0"
   )
-  
-  cv_comp_controller = crew_controller_slurm(
-    name = "cv",
-    workers = 202,
-    seconds_idle = 120,
-    seconds_interval = 0.25,
-    options_cluster = crew_options_slurm(
-      memory_gigabytes_per_cpu = 2,
-      cpus_per_task = DEFAULT_NINIT,
-      time_minutes = 1440,
-      log_error = "logs/crew_log_%A.err",
-      log_output = "logs/crew_log_%A.out",
-      script_lines = "module load r/4.4.0"
-    )
+)
+
+cv_comp_controller = crew_controller_slurm(
+  name = "cv",
+  workers = 202,
+  seconds_idle = 120,
+  seconds_interval = 0.25,
+  options_cluster = crew_options_slurm(
+    memory_gigabytes_per_cpu = 2,
+    cpus_per_task = DEFAULT_NINIT,
+    time_minutes = 1440,
+    log_error = "logs/crew_log_%A.err",
+    log_output = "logs/crew_log_%A.out",
+    script_lines = "module load r/4.4.0"
   )
-  
-  full_run_controller = crew_controller_slurm(
-    name = "full",
-    workers = 202,
-    seconds_idle = 120,
-    seconds_interval = 0.25,
-    options_cluster = crew_options_slurm(
-      memory_gigabytes_required = 32,
-      cpus_per_task = DEFAULT_NINIT_FULL,
-      time_minutes = 600,
-      log_error = "logs/crew_log_%A.err",
-      log_output = "logs/crew_log_%A.out",
-      script_lines = "module load r/4.4.0"
-    )
+)
+
+full_run_controller = crew_controller_slurm(
+  name = "full",
+  workers = 202,
+  seconds_idle = 120,
+  seconds_interval = 0.25,
+  options_cluster = crew_options_slurm(
+    memory_gigabytes_required = 32,
+    cpus_per_task = DEFAULT_NINIT_FULL,
+    time_minutes = 600,
+    log_error = "logs/crew_log_%A.err",
+    log_output = "logs/crew_log_%A.out",
+    script_lines = "module load r/4.4.0"
   )
-  
-  med_mem_controller = crew_controller_slurm(
-    name = "med_mem",
-    workers = 120,
-    seconds_idle = 120,
-    seconds_interval = 0.25,
-    options_cluster = crew_options_slurm(
-      memory_gigabytes_required = 8,
-      cpus_per_task = 1,
-      time_minutes = 200,
-      log_error = "logs/crew_log_%A.err",
-      log_output = "logs/crew_log_%A.out",
-      script_lines = "module load r/4.4.0"
-    )
+)
+
+med_mem_controller = crew_controller_slurm(
+  name = "med_mem",
+  workers = 120,
+  seconds_idle = 120,
+  seconds_interval = 0.25,
+  options_cluster = crew_options_slurm(
+    memory_gigabytes_required = 8,
+    cpus_per_task = 1,
+    time_minutes = 200,
+    log_error = "logs/crew_log_%A.err",
+    log_output = "logs/crew_log_%A.out",
+    script_lines = "module load r/4.4.0"
   )
-  
-  active_controller <- crew_controller_group(default_controller, 
-                                             low_mem_controller,
-                                             cv_comp_controller,
-                                             full_run_controller,
-                                             med_mem_controller)
-}
+)
+
+active_controller <- crew_controller_group(default_controller, 
+                                           low_mem_controller,
+                                           cv_comp_controller,
+                                           full_run_controller,
+                                           med_mem_controller)
 
 # ---- Global options ----
 TARGET_PACKAGES = c(

@@ -1,0 +1,90 @@
+---
+title: "DeSurv `_targets.R` Pipeline"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+---
+
+## Pipeline overview
+
+`_targets.R` wires the whole workflow together.  It starts by sourcing the configuration helpers (`targets_configs.R`), runtime setup (`targets_setup.R`), and the shared pipeline fragments (`targets_common_pipeline.R`).  Config tables are resolved and validated before the actual targets are defined, so every execution picks up consistent sets of BO / run / validation entries (`_targets.R:1-168`).  The top-level graph iterates over the resolved configs and then loads data, runs training, and validates models.
+
+## Configuration layers
+
+The pipeline is driven by three configuration factories that return named lists and therefore make the graph iterable:
+
+- `targets_bo_configs()` defines Bayesian-optimization settings such as data mode, preprocessing, bounds for every tuning variable, and resource controls (`targets_configs.R:2-72`).
+- `targets_run_configs()` pairs BO bundles with full-model run parameters (`ninit_full`, `ntop_config`, solver tolerances, etc.) so the same BO history can be reused by multiple downstream downstream runs (`targets_configs.R:75-100`).
+- `targets_val_configs()` lists validation modes (`external` vs `train_split`), dataset names, and clustering parameters that are applied after training finishes (`targets_configs.R:102-134`).
+
+Because `_targets.R` resolves those raw lists via `resolve_desurv_*` helpers, you can add a configuration by editing `targets_configs.R` and expect the new entry to appear in `bo_config`, `run_config`, or `val_config` targets (`_targets.R:1-41`).
+
+## Config tagging and run isolation
+
+`resolve_desurv_bo_config()`, `resolve_desurv_run_config()`, and `resolve_desurv_val_config()` merge each user-supplied entry with defaults, validate the result, and compute a SHA1 over the “input” part of the config (`R/targets_config.R:40-220`). The hash becomes `config_id` (with an 8‑character `short_id`) and feeds into `path_tag = build_config_tag(label, config_id)` so every build references a stable label-plus-hash identifier (`R/targets_config.R:40-220`).
+
+`validate_desurv_configs()` enforces that every config has a label, run configs point to known BO labels, and validation configs only use train-split modes when the referenced BO config also used `data_mode = "split"` (`R/targets_config.R:220-340`). Because the pipeline iterates over the resolved lists (`bo_config`, `run_config`, `val_config`), adding a new entry never mutates an existing config—it simply adds another iterator value with its own `config_id` and `path_tag` that downstream targets treat as a separate branch (`_targets.R:25-168`).
+
+Those IDs protect old runs: `get_bo_results_dir()` and `results_root_dir()` inject both `path_tag` and the hashed `config_id` into the filesystem hierarchy (`R/results_paths.R:1-87`). When you add or tweak configurations, the graph writes outputs into new folders, so targets that depend on a changed hash run afresh while previous hashes remain untouched. `desurv_config_diff()` (also in `R/targets_config.R`) lets you compare old vs. new inputs if you need to understand which parameter triggered a re-run, but the hashing itself is what keeps new configs from invalidating historical BO or run directories unless the actual settings change (`R/targets_config.R:340-390`).
+
+## Setup & dependencies
+
+`targets_setup.R` sets the stage for execution:
+
+- It loads the Slurm-backed `crew.cluster` controllers used throughout the pipeline (`targets_setup.R:1-104`).
+- Multiple `crew_controller_slurm()` definitions budget different resources for low-memory jobs, cross-validation grids, full runs, and medium-memory tasks; they are grouped into `active_controller` so every target can request the appropriate controller via `tar_resources` (`targets_setup.R:17-104`).
+- `tar_option_set()` registers package dependencies, output format, controller, and a permissive error strategy so that one failure does not stop unrelated targets (`targets_setup.R:89-100`).
+- All helper functions under `R/` and preprocessed subtype data are sourced once (`targets_setup.R:102-104`).
+
+## Target graph
+
+### Data ingestion & splitting
+
+The first targets create iterators over config entries, collect raw files, and optionally split train/validation sets:
+
+- `bo_config`, `run_config`, and `val_config` iterate over resolved lists (`_targets.R:25-41`).
+- `raw_data` returns either files under `data/original/` or a user-provided split file, depending on `data_mode`.  Downstream targets call a loader (e.g., `load_data` or `load_data_bladder_vig`) and run `split_train_validation()` when required (`_targets.R:45-167`).
+- Validation datasets are similarly baked into the graph; if `val_config$mode == "external"`, files under `data/original/` are declared as `format = "file"` dependencies (`_targets.R:101-167`).
+
+### Bayesian optimization
+
+`COMMON_DESURV_BO_TARGETS` (in `targets_common_pipeline.R`) encapsulates the BO phase:
+
+- Each BO bundle (`bo_bundle`) contains the resolved config, raw/split/filtered data, best parameters for both `alpha` tuned and `alpha=0` variants, and helper scalars such as `ngene_value` (`targets_common_pipeline.R:1-198`).
+- `desurv_bo_results` and `desurv_bo_results_alpha0` call `DeSurv::desurv_cv_bayesopt_refine()` with custom bounds, fixed parameters (e.g., locking `alpha = 0` when needed), and parallel-grid controls.  The results write a history CSV in `bo_results_dir` so you can compare optimization runs (`targets_common_pipeline.R:26-198`).
+- The best hyperparameters are standardized, and fallback defaults ensure `ngene`/`lambdaW`/`lambdaH` are available even when optimization fails (`targets_common_pipeline.R:78-145`).
+
+### Full model runs & downstream summaries
+
+`COMMON_DESURV_RUN_TARGETS` defines the heavier training and analysis steps:
+
+- `bo_bundle_selected` selects the BO result matching a run config via `bo_key`, and scalar values such as `ntop_value` drive factor selection (`targets_common_pipeline.R:220-280`).
+- A set of seeds (`ninit_full`) initialize `desurv_fit()` runs; `desurv_consensus_seed()` builds a consensus initialization that feeds into the final `fit_desurv` and (for `alpha=0`) `fit_desurv_alpha0` models, both scheduled on the medium-memory controller (`targets_common_pipeline.R:280-420`).
+- Standard NMF baselines (`fit_std`) and a helper for plotting auto-selected ranks run on the CV controller, although many of those downstream targets remain commented out in the current pipeline (`targets_common_pipeline.R:420-520`).
+- Top genes (`tops_desurv`, `tops_desurv_alpha0`), gene-overlap tables, and ORA analyses are generated so that factor lists and enrichment results are saved alongside the training results (`targets_common_pipeline.R:600-860`).
+
+### Validation & exports
+
+The last part of the graph runs validation comparisons:
+
+- A `val_run_bundle` identifies which trained run to validate, and the pipeline pre-processes the requested datasets (`desurv_predict_validation`, `preprocess_validation_data`) so the validation inputs share genes or transformations with training when desired (`targets_common_pipeline.R:520-720`).
+- Latent features, consensus cluster assignments, and c-index summaries are written to the training-results hierarchy so they can later be consumed by downstream notebooks or figures (`targets_common_pipeline.R:720-900`).
+- Clustering summaries even allow cluster stability permutations (`cluster_validation_latent()` calls) and store results per dataset folder (`targets_common_pipeline.R:840-930`).
+
+## Running the pipeline
+
+1. The simplest entry point is in an R session that loads the package and calls `targets::tar_make()`.
+
+```{bash}
+Rscript -e 'targets::tar_make(callr_function = NULL)'
+```
+
+2. For production submissions, use one of the helper scripts (e.g., `submit_targets.R` or `submit_targets_bladder.R`) that wrap `tar_make()` with profile-specific environment variables and logging.
+3. `targets::tar_visnetwork()` or `targets::tar_glimpse()` are useful for inspecting the DAG before running expensive steps.
+
+## Notes
+
+- Changing any config entry in `targets_configs.R` triggers the entire branch associated with that config, so new datasets or parameter sweeps are automatically wired into the `_targets.R` graph.
+- Since every major compute chunk requests a `crew` controller, make sure the `logs/` directory exists (`targets_setup.R:24-80`) and that the Slurm account has permission to schedule hundreds of workers.
+- Large outputs (e.g., saved histories, validation clusters) live under paths returned by `get_bo_results_dir()` and `results_root_dir()`, which include `pkg_version`, `git_branch`, and `config tag` metadata (`targets_common_pipeline.R:120-210`, `targets_common_pipeline.R:330-360`).

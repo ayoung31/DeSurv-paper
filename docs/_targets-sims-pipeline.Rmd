@@ -1,0 +1,153 @@
+---
+title: "DeSurv `_targets_sims.R` Pipeline"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+---
+
+## Pipeline overview
+
+`_targets_sims.R` defines the simulation study workflow. It sources all files in `R/simulation_functions/` plus `R/get_top_genes.R`, sets global simulation constants, defines simulation scenarios and analysis modes, and then builds a compact targets graph that (1) generates simulated datasets, (2) runs fixed-parameter and Bayesian-optimization analyses, and (3) summarizes the results.
+
+## Simulation configuration
+
+The top of `_targets_sims.R` defines the knobs that affect every simulation run:
+
+- Reproducibility and sizing: `SIM_DATASETS_PER_SCENARIO`, `SIM_GLOBAL_SEED`, `SIM_DEFAULT_K`, `SIM_DEFAULT_NGENE`, `SIM_DEFAULT_NTOP`.
+- DeSurv fitting controls: `SIM_DESURV_TOL`, `SIM_DESURV_MAXIT`, `SIM_CV_NFOLDS`, `SIM_CV_NSTARTS`.
+- Train/test split settings: `SIM_TRAIN_FRACTION`, `SIM_SPLIT_SEED_OFFSET`.
+- BO controls: `SIM_DESURV_BO_BOUNDS`, `SIM_BO_N_INIT`, `SIM_BO_N_ITER`, `SIM_BO_CANDIDATE_POOL`, `SIM_BO_EXPLORATION_WEIGHT`.
+- Execution: the Slurm-backed `SIM_ANALYSIS_CONTROLLER` used by `sim_analysis_result`.
+
+Changing these values updates every downstream target that relies on them.
+
+## Simulation scenarios
+
+`SIMULATION_SCENARIOS` is the main entry point for defining which simulated datasets are generated. Each list element supports:
+
+- `scenario_id`: human-readable label used in dataset names and summaries.
+- `scenario`: a scenario string passed into `simulate_desurv_scenario()` (e.g., `"R0"`, `"R00"`).
+- `description`: text stored in metadata for later inspection.
+- `replicates`: number of datasets per scenario.
+- `seed_offset`: per-scenario seed base.
+- `overrides`: a named list of parameters that override the defaults for the scenario.
+
+`build_simulation_dataset_specs()` expands those entries into per-replicate specs with deterministic seeds. `generate_simulation_dataset()` then calls `simulate_desurv_scenario()` and formats the data with `format_simulation_data()` to produce a standardized list containing expression (`ex`), sample metadata (`sampInfo`), and the simulation truth objects.
+
+## Analysis specifications
+
+`SIM_ANALYSIS_SPECS` describes how each simulated dataset is analyzed:
+
+- Fixed-parameter runs (`mode = "fixed"`) call `DeSurv::desurv_fit()` with a fixed set of parameters (`SIM_FIXED_PARAMS` and derivatives like `fixed_alpha0`).
+- Bayesian optimization runs (`mode = "bayesopt"`) call `DeSurv::desurv_bayesopt()` to tune `k`, `alpha`, `lambda`, and `nu` (and optionally `ntop`), then run a final `desurv_fit()` using the selected parameters.
+
+Each analysis uses a train/test split from `split_simulation_samples()` and ensures that test data are filtered to the same gene set as the training data (`prepare_simulation_data()` with `genes = rownames(processed_train$ex)`).
+
+## Target graph
+
+The targets list is intentionally small:
+
+- `sim_dataset_specs`: expands `SIMULATION_SCENARIOS` into per-replicate specs.
+- `sim_dataset`: materializes simulated datasets with truth data, formatted expression, and metadata.
+- `sim_analysis_spec`: iterates over analysis configurations.
+- `sim_analysis_result`: runs every analysis specification for every dataset (cross product) on the simulation Slurm controller.
+- `sim_results_table`: builds a tidy summary table with c-index and marker-recovery metrics.
+
+## Adding or editing simulation scenarios
+
+There are two common ways to add scenarios:
+
+1. **Reuse an existing default scenario and override specific parameters.**
+
+Add a new entry to `SIMULATION_SCENARIOS` and supply a base `scenario` plus an `overrides` list. This is the fastest path when you only need small tweaks.
+
+```r
+list(
+  scenario_id = "R0_higher_noise",
+  scenario = "R0",
+  description = "R0 with higher noise and more samples",
+  replicates = 50L,
+  seed_offset = SIM_GLOBAL_SEED + 3000L,
+  overrides = list(
+    noise_sd = 0.5,
+    N = 300
+  )
+)
+```
+
+2. **Create a new named scenario with its own defaults.**
+
+- Add the new scenario to `R/simulation_functions/scenario_defaults.R`:
+  - Include it in the `match.arg()` list.
+  - Add a new `switch()` entry with the parameter defaults.
+- Add a matching entry to `SIMULATION_SCENARIOS` with `scenario = "YourNewScenario"`.
+
+If you want a fully custom setup without touching defaults, you can set `scenario = NULL` and provide *all* required fields via `overrides` (`G`, `N`, `K`, `markers_per_factor`, `B_size`, `noise_sd`, `beta`, etc.).
+
+## Primary simulation functions
+
+The data generation pipeline is implemented in `R/simulation_functions/`:
+
+- `simulate_desurv_scenario()` (`R/simulation_functions/simulate_data.R`):
+  - Loads scenario defaults with `get_desurv_defaults()` when `scenario` is set.
+  - Applies any overrides supplied by `_targets_sims.R`.
+  - Calls the functions below to produce `W`, `H`, `X`, and survival outcomes.
+- `get_desurv_defaults()` (`R/simulation_functions/scenario_defaults.R`):
+  - Defines the built-in scenario presets (`R00`, `R0`, `R1`, `R2`, `R3`, `R4`).
+- `simulate_W_marker_background()` (`R/simulation_functions/simulate_W.R`):
+  - Builds factor loadings with marker genes, background genes, and noise genes, plus optional overlap.
+- `simulate_H()` (`R/simulation_functions/simulate_H.R`):
+  - Draws patient factor scores; optionally correlated via MVN + softplus.
+- `simulate_X()` (`R/simulation_functions/simulate_X.R`):
+  - Constructs expression values from `W %*% t(H)` with baseline expression and Gaussian noise.
+- `simulate_survival_from_XtW()` (`R/simulation_functions/simulate_survival.R`):
+  - Masks `W` to marker genes, creates factor scores, and simulates survival times/censoring.
+
+These functions are sourced at the top of `_targets_sims.R`, so edits to them automatically affect every run.
+
+## Data simulation knobs
+
+The knobs below control how simulated data are generated. The first group can be set per scenario via the `overrides` list in `SIMULATION_SCENARIOS` (because they are arguments to `simulate_desurv_scenario()`). The second group are lower-level knobs that require editing the simulation helper functions directly.
+
+### Scenario-level knobs (set via `overrides`)
+
+- `scenario`: selects a preset in `get_desurv_defaults()` (`R00`, `R0`, `R1`, `R2`, `R3`, `R4`).
+- `seed`: RNG seed for the scenario draw (overrides the replicate seed if supplied).
+- `G`: number of genes in the simulated expression matrix.
+- `N`: number of samples (patients).
+- `K`: number of latent factors.
+- `markers_per_factor`: number of marker genes per factor.
+- `B_size`: number of background genes (large shared loadings).
+- `noise_sd`: Gaussian noise standard deviation added to expression in `simulate_X()`.
+- `correlated_H`: whether to draw correlated factor scores in `simulate_H()`.
+- `rho_H`: correlation used when `correlated_H = TRUE`.
+- `beta`: length-`K` vector of survival coefficients (controls which factors are prognostic).
+- `baseline_hazard`: baseline event rate in the exponential survival model.
+- `censor_rate`: exponential censoring rate (higher values mean more censoring).
+- `survival_gene_n`: number of survival-associated genes per factor (if `NULL`, defaults to all marker genes).
+- `survival_marker_frac`: fraction of survival genes that are markers (if `NULL`, defaults to 1).
+- `shape_B`, `rate_B`: Gamma shape/rate for background loadings in `W`.
+- `shape_M`, `rate_M`: Gamma shape/rate for marker loadings in `W`.
+- `shape_cross`, `rate_cross`: Gamma shape/rate for cross-loadings in `W`.
+- `shape_noise`, `rate_noise`: Gamma shape/rate for noise gene loadings in `W`.
+- `marker_overlap`: fraction of markers in factors 2..K that overlap with factor 1.
+
+### Lower-level knobs (edit helper functions)
+
+- `simulate_H()` (`R/simulation_functions/simulate_H.R`):
+  - `gamma_shape`, `gamma_rate`: Gamma parameters for independent factor scores when `correlated = FALSE`.
+- `simulate_X()` (`R/simulation_functions/simulate_X.R`):
+  - `gene_baseline_mean`, `gene_baseline_sd`: per-gene baseline expression mean/sd added to `W %*% t(H)`.
+- `simulate_survival_from_XtW()` (`R/simulation_functions/simulate_survival.R`):
+  - `scale_scores`: standardize factor scores before applying `beta`.
+
+## Running the simulations
+
+Run the pipeline locally with:
+
+```{bash}
+Rscript -e 'targets::tar_make(callr_function = NULL, script = "_targets_sims.R")'
+```
+
+For batch runs, use `submit_targets_sims.R` or `_targets_sims.sh`, which wrap `tar_make()` with Slurm-friendly settings.

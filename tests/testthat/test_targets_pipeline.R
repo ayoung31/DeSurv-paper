@@ -24,19 +24,10 @@ skip_if_pipeline_data_missing <- function() {
 }
 
 test_that("targets manifest loads and includes core pipeline targets", {
-  skip_if_packages_unavailable(c("targets", "tarchetypes", "crew", "gert"))
+  skip_if_packages_unavailable(c("targets", "tarchetypes", "crew", "crew.cluster", "gert"))
   skip_if_pipeline_data_missing()
 
   manifest <- local({
-    old <- Sys.getenv("DESURV_LOCAL_RENDER", unset = NA_character_)
-    on.exit({
-      if (is.na(old)) {
-        Sys.unsetenv("DESURV_LOCAL_RENDER")
-      } else {
-        Sys.setenv(DESURV_LOCAL_RENDER = old)
-      }
-    }, add = TRUE)
-    Sys.setenv(DESURV_LOCAL_RENDER = "1")
     project_root <- normalizePath(file.path(testthat::test_path(), "..", ".."))
     withr::with_dir(project_root, {
       targets::tar_manifest(script = file.path(project_root, "_targets.R"))
@@ -49,8 +40,7 @@ test_that("targets manifest loads and includes core pipeline targets", {
     "bo_config",
     "run_config",
     "val_config",
-    "bo_bundle",
-    "bo_bundles",
+    "tar_bo_bundle",
     "run_bundle",
     "run_bundles",
     "val_run_bundle",
@@ -62,19 +52,10 @@ test_that("targets manifest loads and includes core pipeline targets", {
 })
 
 test_that("targets manifest captures split/external validation behavior", {
-  skip_if_packages_unavailable(c("targets", "tarchetypes", "crew", "gert"))
+  skip_if_packages_unavailable(c("targets", "tarchetypes", "crew", "crew.cluster", "gert"))
   skip_if_pipeline_data_missing()
 
   manifest <- local({
-    old <- Sys.getenv("DESURV_LOCAL_RENDER", unset = NA_character_)
-    on.exit({
-      if (is.na(old)) {
-        Sys.unsetenv("DESURV_LOCAL_RENDER")
-      } else {
-        Sys.setenv(DESURV_LOCAL_RENDER = old)
-      }
-    }, add = TRUE)
-    Sys.setenv(DESURV_LOCAL_RENDER = "1")
     project_root <- normalizePath(file.path(testthat::test_path(), "..", ".."))
     withr::with_dir(project_root, {
       targets::tar_manifest(script = file.path(project_root, "_targets.R"))
@@ -87,26 +68,17 @@ test_that("targets manifest captures split/external validation behavior", {
 })
 
 test_that("targets manifest includes tagged results paths", {
-  skip_if_packages_unavailable(c("targets", "tarchetypes", "crew", "gert"))
+  skip_if_packages_unavailable(c("targets", "tarchetypes", "crew", "crew.cluster", "gert"))
   skip_if_pipeline_data_missing()
 
   manifest <- local({
-    old <- Sys.getenv("DESURV_LOCAL_RENDER", unset = NA_character_)
-    on.exit({
-      if (is.na(old)) {
-        Sys.unsetenv("DESURV_LOCAL_RENDER")
-      } else {
-        Sys.setenv(DESURV_LOCAL_RENDER = old)
-      }
-    }, add = TRUE)
-    Sys.setenv(DESURV_LOCAL_RENDER = "1")
     project_root <- normalizePath(file.path(testthat::test_path(), "..", ".."))
     withr::with_dir(project_root, {
       targets::tar_manifest(script = file.path(project_root, "_targets.R"))
     })
   })
 
-  training_cmd <- manifest$command[manifest$name == "training_results_dir"]
+  training_cmd <- manifest$command[manifest$name == "tar_training_results_dir"]
   bo_cmd <- manifest$command[manifest$name == "bo_results_dir"]
   expect_true(any(grepl("run_config\\$path_tag", training_cmd)))
   expect_true(any(grepl("bo_config\\$path_tag", bo_cmd)))
