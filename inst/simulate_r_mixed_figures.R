@@ -37,9 +37,26 @@ set.seed(101)
 sim <- simulate_desurv_scenario(
   scenario = "R_mixed",
   seed = 101,
+  # shape_B = 1,
+  # rate_B = 20,
   survival_gene_n = 150,
-  survival_marker_frac = 0.7 # 70% markers, 30% background
+  survival_marker_frac = 0.1 # % marker
 )
+marker_surv_genes = intersect(sim$survival_gene_sets[[1]],sim$marker_sets[[1]])
+back_surv_genes = setdiff(sim$survival_gene_sets[[1]],sim$marker_sets[[1]])
+
+dfit0 = desurv_fit(X=sim$X,y=sim$time,d=sim$status,k=3,
+                   alpha=.7,lambda=.3,nu=.99,lambdaW=0,lambdaH=0,ninit=50,maxit=3000,tol=1e-7)
+
+keep=which(rowSums(sim$X)>0)
+nfit = nmf(sim$X[keep,],3,method="lee",nrun = 30)
+tops=get_top_genes(nfit@fit@W,150)$top_genes
+tops=get_top_genes(dfit0$W,150)$top_genes
+intersect(tops[,3],sim$survival_gene_sets$Factor1)
+intersect(tops[,1],marker_surv_genes)
+intersect(tops[,1],back_surv_genes)
+intersect(tops[,1],sim$marker_sets[[2]])
+
 
 expr_vals <- as.vector(sim$X)
 if (length(expr_vals) > 200000) {
