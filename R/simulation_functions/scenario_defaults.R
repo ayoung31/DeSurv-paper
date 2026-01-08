@@ -19,7 +19,7 @@ get_desurv_defaults <- function(scenario) {
       rho_H = 0.0,
       beta = c(0.0, 0.0, 0.0),  # lethal = Factor1
       baseline_hazard = 0.05,
-      censor_rate = 0.02,lp
+      censor_rate = 0.02,
       shape_B = 2,  rate_B = 1.0,   # modest background
       shape_M = 3,  rate_M = 0.8,   # strong markers
       shape_cross = 1, rate_cross = 20,

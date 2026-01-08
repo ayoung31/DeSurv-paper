@@ -13,6 +13,10 @@ NMF_*/
 store_*/
 data/
 
+#other
+old/
+R/old/
+
 # ---- results / generated data ----
 results/
 reports/
