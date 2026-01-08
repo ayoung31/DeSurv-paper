@@ -1,4 +1,4 @@
-plot_survival <- function(data, factors, cluster_name) {
+plot_survival <- function(data, factors, cluster_name, sample_filter = NULL) {
   library(tidyr)
   library(dplyr)
   library(stringr)
@@ -7,9 +7,21 @@ plot_survival <- function(data, factors, cluster_name) {
   library(ggpubr)
 
   if (!"sampInfo" %in% names(data)) stop("data must contain 'sampInfo'")
-  
-  sampInfo <- data$sampInfo %>%
-    dplyr::filter(whitelist)
+
+  sampInfo <- data$sampInfo
+
+  # Finding 3 fix: Use explicit sample_filter parameter instead of undefined 'whitelist'
+ # If sample_filter is provided as a logical vector, use it; otherwise keep all samples
+  if (!is.null(sample_filter)) {
+    if (is.logical(sample_filter) && length(sample_filter) == nrow(sampInfo)) {
+      sampInfo <- sampInfo[sample_filter, , drop = FALSE]
+    } else if (is.character(sample_filter) || is.numeric(sample_filter)) {
+      sampInfo <- sampInfo[sample_filter, , drop = FALSE]
+    }
+  }
+
+  # Remove samples with NA cluster assignment (e.g., those filtered during clustering)
+  sampInfo <- sampInfo[!is.na(sampInfo[[cluster_name]]), , drop = FALSE]
   
   sampInfo$cluster <- sampInfo[[cluster_name]]
   

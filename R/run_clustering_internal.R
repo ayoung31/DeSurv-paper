@@ -54,20 +54,33 @@ run_clustering_internal <- function(tops, data, gene_lists, color.lists = NULL, 
     
     
     # --- Annotate and plot ---
+    # Finding 4 fix: Store filtered sample indices for proper label alignment
+    filtered_sample_ids <- colnames(Xtemp)
+
     for (k in 2:length(clus_res$clusCol)) {
       class <- clus_res$clusCol[[k]]$consensusClass
       clus_name <- paste0(name, "_with_", k, "clusters")
-      
+
+      # Finding 4 fix: Only assign cluster labels to filtered samples
+      # Initialize all samples as NA, then fill in filtered samples
       data$sampInfo[[clus_name]] <- NA
-      data$sampInfo[[clus_name]] <- class
-      
+      sample_match <- match(filtered_sample_ids, rownames(data$sampInfo))
+      data$sampInfo[[clus_name]][sample_match] <- class
+
       if (plot) {
-        plot_heatmap(Xtemp=Xtemp, tops=tops, data=data, 
-                     clusCol=clus_res$clusCol[[k]], 
-                     clusRow=clus_res$clusRow[[length(facs)]], 
-                     cluster_name=clus_name, factors=facs,
-                     save=FALSE)
-        plot_survival(data=data, factors=facs, cluster_name=clus_name)
+        # Finding 2 fix: Use correct signature for plot_heatmap
+        # First argument is x (clustering result), then k, k_row, and Xtemp
+        clus_res$title <- clus_name
+        clus_res$facs <- facs
+        k_row <- if (!is.null(clus_res$clusRow) && length(facs) <= length(clus_res$clusRow)) {
+          length(facs)
+        } else {
+          NULL
+        }
+        if (!is.null(k_row)) {
+          plot_heatmap(x = clus_res, k = k, k_row = k_row, Xtemp = Xtemp)
+        }
+        plot_survival(data = data, factors = facs, cluster_name = clus_name)
       }
     }
   }

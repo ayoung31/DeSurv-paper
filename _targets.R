@@ -97,10 +97,15 @@ targets_list <- list(
   ),
   tar_target(
     data_val,
-    setNames(
-      lapply(val_datasets, load_data),
-      val_datasets
-    )
+    {
+      # Finding 6 fix: Explicitly depend on raw_data_val so changes to raw files
+      # invalidate this target
+      raw_data_val
+      setNames(
+        lapply(val_datasets, load_data),
+        val_datasets
+      )
+    }
   ),
   
   tar_target(
@@ -115,6 +120,8 @@ targets_list <- list(
     data_val_comb_filtered,
     {
       genes_train = rownames(data_filtered$ex)
+      # Finding 7 fix: Pass training transform_target to avoid recomputing
+      # quantile normalization target from validation data
       prep <- DeSurv::preprocess_data(
         X = data_val_comb$ex,
         y = data_val_comb$sampInfo$time,
@@ -123,6 +130,7 @@ targets_list <- list(
         samp_keeps = data_val_comb$samp_keeps,
         genes = genes_train,
         method_trans_train = METHOD_TRANS_TRAIN,
+        transform_target = data_filtered$transform_target,
         verbose = FALSE
       )
       prep$dataname <- data_val_comb$dataname

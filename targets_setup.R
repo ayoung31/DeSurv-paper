@@ -173,4 +173,14 @@ DESURV_NCORES_GRID <- pipeline_param("DESURV_NCORES_GRID", NINIT)
 
 # ---- Source helper functions ----
 purrr::walk(list.files("R", full.names = TRUE, pattern = "[.]R$"), source)
-load("data/derv/cmbSubtypes_formatted.RData")
+
+# Finding 6 fix: Define path as constant; actual loading should happen in a target
+# to track dependencies properly
+CMB_SUBTYPES_PATH <- "data/derv/cmbSubtypes_formatted.RData"
+
+# Load for backwards compatibility with code that expects cmbSubtypes to be available
+# at setup time. For proper dependency tracking, prefer using the
+# cmb_subtypes_file target and tar_load() in targets that need it.
+if (file.exists(CMB_SUBTYPES_PATH)) {
+  load(CMB_SUBTYPES_PATH)
+}

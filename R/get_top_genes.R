@@ -1,16 +1,25 @@
-get_top_genes <- function(W,ntop) {
-  maxes = apply(W,2,max)
-  W = W[,maxes>0,drop=FALSE]
-  
-  if(ncol(W)>0){
-    if(ncol(W)>1){
-      W = W%*%diag(1/apply(W,2,max))
-    }else{
-      W = W/apply(W,2,max)
+get_top_genes <- function(W, ntop) {
+  maxes <- apply(W, 2, max)
+  W <- W[, maxes > 0, drop = FALSE]
+
+  if (ncol(W) > 0) {
+    if (ncol(W) > 1) {
+      W <- W %*% diag(1 / apply(W, 2, max))
+    } else {
+      W <- W / apply(W, 2, max)
     }
-    
+
     if (is.null(W) || !is.matrix(W)) stop("W must be a non-null matrix.")
-    if (ntop > nrow(W)) stop("ntop exceeds number of genes available.")
+
+    # Finding 9 fix: Clamp ntop instead of hard-stopping
+    # This matches the DeSurv package behavior
+    if (ntop > nrow(W)) {
+      warning(sprintf(
+        "ntop (%d) exceeds number of genes available (%d). Using all genes.",
+        ntop, nrow(W)
+      ))
+      ntop <- nrow(W)
+    }
     
     top_genes <- list()
     top_diffs <- list()

@@ -1,7 +1,11 @@
 # Run consensus clustering on samples or genes
+#
+# Finding 5 fix: Added weightsFeature parameter for gene weights when clustering rows
+# Finding 5 fix: Compute distance matrix using the specified distance metric
 run_consensus_clustering <- function(mat, maxK, reps, pItem, pFeature, seed,
                                      clusterAlg, distance, cluster_by = "col",
-                                     weightsItem = NULL, dir = NULL) {
+                                     weightsItem = NULL, weightsFeature = NULL,
+                                     dir = NULL) {
   if (is.null(dir) || length(dir) != 1 || is.na(dir) || !nzchar(dir)) {
     dir <- file.path(tempdir(), "desurv_clustering")
   }
@@ -12,7 +16,7 @@ run_consensus_clustering <- function(mat, maxK, reps, pItem, pFeature, seed,
   }
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
   dir <- normalizePath(dir, mustWork = TRUE, winslash = "/")
-  
+
   cluster_label <- if (identical(cluster_by, "row")) "genes" else "subjects"
   pdf_file <- file.path(dir, paste0(cluster_label, ".pdf"))
   ccp_folder_name <- paste0(cluster_label, "_ccp")
@@ -20,17 +24,26 @@ run_consensus_clustering <- function(mat, maxK, reps, pItem, pFeature, seed,
   if (dir.exists(ccp_output_dir)) {
     unlink(ccp_output_dir, recursive = TRUE)
   }
-  
+
   old_wd <- getwd()
   on.exit(setwd(old_wd), add = TRUE)
   setwd(dir)
-  
+
   mat <- as.matrix(mat)
   if (cluster_by == "row") {
     mat <- t(mat)
   }
-  dmat <- as.dist(1 - cor(mat, method = "pearson"))
-  
+
+  # Finding 5 fix: Compute distance matrix using the specified distance metric
+  # Support common distance types: pearson, spearman (correlation-based),
+  # or standard dist() metrics (euclidean, manhattan, etc.)
+  if (distance %in% c("pearson", "spearman")) {
+    dmat <- as.dist(1 - cor(mat, method = distance))
+  } else {
+    # Use standard distance metrics via dist()
+    dmat <- dist(t(mat), method = distance)
+  }
+
   grDevices::pdf(file = pdf_file)
   close_pdf <- TRUE
   on.exit({
@@ -38,20 +51,30 @@ run_consensus_clustering <- function(mat, maxK, reps, pItem, pFeature, seed,
       grDevices::dev.off()
     }
   }, add = TRUE)
-  
+
+  # Finding 5 fix: Use correct weights parameter based on clustering direction
+  # - cluster_by = "col" (samples): weightsItem = sample weights, weightsFeature = gene weights
+  # - cluster_by = "row" (genes): after transpose, weightsItem = gene weights, weightsFeature = sample weights
   if (cluster_by == "row") {
+    # Clustering genes (rows of original matrix)
+    # After transpose: "items" are genes, "features" are samples
     result <- ConsensusClusterPlus::ConsensusClusterPlus(
       dmat, maxK,
       reps = reps, pItem = pItem, pFeature = pFeature,
-      seed = seed, clusterAlg = clusterAlg, distance = distance,
-      weightsFeature = weightsItem, plot = "pdf", title = ccp_folder_name
+      seed = seed, clusterAlg = clusterAlg, distance = "precomputed",
+      weightsItem = weightsFeature,  # Gene weights (now items after transpose)
+      weightsFeature = weightsItem,  # Sample weights (now features after transpose)
+      plot = "pdf", title = ccp_folder_name
     )
   } else {
+    # Clustering samples (columns of original matrix)
     result <- ConsensusClusterPlus::ConsensusClusterPlus(
       dmat, maxK,
       reps = reps, pItem = pItem, pFeature = pFeature,
-      seed = seed, clusterAlg = clusterAlg, distance = distance,
-      weightsItem = weightsItem, plot = "pdf", title = ccp_folder_name
+      seed = seed, clusterAlg = clusterAlg, distance = "precomputed",
+      weightsItem = weightsItem,     # Sample weights
+      weightsFeature = weightsFeature,  # Gene weights
+      plot = "pdf", title = ccp_folder_name
     )
   }
   

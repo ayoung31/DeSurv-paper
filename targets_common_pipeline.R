@@ -642,6 +642,8 @@ COMMON_DESURV_TARGETS <- list(
             dataset <- datasets_named[[idx]]
             dataname <- names(datasets_named)[idx]
             gene_arg <- if (USE_TRAIN_GENES_FOR_VAL) rownames(data_filtered$ex) else NULL
+            # Finding 7 fix: Pass training transform_target to avoid recomputing
+            # quantile normalization target from validation data
             prep <- DeSurv::preprocess_data(
               X = dataset$ex,
               y = dataset$sampInfo$time,
@@ -651,6 +653,7 @@ COMMON_DESURV_TARGETS <- list(
               genes = gene_arg,
               ngene = ngene_value,
               method_trans_train = METHOD_TRANS_TRAIN,
+              transform_target = data_filtered$transform_target,
               verbose = FALSE
             )
             prep$dataname <- dataname
