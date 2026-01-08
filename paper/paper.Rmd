@@ -1,3 +1,4 @@
+---
 title: Survival driven deconvolution (deSurv) reveals prognostic and interpretable cancer subtypes
   # Use letters for affiliations, numbers to show equal authorship (if applicable) and to indicate the corresponding author
 author:
@@ -34,7 +35,7 @@ abstract: |
   Molecular subtyping in cancer is an ongoing problem that relies on the identification of robust and replicable gene signatures. While transcriptomic profiling has revealed recurrent gene expression patterns in various types of cancer, the prognostic value of these signatures is typically evaluated in retrospect. This is due to the reliance on unsupervised learning methods for identifying cell-type-specific signals and clustering patients into molecular subtypes. Here we present a Survival-driven Deconvolution tool (deSurv) that integrates bulk RNA-sequencing data with patient survival information to identify cell-type-enriched gene signatures associated with prognosis. Applying deSurv to various cohorts in pancreatic cancer, we uncover prognostic and biologically interpretable subtypes that reflect the complex interactions between stroma, tumor, and immune cells in the tumor microenvironment. Our approach highlights the value of using patient outcomes during gene signature discovery.
 
 significance: |
-Tumor transcriptomes reflect mixtures of malignant and microenvironmental cell populations, making it challenging to identify the molecular programs that truly drive clinical outcomes. Existing deconvolution and matrix factorization methods discover latent transcriptional programs but do not ensure that these programs are prognostic, while supervised extensions optimized for prediction offer limited biological interpretability. We present DeSurv, a survival-supervised deconvolution framework that integrates nonnegative matrix factorization with Cox modeling to jointly learn biologically coherent gene programs and their associations with patient survival. By embedding outcome information directly into the discovery process and performing automatic model selection, DeSurv reveals clinically relevant transcriptional programs that are reproducible across cohorts. This approach advances the statistical foundations of tumor deconvolution and provides a general tool for identifying actionable molecular drivers of disease progression.
+  Tumor transcriptomes reflect mixtures of malignant and microenvironmental cell populations, making it challenging to identify the molecular programs that truly drive clinical outcomes. Existing deconvolution and matrix factorization methods discover latent transcriptional programs but do not ensure that these programs are prognostic, while supervised extensions optimized for prediction offer limited biological interpretability. We present DeSurv, a survival-supervised deconvolution framework that integrates nonnegative matrix factorization with Cox modeling to jointly learn biologically coherent gene programs and their associations with patient survival. By embedding outcome information directly into the discovery process and performing automatic model selection, DeSurv reveals clinically relevant transcriptional programs that are reproducible across cohorts. This approach advances the statistical foundations of tumor deconvolution and provides a general tool for identifying actionable molecular drivers of disease progression.
 
 acknowledgements: |
   Please include your acknowledgments here, set in a single paragraph. Please do not include any acknowledgments in the Supporting Information, or anywhere else in the manuscript.
@@ -45,6 +46,12 @@ keywords:
   - optional
   - optional
   - optional
+
+params:
+  tar_store: ~
+  bo_label: ~
+  run_label: ~
+  val_label: ~
 
 ## must be one of: pnasresearcharticle (usual two-column layout), pnasmathematics (one column layout), or pnasinvited (invited submissions only)
 pnas_type: pnasresearcharticle
@@ -88,7 +95,7 @@ knitr::opts_chunk$set(
 
 ```{r targets-store, include=FALSE}
 library(targets)
-tar_config_set(store = "store_PKG_VERSION=HEAD_GIT_BRANCH=new_init")
+tar_config_set(store = "store_PKG_VERSION=tie_handling_GIT_BRANCH=main")
 ```
 
 

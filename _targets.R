@@ -255,6 +255,22 @@ targets_list <- tar_map(
 )
 
 c(
+  # tar_target(
+  #   version_info,
+  #   {
+  #     list(
+  #       desurv = list(
+  #         branch = gert::git_branch(repo = "../DeSurv"),
+  #         commit = gert::git_log(repo = "../DeSurv", max = 1)$commit,
+  #         date = Sys.time()
+  #       ),
+  #       paper = list(
+  #         branch = gert::git_branch(),
+  #         commit = gert::git_log(max = 1)$commit
+  #       )
+  #     )
+  #   }
+  # ),
   targets_list
   # COMMON_DESURV_BO_TARGETS,
   # COMMON_DESURV_RUN_TARGETS,

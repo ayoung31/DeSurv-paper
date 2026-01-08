@@ -1,0 +1,646 @@
+```{r setup}
+library(targets)
+library(dplyr)
+library(ggplot2)
+library(survival)
+library(survminer)
+library(cowplot)
+library(enrichplot)
+library(magick)
+library(Seurat)
+library(gt)
+library(VAM)
+library(grid)
+library(viridis)
+library(ggplotify)
+
+PKG_VERSION        = utils::packageDescription("DeSurv", fields = "RemoteRef")
+GIT_BRANCH         = gert::git_branch()
+store=paste0("store_PKG_VERSION=",PKG_VERSION,"_GIT_BRANCH=",GIT_BRANCH)
+tar_config_set(store=store)
+tar_load_globals()
+ntop = params$ntop
+ngene = params$ngene
+
+```
+
+
+## Model Overview
+
+We have developed an integrated framework, DeSurv, that couples Nonnegative Matrix Factorization (NMF) with Cox proportional hazards regression to identify latent gene-expression programs associated with patient survival (Fig. 1). The model takes as input a bulk expression matrix of $p$ genes by $n$ patients ($X_{Train}$) together with corresponding survival times ($y_{Train}$) and censoring indicators ($\delta_{Train}$) (Fig 1A). 
+
+DeSurv optimizes a joint objective combining the NMF reconstruction loss and the Cox model's log-partial likelihood, weighted by a supervision parameter ($\alpha$) that determines the relative contribution of each term (Fig 1B):
+\begin{equation}
+  (1-\alpha) \mathcal{L}_{NMF}(X_{Train} \approx WH) + \alpha \mathcal{L}_{Cox}(X_{Train}^TW\beta,y_{Train},\delta_{Train})
+\end{equation}
+When $\alpha=0$, the method reduces to standard unsupervised NMF; when $\alpha>0$, survival information directly guides the learned factors toward prognostic structure. 
+
+Within this framework, the product ($X_{Train}^TW$) represents patient-level factor scores - the inferred burden of each latent program across subjects. These factor scores serve as covariates in the Cox model, and their regression coefficients ($\beta$) indicate whether higher activity of a given program corresponds to improved or reduced survival. 
+
+Model training yields gene weights ($\hat{W}$), factor loadings ($\hat{H}$), and Cox coefficients ($\hat{\beta}$) (Fig 1C), where the inner dimension ($k$) specifies the number of latent factors. Genes with high loadings in one factor and low loadings in all others define the factor-specific signature genes (Fig. 1D). By integrating survival supervision into the factorization, DeSurv not only reconstructs the underlying expression structure, preserving biologial interpretability, but also guides latent factors to be prognostically informative. Subsequent analyses can therefore focus on the survival-associated gene programs (Fig. 1E).
+```{r fig-schema, fig.cap="DeSurv overview. Overview of the DeSurv training pipeline. A. The input is a preprocessed bulk gene expression matrix and patient survival outcomes. B. The Desurv model optimizes a joint NMF + Cox loss function. C. The DeSurv model estimates three quantities: Gene weights matrix (W), Subject loadings matrix (H), and regression coefficients from the Cox model (beta). D. We extract the exemplar genes from each signature in the gene weights matrix. E. The exemplar genes from survival associated factors provide prognostic gene signatures.", fig.env='figure*', fig.pos='t', out.height= "4in", out.width='\\textwidth'}
+
+knitr::include_graphics("/work/users/a/y/ayoung31/DeSurv-paper/figures/model_schematic_training.pdf")
+```
+
+
+## Bayesian optimisation tunes the NMF rank (k) and supervision parameter ($\alpha$)
+Instead of exhaustively evaluating a cross-validation grid, we now couple DeSurv
+with Bayesian optimisation (BO) to explore the joint space of $k$, $\alpha$,
+and the penalty weights. Each BO evaluation runs a full cross-validation of a
+single parameter setting, and a Gaussian-process surrogate proposes new
+configurations that improve the mean validation C-index. The initial Latin
+hypercube design seeds the surrogate with diverse evaluations, and the
+sequential phase rapidly concentrates on high-performing regions. Figure
+\@ref(fig:fig-bo)B illustrates how C-index improves over the course of the BO
+run, while Figure \@ref(fig:fig-bo)C overlays all tested parameter combinations
+to highlight the neighbourhood around the selected $k=3$ and $\alpha=0.7$.
+
+For comparison, we still report the standard NMF heuristics that are typically
+used when a supervised objective is unavailable (Fig. \@ref(fig:fig-bo)D). These
+metrics disagree on the optimal rank, underscoring the benefit of the
+Bayesian-optimised DeSurv procedure, which converges on a compact model that
+maximises held-out concordance.
+```{r fig-bo, fig.width = 6, fig.height= 5.5, fig.cap="A. Overview of the DeSurv training and Bayesian optimisation workflow. B. Mean validation C-index achieved at each Bayesian-optimisation evaluation; the star marks the final configuration. C. Parameter combinations explored by Bayesian optimisation, coloured by validation C-index. D. Conventional NMF diagnostics (cophenetic, dispersion, residuals, explained variance, silhouette, and sparseness) illustrating the absence of a clear consensus rank in the unsupervised setting." , fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
+tar_load_globals()
+
+bo_hist = "desurv_bo_history"
+tar_load(bo_hist)
+bo_history_path = get(bo_hist)
+rm(list=bo_hist)
+bo_history = read.csv(bo_history_path, stringsAsFactors = FALSE)
+bo_history = bo_history[order(bo_history$eval_id), , drop = FALSE]
+bo_history = bo_history[bo_history$status == "ok" & !is.na(bo_history$mean_cindex), , drop = FALSE]
+bo_history$evaluation = seq_len(nrow(bo_history))
+bo_history$stage = factor(
+  bo_history$stage,
+  levels = c("init", "bo"),
+  labels = c("Initial design", "BO iteration")
+)
+bo_history$is_best = FALSE
+if (nrow(bo_history) > 0) {
+  bo_history$is_best[which.max(bo_history$mean_cindex)] = TRUE
+}
+
+best_p = "params_best"
+tar_load(best_p)
+best_params = get(best_p)
+rm(list=best_p)
+
+fit_s = "fit_std"
+tar_load(fit_s)
+fit_std = get(fit_s)
+rm(list=fit_s)
+
+traj_plot = ggplot(bo_history, aes(x = evaluation, y = mean_cindex, color = stage)) +
+  geom_line(linewidth = 0.4) +
+  geom_point(size = 2) +
+  geom_point(
+    data = subset(bo_history, is_best),
+    shape = 8,
+    size = 3,
+    color = "black",
+    stroke = 1
+  ) +
+  theme_minimal(base_size = 9) +
+  labs(x = "Evaluation", y = "Mean validation C-index", color = NULL) +
+  theme(legend.position = "bottom")
+
+param_plot = ggplot(bo_history, aes(x = k, y = alpha, color = mean_cindex, shape = stage)) +
+  geom_point(size = 2.5) +
+  scale_color_viridis_c(option = "magma", direction = -1) +
+  theme_minimal(base_size = 9) +
+  labs(x = "k", y = expression(alpha), color = "Mean C-index", shape = NULL) +
+  theme(legend.position = "bottom")
+
+bo_panel = plot_grid(traj_plot, param_plot, labels = c("B", "C"), ncol = 2)
+
+plots_std = plot(fit_std,what=c("cophenetic","dispersion","evar","residuals","silhouette","sparseness"),
+                 main=NULL,xlab="Rank (k)")+
+  theme_minimal(base_size = 9)+
+  theme(panel.grid.minor.x = element_blank(),
+        legend.position = "bottom")+
+  scale_x_continuous(breaks=seq(2,12,by=2))+
+  guides(color = guide_legend(nrow = 2, byrow = TRUE))
+
+img = image_read_pdf("figures/model_schematic_cv.pdf",density=300)
+pdf_panel <- ggdraw() + draw_image(img)
+
+plot_grid(pdf_panel,
+          bo_panel,
+          plots_std,
+          nrow = 3,
+          labels = c("A", "", "D"),
+          rel_heights=c(2,1.5,1.5))
+```
+
+## DeSurv provides biologically interpretable gene signatures
+For the selected DeSurv model ($k=3, \alpha=0.7$), we identified the top 50 exemplar genes from each latent factor to characterize their underlying biological functions. Figures 3A–C summarize the results of an over-representation analysis (ORA) performed on these genes. The enrichment profiles reveal three distinct biological programs. Factor 1 is strongly enriched for immune-related pathways, including cytokine signaling, T-cell activation, and interferon response. Factor 2 shows enrichment for genes associated with normal pancreatic or exocrine function, suggesting that this component captures residual normal-tissue signal. Factor 3 is enriched for pathways linked to epithelial–mesenchymal transition, cell cycle progression, and KRAS signaling—features typically associated with the Basal-like subtype of pancreatic ductal adenocarcinoma (PDAC).
+
+Survival analysis of the factor signature scores on the training data demonstrates clear prognostic stratification. High expression of Factor 1 is associated with longer overall survival (HR = [x.xx], p = [p-value]), whereas Factor 3 is linked to significantly shorter survival (HR = [x.xx], p = [p-value]). These trends are consistent with known biology: immune-infiltrated tumors generally exhibit improved prognosis, while Basal-like tumors are aggressive and clinically refractory. Factor 2, corresponding to the normal/exocrine signal, shows no significant association with survival (HR = [x.xx], p = [p-value]), indicating that while this component contributes to reconstructing the expression variance, it does not carry prognostic information. This behavior illustrates a key property of DeSurv—its joint optimization ensures that the latent factors balance both survival relevance and expression reconstruction, preserving biologically necessary structure even when not directly linked to outcome.
+
+Figure 3D further examines the correlation between DeSurv factors and previously published PDAC gene signatures. Factor 1 aligns with the Classical tumor subtype, iCAF and restCAF stromal programs, and immune infiltration signatures, all of which are associated with favorable prognosis. In contrast, Factor 3 correlates with Basal-like tumor, myCAF, and proCAF stromal programs, which are generally linked to poor outcomes. These overlaps suggest that each factor represents a composite axis of tumor–stroma interaction, capturing biologically coherent programs that align with known PDAC ecosystems but arise de novo from the DeSurv model.
+```{r fig-bio, out.height= "4in", out.width='\\textwidth'}
+
+p1 = list()
+for(i in 1:best_params$k){
+  file=paste0("paper/figures/ORA_GO_FIGURES_",i,".pdf")
+  ORA_GO <- readRDS(paste0("paper/figures/ORA_GO_",i,".Rds"))
+  if(dim(ORA_GO@result)[1]>0){
+    p1[[i]] <- dotplot(ORA_GO, showCategory=10, label_format=100) +
+      # ggtitle(paste0("ORA Analysis Factor ",i))+
+      theme_minimal(base_size = 12)+
+      theme(
+        panel.border = element_rect(color = "black", fill = NA, linewidth=.5),
+                                plot.margin = margin(0, 5, 0, 5)
+      )
+    
+  }else{
+    p1[[i]] = NULL
+  }
+}
+
+all_dat <- do.call(rbind, lapply(p1, function(p) p$data))
+
+x_max   <- max(all_dat$GeneRatio, na.rm = TRUE)
+col_min <- min(all_dat$p.adjust, na.rm = TRUE)
+col_max <- max(all_dat$p.adjust, na.rm = TRUE)
+size_min <- min(all_dat$Count, na.rm = TRUE)
+size_max <- max(all_dat$Count, na.rm = TRUE)
+
+make_equal_scales <- function(p) {
+  p +
+    scale_x_continuous(limits = c(0, x_max)) +
+    scale_color_viridis_c(
+      limits = c(col_min, col_max),
+      direction = -1,  # smaller p.adjust = brighter
+      name = "Adjusted p-value"
+    ) +
+    scale_size_continuous(
+      limits = c(size_min, size_max),
+      name = "Gene count"
+    ) +
+    theme(legend.position = "none")
+}
+
+
+
+p1_eq <- make_equal_scales(p1[[1]])
+p2_eq <- make_equal_scales(p1[[2]])
+p3_eq <- make_equal_scales(p1[[3]])
+
+p_for_legend <- p1[[1]] +
+  scale_x_continuous(limits = c(0, x_max)) +
+  scale_color_viridis_c(limits = c(col_min, col_max),
+                        direction = -1, name = "Adjusted p-value") +
+  scale_size_continuous(limits = c(size_min, size_max),
+                        name = "Gene count") +
+  theme(
+    legend.position = "right",
+    legend.box = "vertical",
+    legend.title = element_text(size = 10),
+    legend.text  = element_text(size = 8)
+  )
+
+legend_shared <- get_legend(p_for_legend)
+
+dplots=plot_grid(p1_eq,p2_eq,p3_eq,nrow=3,align="v",axis="l")
+
+dplots2=plot_grid(
+  dplots,
+  legend_shared,
+  ncol = 2,
+  rel_widths = c(1, 0.25)
+)
+
+tar_load(fit_consensus)
+top_genes$deCAF = list(proCAF=c("IGFL2","NOX4","VSNL1","BICD1","NPR3","ETV1","ITGA11","CNIH3","COL11A1"),                    restCAF=c("CHRDL1","OGN","PI16","ANK2","ABCA8","TGFBR3","FBLN5","SCARA5","KIAA1217"))
+names(top_genes)[3] = "Moffitt"
+names(top_genes)[4] = "Moffitt"
+names(top_genes)[13] = "SCISSORS"
+names(top_genes)[16] = "SCISSORS" 
+names(top_genes)[12] = "Elyada"
+temp=purrr::list_flatten(top_genes)
+ref_sigs=temp[!startsWith(names(temp),"Bailey") & !grepl("peri",names(temp)) & !startsWith(names(temp),"DECODER") & !startsWith(names(temp),"MSI") & !startsWith(names(temp),"PurISS")]
+
+W=fit_consensus$W
+common_genes <- Reduce(intersect, list(rownames(W), unique(unlist(ref_sigs))))
+W <- W[common_genes, , drop = FALSE]
+
+# initialize result matrix
+cor_mat <- matrix(NA, nrow = ncol(W), ncol = length(ref_sigs),
+                  dimnames = list(colnames(W), names(ref_sigs)))
+
+# compute correlations
+for (j in seq_len(ncol(W))) {
+  wj <- W[, j]
+  for (k in seq_along(ref_sigs)) {
+    vk <- as.numeric(common_genes %in% ref_sigs[[k]])
+    cor_mat[j, k] <- cor(wj, vk, method = "spearman")
+  }
+}
+
+keep=apply(t(cor_mat),1,function(x) !any(is.na(x)))
+mat=t(cor_mat[,which(keep)])
+pheatmap::pheatmap(pmin(mat,.2),cluster_cols = FALSE)
+my_colors <- colorRampPalette(c("blue", "white", "red"))(100)
+ph = pheatmap::pheatmap(mat[,c(1,3)],
+                   cluster_cols = FALSE,
+                   color = my_colors,
+                   breaks = seq(-.4, .4, length.out = 101))
+ph_grob <- ph$gtable
+pheat = ggdraw(ph_grob)
+plot_grid(dplots2,pheat,ncol=2,rel_widths = c(2,1))
+
+```
+
+
+
+## Clustering patients from external cohorts on DeSurv gene signatures produces prognostic subtypes
+To evaluate the generalizability of DeSurv-derived prognostic signatures, we applied the exemplar genes from the survival-associated factors in the trained model (Factors 1 and 3) to multiple independent PDAC cohorts—including Dijk, PACA-AU (RNA-seq and microarray), Moffitt, and Puleo datasets—using their bulk gene-expression profiles. Unsupervised consensus clustering was performed on each cohort based on the expression of these prognostic genes. Three clusters were selected as the optimal solution, supported by inspection of the cumulative distribution function (CDF) plots, relative change in area under the CDF curve, consensus heatmaps, and cluster consensus scores (Fig. SX). Importantly, the number of clusters was determined without incorporating any survival information, ensuring an unbiased evaluation of downstream prognostic performance.
+
+Expression heatmaps of the DeSurv prognostic signatures revealed three distinct transcriptional patterns across the external cohorts (Fig. XA). Cluster 1 displayed high expression of the basal-like (Factor 3) gene set; Cluster 2 showed elevated expression of the immune/iCAF (Factor 1) signature and reduced basal activity; and Cluster 3 exhibited intermediate expression of both programs. These patterns suggest that survival prediction is primarily driven by the presence or absence of basal and immune/iCAF programs, rather than by a reciprocal contrast between basal versus classical tumor states or iCAF versus myCAF stromal signatures.
+
+Additionally, DeSurv-derived clusters showed strong correspondence with established molecular classifiers. Column annotations in Fig. XA and the contingency table in Fig. XB demonstrate substantial overlap with PurIST and DeCAF subtype labels: for example, X% of patients in Cluster 1 were classified as PurIST Basal-like and DeCAF proCAF, X% of Cluster 2 as Classical + restCAF, and X% of Cluster 3 as Classical + proCAF. The rarity of the Basal + restCAF subtype likely contributes to the discovery of 3 rather than 4 clusters. A chi-squared test confirmed a significant association between the DeSurv-defined clusters and existing classifier labels ($\chi^2$=X.XX, p = [value]).
+
+We next assessed the prognostic relevance of these clusters using overall survival data from the external cohorts (Fig. XC–D). Because DeSurv was trained exclusively on the TCGA-PAAD and CPTAC datasets—without access to the expression or outcome data of the external cohorts—this analysis represents an independent validation of the model’s predictive generalizability. Kaplan–Meier analysis demonstrated that the DeSurv-derived clusters were strongly associated with survival (p = [value]). As expected, the Basal-like cluster (Cluster X) was associated with the poorest survival, the Classical + restCAF cluster (Cluster X) exhibited the most favorable outcomes, and the Classical + proCAF cluster (Cluster X) showed intermediate survival. This pattern mirrors previous findings describing the interplay between tumor-intrinsic and stromal subtypes in PDAC (e.g., [cite Decoder]), supporting the robustness and biological validity of the DeSurv-derived signatures.
+```{r fig-clus}
+tar_load(aligned_clusters_desurv_50)
+clus=aligned_clusters_desurv_50
+tar_load(tops_desurv_50)
+tops_desurv=tops_desurv_50
+tar_load(data_val)
+tar_load(selected_factors_desurv_50)
+tbl=read.csv(selected_factors_desurv_50)
+factors=which(tbl$selected)
+
+sinfos=list()
+for(i in 1:5){
+  sinfos[[i]]=clus[[i]]$data$sampInfo
+}
+sampInfo=bind_rows(sinfos)
+
+fit = survfit(Surv(time,event)~samp_cluster,data=sampInfo)
+p=ggsurvplot(fit,data=sampInfo,pval = TRUE,risk.table = TRUE,
+             legend.labs=c("1","2","3"),legend.title="Cluster",
+             pval.coord=c(0,.05))
+ph1 = coxph(Surv(time,event)~as.factor(samp_cluster)+strata(dataset),data=sampInfo)
+
+
+for(i in 1:5){
+  data_val[[i]]$ex = data_val[[i]]$ex[,data_val[[i]]$samp_keeps]
+  data_val[[i]]$sampInfo = data_val[[i]]$sampInfo[data_val[[i]]$samp_keeps,]
+}
+
+ex=list()
+genes = list()
+samps = list()
+gene_clus = list()
+tops = unlist(tops_desurv$top_genes[,c(factors)])
+for(i in 1:5){
+  ex[[i]] = data_val[[i]]$ex
+  genes[[i]] = intersect(rownames(ex[[i]]),tops)
+  samps[[i]] = clus[[i]]$data$sampInfo
+  gene_clus[[i]] = clus[[i]]$clus_res$clusRow[[2]]$consensusClass
+}
+
+# genes = Reduce(intersect,lapply(gene_clus,function(x) names(x)))
+genes=Reduce(intersect,genes)
+ex=lapply(ex,function(x) t(scale(t(x[genes,]))))
+X = do.call('cbind',ex)
+X = X[genes,]
+sampInfo = do.call('rbind',samps)
+col_anno = data.frame(DeSurv_cluster=as.factor(sampInfo$samp_cluster),
+                      DeCAF = sampInfo$DeCAF,
+                      PurIST = sampInfo$PurIST,
+                      dataset=sampInfo$dataset
+)
+col_anno$DeCAF = ifelse(col_anno$DeCAF=="permCAF","proCAF","restCAF")
+rownames(col_anno) = colnames(X)
+X = X[,order(col_anno$DeSurv_cluster)]
+col_anno = col_anno[order(col_anno$DeSurv_cluster),]
+row_anno = data.frame(gene = genes)#,gene_cluster=as.factor(gene_clus[[1]][genes])
+row_anno$`DeSurv factor` = as.factor(ifelse(genes %in% tops_desurv$top_genes[,factors[1]],factors[1],factors[2]))
+rownames(row_anno) = row_anno$gene
+row_anno$gene = NULL
+X = X[order(row_anno$`DeSurv factor`),]
+row_anno = row_anno[order(row_anno$`DeSurv factor`),,drop=FALSE]
+
+annotation_colors = list(
+  `DeSurv factor`=c(
+    `1` = "lightgrey",
+    `3` = "black" 
+  ),
+  DeSurv_cluster = c(
+    `1` = "#F8766D",
+    `2` = "#00BA38",
+    `3` = "#619CFF"
+  ),
+  DeCAF = c(
+    `proCAF` = "violetred2",
+    `restCAF` = "cyan4"
+  ),
+  PurIST = c(
+    `Basal-like` = "orange",
+    `Classical` = "blue"
+  ),
+  dataset = c(
+    `Dijk` = "slateblue1",
+    `Moffitt_GEO_array` = "springgreen4",
+    `PACA_AU_array` = "yellow3",
+    `PACA_AU_seq` = "coral",
+    `Puleo_array` = "dodgerblue3"
+  )
+)
+
+min_val = -2
+max_val = 4
+ncolors <- 200
+my_colors <- colorRampPalette(c("blue", "white", "red"))(ncolors)
+
+# Create symmetric breaks centered at 0
+breaks_centered <- c(
+  seq(min_val, 0, length.out = ceiling(ncolors / 2) + 1),
+  seq(0, max_val, length.out = floor(ncolors / 2) + 1)[-1]
+)
+
+ph = pheatmap(X,
+         annotation_col = col_anno,
+         annotation_row = row_anno,
+         annotation_colors = annotation_colors,
+         cluster_rows = FALSE,
+         cluster_cols = FALSE,
+         color = my_colors,
+         breaks = breaks_centered,
+         show_colnames = FALSE,
+         annotation_names_row = FALSE,
+         show_rownames = FALSE,
+         silent=TRUE)
+
+ph_grob <- ph$gtable
+pheat = ggdraw(ph_grob)
+
+
+sampInfo$subtype = ifelse(sampInfo$PurIST=="Basal-like","Basal-like",
+                          ifelse(sampInfo$DeCAF=="restCAF","Classical + restCAF","Classical + proCAF"))
+tbl=table(sampInfo$samp_cluster,sampInfo$subtype)
+tbl = as.matrix(tbl)
+# colnames(tbl) = c("Cluster","Subtype","Frequency")
+
+gt_tbl <- gt::gt(as.data.frame.matrix(tbl), rownames_to_stub = TRUE) |>
+  cols_width(
+    everything() ~ px(120)   # all columns 100 px wide
+  )%>%
+  tab_options(
+    table.font.size = px(18)    # or "large", or pct(120)
+  )%>%
+  cols_align(align = "center", columns = everything())%>%
+  # Color the middle cell (row 2, column B)
+  tab_style(
+    style = list(
+      cell_fill(color = "#F8766D"),    # light red background
+      cell_text(weight = "bold")       # bold text
+    ),
+    locations = cells_body(
+      rows = 1,                        # 2nd row
+      columns = `Basal-like`                 # column name
+    )
+  )%>%
+  # Color top-right cell (row 1, column C)
+  tab_style(
+    style = list(cell_fill(color = "#00BA38"),cell_text(weight = "bold")),  # light green
+    locations = cells_body(rows = 2, columns = `Classical + restCAF`)
+  ) |>
+  # Color bottom-left cell (row 3, column A)
+  tab_style(
+    style = list(cell_fill(color = "#619CFF"),cell_text(weight = "bold")),  # light blue
+    locations = cells_body(rows = 3, columns = `Classical + proCAF`)
+  )
+
+gt_tbl
+
+gtsave(gt_tbl, "figures/table.png")
+img <- image_read("figures/table.png")
+table_plot <- ggdraw() + draw_image(img)
+
+right=plot_grid(p$plot,p$table,nrow=2,rel_heights = c(4,2),labels=c("C.","D."))
+tab=plot_grid(table_plot,NULL,ncol=2,rel_widths = c(3,2))
+left=plot_grid(NULL,pheat,NULL,NULL,NULL,tab,rel_heights = c(4,.05,1),ncol=2,labels=c("A.","","B.",""),rel_widths=c(.1,1))
+plot_grid(left,right,rel_widths = c(4,2))
+
+```
+
+
+## Analysis of scRNA-seq 
+To assess represented cell types in each of the DeSurv derived signatures, we calculated VAM scores for each cell in the Elyada single-cell dataset. Figure 1A summarizes the cell-type clusters derived from SCISSORS on the Elyada data. We found that our DeSurv factor 1 signature was expressed primarily in iCAF and B cells, factor 2 was expressed in XXX, and factor 3 was expressed in Basal-like cells.
+
+```{r fig-sc, out.height= "8in", out.width='\\textwidth'}
+
+getVAM=function(sc,desurv_genesets){
+  #### vam score
+  DefaultAssay(sc) <- "RNA"   # or "SCT" if that’s what you used
+  
+  gene_ids <- rownames(sc)    # these should match your gene symbols
+  
+  gs_collection <- createGeneSetCollection(
+    gene.ids            = gene_ids,
+    gene.set.collection = desurv_genesets,
+    min.size            = 5   # or whatever minimum size you want
+    # max.size          = 200 # optional
+  )
+  
+  sc <- vamForSeurat(
+    seurat.data        = sc,
+    gene.set.collection = gs_collection,
+    center             = FALSE,        # standard VAM settings
+    gamma              = TRUE,
+    sample.cov         = FALSE,
+    return.dist        = FALSE         # we only want the CDF scores
+  )
+  DefaultAssay(sc) <- "VAMcdf"
+  sc
+}
+
+sc_all = readRDS("data/original/Elyada.Rds")
+sc_caf = readRDS("data/original/Elyada_caf.Rds")
+sc_tum=readRDS("data/original/Elyada_PDAC.Rds")
+
+sc_all <- RunUMAP(sc_all, dims = 1:20) 
+sc_caf= RunUMAP(sc_caf,dims=1:20)
+sc_tum=RunUMAP(sc_tum,dims=1:20)
+
+tar_load(tops_desurv_50)
+tops=tops_desurv_50
+
+desurv_genesets = as.list(tops$top_genes)
+factor_names <- paste0("DeSurv Factor ", seq_along(desurv_genesets))
+names(desurv_genesets) <- factor_names
+
+sc_all = getVAM(sc_all,desurv_genesets)
+sc_caf = getVAM(sc_caf,desurv_genesets)
+sc_tum = getVAM(sc_tum,desurv_genesets)
+
+features_to_plot <- c("DeSurv Factor 1", "DeSurv Factor 2", "DeSurv Factor 3")
+
+p_list_all <- lapply(features_to_plot, function(feat) {
+  fp=FeaturePlot(
+    sc_all,
+    features   = feat,       # now interpreted as a "feature" in VAM.cdf
+    reduction  = "umap",
+    pt.size    = 0.25,
+    slot = "data",
+    max.cutoff = "q95",
+  ) + ggtitle("")+
+    scale_color_gradientn(
+      colours = viridis(256,option="D"),
+      limits  = c(0, 1)
+    )+
+    theme(axis.title = element_blank(),
+          axis.text  = element_blank(),
+          axis.ticks = element_blank(),
+          axis.line  = element_blank())+
+    labs(color="VAM\nscore")
+  fp[[1]]
+})
+
+legend = get_legend(p_list_all[[1]] + theme(legend.position = "right"))
+p_list_all[[1]] = p_list_all[[1]] + theme(legend.position = "none")
+p_list_all[[2]] = p_list_all[[2]] + theme(legend.position = "none")
+p_list_all[[3]] = p_list_all[[3]] + theme(legend.position = "none")
+
+p_list_caf <- lapply(features_to_plot, function(feat) {
+  fp=FeaturePlot(
+    sc_caf,
+    features   = feat,       # now interpreted as a "feature" in VAM.cdf
+    reduction  = "umap",
+    pt.size    = 0.25,
+    slot = "data",
+    max.cutoff = "q95",
+  ) + ggtitle("")+
+    scale_color_gradientn(
+      colours = viridis(256,option="D"),
+      limits  = c(0, 1)
+    )+
+    theme(axis.title = element_blank(),
+          axis.text  = element_blank(),
+          axis.ticks = element_blank(),
+          axis.line  = element_blank(),
+          legend.position = "none")
+  fp[[1]]
+})
+
+p_list_tum <- lapply(features_to_plot, function(feat) {
+  fp=FeaturePlot(
+    sc_tum,
+    features   = feat,       # now interpreted as a "feature" in VAM.cdf
+    reduction  = "umap",
+    pt.size    = 0.25,
+    slot = "data",
+    # max.cutoff = "q95",
+  ) + ggtitle("")+
+    scale_color_gradientn(
+      colours = viridis(256,option="D"),
+      limits  = c(0, 1)
+    )+
+    theme(axis.title = element_blank(),
+          axis.text  = element_blank(),
+          axis.ticks = element_blank(),
+          axis.line  = element_blank(),
+          legend.position = "none")
+  fp[[1]]
+})
+
+scplot_all=DimPlot(sc_all, group.by = "label_broad", reduction = "umap", label = TRUE, repel = TRUE) +
+  ggtitle("All Cells")+
+  theme(axis.title = element_blank(),
+        axis.text  = element_blank(),
+        axis.ticks = element_blank(),
+        axis.line  = element_blank(),
+        legend.position = "none")
+
+scplot_caf=DimPlot(sc_caf, group.by = "label", reduction = "umap", label = TRUE, repel = TRUE) +
+  ggtitle("CAF Cells")+
+  theme(axis.title = element_blank(),
+        axis.text  = element_blank(),
+        axis.ticks = element_blank(),
+        axis.line  = element_blank(),
+        legend.position = "none")
+
+scplot_tum=DimPlot(sc_tum, group.by = "label", reduction = "umap", label = TRUE, repel = TRUE) +
+  ggtitle("Tumor Cells")+
+  theme(axis.title = element_blank(),
+        axis.text  = element_blank(),
+        axis.ticks = element_blank(),
+        axis.line  = element_blank(),
+        legend.position = "none")
+
+
+labeltop <- grid::textGrob("Labels",gp = gpar(fontsize = 14, fontface = "bold"))
+labelmid <- grid::textGrob("DeSurv\nfactor 1", gp = gpar(fontsize = 14, fontface = "bold"))
+labelmid2 <- grid::textGrob("DeSurv\nfactor 2", gp = gpar(fontsize = 14, fontface = "bold"))
+labelbottom <- grid::textGrob("DeSurv\nfactor 3", gp = gpar(fontsize = 14, fontface = "bold"))
+
+top = plot_grid(labeltop,scplot_all[[1]],scplot_caf[[1]],scplot_tum[[1]],ncol=4,rel_widths = c(.5,1,1,1))
+mid = plot_grid(labelmid,p_list_all[[1]],p_list_caf[[1]],p_list_tum[[1]],ncol=4,rel_widths = c(.5,1,1,1))
+mid2 = plot_grid(labelmid2,p_list_all[[2]],p_list_caf[[2]],p_list_tum[[2]],ncol=4,rel_widths = c(.5,1,1,1))
+bottom = plot_grid(labelbottom,p_list_all[[3]],p_list_caf[[3]],p_list_tum[[3]],ncol=4,rel_widths = c(.5,1,1,1))
+
+add_outline <- function(p) {
+  p + theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.6))
+}
+
+full = plot_grid(add_outline(top),NULL,
+                 add_outline(mid),NULL,
+                 add_outline(mid2),NULL,
+                 add_outline(bottom),
+                 nrow=7,labels = c("A.","","B.","","C.","","D."),
+                 rel_heights = c(1,.05,1,.05,1,.05,1))
+# plot_grid(full,legend,ncol=2,rel_widths = c(8,1))
+
+
+vam_mat <- t(as.matrix(GetAssayData(sc_all, assay = "VAMcdf", layer = "data")))
+# now rows = cells, cols = gene sets
+
+# add to meta.data
+sc_all@meta.data[, colnames(vam_mat)] <- vam_mat[rownames(sc_all@meta.data), ]
+
+ct_col <- "label_fine"
+if (!ct_col %in% colnames(sc_all@meta.data)) {
+  stop("I expected a column named 'cell_type' in sc@meta.data. Rename or change ct_col.")
+}
+
+avg_scores <- sc_all@meta.data %>%
+  group_by(.data[[ct_col]]) %>%
+  summarise(
+    across(c("DeSurv Factor 1","DeSurv Factor 2","DeSurv Factor 3"), ~ mean(.x, na.rm = TRUE))
+  )
+
+mat <- as.matrix(avg_scores[, -1, drop = FALSE])
+rownames(mat) <- avg_scores[[ct_col]]
+
+mat_capped=mat
+upper <- quantile(mat, 0.99, na.rm = TRUE)
+lower <- quantile(mat, 0.01, na.rm = TRUE)
+mat_capped[mat_capped > upper] <- upper
+mat_capped[mat_capped < lower] <- lower
+
+col_fun <- viridis(256,option="D")
+
+ht <- pheatmap::pheatmap(
+  mat_capped,
+  color  = col_fun,
+  cluster_rows    = TRUE,
+  cluster_cols = FALSE,
+  treeheight_row = 0,
+  legend = FALSE,
+  silent = TRUE
+)
+
+gght = as.ggplot(ht$gtable)
+leg = plot_grid(NULL,legend,nrow=2,rel_heights = c(3,2))
+plot_grid(full,NULL,gght,leg,ncol=4,rel_widths = c(8,.25,3,1),labels=c("","","E.",""),label_x=c(0,0,-.09,0))
+
+
+
+
+```
