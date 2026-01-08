@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.1.8)  8 JAN 2026 12:14
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.1.8)  8 JAN 2026 15:33
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1163,36 +1163,36 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\alpha' on input line 290.
 
-<paper_files/figure-latex/fig-bo-1.pdf, id=155, 433.62pt x 397.485pt>
-File: paper_files/figure-latex/fig-bo-1.pdf Graphic file (type pdf)
-<use paper_files/figure-latex/fig-bo-1.pdf>
-Package pdftex.def Info: paper_files/figure-latex/fig-bo-1.pdf  used on input line 322.
+<../figures/fig_bo_easy_easy.pdf, id=155, 433.62pt x 397.485pt>
+File: ../figures/fig_bo_easy_easy.pdf Graphic file (type pdf)
+<use ../figures/fig_bo_easy_easy.pdf>
+Package pdftex.def Info: ../figures/fig_bo_easy_easy.pdf  used on input line 322.
 (pdftex.def)             Requested size: 433.63878pt x 397.49614pt.
 LaTeX Font Info:    Font shape `T1/phv/m/it' in size <7> not available
 (Font)              Font shape `T1/phv/m/sl' tried instead on input line 374.
 LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
 (Font)              scaled to size 6.64998pt on input line 374.
 [2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
-<paper_files/figure-latex/fig-bio-1.pdf, id=167, 469.755pt x 325.215pt>
-File: paper_files/figure-latex/fig-bio-1.pdf Graphic file (type pdf)
-<use paper_files/figure-latex/fig-bio-1.pdf>
-Package pdftex.def Info: paper_files/figure-latex/fig-bio-1.pdf  used on input line 377.
-(pdftex.def)             Requested size: 505.69357pt x 325.23901pt.
+<../figures/fig_bio_easy_easy.pdf, id=167, 505.89pt x 325.215pt>
+File: ../figures/fig_bio_easy_easy.pdf Graphic file (type pdf)
+<use ../figures/fig_bio_easy_easy.pdf>
+Package pdftex.def Info: ../figures/fig_bio_easy_easy.pdf  used on input line 377.
+(pdftex.def)             Requested size: 505.70348pt x 325.23901pt.
 
 Underfull \vbox (badness 4752) has occurred while \output is active []
 
 [3 <../figures/model_schematic_training.pdf>]
-<paper_files/figure-latex/fig-sc-1.pdf, id=204, 469.755pt x 325.215pt>
-File: paper_files/figure-latex/fig-sc-1.pdf Graphic file (type pdf)
-<use paper_files/figure-latex/fig-sc-1.pdf>
-Package pdftex.def Info: paper_files/figure-latex/fig-sc-1.pdf  used on input line 458.
-(pdftex.def)             Requested size: 505.69357pt x 578.206pt.
-[4 <./paper_files/figure-latex/fig-bo-1.pdf>]
+<../figures/fig_sc_easy_easy.pdf, id=204, 542.025pt x 578.16pt>
+File: ../figures/fig_sc_easy_easy.pdf Graphic file (type pdf)
+<use ../figures/fig_sc_easy_easy.pdf>
+Package pdftex.def Info: ../figures/fig_sc_easy_easy.pdf  used on input line 458.
+(pdftex.def)             Requested size: 505.71562pt x 578.18504pt.
+[4 <../figures/fig_bo_easy_easy.pdf>]
 Underfull \hbox (badness 10000) in paragraph at lines 546--547
 
  []
 
-[5 <./paper_files/figure-latex/fig-bio-1.pdf>]
+[5 <../figures/fig_bio_easy_easy.pdf>]
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
 (Font)              scaled to size 7.59998pt on input line 631.
 LaTeX Font Info:    External font `lmex10' loaded for size
@@ -1430,7 +1430,7 @@ Package natbib Warning: There were undefined citations.
 
 [11
 
-] [12 <./paper_files/figure-latex/fig-sc-1.pdf>] 
+] [12 <../figures/fig_sc_easy_easy.pdf>] 
 enddocument/afterlastpage (AED): lastpage setting LastPage.
 (./paper.aux)
  ***********
@@ -1445,17 +1445,17 @@ Package rerunfilecheck Info: File `paper.out' has not changed.
  ) 
 Here is how much of TeX's memory you used:
  31100 strings out of 469476
- 579036 string characters out of 5467115
+ 578874 string characters out of 5467115
  1037220 words of memory out of 5000000
  58547 multiletter control sequences out of 15000+600000
  757495 words of font info for 382 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  117i,15n,121p,1002b,1115s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvbo8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on paper.pdf (12 pages, 7212933 bytes).
+Output written on paper.pdf (12 pages, 7205920 bytes).
 PDF statistics:
- 516 PDF objects out of 1000 (max. 8388607)
- 424 compressed objects within 5 object streams
+ 515 PDF objects out of 1000 (max. 8388607)
+ 423 compressed objects within 5 object streams
  101 named destinations out of 1000 (max. 500000)
  89897 words of extra memory for PDF output out of 106986 (max. 10000000)
 

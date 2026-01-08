@@ -5,7 +5,12 @@ library(crew)
 library(crew.cluster)
 suppressWarnings(suppressMessages(library(dplyr)))
 
-PKG_VERSION <- "HEAD" # utils::packageDescription("DeSurv", fields = "RemoteRef")
+PKG_VERSION <- tryCatch(
+  as.character(utils::packageVersion("DeSurv")),
+  error = function(e) {
+    "unknown"
+  }
+)
 
 # Get git branch with fallback if gert is not installed
 GIT_BRANCH <- tryCatch(

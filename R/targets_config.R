@@ -485,12 +485,29 @@ ensure_named_datasets <- function(datasets, fallback = "validation") {
 }
 
 preprocess_training_data <- function(data, ngene, method_trans_train) {
+  keep_idx <- data$samp_keeps
+  X <- data$ex
+  y <- data$sampInfo$time
+  d <- data$sampInfo$event
+  dataset <- data$sampInfo$dataset
+  if (!is.null(keep_idx)) {
+    if (is.logical(keep_idx)) {
+      keep_idx <- which(keep_idx)
+    }
+    if (!length(keep_idx)) {
+      stop("No samples selected after applying `samp_keeps`.")
+    }
+    X <- X[, keep_idx, drop = FALSE]
+    y <- y[keep_idx]
+    d <- d[keep_idx]
+    dataset <- dataset[keep_idx]
+  }
   prep <- DeSurv::preprocess_data(
-    X = data$ex,
-    y = data$sampInfo$time,
-    d = data$sampInfo$event,
-    dataset = data$sampInfo$dataset,
-    samp_keeps = data$samp_keeps,
+    X = X,
+    y = y,
+    d = d,
+    dataset = dataset,
+    samp_keeps = NULL,
     ngene = ngene,
     method_trans_train = method_trans_train,
     verbose = FALSE
@@ -504,12 +521,29 @@ preprocess_validation_data <- function(dataset, genes = NULL, ngene = NULL, meth
   if (is.null(genes) && is.null(ngene)) {
     stop("Provide either genes or ngene for validation preprocessing.")
   }
+  keep_idx <- dataset$samp_keeps
+  X <- dataset$ex
+  y <- dataset$sampInfo$time
+  d <- dataset$sampInfo$event
+  dataset_ids <- dataset$sampInfo$dataset
+  if (!is.null(keep_idx)) {
+    if (is.logical(keep_idx)) {
+      keep_idx <- which(keep_idx)
+    }
+    if (!length(keep_idx)) {
+      stop("No samples selected after applying `samp_keeps`.")
+    }
+    X <- X[, keep_idx, drop = FALSE]
+    y <- y[keep_idx]
+    d <- d[keep_idx]
+    dataset_ids <- dataset_ids[keep_idx]
+  }
   args <- list(
-    X = dataset$ex,
-    y = dataset$sampInfo$time,
-    d = dataset$sampInfo$event,
-    dataset = dataset$sampInfo$dataset,
-    samp_keeps = dataset$samp_keeps,
+    X = X,
+    y = y,
+    d = d,
+    dataset = dataset_ids,
+    samp_keeps = NULL,
     method_trans_train = method_trans_train,
     verbose = FALSE
   )

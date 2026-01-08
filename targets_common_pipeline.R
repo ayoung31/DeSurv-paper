@@ -1185,3 +1185,79 @@ COMMON_DESURV_VAL_TARGETS <- list(
   #   )
   # )
 )
+
+FIGURE_TARGETS <- list(
+  tar_target(
+    fig_bo,
+    save_fig_bo(
+      bo_history_path = desurv_bo_history,
+      bo_history_alpha0_path = desurv_bo_history_alpha0,
+      bo_results_supervised = desurv_bo_results,
+      bo_results_alpha0 = desurv_bo_results_alpha0,
+      fit_std = fit_std,
+      path = file.path(
+        FIGURE_CONFIGS$figures_dir,
+        sprintf("fig_bo_%s_%s.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file",
+    packages = c("ggplot2", "dplyr", "cowplot", "tibble", "DiceKriging", "NMF")
+  ),
+  tar_target(
+    fig_bio,
+    save_fig_bio(
+      ora_analysis = ora_analysis_desurv,
+      fit_desurv = tar_fit_desurv,
+      tops_desurv = tar_tops_desurv,
+      top_genes_ref = top_genes,
+      path = file.path(
+        FIGURE_CONFIGS$figures_dir,
+        sprintf("fig_bio_%s_%s.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file",
+    packages = c("ggplot2", "dplyr", "stringr", "viridis", "cowplot", "purrr", "enrichplot", "pheatmap")
+  ),
+  tar_target(
+    fig_sc,
+    save_fig_sc(
+      tops_desurv = tar_tops_desurv,
+      sc_all_path = FIGURE_CONFIGS$sc_data_paths$all,
+      sc_caf_path = FIGURE_CONFIGS$sc_data_paths$caf,
+      sc_tum_path = FIGURE_CONFIGS$sc_data_paths$tum,
+      path = file.path(
+        FIGURE_CONFIGS$figures_dir,
+        sprintf("fig_sc_%s_%s.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file",
+    packages = c("ggplot2", "dplyr", "viridis", "cowplot", "pheatmap", "ggplotify", "Seurat", "VAM")
+  )
+)
+
+FIGURE_VAL_TARGETS <- list(
+  # tar_target(
+  #   fig_clus,
+  #   save_fig_clus(
+  #     data_val_filtered = data_val_filtered,
+  #     fit_desurv = tar_fit_desurv,
+  #     tops_desurv = tar_tops_desurv,
+  #     path = file.path(
+  #       FIGURE_CONFIGS$figures_dir,
+  #       sprintf("fig_clus_%s_%s_%s.pdf", val_label, run_label, bo_label)
+  #     )
+  #   ),
+  #   format = "file",
+  #   packages = c(
+  #     "ggplot2",
+  #     "dplyr",
+  #     "cowplot",
+  #     "pheatmap",
+  #     "survival",
+  #     "survminer",
+  #     "gt",
+  #     "magick",
+  #     "ConsensusClusterPlus"
+  #   )
+  # )
+)

@@ -2,6 +2,7 @@ source("targets_configs.R")
 BO_CONFIGS_RAW <- targets_bo_configs()
 RUN_CONFIGS_RAW <- targets_run_configs()
 VAL_CONFIGS_RAW <- targets_val_configs()
+FIGURE_CONFIGS <- targets_figure_configs()
 DEFAULT_NINIT <- if (length(BO_CONFIGS_RAW)) {
   max(vapply(BO_CONFIGS_RAW, function(cfg) if (is.null(cfg$ninit)) 50 else cfg$ninit, numeric(1)))
 } else {
@@ -21,6 +22,58 @@ RESOLVED_RUN_CONFIGS <- resolve_desurv_run_configs(RUN_CONFIGS_RAW)
 RESOLVED_VAL_CONFIGS <- resolve_desurv_val_configs(VAL_CONFIGS_RAW)
 validate_desurv_configs(RESOLVED_BO_CONFIGS, RESOLVED_RUN_CONFIGS, RESOLVED_VAL_CONFIGS)
 
+paper_deps <- local({
+  bo_labels <- names(RESOLVED_BO_CONFIGS)
+  run_labels <- names(RESOLVED_RUN_CONFIGS)
+  val_labels <- names(RESOLVED_VAL_CONFIGS)
+  bo_bases <- c(
+    "tar_params_best",
+    "desurv_bo_history",
+    "desurv_bo_history_alpha0",
+    "desurv_bo_results",
+    "desurv_bo_results_alpha0"
+  )
+  run_bases <- c(
+    "fit_std",
+    "ora_analysis_desurv",
+    "tar_fit_desurv",
+    "tar_tops_desurv",
+    "fig_bo",
+    "fig_bio",
+    "fig_sc"
+  )
+  val_bases <- character(0)
+  deps <- character(0)
+  if (length(bo_labels)) {
+    deps <- c(
+      deps,
+      unlist(lapply(bo_bases, function(base) paste(base, bo_labels, sep = "_")))
+    )
+  }
+  if (length(run_labels) && length(bo_labels)) {
+    run_combo <- as.vector(outer(
+      run_labels,
+      bo_labels,
+      function(run_label, bo_label) paste(run_label, bo_label, sep = "_")
+    ))
+    deps <- c(
+      deps,
+      unlist(lapply(run_bases, function(base) paste(base, run_combo, sep = "_")))
+    )
+    if (length(val_labels)) {
+      val_combo <- as.vector(outer(
+        val_labels,
+        run_combo,
+        function(val_label, run_combo_label) paste(val_label, run_combo_label, sep = "_")
+      ))
+      deps <- c(
+        deps,
+        unlist(lapply(val_bases, function(base) paste(base, val_combo, sep = "_")))
+      )
+    }
+  }
+  unique(deps[nzchar(deps)])
+})
 
 # ---- Targets ----
 targets_list <- tar_map(
@@ -249,8 +302,10 @@ targets_list <- tar_map(
           }
         },
       ),
-      COMMON_DESURV_VAL_TARGETS
-    )
+      COMMON_DESURV_VAL_TARGETS,
+      FIGURE_VAL_TARGETS
+    ),
+    FIGURE_TARGETS
   )
 )
 
@@ -271,50 +326,12 @@ c(
   #     )
   #   }
   # ),
-  targets_list
-  # COMMON_DESURV_BO_TARGETS,
-  # COMMON_DESURV_RUN_TARGETS,
-  # COMMON_DESURV_VAL_TARGETS#,
-  # tarchetypes::tar_render(
-  #   paper,
-  #   "paper/paper.Rmd",
-  #   quiet = FALSE,
-  #   deps = c(
-  #     "desurv_bo_history",
-  #     "desurv_bo_history_alpha0",
-  #     "tar_params_best",
-  #     "tar_ngene_value",
-  #     "ntop_value",
-  #     "tar_fit_desurv",
-  #     "tar_fit_desurv_alpha0",
-  #     "fit_std",
-  #     "fit_std_beta",
-  #     "tar_tops_desurv",
-  #     "tar_tops_desurv_alpha0",
-  #     "tops_std",
-  #     "gene_overlap_desurv",
-  #     "gene_overlap_desurv_alpha0",
-  #     "gene_overlap_std",
-  #     "ora_analysis_desurv",
-  #     "ora_analysis_desurv_alpha0",
-  #     "ora_analysis_std",
-  #     "selected_factors_desurv",
-  #     "selected_factors_desurv_alpha0",
-  #     "selected_factors_std",
-  #     "clusters_desurv",
-  #     "clusters_std",
-  #     "aligned_clusters_desurv",
-  #     "aligned_clusters_std",
-  #     "cluster_alignment_plot_desurv",
-  #     "cluster_alignment_plot_std",
-  #     "cluster_alignment_table_desurv",
-  #     "cluster_alignment_table_std",
-  #     "tar_data_filtered",
-  #     "data_val",
-  #     "data_val_filtered",
-  #     "tar_training_results_dir"
-  #   )
-  # )
+  targets_list,
+  tarchetypes::tar_render(
+    paper,
+    "paper/paper.Rmd",
+    quiet = FALSE
+  )
 )
 
   # 

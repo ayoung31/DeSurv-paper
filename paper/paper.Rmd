@@ -95,7 +95,10 @@ knitr::opts_chunk$set(
 
 ```{r targets-store, include=FALSE}
 library(targets)
-tar_config_set(store = "store_PKG_VERSION=tie_handling_GIT_BRANCH=main")
+tar_store <- if (exists("params", inherits = TRUE)) params$tar_store else NULL
+if (!is.null(tar_store) && nzchar(tar_store)) {
+  tar_config_set(store = tar_store)
+}
 ```
 
 
