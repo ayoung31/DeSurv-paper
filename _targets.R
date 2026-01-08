@@ -205,6 +205,8 @@ targets_list <- tar_map(
             setNames(list(dataset), dataname)
           } else {
             if (length(val_datasets_raw)) {
+              # Reference raw_data_val to establish dependency so file changes invalidate this target
+              raw_data_val
               setNames(
                 lapply(val_datasets_raw, load_data),
                 val_datasets_raw
@@ -239,7 +241,8 @@ targets_list <- tar_map(
               dataset = data_val_comb,
               genes = genes_train,
               method_trans_train = val_run_bundle$bo_bundle$config$method_trans_train,
-              dataname = data_val_comb$dataname
+              dataname = data_val_comb$dataname,
+              transform_target = val_run_bundle$bo_bundle$data_filtered$transform_target
             )
           } else {
             NULL

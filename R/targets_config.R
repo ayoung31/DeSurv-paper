@@ -499,7 +499,8 @@ preprocess_training_data <- function(data, ngene, method_trans_train) {
   prep
 }
 
-preprocess_validation_data <- function(dataset, genes = NULL, ngene = NULL, method_trans_train, dataname) {
+preprocess_validation_data <- function(dataset, genes = NULL, ngene = NULL, method_trans_train, dataname,
+                                       transform_target = NULL) {
   if (is.null(genes) && is.null(ngene)) {
     stop("Provide either genes or ngene for validation preprocessing.")
   }
@@ -516,6 +517,10 @@ preprocess_validation_data <- function(dataset, genes = NULL, ngene = NULL, meth
     args$genes <- genes
   } else {
     args$ngene <- ngene
+  }
+  # Pass training transform_target to prevent quantile drift when method_trans_train == "quant"
+  if (!is.null(transform_target)) {
+    args$transform_target <- transform_target
   }
   prep <- do.call(DeSurv::preprocess_data, args)
   prep$dataname <- dataname

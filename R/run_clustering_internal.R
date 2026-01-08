@@ -18,12 +18,13 @@ run_clustering_internal <- function(tops, data, gene_lists, color.lists = NULL, 
 
   if(length(facs)>0 ){
     # --- Prepare expression data ---
-    clus_data <- prepare_data_for_clustering(tops=tops, 
-                                         data=data, 
-                                         facs=facs, 
+    clus_data <- prepare_data_for_clustering(tops=tops,
+                                         data=data,
+                                         facs=facs,
                                          weight=weight)
-    Xtemp = clus_data$Xtemp
-    weightsItem = clus_data$weightsItem
+    Xtemp <- clus_data$Xtemp
+    weightsItem <- clus_data$weightsItem
+    kept_sample_ids <- clus_data$kept_sample_ids
     
     
     # --- Set defaults if needed ---
@@ -57,9 +58,11 @@ run_clustering_internal <- function(tops, data, gene_lists, color.lists = NULL, 
     for (k in 2:length(clus_res$clusCol)) {
       class <- clus_res$clusCol[[k]]$consensusClass
       clus_name <- paste0(name, "_with_", k, "clusters")
-      
+
+      # Initialize column with NA for all samples
       data$sampInfo[[clus_name]] <- NA
-      data$sampInfo[[clus_name]] <- class
+      # Assign cluster labels only to kept samples using sample IDs (not position)
+      data$sampInfo[kept_sample_ids, clus_name] <- class[kept_sample_ids]
       
       if (plot) {
         plot_heatmap(Xtemp=Xtemp, tops=tops, data=data, 

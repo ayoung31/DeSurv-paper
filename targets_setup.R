@@ -1,12 +1,26 @@
 # _targets.R
 library(targets)
-library(tarchetypes)  
+library(tarchetypes)
 library(crew)
 library(crew.cluster)
 suppressWarnings(suppressMessages(library(dplyr)))
 
-PKG_VERSION        = "HEAD"#utils::packageDescription("DeSurv", fields = "RemoteRef")
-GIT_BRANCH         = gert::git_branch()
+PKG_VERSION <- "HEAD" # utils::packageDescription("DeSurv", fields = "RemoteRef")
+
+# Get git branch with fallback if gert is not installed
+GIT_BRANCH <- tryCatch(
+
+  gert::git_branch(),
+  error = function(e) {
+    # Fallback: try git command directly, or use "unknown"
+    branch <- tryCatch(
+      trimws(system("git rev-parse --abbrev-ref HEAD", intern = TRUE, ignore.stderr = TRUE)),
+      error = function(e2) "unknown"
+    )
+    if (length(branch) == 0 || !nzchar(branch)) branch <- "unknown"
+    branch
+  }
+)
 
 DEFAULT_NINIT <- if (exists("DEFAULT_NINIT", inherits = TRUE)) DEFAULT_NINIT else 50
 DEFAULT_NINIT_FULL <- if (exists("DEFAULT_NINIT_FULL", inherits = TRUE)) DEFAULT_NINIT_FULL else 100
@@ -94,4 +108,12 @@ tar_option_set(
 
 # ---- Source helper functions ----
 purrr::walk(list.files("R", full.names = TRUE, pattern = "[.]R$"), source)
-load("data/derv/cmbSubtypes_formatted.RData")
+
+# Load subtype data if available (optional - only needed for certain downstream analyses)
+.cmb_subtypes_path <- "data/derv/cmbSubtypes_formatted.RData"
+if (file.exists(.cmb_subtypes_path)) {
+  load(.cmb_subtypes_path)
+} else {
+  message("Note: ", .cmb_subtypes_path, " not found. Some analyses may be unavailable.")
+}
+rm(.cmb_subtypes_path)

@@ -991,7 +991,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
               genes = genes_train,
               ngene = val_run_bundle$bo_bundle$ngene_value,
               method_trans_train = val_run_bundle$bo_bundle$config$method_trans_train,
-              dataname = dataname
+              dataname = dataname,
+              transform_target = val_run_bundle$bo_bundle$data_filtered$transform_target
             )
           }
         ),

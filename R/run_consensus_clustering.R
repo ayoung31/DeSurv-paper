@@ -12,7 +12,7 @@ run_consensus_clustering <- function(mat, maxK, reps, pItem, pFeature, seed,
   }
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
   dir <- normalizePath(dir, mustWork = TRUE, winslash = "/")
-  
+
   cluster_label <- if (identical(cluster_by, "row")) "genes" else "subjects"
   pdf_file <- file.path(dir, paste0(cluster_label, ".pdf"))
   ccp_folder_name <- paste0(cluster_label, "_ccp")
@@ -20,17 +20,31 @@ run_consensus_clustering <- function(mat, maxK, reps, pItem, pFeature, seed,
   if (dir.exists(ccp_output_dir)) {
     unlink(ccp_output_dir, recursive = TRUE)
   }
-  
+
   old_wd <- getwd()
   on.exit(setwd(old_wd), add = TRUE)
   setwd(dir)
-  
+
   mat <- as.matrix(mat)
   if (cluster_by == "row") {
     mat <- t(mat)
   }
-  dmat <- as.dist(1 - cor(mat, method = "pearson"))
-  
+
+  # Compute distance matrix based on the distance argument (previously hardcoded to pearson)
+  dmat <- switch(
+    distance,
+    pearson = as.dist(1 - cor(mat, method = "pearson")),
+    spearman = as.dist(1 - cor(mat, method = "spearman")),
+    euclidean = dist(t(mat), method = "euclidean"),
+    maximum = dist(t(mat), method = "maximum"),
+    manhattan = dist(t(mat), method = "manhattan"),
+    canberra = dist(t(mat), method = "canberra"),
+    binary = dist(t(mat), method = "binary"),
+    minkowski = dist(t(mat), method = "minkowski"),
+    # Default: correlation-based distance
+    as.dist(1 - cor(mat, method = "pearson"))
+  )
+
   grDevices::pdf(file = pdf_file)
   close_pdf <- TRUE
   on.exit({
@@ -38,15 +52,18 @@ run_consensus_clustering <- function(mat, maxK, reps, pItem, pFeature, seed,
       grDevices::dev.off()
     }
   }, add = TRUE)
-  
+
   if (cluster_by == "row") {
+    # When clustering rows (genes), sample weights (weightsItem) are not applicable
+    # as we're clustering genes, not samples. Pass NULL to avoid conceptual mismatch.
     result <- ConsensusClusterPlus::ConsensusClusterPlus(
       dmat, maxK,
       reps = reps, pItem = pItem, pFeature = pFeature,
       seed = seed, clusterAlg = clusterAlg, distance = distance,
-      weightsFeature = weightsItem, plot = "pdf", title = ccp_folder_name
+      weightsItem = NULL, plot = "pdf", title = ccp_folder_name
     )
   } else {
+    # When clustering columns (samples), weightsItem correctly weights the samples
     result <- ConsensusClusterPlus::ConsensusClusterPlus(
       dmat, maxK,
       reps = reps, pItem = pItem, pFeature = pFeature,
