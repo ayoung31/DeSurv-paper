@@ -41,9 +41,12 @@ For production runs using local Slurm resources:
 | `_targets.sh` | Batch script for main pipeline (16GB mem, no module load) |
 | `_targets_bladder.sh` | Batch script for bladder cancer pipeline |
 | `_targets_sims.sh` | Batch script for simulation pipeline |
+| `_targets_quick.sh` | Batch script for quick/easy mode testing |
+| `submit_targets_quick.R` | R script that swaps configs, runs, then restores |
 | `targets_setup.R` | Slurm controllers configured for local resources |
 | `_targets_sims.R` | Simulation config with decoupled init/CPU counts |
 | `targets_configs.R` | Easy configs with reduced initializations |
+| `paper_targets.yaml` | Local store path for paper rendering |
 
 ## Key Differences from HPC Versions
 
@@ -87,3 +90,18 @@ To switch from easy to full configs while staying local:
 3. Keep `desurv_ncores_grid = 19` to respect local CPU limits
 
 Or source the original `targets_configs.R` and only override `targets_setup.R`.
+
+## Paper Rendering with Local Store
+
+To render the paper using a local store path (avoiding conflicts with collaborators):
+
+```bash
+# Copy the local yaml to paper/ before rendering
+cp local_slurm/paper_targets.yaml paper/_targets.yaml
+
+# Render the paper
+Rscript -e 'rmarkdown::render("paper/paper.Rmd")'
+
+# Restore original yaml after (or add paper/_targets.yaml to .gitignore)
+git checkout paper/_targets.yaml
+```

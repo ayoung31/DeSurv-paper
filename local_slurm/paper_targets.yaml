@@ -1,0 +1,2 @@
+main:
+  store: ../store_PKG_VERSION=HEAD_GIT_BRANCH=main_quick

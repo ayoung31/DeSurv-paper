@@ -30,7 +30,7 @@ targets_bo_configs <- function() {
         ntop_config = c(100),
         lambdaw_config = c(0),
         lambdah_config = c(0),
-        ninit = 2,
+        ninit = 4,  # 4 inits × 5 folds = 20 jobs, good for 19 CPUs
         bo_n_init = 4,
         bo_n_iter = 4,
         bo_candidate_pool = 200,
@@ -68,7 +68,7 @@ targets_bo_configs <- function() {
       ngene_config = 1000,
       lambdaw_config = c(0),
       lambdah_config = c(0),
-      ninit = 2,
+      ninit = 4,  # 4 inits × 5 folds = 20 jobs, good for 19 CPUs
       bo_n_init = 4,
       bo_n_iter = 4,
       bo_candidate_pool = 200,
@@ -137,7 +137,7 @@ targets_bo_configs <- function() {
       ntop_config = c(100),
       lambdaw_config = c(0),
       lambdah_config = c(0),
-      ninit = 2,
+      ninit = 4,  # 4 inits × 5 folds = 20 jobs, good for 19 CPUs
       bo_n_init = 4,
       bo_n_iter = 4,
       bo_candidate_pool = 200,
@@ -163,7 +163,7 @@ targets_run_configs <- function() {
     # Easy run config - references all easy BO configs
     easy = list(
       bo_key = c("easy", "bladdereasy", "pdacspliteasy"),
-      ninit_full = 10,  # Reduced from 100
+      ninit_full = 19,  # Match available CPUs for final model fitting
       run_tol = 1e-5,
       run_maxit = 4000,
       std_nmf_k_grid = 2:12,
