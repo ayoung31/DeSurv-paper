@@ -85,7 +85,10 @@ targets_list <- tar_map(
   names = "bo_label",
   tar_target(
     bo_config,
-    bo_config_value
+    {
+      version_info
+      bo_config_value
+    }
   ),
   ################# Training ###################
   tar_target(
@@ -310,27 +313,24 @@ targets_list <- tar_map(
 )
 
 c(
-  # tar_target(
-  #   version_info,
-  #   {
-  #     list(
-  #       desurv = list(
-  #         branch = gert::git_branch(repo = "../DeSurv"),
-  #         commit = gert::git_log(repo = "../DeSurv", max = 1)$commit,
-  #         date = Sys.time()
-  #       ),
-  #       paper = list(
-  #         branch = gert::git_branch(),
-  #         commit = gert::git_log(max = 1)$commit
-  #       )
-  #     )
-  #   }
-  # ),
+  tar_target(
+    version_info,
+    list(
+      desurv_pkg_version = PKG_VERSION,
+      desurv_git_branch = DESURV_GIT_BRANCH,
+      desurv_git_commit = DESURV_GIT_COMMIT,
+      paper_git_branch = GIT_BRANCH,
+      paper_git_commit = GIT_COMMIT
+    ),
+    cue = tar_cue(mode = "always")
+  ),
   targets_list,
   tarchetypes::tar_render(
     paper,
     "paper/paper.Rmd",
-    quiet = FALSE
+    quiet = FALSE,
+    output_file = sprintf("paper_%s.pdf", format(Sys.Date(), "%Y%m%d")),
+    output_dir = "paper"
   )
 )
 

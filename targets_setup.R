@@ -12,6 +12,47 @@ PKG_VERSION <- tryCatch(
   }
 )
 
+DESURV_REPO_PATH <- normalizePath("../DeSurv", winslash = "/", mustWork = FALSE)
+
+DESURV_GIT_BRANCH <- tryCatch(
+  {
+    if (!dir.exists(DESURV_REPO_PATH)) stop("DeSurv repo not found")
+    gert::git_branch(repo = DESURV_REPO_PATH)
+  },
+  error = function(e) {
+    branch <- tryCatch(
+      trimws(system(
+        sprintf("git -C %s rev-parse --abbrev-ref HEAD", shQuote(DESURV_REPO_PATH)),
+        intern = TRUE,
+        ignore.stderr = TRUE
+      )),
+      error = function(e2) "unknown"
+    )
+    if (length(branch) == 0 || !nzchar(branch)) branch <- "unknown"
+    branch
+  }
+)
+
+DESURV_GIT_COMMIT <- tryCatch(
+  {
+    if (!dir.exists(DESURV_REPO_PATH)) stop("DeSurv repo not found")
+    log <- gert::git_log(repo = DESURV_REPO_PATH, max = 1)
+    if (nrow(log)) log$commit[[1]] else "unknown"
+  },
+  error = function(e) {
+    commit <- tryCatch(
+      trimws(system(
+        sprintf("git -C %s rev-parse HEAD", shQuote(DESURV_REPO_PATH)),
+        intern = TRUE,
+        ignore.stderr = TRUE
+      )),
+      error = function(e2) "unknown"
+    )
+    if (length(commit) == 0 || !nzchar(commit)) commit <- "unknown"
+    commit
+  }
+)
+
 # Get git branch with fallback if gert is not installed
 GIT_BRANCH <- tryCatch(
 
@@ -24,6 +65,21 @@ GIT_BRANCH <- tryCatch(
     )
     if (length(branch) == 0 || !nzchar(branch)) branch <- "unknown"
     branch
+  }
+)
+
+GIT_COMMIT <- tryCatch(
+  {
+    log <- gert::git_log(max = 1)
+    if (nrow(log)) log$commit[[1]] else "unknown"
+  },
+  error = function(e) {
+    commit <- tryCatch(
+      trimws(system("git rev-parse HEAD", intern = TRUE, ignore.stderr = TRUE)),
+      error = function(e2) "unknown"
+    )
+    if (length(commit) == 0 || !nzchar(commit)) commit <- "unknown"
+    commit
   }
 )
 

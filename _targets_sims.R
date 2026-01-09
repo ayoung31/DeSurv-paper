@@ -9,6 +9,10 @@ suppressPackageStartupMessages({
   library(DeSurv)
 })
 
+source("targets_configs.R")
+FIGURE_CONFIGS <- targets_figure_configs()
+SIM_FIGURE_CONFIGS <- FIGURE_CONFIGS$sim_figures
+
 sim_files <- list.files(
   "R/simulation_functions",
   pattern = "[.]R$",
@@ -16,6 +20,7 @@ sim_files <- list.files(
 )
 purrr::walk(sim_files, source)
 source("R/get_top_genes.R")
+source("inst/sim_figs.R")
 
 
 
@@ -1463,7 +1468,41 @@ targets_list <- list(
     {
       summarize_simulation_results(sim_analysis_result)
     }
-    
+  ),
+  tar_target(
+    sim_figs,
+    build_sim_figs(sim_results_table, sim_analysis_result),
+    packages = c("ggplot2", "dplyr", "purrr", "tibble")
+  ),
+  tar_target(
+    sim_fig_k_hist,
+    save_sim_plot(
+      sim_figs$k_hist,
+      file.path(FIGURE_CONFIGS$figures_dir, SIM_FIGURE_CONFIGS$k_hist$filename),
+      width = SIM_FIGURE_CONFIGS$k_hist$width,
+      height = SIM_FIGURE_CONFIGS$k_hist$height
+    ),
+    format = "file"
+  ),
+  tar_target(
+    sim_fig_cindex_box,
+    save_sim_plot(
+      sim_figs$cindex_box,
+      file.path(FIGURE_CONFIGS$figures_dir, SIM_FIGURE_CONFIGS$cindex_box$filename),
+      width = SIM_FIGURE_CONFIGS$cindex_box$width,
+      height = SIM_FIGURE_CONFIGS$cindex_box$height
+    ),
+    format = "file"
+  ),
+  tar_target(
+    sim_fig_precision_box,
+    save_sim_plot(
+      sim_figs$precision_box,
+      file.path(FIGURE_CONFIGS$figures_dir, SIM_FIGURE_CONFIGS$precision_box$filename),
+      width = SIM_FIGURE_CONFIGS$precision_box$width,
+      height = SIM_FIGURE_CONFIGS$precision_box$height
+    ),
+    format = "file"
   )
 )
 

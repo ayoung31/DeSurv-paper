@@ -137,3 +137,73 @@ if (!is.null(tar_store) && nzchar(tar_store)) {
 ```
 
 \pnasbreak
+
+# Versioning {.unnumbered}
+
+```{r versioning, echo=FALSE}
+version_info <- tryCatch(
+  targets::tar_read("version_info"),
+  error = function(e) NULL
+)
+
+if (is.null(version_info)) {
+  desurv_version <- tryCatch(
+    as.character(utils::packageVersion("DeSurv")),
+    error = function(e) "unknown"
+  )
+  desurv_repo <- normalizePath("../DeSurv", mustWork = FALSE)
+  desurv_branch <- tryCatch(
+    if (dir.exists(desurv_repo)) {
+      trimws(system(
+        sprintf("git -C %s rev-parse --abbrev-ref HEAD", shQuote(desurv_repo)),
+        intern = TRUE,
+        ignore.stderr = TRUE
+      ))
+    } else {
+      "unknown"
+    },
+    error = function(e) "unknown"
+  )
+  desurv_commit <- tryCatch(
+    if (dir.exists(desurv_repo)) {
+      trimws(system(
+        sprintf("git -C %s rev-parse HEAD", shQuote(desurv_repo)),
+        intern = TRUE,
+        ignore.stderr = TRUE
+      ))
+    } else {
+      "unknown"
+    },
+    error = function(e) "unknown"
+  )
+  paper_branch <- tryCatch(
+    trimws(system("git rev-parse --abbrev-ref HEAD", intern = TRUE, ignore.stderr = TRUE)),
+    error = function(e) "unknown"
+  )
+  paper_commit <- tryCatch(
+    trimws(system("git rev-parse HEAD", intern = TRUE, ignore.stderr = TRUE)),
+    error = function(e) "unknown"
+  )
+} else {
+  desurv_version <- version_info$desurv_pkg_version
+  desurv_branch <- version_info$desurv_git_branch
+  desurv_commit <- version_info$desurv_git_commit
+  paper_branch <- version_info$paper_git_branch
+  paper_commit <- version_info$paper_git_commit
+}
+
+if (!length(desurv_version) || !nzchar(desurv_version)) desurv_version <- "unknown"
+if (!length(desurv_branch) || !nzchar(desurv_branch)) desurv_branch <- "unknown"
+if (!length(desurv_commit) || !nzchar(desurv_commit)) desurv_commit <- "unknown"
+if (!length(paper_branch) || !nzchar(paper_branch)) paper_branch <- "unknown"
+if (!length(paper_commit) || !nzchar(paper_commit)) paper_commit <- "unknown"
+
+cat(
+  "DeSurv package version: ", desurv_version, "\n",
+  "DeSurv git branch: ", desurv_branch, "\n",
+  "DeSurv git commit: ", desurv_commit, "\n",
+  "Paper git branch: ", paper_branch, "\n",
+  "Paper git commit: ", paper_commit, "\n",
+  sep = ""
+)
+```
