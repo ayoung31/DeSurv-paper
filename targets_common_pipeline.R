@@ -1188,50 +1188,282 @@ COMMON_DESURV_VAL_TARGETS <- list(
 
 FIGURE_TARGETS <- list(
   tar_target(
-    fig_bo,
-    save_fig_bo(
+    fig_bo_panels,
+    build_fig_bo_panels(
       bo_history_path = desurv_bo_history,
       bo_history_alpha0_path = desurv_bo_history_alpha0,
       bo_results_supervised = desurv_bo_results,
       bo_results_alpha0 = desurv_bo_results_alpha0,
-      fit_std = fit_std,
-      path = file.path(
-        FIGURE_CONFIGS$figures_dir,
-        sprintf("fig_bo_%s_%s.pdf", run_label, bo_label)
-      )
+      fit_std = fit_std
     ),
-    format = "file",
     packages = c("ggplot2", "dplyr", "cowplot", "tibble", "DiceKriging", "NMF")
   ),
+  tar_target(fig_bo_panel_a, fig_bo_panels$A),
+  tar_target(fig_bo_panel_b, fig_bo_panels$B),
+  tar_target(fig_bo_panel_c, fig_bo_panels$C),
+  tar_target(fig_bo_panel_d, fig_bo_panels$D),
+  tar_target(fig_bo_panel_e, fig_bo_panels$E),
+  tar_target(fig_bo_panel_f, fig_bo_panels$F),
+  tar_target(fig_bo_panel_g, fig_bo_panels$G),
   tar_target(
-    fig_bio,
-    save_fig_bio(
+    fig_bo_panel_a_file,
+    save_plot_pdf(
+      fig_bo_panel_a,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_bo_%s_%s_panel_a.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_bo_panel_b_file,
+    save_plot_pdf(
+      fig_bo_panel_b,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_bo_%s_%s_panel_b.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_bo_panel_c_file,
+    save_plot_pdf(
+      fig_bo_panel_c,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_bo_%s_%s_panel_c.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_bo_panel_d_file,
+    save_plot_pdf(
+      fig_bo_panel_d,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_bo_%s_%s_panel_d.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_bo_panel_e_file,
+    save_plot_pdf(
+      fig_bo_panel_e,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_bo_%s_%s_panel_e.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_bo_panel_f_file,
+    save_plot_pdf(
+      fig_bo_panel_f,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_bo_%s_%s_panel_f.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_bo_panel_g_file,
+    save_plot_pdf(
+      fig_bo_panel_g,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_bo_%s_%s_panel_g.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_bo_plot,
+    combine_fig_bo_panels(fig_bo_panels),
+    packages = c("cowplot")
+  ),
+  tar_target(
+    fig_bo,
+    save_plot_pdf(
+      fig_bo_plot,
+      file.path(
+        FIGURE_CONFIGS$figures_dir,
+        sprintf("fig_bo_%s_%s.pdf", run_label, bo_label)
+      ),
+      width = 6,
+      height = 5.5
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_bio_bundle,
+    build_fig_bio_panels(
       ora_analysis = ora_analysis_desurv,
       fit_desurv = tar_fit_desurv,
       tops_desurv = tar_tops_desurv,
-      top_genes_ref = top_genes,
-      path = file.path(
-        FIGURE_CONFIGS$figures_dir,
-        sprintf("fig_bio_%s_%s.pdf", run_label, bo_label)
-      )
+      top_genes_ref = top_genes
     ),
-    format = "file",
     packages = c("ggplot2", "dplyr", "stringr", "viridis", "cowplot", "purrr", "enrichplot", "pheatmap")
   ),
+  tar_target(fig_bio_panels, fig_bio_bundle$panels),
+  tar_target(fig_bio_panel_a, fig_bio_panels$A),
+  tar_target(fig_bio_panel_b, fig_bio_panels$B),
+  tar_target(fig_bio_panel_c, fig_bio_panels$C),
+  tar_target(fig_bio_panel_d, fig_bio_panels$D),
   tar_target(
-    fig_sc,
-    save_fig_sc(
+    fig_bio_panel_a_file,
+    save_plot_pdf(
+      fig_bio_panel_a,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_bio_%s_%s_panel_a.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_bio_panel_b_file,
+    save_plot_pdf(
+      fig_bio_panel_b,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_bio_%s_%s_panel_b.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_bio_panel_c_file,
+    save_plot_pdf(
+      fig_bio_panel_c,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_bio_%s_%s_panel_c.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_bio_panel_d_file,
+    save_plot_pdf(
+      fig_bio_panel_d,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_bio_%s_%s_panel_d.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_bio_plot,
+    combine_fig_bio_panels(fig_bio_bundle),
+    packages = c("cowplot")
+  ),
+  tar_target(
+    fig_bio,
+    save_plot_pdf(
+      fig_bio_plot,
+      file.path(
+        FIGURE_CONFIGS$figures_dir,
+        sprintf("fig_bio_%s_%s.pdf", run_label, bo_label)
+      ),
+      width = 7,
+      height = 4.5
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_sc_panels,
+    build_fig_sc_panels(
       tops_desurv = tar_tops_desurv,
       sc_all_path = FIGURE_CONFIGS$sc_data_paths$all,
       sc_caf_path = FIGURE_CONFIGS$sc_data_paths$caf,
-      sc_tum_path = FIGURE_CONFIGS$sc_data_paths$tum,
-      path = file.path(
-        FIGURE_CONFIGS$figures_dir,
-        sprintf("fig_sc_%s_%s.pdf", run_label, bo_label)
+      sc_tum_path = FIGURE_CONFIGS$sc_data_paths$tum
+    ),
+    packages = c("ggplot2", "dplyr", "viridis", "cowplot", "pheatmap", "ggplotify", "Seurat", "VAM")
+  ),
+  tar_target(fig_sc_panel_a, fig_sc_panels$A),
+  tar_target(fig_sc_panel_b, fig_sc_panels$B),
+  tar_target(fig_sc_panel_c, fig_sc_panels$C),
+  tar_target(fig_sc_panel_d, fig_sc_panels$D),
+  tar_target(fig_sc_panel_e, fig_sc_panels$E),
+  tar_target(
+    fig_sc_panel_a_file,
+    save_plot_pdf(
+      fig_sc_panel_a,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_sc_%s_%s_panel_a.pdf", run_label, bo_label)
       )
     ),
-    format = "file",
-    packages = c("ggplot2", "dplyr", "viridis", "cowplot", "pheatmap", "ggplotify", "Seurat", "VAM")
+    format = "file"
+  ),
+  tar_target(
+    fig_sc_panel_b_file,
+    save_plot_pdf(
+      fig_sc_panel_b,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_sc_%s_%s_panel_b.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_sc_panel_c_file,
+    save_plot_pdf(
+      fig_sc_panel_c,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_sc_%s_%s_panel_c.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_sc_panel_d_file,
+    save_plot_pdf(
+      fig_sc_panel_d,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_sc_%s_%s_panel_d.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_sc_panel_e_file,
+    save_plot_pdf(
+      fig_sc_panel_e,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_sc_%s_%s_panel_e.pdf", run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_sc_plot,
+    combine_fig_sc_panels(fig_sc_panels),
+    packages = c("cowplot")
+  ),
+  tar_target(
+    fig_sc,
+    save_plot_pdf(
+      fig_sc_plot,
+      file.path(
+        FIGURE_CONFIGS$figures_dir,
+        sprintf("fig_sc_%s_%s.pdf", run_label, bo_label)
+      ),
+      width = 7.5,
+      height = 8
+    ),
+    format = "file"
   )
 )
 

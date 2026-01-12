@@ -83,9 +83,6 @@ GIT_COMMIT <- tryCatch(
   }
 )
 
-DEFAULT_NINIT <- if (exists("DEFAULT_NINIT", inherits = TRUE)) DEFAULT_NINIT else 50
-DEFAULT_NINIT_FULL <- if (exists("DEFAULT_NINIT_FULL", inherits = TRUE)) DEFAULT_NINIT_FULL else 100
-
 # ------ Slurm controllers ------
 default_controller = crew_controller_sequential()
 

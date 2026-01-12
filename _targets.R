@@ -1,18 +1,18 @@
-source("targets_configs.R")
+source("targets_bo_configs.R")
+source("targets_run_configs.R")
+source("targets_val_configs.R")
+source("targets_figure_configs.R")
 BO_CONFIGS_RAW <- targets_bo_configs()
 RUN_CONFIGS_RAW <- targets_run_configs()
 VAL_CONFIGS_RAW <- targets_val_configs()
 FIGURE_CONFIGS <- targets_figure_configs()
+
 DEFAULT_NINIT <- if (length(BO_CONFIGS_RAW)) {
   max(vapply(BO_CONFIGS_RAW, function(cfg) if (is.null(cfg$ninit)) 50 else cfg$ninit, numeric(1)))
 } else {
   50
 }
-DEFAULT_NINIT_FULL <- if (length(RUN_CONFIGS_RAW)) {
-  max(vapply(RUN_CONFIGS_RAW, function(cfg) if (is.null(cfg$ninit_full)) 100 else cfg$ninit_full, numeric(1)))
-} else {
-  100
-}
+DEFAULT_NINIT_FULL <- 100
 
 source("targets_setup.R")
 source("targets_common_pipeline.R")
@@ -23,9 +23,26 @@ RESOLVED_VAL_CONFIGS <- resolve_desurv_val_configs(VAL_CONFIGS_RAW)
 validate_desurv_configs(RESOLVED_BO_CONFIGS, RESOLVED_RUN_CONFIGS, RESOLVED_VAL_CONFIGS)
 
 paper_deps <- local({
-  bo_labels <- names(RESOLVED_BO_CONFIGS)
-  run_labels <- names(RESOLVED_RUN_CONFIGS)
-  val_labels <- names(RESOLVED_VAL_CONFIGS)
+  paper_keys <- FIGURE_CONFIGS$paper_figure_keys
+  normalize_keys <- function(keys, available, key_name) {
+    keys <- keys[!is.na(keys) & nzchar(keys)]
+    if (!length(keys)) {
+      stop(sprintf("paper_figure_keys$%s must include at least one key.", key_name))
+    }
+    missing <- setdiff(keys, available)
+    if (length(missing)) {
+      stop(sprintf(
+        "paper_figure_keys$%s contains unknown keys: %s",
+        key_name,
+        paste(missing, collapse = ", ")
+      ))
+    }
+    keys
+  }
+
+  bo_labels <- normalize_keys(paper_keys$bo_key, names(RESOLVED_BO_CONFIGS), "bo_key")
+  run_labels <- normalize_keys(paper_keys$run_key, names(RESOLVED_RUN_CONFIGS), "run_key")
+  val_labels <- normalize_keys(paper_keys$val_key, names(RESOLVED_VAL_CONFIGS), "val_key")
   bo_bases <- c(
     "tar_params_best",
     "desurv_bo_history",
@@ -74,7 +91,6 @@ paper_deps <- local({
   }
   unique(deps[nzchar(deps)])
 })
-
 # ---- Targets ----
 targets_list <- tar_map(
   values = data.frame(
@@ -85,10 +101,7 @@ targets_list <- tar_map(
   names = "bo_label",
   tar_target(
     bo_config,
-    {
-      version_info
-      bo_config_value
-    }
+    bo_config_value
   ),
   ################# Training ###################
   tar_target(

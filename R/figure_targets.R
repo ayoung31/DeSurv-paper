@@ -11,7 +11,24 @@ prepare_bo_history <- function(history_path) {
   bo_history
 }
 
-make_panel <- function(history_df, labels, include_alpha = TRUE, cindex_label = "Best CV C-index across k") {
+add_panel_label <- function(plot, label) {
+  if (is.null(label) || !nzchar(label)) {
+    return(plot)
+  }
+  cowplot::plot_grid(plot, labels = label)
+}
+
+save_plot_pdf <- function(plot, path, width = NULL, height = NULL) {
+  dir.create(dirname(path), showWarnings = FALSE, recursive = TRUE)
+  if (is.null(width) || is.null(height)) {
+    ggplot2::ggsave(path, plot)
+  } else {
+    ggplot2::ggsave(path, plot, width = width, height = height, units = "in")
+  }
+  path
+}
+
+make_bo_k_panels <- function(history_df, include_alpha = TRUE, cindex_label = "Best CV C-index across k") {
   k_col <- intersect(c("k", "k_grid"), names(history_df))[1]
   alpha_col <- intersect(c("alpha", "alpha_grid"), names(history_df))[1]
   if (is.na(alpha_col)) {
@@ -51,6 +68,7 @@ make_panel <- function(history_df, labels, include_alpha = TRUE, cindex_label = 
     ggplot2::theme_minimal(base_size = 12) +
     ggplot2::theme(legend.position = "none")
 
+  panels <- list(cindex = p_k_cindex)
   if (include_alpha) {
     p_k_alpha <- ggplot2::ggplot(best_per_k, ggplot2::aes(x = k, y = alpha_best, group = 1)) +
       ggplot2::geom_line(color = "#33a02c", linewidth = 0.6) +
@@ -59,18 +77,9 @@ make_panel <- function(history_df, labels, include_alpha = TRUE, cindex_label = 
       ggplot2::labs(x = "Rank k", y = "Selected alpha") +
       ggplot2::theme_minimal(base_size = 12) +
       ggplot2::theme(legend.position = "none")
-
-    cowplot::plot_grid(
-      p_k_cindex,
-      p_k_alpha,
-      ncol = 1,
-      align = "v",
-      rel_heights = c(1, 1),
-      labels = labels
-    )
-  } else {
-    p_k_cindex + ggplot2::labs(tag = labels[1])
+    panels$alpha <- p_k_alpha
   }
+  panels
 }
 
 make_cindex_violin <- function(history_df, label) {
@@ -165,20 +174,31 @@ make_gp_curve_plot <- function(curve_df, label) {
     ggplot2::theme_minimal(base_size = 9)
 }
 
-save_fig_bo <- function(bo_history_path, bo_history_alpha0_path, bo_results_supervised,
-                        bo_results_alpha0, fit_std, path, width = 6, height = 5.5) {
+build_fig_bo_panels <- function(bo_history_path, bo_history_alpha0_path, bo_results_supervised,
+                                bo_results_alpha0, fit_std,
+                                cindex_label = "Best CV C-index across k") {
   bo_history_supervised <- prepare_bo_history(bo_history_path)
   bo_history_alpha0 <- prepare_bo_history(bo_history_alpha0_path)
 
-  p_panelA <- make_panel(bo_history_supervised, labels = c("A", "B"))
-  p_cindex_violin <- make_cindex_violin(bo_history_supervised, label = "C")
-  p_cindex_violin_alpha0 <- make_cindex_violin(bo_history_alpha0, label = "D")
+  k_panels <- make_bo_k_panels(
+    bo_history_supervised,
+    include_alpha = TRUE,
+    cindex_label = cindex_label
+  )
+  if (is.null(k_panels$alpha)) {
+    stop("Expected an alpha panel for the BO figure.")
+  }
+
+  panel_a <- add_panel_label(k_panels$cindex, "A")
+  panel_b <- add_panel_label(k_panels$alpha, "B")
+  panel_c <- make_cindex_violin(bo_history_supervised, label = "C")
+  panel_d <- make_cindex_violin(bo_history_alpha0, label = "D")
 
   gp_curve_supervised <- extract_gp_curve(bo_results_supervised, bo_history_supervised)
   gp_curve_alpha0 <- extract_gp_curve(bo_results_alpha0, bo_history_alpha0)
 
-  p_gp_supervised <- make_gp_curve_plot(gp_curve_supervised, label = "E")
-  p_gp_alpha0 <- make_gp_curve_plot(gp_curve_alpha0, label = "F")
+  panel_e <- make_gp_curve_plot(gp_curve_supervised, label = "E")
+  panel_f <- make_gp_curve_plot(gp_curve_alpha0, label = "F")
 
   plots_std <- plot(
     fit_std,
@@ -194,41 +214,70 @@ save_fig_bo <- function(bo_history_path, bo_history_alpha0_path, bo_results_supe
     ggplot2::scale_x_continuous(breaks = seq(2, 12, by = 2)) +
     ggplot2::guides(color = ggplot2::guide_legend(nrow = 2, byrow = TRUE))
 
+  panel_g <- add_panel_label(plots_std, "G")
+
+  list(
+    A = panel_a,
+    B = panel_b,
+    C = panel_c,
+    D = panel_d,
+    E = panel_e,
+    F = panel_f,
+    G = panel_g
+  )
+}
+
+combine_fig_bo_panels <- function(panels) {
+  panel_left <- cowplot::plot_grid(
+    panels$A,
+    panels$B,
+    ncol = 1,
+    align = "v",
+    rel_heights = c(1, 1)
+  )
+
   panel_right <- cowplot::plot_grid(
-    p_cindex_violin,
-    p_cindex_violin_alpha0,
+    panels$C,
+    panels$D,
     ncol = 1
   )
 
   panel_gp <- cowplot::plot_grid(
-    p_gp_supervised,
-    p_gp_alpha0,
+    panels$E,
+    panels$F,
     ncol = 2
   )
 
   panel_top <- cowplot::plot_grid(
-    p_panelA,
+    panel_left,
     panel_right,
     ncol = 2,
     rel_widths = c(1.2, 0.8)
   )
 
-  fig <- cowplot::plot_grid(
+  cowplot::plot_grid(
     panel_top,
     panel_gp,
-    plots_std,
+    panels$G,
     ncol = 1,
-    rel_heights = c(1.8, 0.8, 1),
-    labels = c("", "", "G")
+    rel_heights = c(1.8, 0.8, 1)
   )
-
-  dir.create(dirname(path), showWarnings = FALSE, recursive = TRUE)
-  ggplot2::ggsave(path, fig, width = width, height = height, units = "in")
-  path
 }
 
-save_fig_bio <- function(ora_analysis, fit_desurv, tops_desurv, top_genes_ref,
-                         path, width = 7, height = 4.5) {
+save_fig_bo <- function(bo_history_path, bo_history_alpha0_path, bo_results_supervised,
+                        bo_results_alpha0, fit_std, path, width = 6, height = 5.5) {
+  panels <- build_fig_bo_panels(
+    bo_history_path = bo_history_path,
+    bo_history_alpha0_path = bo_history_alpha0_path,
+    bo_results_supervised = bo_results_supervised,
+    bo_results_alpha0 = bo_results_alpha0,
+    fit_std = fit_std
+  )
+  fig <- combine_fig_bo_panels(panels)
+  save_plot_pdf(fig, path, width = width, height = height)
+}
+
+build_fig_bio_panels <- function(ora_analysis, fit_desurv, tops_desurv, top_genes_ref) {
   ora_results <- ora_analysis$enrich_GO
   if (is.null(ora_results) || !length(ora_results)) {
     stop("ORA results are missing.")
@@ -306,16 +355,9 @@ save_fig_bio <- function(ora_analysis, fit_desurv, tops_desurv, top_genes_ref,
   g <- ggplot2::ggplotGrob(p_for_legend)
   legend_shared <- g$grobs[which(vapply(g$grobs, function(x) x$name, character(1)) == "guide-box")][[1]]
 
-  dplots2 <- cowplot::plot_grid(
-    p1_eq,
-    p2_eq,
-    p3_eq,
-    legend_shared,
-    nrow = 2,
-    align = "v",
-    axis = "tblr",
-    labels = c("A.", "B.", "C.")
-  )
+  panel_a <- add_panel_label(p1_eq, "A.")
+  panel_b <- add_panel_label(p2_eq, "B.")
+  panel_c <- add_panel_label(p3_eq, "C.")
 
   if (is.null(top_genes_ref) || !length(top_genes_ref)) {
     stop("Reference gene signatures are missing.")
@@ -395,11 +437,51 @@ save_fig_bio <- function(ora_analysis, fit_desurv, tops_desurv, top_genes_ref,
   ph_grob <- ph$gtable
   pheat <- cowplot::plot_grid(NULL, cowplot::ggdraw(ph_grob), nrow = 2, rel_heights = c(0.25, 4))
 
-  fig <- cowplot::plot_grid(dplots2, pheat, ncol = 2, rel_widths = c(2, 1), labels = c("", "D."))
+  panel_d <- add_panel_label(pheat, "D.")
 
-  dir.create(dirname(path), showWarnings = FALSE, recursive = TRUE)
-  ggplot2::ggsave(path, fig, width = width, height = height, units = "in")
-  path
+  list(
+    panels = list(
+      A = panel_a,
+      B = panel_b,
+      C = panel_c,
+      D = panel_d
+    ),
+    legend = legend_shared
+  )
+}
+
+combine_fig_bio_panels <- function(panel_bundle) {
+  panels <- panel_bundle$panels
+  legend_shared <- panel_bundle$legend
+
+  dplots2 <- cowplot::plot_grid(
+    panels$A,
+    panels$B,
+    panels$C,
+    legend_shared,
+    nrow = 2,
+    align = "v",
+    axis = "tblr"
+  )
+
+  cowplot::plot_grid(
+    dplots2,
+    panels$D,
+    ncol = 2,
+    rel_widths = c(2, 1)
+  )
+}
+
+save_fig_bio <- function(ora_analysis, fit_desurv, tops_desurv, top_genes_ref,
+                         path, width = 7, height = 4.5) {
+  panel_bundle <- build_fig_bio_panels(
+    ora_analysis = ora_analysis,
+    fit_desurv = fit_desurv,
+    tops_desurv = tops_desurv,
+    top_genes_ref = top_genes_ref
+  )
+  fig <- combine_fig_bio_panels(panel_bundle)
+  save_plot_pdf(fig, path, width = width, height = height)
 }
 
 get_vam_scores <- function(sc, desurv_genesets) {
@@ -424,8 +506,7 @@ get_vam_scores <- function(sc, desurv_genesets) {
   sc
 }
 
-save_fig_sc <- function(tops_desurv, sc_all_path, sc_caf_path, sc_tum_path,
-                        path, width = 7.5, height = 8) {
+build_fig_sc_panels <- function(tops_desurv, sc_all_path, sc_caf_path, sc_tum_path) {
   if (!file.exists(sc_all_path)) {
     stop("Missing scRNA-seq file: ", sc_all_path)
   }
@@ -608,6 +689,8 @@ save_fig_sc <- function(tops_desurv, sc_all_path, sc_caf_path, sc_tum_path,
     ncol = 3,
     rel_widths = c(1, 1, 1)
   )
+  panel_a <- add_panel_label(top, "A.")
+
   mid <- cowplot::plot_grid(
     labelmid,
     p_list_all[[1]],
@@ -637,16 +720,9 @@ save_fig_sc <- function(tops_desurv, sc_all_path, sc_caf_path, sc_tum_path,
     p + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill = NA, linewidth = 0.6))
   }
 
-  full <- cowplot::plot_grid(
-    add_outline(mid),
-    NULL,
-    add_outline(mid2),
-    NULL,
-    add_outline(bottom),
-    nrow = 5,
-    labels = c("B.", "", "C.", "", "D."),
-    rel_heights = c(1, 0.05, 1, 0.05, 1)
-  )
+  panel_b <- add_panel_label(add_outline(mid), "B.")
+  panel_c <- add_panel_label(add_outline(mid2), "C.")
+  panel_d <- add_panel_label(add_outline(bottom), "D.")
 
   vam_mat <- t(as.matrix(GetAssayData(sc_all, assay = "VAMcdf", layer = "data")))
   sc_all@meta.data[, colnames(vam_mat)] <- vam_mat[rownames(sc_all@meta.data), ]
@@ -686,22 +762,60 @@ save_fig_sc <- function(tops_desurv, sc_all_path, sc_caf_path, sc_tum_path,
 
   gght <- cowplot::plot_grid(NULL, ggplotify::as.ggplot(ht$gtable), nrow = 2, rel_heights = c(0.25, 4))
   leg <- cowplot::plot_grid(NULL, legend, nrow = 2, rel_heights = c(3, 2))
+  panel_e_base <- cowplot::plot_grid(
+    gght,
+    leg,
+    ncol = 2,
+    rel_widths = c(3, 0.8)
+  )
+  panel_e <- add_panel_label(panel_e_base, "E.")
+
+  list(
+    A = panel_a,
+    B = panel_b,
+    C = panel_c,
+    D = panel_d,
+    E = panel_e
+  )
+}
+
+combine_fig_sc_panels <- function(panels) {
+  full <- cowplot::plot_grid(
+    panels$B,
+    NULL,
+    panels$C,
+    NULL,
+    panels$D,
+    nrow = 5,
+    rel_heights = c(1, 0.05, 1, 0.05, 1)
+  )
+
   main <- cowplot::plot_grid(
     full,
     NULL,
-    gght,
-    leg,
-    ncol = 4,
-    rel_widths = c(8, 0.25, 3, 0.8),
-    labels = c("", "", "E.", ""),
-    label_x = c(0, 0, -0.09, 0)
+    panels$E,
+    ncol = 3,
+    rel_widths = c(8, 0.25, 3.8)
   )
 
-  fig <- cowplot::plot_grid(top, main, nrow = 2, rel_heights = c(1.5, 3))
+  cowplot::plot_grid(
+    panels$A,
+    main,
+    nrow = 2,
+    rel_heights = c(1.5, 3)
+  )
+}
 
-  dir.create(dirname(path), showWarnings = FALSE, recursive = TRUE)
-  ggplot2::ggsave(path, fig, width = width, height = height, units = "in")
-  path
+save_fig_sc <- function(tops_desurv, sc_all_path, sc_caf_path, sc_tum_path,
+                        path, width = 7.5, height = 8) {
+  panels <- build_fig_sc_panels(
+    tops_desurv = tops_desurv,
+    sc_all_path = sc_all_path,
+    sc_caf_path = sc_caf_path,
+    sc_tum_path = sc_tum_path
+  )
+  fig <- combine_fig_sc_panels(panels)
+  save_plot_pdf(fig, path, width = width, height = height)
 }
 
 select_desurv_factors <- function(fit, n = 2) {

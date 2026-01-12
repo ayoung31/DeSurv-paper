@@ -9,7 +9,10 @@ suppressPackageStartupMessages({
   library(DeSurv)
 })
 
-source("targets_configs.R")
+source("targets_bo_configs.R")
+source("targets_run_configs.R")
+source("targets_val_configs.R")
+source("targets_figure_configs.R")
 FIGURE_CONFIGS <- targets_figure_configs()
 SIM_FIGURE_CONFIGS <- FIGURE_CONFIGS$sim_figures
 
