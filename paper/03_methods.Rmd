@@ -5,11 +5,12 @@ Let $X \in \mathbb{R}^{p \times n}_{\ge 0}$ denote the nonnegative gene expressi
 DeSurv integrates Nonnegative Matrix Factorization (NMF) with penalized Cox regression to identify gene programs associated with patient survival. 
 
 The joint objective is  
-\[
+\begin{equation}
+\label{eqn:desurv}
 \mathcal{L}(W,H,\beta) =
 (1-\alpha)\,\mathcal{L}_{\mathrm{NMF}}(W,H)
 - \alpha\,\mathcal{L}_{\mathrm{Cox}}(W,\beta),
-\]
+\end{equation}
 where $\mathcal{L}_{\mathrm{NMF}}(W,H)$ is the NMF reconstruction error and $\mathcal{L}_{\mathrm{Cox}}(W,\beta)$ is the elastic-net penalized partial log-likelihood. Optimization proceeds by alternating updates for $H$, $W$, and $\beta$, using multiplicative rules for $H$ [@lee1999learning], projected gradients for $W$, and coordinate descent for $\beta$. Although non-convex, these updates are shown to converge to a stationary point under mild conditions (SI Appendix). Complete derivations and algorithmic details are provided in the SI Appendix.
 
 ## Hyperparameter selection and cross-validation 

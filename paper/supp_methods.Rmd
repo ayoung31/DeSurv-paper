@@ -89,7 +89,7 @@ fixed.
             \State \hspace{0.5cm} Update $H^{(t+1)}$ from $H^{(t)}$ using the multiplicative rule in Eq.~\ref{eqn:Hupdate}, 
             \State \hspace{0.5cm} holding $W^{(t)}$ and $\beta^{(t)}$ fixed.
             \State \textbf{(W-update)} 
-            \State \hspace{0.5cm} Update $W^{(t+1)}$ from $W^{(t)}$ using the hybrid multiplicative rule in Eq.~\ref{W_update_convergence},
+            \State \hspace{0.5cm} Update $W^{(t+1)}$ from $W^{(t)}$ using the hybrid multiplicative rule in Eq.~\ref{eqn:W_update},
             \State \hspace{0.5cm} holding $H^{(t+1)}$ and $\beta^{(t)}$ fixed, and perform backtracking to ensure 
             \State \hspace{0.5cm} $\mathcal{L}$ does not increase.
             \State \textbf{($\beta$-update)}
@@ -109,7 +109,7 @@ Conditional on $W$, the loss $\mathcal{L}(W,H,\beta)$ reduces to a strictly
 convex quadratic function of $H$. We adopt the standard NMF multiplicative
 update with $\ell_2$ penalty:
 \begin{equation}
-\label{eq:supp-Hupdate}
+\label{eqn:Hupdate}
 H \leftarrow
 \max\!\left(
   H \odot \frac{W^\top X}{
@@ -122,7 +122,7 @@ where $\odot$ denotes elementwise multiplication, all divisions are
 elementwise, and $\varepsilon_H > 0$ is a small floor to prevent entries from
 becoming exactly zero. This update is equivalent to a majorization–minimization
 step and guarantees a nonincreasing reconstruction term conditional on $W$
-[@lee2001algorithms; @pascualmontano2006nonsmooth]. The $\varepsilon_H$-floor
+[@seung2001algorithms; @pascualmontano2006nonsmooth]. The $\varepsilon_H$-floor
 ensures that iterates remain in the interior of the nonnegative orthant, which
 simplifies the convergence analysis.
 
@@ -189,7 +189,7 @@ R^{(t)}
 \end{equation}
 and the proposed update is
 \begin{equation}
-\label{eq:supp-Wupdate}
+\label{eqn:W_update}
 W^{(t+1)}
 =
 \max\!\left(
@@ -198,7 +198,7 @@ W^{(t+1)}
 \right),
 \end{equation}
 with a small floor $\varepsilon_W > 0$. When $\alpha=0$, this reduces
-to the standard multiplicative update for NMF [@lee2001algorithms];
+to the standard multiplicative update for NMF [@seung2001algorithms];
 for $\alpha>0$, the Cox gradient perturbs the update in a direction that
 decreases the supervised loss.
 
@@ -256,11 +256,11 @@ elastic-net–penalized Cox problem:
 \right\}.
 \]
 We solve this subproblem by cyclic coordinate descent following
-[@simon2011]. Writing $\ell(\beta) = \ell(W,\beta)$ and
+[@simon2011regularization]. Writing $\ell(\beta) = \ell(W,\beta)$ and
 $\tilde{\eta}_i = Z_i^\top \beta$, the update for coordinate $r$ has the
 closed form
 \begin{equation}
-\label{eq:supp-beta-update}
+\label{eqn:beta_update}
 \hat{\beta}_r
 =
 \frac{
@@ -279,7 +279,7 @@ closed form
 \end{equation}
 where $S(a,\tau) = \mathrm{sign}(a)\max(|a|-\tau,0)$ is the soft-thresholding
 operator, and $w(\tilde{\eta})$, $v(\tilde{\eta})$ are standard local
-quadratic approximations of the Cox log-partial likelihood [@simon2011].
+quadratic approximations of the Cox log-partial likelihood [@simon2011regularization].
 We iterate coordinate updates until the subproblem converges to numerical
 tolerance, yielding a minimizer in $\beta$ for the current $W$.
 
@@ -381,7 +381,7 @@ Algorithm~S\ref{alg:desurv} satisfy:
         applied at $(W^{(t)},H^{(t)})$. This rule preserves nonnegativity and
         yields a nonincreasing value of the reconstruction term conditional on
         $W^{(t)}$ and $\beta^{(t)}$; see e.g.
-        [@lee2001algorithms; @pascualmontano2006nonsmooth; @lin2007multconv].
+        [@seung2001algorithms; @pascualmontano2006nonsmooth; @lin2007convergence].
   \item \emph{$W$-update.} For fixed $(H^{(t+1)},\beta^{(t)})$, the update
         $W^{(t)} \mapsto W^{(t+1)}$ is the hybrid multiplicative step
         followed by backtracking as in Algorithm~S\ref{alg:backtrack}, producing
@@ -396,7 +396,7 @@ Algorithm~S\ref{alg:desurv} satisfy:
         $W^{(t+1)} := W^{(t)}$.
   \item \emph{$\beta$-update.} For fixed $(W^{(t+1)},H^{(t+1)})$, the update
         $\beta^{(t)} \mapsto \beta^{(t+1)}$ is obtained by running the
-        coordinate descent method of [@simon2011] on the convex elastic-net Cox
+        coordinate descent method of [@simon2011regularization] on the convex elastic-net Cox
         subproblem until convergence. Thus
         \[
           \beta^{(t+1)} \in
@@ -516,7 +516,7 @@ $\mathcal{L}(\theta^{(t_j)})\to\mathcal{L}^*$.
 \end{equation}
 a strictly convex quadratic program. The multiplicative update for $H$ is known
 to be a descent method whose fixed points coincide with the KKT points of this
-constrained subproblem [@lee2001algorithms; @lin2007multconv]. Since the full
+constrained subproblem [@seung2001algorithms; @lin2007convergence]. Since the full
 objective $\mathcal{L}(\theta^{(t)})$ converges, the per-iteration decrease
 in $\mathcal{L}$ due to the $H$-update must vanish along $\{t_j\}$.
 If $H^*$ were not KKT for the $H$-subproblem given $(W^*,\beta^*)$, there would
@@ -531,7 +531,7 @@ log-likelihood in a linear predictor). The hybrid multiplicative step with
 backtracking can be viewed as a projected gradient-like update onto the
 nonnegative orthant. Under mild conditions on the search direction and step
 sizes, any limit point of such a projected gradient scheme is a KKT point for
-the constrained subproblem; see, for example, [@tseng2001; @grippo2000].
+the constrained subproblem; see, for example, [@tseng2001convergence; @grippo2000convergence].
 If $W^*$ did not satisfy the KKT conditions, there would be a feasible
 descent direction at $(W^*,H^*,\beta^*)$ and a sufficiently small step that
 reduces $\mathcal{L}$, which the line search would eventually accept. This
@@ -571,7 +571,7 @@ The DeSurv loss can be written as
 where $f$ is continuously differentiable, $g(\beta)=\lambda\xi\|\beta\|_1$ is
 a separable convex (possibly nondifferentiable) penalty, and $I_C$ denotes the
 indicator of a closed convex set $C$. This is the smooth+nonsmooth composite
-form considered in block coordinate descent analyses such as [@tseng2001].
+form considered in block coordinate descent analyses such as [@tseng2001convergence].
 In this setting, any point that is optimal with respect to each block
 individually (a block coordinatewise minimizer) is a stationary point for the
 full problem: equivalently,
@@ -673,6 +673,19 @@ generalize across cohorts.
 
 \subsection{Cross-validation procedure}
 Algorithm~S\ref{alg:cv} describes the cross validation procedure with $F$ folds and $R$ initializations.
+We define the c-index using comparable pairs
+$\mathcal{P} = \{(i,j) : y_i < y_j,\ \delta_i = 1\}$ and linear predictors
+$\hat{\eta}_i$:
+\begin{equation}
+\label{eqn:cindex}
+\hat{c} =
+\frac{1}{|\mathcal{P}|}
+\sum_{(i,j)\in\mathcal{P}}
+\left[
+  \mathbb{1}(\hat{\eta}_i > \hat{\eta}_j)
+  + \tfrac{1}{2}\mathbb{1}(\hat{\eta}_i = \hat{\eta}_j)
+\right].
+\end{equation}
 
 \begin{algorithm}[H]
 \caption{Cross-validation for DeSurv pipeline}

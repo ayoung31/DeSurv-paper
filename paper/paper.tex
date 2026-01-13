@@ -277,7 +277,7 @@ programs (Figure @ref(fig:fig-schema)E).
 
 \begin{figure*}[t]
 
-{\centering \includegraphics[width=\textwidth,height=4in]{../figures/model_schematic_training} 
+{\centering \includegraphics[width=\textwidth,height=4in]{../figures/model_schematic_final} 
 
 }
 
@@ -541,18 +541,20 @@ Cox regression to identify gene programs associated with patient
 survival.
 
 The joint objective is\\
-\[
+\begin{equation}
+\label{eqn:desurv}
 \mathcal{L}(W,H,\beta) =
 (1-\alpha)\,\mathcal{L}_{\mathrm{NMF}}(W,H)
 - \alpha\,\mathcal{L}_{\mathrm{Cox}}(W,\beta),
-\] where \(\mathcal{L}_{\mathrm{NMF}}(W,H)\) is the NMF reconstruction
-error and \(\mathcal{L}_{\mathrm{Cox}}(W,\beta)\) is the elastic-net
-penalized partial log-likelihood. Optimization proceeds by alternating
-updates for \(H\), \(W\), and \(\beta\), using multiplicative rules for
-\(H\) (13), projected gradients for \(W\), and coordinate descent for
-\(\beta\). Although non-convex, these updates are shown to converge to a
-stationary point under mild conditions (SI Appendix). Complete
-derivations and algorithmic details are provided in the SI Appendix.
+\end{equation} where \(\mathcal{L}_{\mathrm{NMF}}(W,H)\) is the NMF
+reconstruction error and \(\mathcal{L}_{\mathrm{Cox}}(W,\beta)\) is the
+elastic-net penalized partial log-likelihood. Optimization proceeds by
+alternating updates for \(H\), \(W\), and \(\beta\), using
+multiplicative rules for \(H\) (13), projected gradients for \(W\), and
+coordinate descent for \(\beta\). Although non-convex, these updates are
+shown to converge to a stationary point under mild conditions (SI
+Appendix). Complete derivations and algorithmic details are provided in
+the SI Appendix.
 
 \subsection{Hyperparameter selection and
 cross-validation}\label{hyperparameter-selection-and-cross-validation}
@@ -690,7 +692,7 @@ then \(W\), then \(\beta\) while holding the other blocks fixed.
             \State \hspace{0.5cm} Update $H^{(t+1)}$ from $H^{(t)}$ using the multiplicative rule in Eq.~\ref{eqn:Hupdate}, 
             \State \hspace{0.5cm} holding $W^{(t)}$ and $\beta^{(t)}$ fixed.
             \State \textbf{(W-update)} 
-            \State \hspace{0.5cm} Update $W^{(t+1)}$ from $W^{(t)}$ using the hybrid multiplicative rule in Eq.~\ref{W_update_convergence},
+            \State \hspace{0.5cm} Update $W^{(t+1)}$ from $W^{(t)}$ using the hybrid multiplicative rule in Eq.~\ref{eqn:W_update},
             \State \hspace{0.5cm} holding $H^{(t+1)}$ and $\beta^{(t)}$ fixed, and perform backtracking to ensure 
             \State \hspace{0.5cm} $\mathcal{L}$ does not increase.
             \State \textbf{($\beta$-update)}
@@ -710,7 +712,7 @@ then \(W\), then \(\beta\) while holding the other blocks fixed.
 Conditional on \(W\), the loss \(\mathcal{L}(W,H,\beta)\) reduces to a
 strictly convex quadratic function of \(H\). We adopt the standard NMF
 multiplicative update with \(\ell_2\) penalty: \begin{equation}
-\label{eq:supp-Hupdate}
+\label{eqn:Hupdate}
 H \leftarrow
 \max\!\left(
   H \odot \frac{W^\top X}{
@@ -722,10 +724,9 @@ H \leftarrow
 divisions are elementwise, and \(\varepsilon_H > 0\) is a small floor to
 prevent entries from becoming exactly zero. This update is equivalent to
 a majorization--minimization step and guarantees a nonincreasing
-reconstruction term conditional on \(W\) (21,
-\textbf{lee2001algorithms?}). The \(\varepsilon_H\)-floor ensures that
-iterates remain in the interior of the nonnegative orthant, which
-simplifies the convergence analysis.
+reconstruction term conditional on \(W\) (21, 22). The
+\(\varepsilon_H\)-floor ensures that iterates remain in the interior of
+the nonnegative orthant, which simplifies the convergence analysis.
 
 \subsubsection{Update for $W$}
 
@@ -781,7 +782,7 @@ R^{(t)}
   +\varepsilon_W
 },
 \end{equation} and the proposed update is \begin{equation}
-\label{eq:supp-Wupdate}
+\label{eqn:W_update}
 W^{(t+1)}
 =
 \max\!\left(
@@ -790,8 +791,8 @@ W^{(t+1)}
 \right),
 \end{equation} with a small floor \(\varepsilon_W > 0\). When
 \(\alpha=0\), this reduces to the standard multiplicative update for NMF
-(\textbf{lee2001algorithms?}); for \(\alpha>0\), the Cox gradient
-perturbs the update in a direction that decreases the supervised loss.
+(21); for \(\alpha>0\), the Cox gradient perturbs the update in a
+direction that decreases the supervised loss.
 
 Because the combined multiplicative step does not, by itself, guarantee
 a nonincrease in the full loss \(\mathcal{L}\), we embed it in a
@@ -845,11 +846,11 @@ elastic-net--penalized Cox problem: \[
     +\frac{1-\xi}{2} \lVert \beta \rVert_2^2
   \right)
 \right\}.
-\] We solve this subproblem by cyclic coordinate descent following
-(\textbf{simon2011?}). Writing \(\ell(\beta) = \ell(W,\beta)\) and
+\] We solve this subproblem by cyclic coordinate descent following (23).
+Writing \(\ell(\beta) = \ell(W,\beta)\) and
 \(\tilde{\eta}_i = Z_i^\top \beta\), the update for coordinate \(r\) has
 the closed form \begin{equation}
-\label{eq:supp-beta-update}
+\label{eqn:beta_update}
 \hat{\beta}_r
 =
 \frac{
@@ -868,9 +869,9 @@ the closed form \begin{equation}
 \end{equation} where \(S(a,\tau) = \mathrm{sign}(a)\max(|a|-\tau,0)\) is
 the soft-thresholding operator, and \(w(\tilde{\eta})\),
 \(v(\tilde{\eta})\) are standard local quadratic approximations of the
-Cox log-partial likelihood (\textbf{simon2011?}). We iterate coordinate
-updates until the subproblem converges to numerical tolerance, yielding
-a minimizer in \(\beta\) for the current \(W\).
+Cox log-partial likelihood (23). We iterate coordinate updates until the
+subproblem converges to numerical tolerance, yielding a minimizer in
+\(\beta\) for the current \(W\).
 
 \subsubsection{Normalization of W}
 
@@ -960,7 +961,7 @@ satisfy:
         applied at $(W^{(t)},H^{(t)})$. This rule preserves nonnegativity and
         yields a nonincreasing value of the reconstruction term conditional on
         $W^{(t)}$ and $\beta^{(t)}$; see e.g.
-        [@lee2001algorithms; @pascualmontano2006nonsmooth; @lin2007multconv].
+        [@seung2001algorithms; @pascualmontano2006nonsmooth; @lin2007convergence].
   \item \emph{$W$-update.} For fixed $(H^{(t+1)},\beta^{(t)})$, the update
         $W^{(t)} \mapsto W^{(t+1)}$ is the hybrid multiplicative step
         followed by backtracking as in Algorithm~S\ref{alg:backtrack}, producing
@@ -975,7 +976,7 @@ satisfy:
         $W^{(t+1)} := W^{(t)}$.
   \item \emph{$\beta$-update.} For fixed $(W^{(t+1)},H^{(t+1)})$, the update
         $\beta^{(t)} \mapsto \beta^{(t+1)}$ is obtained by running the
-        coordinate descent method of [@simon2011] on the convex elastic-net Cox
+        coordinate descent method of [@simon2011regularization] on the convex elastic-net Cox
         subproblem until convergence. Thus
         \[
           \beta^{(t+1)} \in
@@ -1089,9 +1090,8 @@ theorem. \hfill\(\square\)
     \min_{H \geq 0}\frac{(1-\alpha)}{np}(\lVert X-WH \rVert_F^2 + \frac{\lambda_H}{nk}||H||_F^2) + \text{const in $H$},\nonumber
   \end{equation} a strictly convex quadratic program. The multiplicative
   update for \(H\) is known to be a descent method whose fixed points
-  coincide with the KKT points of this constrained subproblem
-  (\textbf{lee2001algorithms?}, \textbf{lin2007multconv?}). Since the
-  full objective \(\mathcal{L}(\theta^{(t)})\) converges, the
+  coincide with the KKT points of this constrained subproblem (21, 24).
+  Since the full objective \(\mathcal{L}(\theta^{(t)})\) converges, the
   per-iteration decrease in \(\mathcal{L}\) due to the \(H\)-update must
   vanish along \(\{t_j\}\). If \(H^*\) were not KKT for the
   \(H\)-subproblem given \((W^*,\beta^*)\), there would exist a feasible
@@ -1107,13 +1107,13 @@ theorem. \hfill\(\square\)
   gradient-like update onto the nonnegative orthant. Under mild
   conditions on the search direction and step sizes, any limit point of
   such a projected gradient scheme is a KKT point for the constrained
-  subproblem; see, for example, (\textbf{tseng2001?},
-  \textbf{grippo2000?}). If \(W^*\) did not satisfy the KKT conditions,
-  there would be a feasible descent direction at \((W^*,H^*,\beta^*)\)
-  and a sufficiently small step that reduces \(\mathcal{L}\), which the
-  line search would eventually accept. This would contradict the fact
-  that \(\mathcal{L}(\theta^{(t_j)})\to\mathcal{L}^*\). Therefore
-  \(W^*\) is KKT for the \(W\)-subproblem.
+  subproblem; see, for example, (25, 26). If \(W^*\) did not satisfy the
+  KKT conditions, there would be a feasible descent direction at
+  \((W^*,H^*,\beta^*)\) and a sufficiently small step that reduces
+  \(\mathcal{L}\), which the line search would eventually accept. This
+  would contradict the fact that
+  \(\mathcal{L}(\theta^{(t_j)})\to\mathcal{L}^*\). Therefore \(W^*\) is
+  KKT for the \(W\)-subproblem.
 \item
   For fixed \((W,H)\), the \(\beta\)-subproblem is the convex
   elastic-net penalized Cox objective. The coordinate descent algorithm
@@ -1154,10 +1154,10 @@ The DeSurv loss can be written as \[
 \(g(\beta)=\lambda\xi\|\beta\|_1\) is a separable convex (possibly
 nondifferentiable) penalty, and \(I_C\) denotes the indicator of a
 closed convex set \(C\). This is the smooth+nonsmooth composite form
-considered in block coordinate descent analyses such as
-(\textbf{tseng2001?}). In this setting, any point that is optimal with
-respect to each block individually (a block coordinatewise minimizer) is
-a stationary point for the full problem: equivalently, \[
+considered in block coordinate descent analyses such as (25). In this
+setting, any point that is optimal with respect to each block
+individually (a block coordinatewise minimizer) is a stationary point
+for the full problem: equivalently, \[
 0 \in \nabla_{W,H} f(W^*,H^*,\beta^*)
     + \partial I_{\{W\ge 0\}}(W^*)
     + \partial I_{\{H\ge 0\}}(H^*),
@@ -1219,11 +1219,11 @@ Classical nonnegative matrix factorization (NMF) is non-identifiable:
 for any invertible matrix \(R\) with nonnegative entries, the
 factorization \((W, H)\) can be transformed to \((W R, R^{-1} H)\)
 without changing the reconstruction error, yielding multiple valid
-solutions (22--24). Although normalizing columns of \(W\) or rows of
+solutions (27--29). Although normalizing columns of \(W\) or rows of
 \(H\) resolves the trivial scaling ambiguity, nonnegative mixing
 transformations persist, and empirical studies consistently show that
 the sample-loading matrix \(H\) is more sensitive to initialization and
-local minima than the program matrix \(W\) (25--27).
+local minima than the program matrix \(W\) (30--32).
 
 In DeSurv, survival supervision enters through the projection
 \(Z = X^\top W\) in the partial log-likelihood, so that the gradient of
@@ -1242,7 +1242,7 @@ the model could reduce the Cox loss by redistributing patient-specific
 coefficients while leaving the gene-level programs \(W\) nearly
 unchanged, a behavior documented in multiple supervised variants of NMF
 and supervised topic models, where supervision applied only to the
-coefficient matrix modifies \(H\) but not the basis \(W\) (28--30).
+coefficient matrix modifies \(H\) but not the basis \(W\) (33--35).
 
 Supervising \(W\) also provides a practical advantage for
 \textbf{portability}: because \(W\) defines gene-level programs, new
@@ -1261,7 +1261,19 @@ signatures that generalize across cohorts.
 \subsection{Cross-validation procedure}
 
 Algorithm\textasciitilde S\ref{alg:cv} describes the cross validation
-procedure with \(F\) folds and \(R\) initializations.
+procedure with \(F\) folds and \(R\) initializations. We define the
+c-index using comparable pairs
+\(\mathcal{P} = \{(i,j) : y_i < y_j,\ \delta_i = 1\}\) and linear
+predictors \(\hat{\eta}_i\): \begin{equation}
+\label{eqn:cindex}
+\hat{c} =
+\frac{1}{|\mathcal{P}|}
+\sum_{(i,j)\in\mathcal{P}}
+\left[
+  \mathbb{1}(\hat{\eta}_i > \hat{\eta}_j)
+  + \tfrac{1}{2}\mathbb{1}(\hat{\eta}_i = \hat{\eta}_j)
+\right].
+\end{equation}
 
 \begin{algorithm}[H]
 \caption{Cross-validation for DeSurv pipeline}
@@ -1323,7 +1335,7 @@ $
 ## DeSurv git branch: 20260107bugfix
 ## DeSurv git commit: fea641a96e4743315a35b9b6addcc1a1ff53da9d
 ## Paper git branch: main
-## Paper git commit: 853dd47bb5800fc5e8d6ab543a780950e38a4222
+## Paper git commit: 4948add9c5eb241081d29f3b9ec1b73e8ad4d7db
 \end{verbatim}
 
 \phantomsection\label{refs}
@@ -1453,65 +1465,95 @@ restraining cancer-associated fibroblast (DeCAF) subtypes.
 analysis of pancreatic ductal adenocarcinoma reveals antigen-presenting
 cancer-associated fibroblasts. \emph{Cancer Discovery} 9(8):1102--1123.}
 
-\bibitem[\citeproctext]{ref-pascualmontano2006nonsmooth}
+\bibitem[\citeproctext]{ref-seung2001algorithms}
 \CSLLeftMargin{21. }%
+\CSLRightInline{Seung D, Lee L (2001) Algorithms for non-negative matrix
+factorization. \emph{Advances in neural information processing systems}
+13(556-562):35.}
+
+\bibitem[\citeproctext]{ref-pascualmontano2006nonsmooth}
+\CSLLeftMargin{22. }%
 \CSLRightInline{Pascual-Montano A, Carazo JM, Kochi K, Lehmann D,
 Pascual-Marqui RD (2006)
 \href{https://doi.org/10.1109/TPAMI.2006.60}{Nonsmooth nonnegative
 matrix factorization}. \emph{IEEE Transactions on Pattern Analysis and
 Machine Intelligence} 28(3):403--415.}
 
+\bibitem[\citeproctext]{ref-simon2011regularization}
+\CSLLeftMargin{23. }%
+\CSLRightInline{Simon N, Friedman JH, Hastie T, Tibshirani R (2011)
+Regularization paths for cox's proportional hazards model via coordinate
+descent. \emph{Journal of statistical software} 39:1--13.}
+
+\bibitem[\citeproctext]{ref-lin2007convergence}
+\CSLLeftMargin{24. }%
+\CSLRightInline{Lin C-J (2007) On the convergence of multiplicative
+update algorithms for nonnegative matrix factorization. \emph{IEEE
+Transactions on Neural Networks} 18(6):1589--1596.}
+
+\bibitem[\citeproctext]{ref-tseng2001convergence}
+\CSLLeftMargin{25. }%
+\CSLRightInline{Tseng P (2001) Convergence of a block coordinate descent
+method for nondifferentiable minimization. \emph{Journal of optimization
+theory and applications} 109(3):475--494.}
+
+\bibitem[\citeproctext]{ref-grippo2000convergence}
+\CSLLeftMargin{26. }%
+\CSLRightInline{Grippo L, Sciandrone M (2000) On the convergence of the
+block nonlinear gauss--seidel method under convex constraints.
+\emph{Operations research letters} 26(3):127--136.}
+
 \bibitem[\citeproctext]{ref-donoho2004nmf}
-\CSLLeftMargin{22. }%
+\CSLLeftMargin{27. }%
 \CSLRightInline{Donoho D, Stodden V (2004) When does non-negative matrix
 factorization give a correct decomposition into parts? \emph{Advances in
 Neural Information Processing Systems}.}
 
 \bibitem[\citeproctext]{ref-laurberg2008uniqueness}
-\CSLLeftMargin{23. }%
+\CSLLeftMargin{28. }%
 \CSLRightInline{Laurberg H, Christensen MG, Plumbley MD, Hansen LK,
 Jensen SH (2008) Theorems on the uniqueness of nonnegative matrix
 factorization. \emph{Neurocomputing} 71(1-3):606--616.}
 
 \bibitem[\citeproctext]{ref-gillis2014nmf}
-\CSLLeftMargin{24. }%
+\CSLLeftMargin{29. }%
 \CSLRightInline{Gillis N (2014) The why and how of nonnegative matrix
 factorization. \emph{Regularization, Optimization, Kernels, and Support
 Vector Machines} (Chapman; Hall/CRC), pp 257--291.}
 
 \bibitem[\citeproctext]{ref-brunet2004metagenes}
-\CSLLeftMargin{25. }%
+\CSLLeftMargin{30. }%
 \CSLRightInline{Brunet J-P, Tamayo P, Golub TR, Mesirov JP (2004)
 Metagenes and molecular pattern discovery using matrix factorization.
 \emph{Proceedings of the National Academy of Sciences}
 101(12):4164--4169.}
 
 \bibitem[\citeproctext]{ref-kim2007sparse}
-\CSLLeftMargin{26. }%
+\CSLLeftMargin{31. }%
 \CSLRightInline{Kim H, Park H (2007) Sparse non-negative matrix
 factorization for clustering. \emph{Journal of Scientific Computing}
 36:205--222.}
 
 \bibitem[\citeproctext]{ref-gillis2012accelerated}
-\CSLLeftMargin{27. }%
+\CSLLeftMargin{32. }%
 \CSLRightInline{Gillis N, Glineur F (2012) Accelerated multiplicative
 updates and hierarchical ALS algorithms for nonnegative matrix
 factorization. \emph{Neural Computation} 24(4):1085--1105.}
 
 \bibitem[\citeproctext]{ref-cai2011graph}
-\CSLLeftMargin{28. }%
+\CSLLeftMargin{33. }%
 \CSLRightInline{Cai D, He X, Han J (2011) Graph regularized nonnegative
 matrix factorization for data representation. \emph{IEEE Transactions on
 Pattern Analysis and Machine Intelligence}, pp 1548--1560.}
 
 \bibitem[\citeproctext]{ref-wang2014supervised}
-\CSLLeftMargin{29. }%
+\CSLLeftMargin{34. }%
 \CSLRightInline{Wang K, Yang P, Yang Y, Sun L (2014) A novel supervised
 nonnegative matrix factorization algorithm for gene expression
 classification. \emph{Computational Biology and Chemistry} 53:189--197.}
 
 \bibitem[\citeproctext]{ref-blei2007slda}
-\CSLLeftMargin{30. }%
+\CSLLeftMargin{35. }%
 \CSLRightInline{Blei DM, McAuliffe JD (2007) Supervised topic models.
 \emph{Advances in Neural Information Processing Systems}.}
 

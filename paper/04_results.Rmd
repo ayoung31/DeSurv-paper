@@ -188,7 +188,7 @@ Within this framework, the product ($X_{Train}^TW$) represents patient-level fac
 Model training yields gene weights ($\hat{W}$), factor loadings ($\hat{H}$), and Cox coefficients ($\hat{\beta}$) (Figure \@ref(fig:fig-schema)C), where the inner dimension ($k$) specifies the number of latent factors. Genes with high gene weights in one factor and low gene weights in all others define the factor-specific signature genes (Figure \@ref(fig:fig-schema)D). By integrating survival supervision into the factorization, DeSurv not only reconstructs the underlying expression structure, preserving biologial interpretability, but also guides latent factors to be prognostically informative. Subsequent analyses can therefore focus on the survival-associated gene programs (Figure \@ref(fig:fig-schema)E).
 ```{r fig-schema, fig.cap="DeSurv overview. Overview of the DeSurv training pipeline. A. The input is a preprocessed bulk gene expression matrix and patient survival outcomes. B. The Desurv model optimizes a joint NMF + Cox loss function. C. The DeSurv model estimates three quantities: Gene weights matrix (W), Subject loadings matrix (H), and regression coefficients from the Cox model (beta). D. We extract the exemplar genes from each signature in the gene weights matrix. E. The exemplar genes from survival associated factors provide prognostic gene signatures.", fig.env='figure*', fig.pos='t', out.height= "4in", out.width='\\textwidth'}
 
-knitr::include_graphics(file.path(repo_root, "figures", "model_schematic_training.pdf"))
+knitr::include_graphics(file.path(repo_root, "figures", "model_schematic_final.pdf"))
 ```
 
 
