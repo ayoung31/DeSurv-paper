@@ -118,7 +118,10 @@ normalize_gp_params <- function(param_df, bounds_df) {
   param_df
 }
 
-extract_gp_curve <- function(bo_results, history_df) {
+extract_gp_curve <- function(bo_results, history_df, ci_level = 0.95) {
+  if (!is.numeric(ci_level) || length(ci_level) != 1 || ci_level <= 0 || ci_level >= 1) {
+    stop("ci_level must be a single numeric value between 0 and 1.")
+  }
   runs <- bo_results[["runs"]]
   last_run <- runs[[length(runs)]]
   km_fit <- last_run[["km_fit"]]
@@ -148,11 +151,12 @@ extract_gp_curve <- function(bo_results, history_df) {
     cov.compute = FALSE
   )
 
+  z_value <- stats::qnorm((1 + ci_level) / 2)
   tibble::tibble(
     k = best_per_k$k_numeric,
     mean = preds$mean,
-    lower = preds$mean - 1.96 * preds$sd,
-    upper = preds$mean + 1.96 * preds$sd
+    lower = preds$mean - z_value * preds$sd,
+    upper = preds$mean + z_value * preds$sd
   )
 }
 
@@ -174,93 +178,97 @@ make_gp_curve_plot <- function(curve_df, label) {
     ggplot2::theme_minimal(base_size = 9)
 }
 
-build_fig_bo_panels <- function(bo_history_path, bo_history_alpha0_path, bo_results_supervised,
-                                bo_results_alpha0, fit_std,
-                                cindex_label = "Best CV C-index across k") {
-  bo_history_supervised <- prepare_bo_history(bo_history_path)
-  bo_history_alpha0 <- prepare_bo_history(bo_history_alpha0_path)
+make_gp_curve_plot_combined <- function(curve_df) {
+  ggplot2::ggplot(
+    curve_df,
+    ggplot2::aes(x = k, y = mean, color = method, fill = method, group = method)
+  ) +
+    ggplot2::geom_ribbon(
+      ggplot2::aes(ymin = lower, ymax = upper),
+      alpha = 0.25,
+      color = NA
+    ) +
+    ggplot2::geom_line(linewidth = 0.7) +
+    ggplot2::geom_point(size = 2) +
+    ggplot2::scale_color_manual(
+      values = c("DeSurv" = "#33a02c", "alpha = 0" = "#1f78b4")
+    ) +
+    ggplot2::scale_fill_manual(
+      values = c("DeSurv" = "#b2df8a", "alpha = 0" = "#a6cee3")
+    ) +
+    ggplot2::scale_x_continuous(breaks = sort(unique(curve_df$k))) +
+    ggplot2::labs(
+      x = "Rank k",
+      y = "GP-predicted CV C-index",
+      color = NULL,
+      fill = NULL
+    ) +
+    ggplot2::theme_minimal(base_size = 9) +
+    ggplot2::theme(legend.position = "bottom")
+}
 
-  k_panels <- make_bo_k_panels(
-    bo_history_supervised,
-    include_alpha = TRUE,
-    cindex_label = cindex_label
-  )
-  if (is.null(k_panels$alpha)) {
-    stop("Expected an alpha panel for the BO figure.")
-  }
-
-  panel_a <- add_panel_label(k_panels$cindex, "A")
-  panel_b <- add_panel_label(k_panels$alpha, "B")
-  panel_c <- make_cindex_violin(bo_history_supervised, label = "C")
-  panel_d <- make_cindex_violin(bo_history_alpha0, label = "D")
-
-  gp_curve_supervised <- extract_gp_curve(bo_results_supervised, bo_history_supervised)
-  gp_curve_alpha0 <- extract_gp_curve(bo_results_alpha0, bo_history_alpha0)
-
-  panel_e <- make_gp_curve_plot(gp_curve_supervised, label = "E")
-  panel_f <- make_gp_curve_plot(gp_curve_alpha0, label = "F")
-
-  plots_std <- plot(
+make_nmf_metric_plot <- function(fit_std, metric) {
+  plot(
     fit_std,
-    what = c("cophenetic", "dispersion", "evar", "residuals", "silhouette", "sparseness"),
+    what = metric,
     main = NULL,
     xlab = "Rank (k)"
   ) +
     ggplot2::theme_minimal(base_size = 9) +
     ggplot2::theme(
       panel.grid.minor.x = ggplot2::element_blank(),
-      legend.position = "bottom"
+      legend.position = "none"
     ) +
-    ggplot2::scale_x_continuous(breaks = seq(2, 12, by = 2)) +
-    ggplot2::guides(color = ggplot2::guide_legend(nrow = 2, byrow = TRUE))
+    ggplot2::scale_x_continuous(breaks = seq(2, 12, by = 2))
+}
 
-  panel_g <- add_panel_label(plots_std, "G")
+build_fig_bo_panels <- function(bo_history_path, bo_history_alpha0_path, bo_results_supervised,
+                                bo_results_alpha0, fit_std,
+                                cindex_label = "Best CV C-index across k") {
+  bo_history_supervised <- prepare_bo_history(bo_history_path)
+  bo_history_alpha0 <- prepare_bo_history(bo_history_alpha0_path)
+  gp_curve_supervised <- extract_gp_curve(
+    bo_results_supervised,
+    bo_history_supervised,
+    ci_level = 0.90
+  )
+  gp_curve_alpha0 <- extract_gp_curve(
+    bo_results_alpha0,
+    bo_history_alpha0,
+    ci_level = 0.90
+  )
+
+  gp_curve_supervised$method <- "DeSurv"
+  gp_curve_alpha0$method <- "alpha = 0"
+  gp_curve_all <- dplyr::bind_rows(gp_curve_supervised, gp_curve_alpha0)
+
+  panel_a <- add_panel_label(make_gp_curve_plot_combined(gp_curve_all), "A")
+
+  panel_b <- add_panel_label(make_nmf_metric_plot(fit_std, "cophenetic"), "B")
+  panel_c <- add_panel_label(make_nmf_metric_plot(fit_std, "residuals"), "C")
+  panel_d <- add_panel_label(make_nmf_metric_plot(fit_std, "silhouette"), "D")
 
   list(
     A = panel_a,
     B = panel_b,
     C = panel_c,
-    D = panel_d,
-    E = panel_e,
-    F = panel_f,
-    G = panel_g
+    D = panel_d
   )
 }
 
 combine_fig_bo_panels <- function(panels) {
-  panel_left <- cowplot::plot_grid(
-    panels$A,
+  panel_bottom <- cowplot::plot_grid(
     panels$B,
-    ncol = 1,
-    align = "v",
-    rel_heights = c(1, 1)
-  )
-
-  panel_right <- cowplot::plot_grid(
     panels$C,
     panels$D,
-    ncol = 1
-  )
-
-  panel_gp <- cowplot::plot_grid(
-    panels$E,
-    panels$F,
-    ncol = 2
-  )
-
-  panel_top <- cowplot::plot_grid(
-    panel_left,
-    panel_right,
-    ncol = 2,
-    rel_widths = c(1.2, 0.8)
+    ncol = 3
   )
 
   cowplot::plot_grid(
-    panel_top,
-    panel_gp,
-    panels$G,
+    panels$A,
+    panel_bottom,
     ncol = 1,
-    rel_heights = c(1.8, 0.8, 1)
+    rel_heights = c(1.2, 1)
   )
 }
 

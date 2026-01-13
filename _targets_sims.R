@@ -115,6 +115,14 @@ SIMULATION_SCENARIOS <- list(
     replicates = SIM_DATASETS_PER_SCENARIO,
     seed_offset = SIM_GLOBAL_SEED,
     overrides = list()
+  ),
+  list(
+    scenario_id = "R_mixed",
+    scenario = "R_mixed",
+    description = "Mixed marker/background survival genes",
+    replicates = SIM_DATASETS_PER_SCENARIO,
+    seed_offset = SIM_GLOBAL_SEED + 3000L,
+    overrides = list()
   )#,
   # list(
   #   scenario_id = "R2_correlated",
@@ -844,8 +852,19 @@ compute_marker_ari <- function(true_sets, learned_sets, truth_W, fit_W) {
   adjusted_rand_index_vec(truth_labels, learned_labels)
 }
 
+resolve_truth_gene_sets <- function(truth_entry) {
+  if (is.null(truth_entry)) {
+    return(list())
+  }
+  sets <- truth_entry$survival_gene_sets
+  if (is.null(sets) || !length(sets)) {
+    sets <- truth_entry$marker_sets
+  }
+  sets %||% list()
+}
+
 compute_global_marker_recall <- function(truth_entry, learned_sets) {
-  marker_sets <- truth_entry$marker_sets %||% list()
+  marker_sets <- resolve_truth_gene_sets(truth_entry)
   true_genes <- unique(unlist(marker_sets))
   true_genes <- true_genes[!is.na(true_genes) & nzchar(true_genes)]
   if (!length(true_genes)) {
@@ -988,6 +1007,17 @@ compute_simulation_marker_metrics <- function(fit, processed, truth, params) {
   result$n_learned_with_lethal_markers <- lethal_metrics$n_learned_with_lethal_markers
   result$marker_ari <- compute_marker_ari(true_marker_sets, top_sets, truth$W, W)
   result
+}
+
+compute_simulation_survival_metrics <- function(fit, processed, truth, params) {
+  truth_surv <- truth %||% list()
+  truth_surv$marker_sets <- resolve_truth_gene_sets(truth_surv)
+  compute_simulation_marker_metrics(
+    fit = fit,
+    processed = processed,
+    truth = truth_surv,
+    params = params
+  )
 }
 
 get_simulation_k <- function(dataset_entry) {
@@ -1155,6 +1185,15 @@ summarize_simulation_results <- function(result_list) {
   if (!nrow(result_tbl)) {
     return(empty_tbl)
   }
+  survival_metrics <- purrr::pmap(
+    list(
+      fit = result_tbl$fit,
+      processed = result_tbl$processed,
+      truth = result_tbl$truth,
+      params = result_tbl$params
+    ),
+    compute_simulation_survival_metrics
+  )
   summary_tbl <- tibble::tibble(
     scenario_id = result_tbl$scenario_id,
     scenario = result_tbl$scenario,
@@ -1164,21 +1203,57 @@ summarize_simulation_results <- function(result_list) {
     test_cindex = as.numeric(result_tbl$cindex),
     cindex = as.numeric(result_tbl$cindex)
   )
-  summary_tbl$ntop_used <- result_tbl$ntop_used
-  summary_tbl$learned_top_genes <- result_tbl$learned_top_genes
-  summary_tbl$lethal_factor_metrics <- result_tbl$lethal_factor_metrics
-  summary_tbl$learned_factor_purity <- result_tbl$learned_factor_purity
-  summary_tbl$purity_min <- result_tbl$purity_min
-  summary_tbl$purity_max <- result_tbl$purity_max
-  summary_tbl$purity_mean <- result_tbl$purity_mean
-  summary_tbl$purity_min_nonzero <- result_tbl$purity_min_nonzero
-  summary_tbl$purity_max_nonzero <- result_tbl$purity_max_nonzero
-  summary_tbl$purity_mean_nonzero <- result_tbl$purity_mean_nonzero
-  summary_tbl$n_learned_with_lethal_markers <- result_tbl$n_learned_with_lethal_markers
-  summary_tbl$marker_ari <- result_tbl$marker_ari
+  summary_tbl$ntop_used <- purrr::map_int(
+    survival_metrics,
+    ~ .x$ntop %||% NA_integer_
+  )
+  summary_tbl$learned_top_genes <- purrr::map(
+    survival_metrics,
+    "learned_top_genes"
+  )
+  summary_tbl$lethal_factor_metrics <- purrr::map(
+    survival_metrics,
+    "lethal_factor_metrics"
+  )
+  summary_tbl$learned_factor_purity <- purrr::map(
+    survival_metrics,
+    "learned_factor_purity"
+  )
+  summary_tbl$purity_min <- purrr::map_dbl(
+    survival_metrics,
+    ~ .x$purity_min %||% NA_real_
+  )
+  summary_tbl$purity_max <- purrr::map_dbl(
+    survival_metrics,
+    ~ .x$purity_max %||% NA_real_
+  )
+  summary_tbl$purity_mean <- purrr::map_dbl(
+    survival_metrics,
+    ~ .x$purity_mean %||% NA_real_
+  )
+  summary_tbl$purity_min_nonzero <- purrr::map_dbl(
+    survival_metrics,
+    ~ .x$purity_min_nonzero %||% NA_real_
+  )
+  summary_tbl$purity_max_nonzero <- purrr::map_dbl(
+    survival_metrics,
+    ~ .x$purity_max_nonzero %||% NA_real_
+  )
+  summary_tbl$purity_mean_nonzero <- purrr::map_dbl(
+    survival_metrics,
+    ~ .x$purity_mean_nonzero %||% NA_real_
+  )
+  summary_tbl$n_learned_with_lethal_markers <- purrr::map_int(
+    survival_metrics,
+    ~ .x$n_learned_with_lethal_markers %||% 0L
+  )
+  summary_tbl$marker_ari <- purrr::map_dbl(
+    survival_metrics,
+    ~ .x$marker_ari %||% NA_real_
+  )
   summary_tbl$marker_recall_all <- purrr::map2_dbl(
     result_tbl$truth,
-    result_tbl$learned_top_genes,
+    summary_tbl$learned_top_genes,
     compute_global_marker_recall
   )
   param_names <- result_tbl$params %>%

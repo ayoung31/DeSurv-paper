@@ -14,7 +14,7 @@ targets_val_configs <- function() {
     # )
     
     full = list(
-      run_key = "easy",
+      run_key = "full",
       mode = "external",
       val_datasets = c(
         "CPTAC",
