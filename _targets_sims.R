@@ -108,6 +108,14 @@ SIMULATION_SCENARIOS <- list(
     seed_offset = SIM_GLOBAL_SEED,
     overrides = list()
   ),
+  # list(
+  #   scenario_id = "R0k6",
+  #   scenario = "R0",
+  #   description = "R0 scenario with k = 6",
+  #   replicates = SIM_DATASETS_PER_SCENARIO,
+  #   seed_offset = SIM_GLOBAL_SEED + 4000L,
+  #   overrides = list(k_grid = 6L)
+  # ),
   list(
     scenario_id = "R00_null",
     scenario = "R00",
@@ -1203,6 +1211,10 @@ summarize_simulation_results <- function(result_list) {
     test_cindex = as.numeric(result_tbl$cindex),
     cindex = as.numeric(result_tbl$cindex)
   )
+  summary_tbl$true_k <- purrr::map_int(
+    result_tbl$truth,
+    ~ if (is.null(.x)) NA_integer_ else get_simulation_k(list(simulation = .x))
+  )
   summary_tbl$ntop_used <- purrr::map_int(
     survival_metrics,
     ~ .x$ntop %||% NA_integer_
@@ -1548,38 +1560,58 @@ targets_list <- list(
     }
   ),
   tar_target(
-    sim_figs,
-    build_sim_figs(sim_results_table, sim_analysis_result),
+    sim_analysis_id,
+    purrr::map_chr(SIM_ANALYSIS_SPECS, "analysis_id"),
+    iteration = "vector"
+  ),
+  tar_target(
+    sim_scenario_id,
+    purrr::map_chr(SIMULATION_SCENARIOS, "scenario_id"),
+    iteration = "vector"
+  ),
+  tar_target(
+    sim_figs_by_analysis,
+    build_sim_figs_bundle(
+      sim_results_table,
+      analysis_id = sim_analysis_id
+    ),
+    pattern = map(sim_analysis_id),
+    iteration = "list",
     packages = c("ggplot2", "dplyr", "purrr", "tibble")
   ),
   tar_target(
-    sim_fig_k_hist,
-    save_sim_plot(
-      sim_figs$k_hist,
-      file.path(FIGURE_CONFIGS$figures_dir, SIM_FIGURE_CONFIGS$k_hist$filename),
-      width = SIM_FIGURE_CONFIGS$k_hist$width,
-      height = SIM_FIGURE_CONFIGS$k_hist$height
+    sim_figs_by_analysis_files,
+    save_sim_figs(
+      sim_figs_by_analysis$plots,
+      sim_dir = FIGURE_CONFIGS$sim_dir,
+      analysis_id = sim_figs_by_analysis$analysis_id,
+      scenario_id = sim_figs_by_analysis$scenario_id,
+      figure_configs = SIM_FIGURE_CONFIGS
     ),
+    pattern = map(sim_figs_by_analysis),
     format = "file"
   ),
   tar_target(
-    sim_fig_cindex_box,
-    save_sim_plot(
-      sim_figs$cindex_box,
-      file.path(FIGURE_CONFIGS$figures_dir, SIM_FIGURE_CONFIGS$cindex_box$filename),
-      width = SIM_FIGURE_CONFIGS$cindex_box$width,
-      height = SIM_FIGURE_CONFIGS$cindex_box$height
+    sim_figs_by_analysis_scenario,
+    build_sim_figs_bundle(
+      sim_results_table,
+      analysis_id = sim_analysis_id,
+      scenario_id = sim_scenario_id
     ),
-    format = "file"
+    pattern = cross(sim_analysis_id, sim_scenario_id),
+    iteration = "list",
+    packages = c("ggplot2", "dplyr", "purrr", "tibble")
   ),
   tar_target(
-    sim_fig_precision_box,
-    save_sim_plot(
-      sim_figs$precision_box,
-      file.path(FIGURE_CONFIGS$figures_dir, SIM_FIGURE_CONFIGS$precision_box$filename),
-      width = SIM_FIGURE_CONFIGS$precision_box$width,
-      height = SIM_FIGURE_CONFIGS$precision_box$height
+    sim_figs_by_analysis_scenario_files,
+    save_sim_figs(
+      sim_figs_by_analysis_scenario$plots,
+      sim_dir = FIGURE_CONFIGS$sim_dir,
+      analysis_id = sim_figs_by_analysis_scenario$analysis_id,
+      scenario_id = sim_figs_by_analysis_scenario$scenario_id,
+      figure_configs = SIM_FIGURE_CONFIGS
     ),
+    pattern = map(sim_figs_by_analysis_scenario),
     format = "file"
   )
 )

@@ -40,7 +40,6 @@ desurv_default_bo_config <- function() {
 
 desurv_default_run_config <- function() {
   list(
-    bo_key = "default",
     ninit_full = 100,
     run_tol = 1e-5,
     run_maxit = 4000,
@@ -53,7 +52,6 @@ desurv_default_run_config <- function() {
 
 desurv_default_val_config <- function() {
   list(
-    run_key = "default",
     mode = "external",
     val_datasets = c(
       "CPTAC",
@@ -99,6 +97,7 @@ desurv_bo_config_hash <- function(config) {
 
 desurv_run_config_hash_input <- function(config) {
   hash_input <- config
+  hash_input$bo_key <- NULL
   hash_input$config_id <- NULL
   hash_input$label <- NULL
   hash_input$short_id <- NULL
@@ -112,6 +111,7 @@ desurv_run_config_hash <- function(config) {
 
 desurv_val_config_hash_input <- function(config) {
   hash_input <- config
+  hash_input$run_key <- NULL
   hash_input$config_id <- NULL
   hash_input$label <- NULL
   hash_input$short_id <- NULL
@@ -240,6 +240,42 @@ resolve_desurv_run_configs <- function(configs) {
   )
 }
 
+resolve_desurv_run_configs_by_bo <- function(bo_configs, run_configs) {
+  if (!length(bo_configs)) {
+    return(list())
+  }
+  bo_labels <- vapply(bo_configs, function(entry) entry$label, character(1))
+  if (!length(run_configs)) {
+    stop("run configs must be provided for each bo config.")
+  }
+  if (is.null(names(run_configs)) || any(!nzchar(names(run_configs)))) {
+    stop("run configs must be a named list keyed by bo config labels.")
+  }
+  missing <- setdiff(bo_labels, names(run_configs))
+  if (length(missing)) {
+    stop(sprintf(
+      "Missing run configs for bo labels: %s",
+      paste(missing, collapse = ", ")
+    ))
+  }
+  unknown <- setdiff(names(run_configs), bo_labels)
+  if (length(unknown)) {
+    stop(sprintf(
+      "Unknown run config labels: %s",
+      paste(unknown, collapse = ", ")
+    ))
+  }
+  mapply(
+    function(entry, label) {
+      entry$label <- label
+      resolve_desurv_run_config(entry, label)
+    },
+    run_configs[bo_labels],
+    bo_labels,
+    SIMPLIFY = FALSE
+  )
+}
+
 resolve_desurv_val_configs <- function(configs) {
   if (!length(configs)) {
     return(list())
@@ -251,6 +287,42 @@ resolve_desurv_val_configs <- function(configs) {
     function(entry, label) resolve_desurv_val_config(entry, label),
     configs,
     names(configs),
+    SIMPLIFY = FALSE
+  )
+}
+
+resolve_desurv_val_configs_by_bo <- function(bo_configs, val_configs) {
+  if (!length(bo_configs)) {
+    return(list())
+  }
+  bo_labels <- vapply(bo_configs, function(entry) entry$label, character(1))
+  if (!length(val_configs)) {
+    stop("val configs must be provided for each bo config.")
+  }
+  if (is.null(names(val_configs)) || any(!nzchar(names(val_configs)))) {
+    stop("val configs must be a named list keyed by bo config labels.")
+  }
+  missing <- setdiff(bo_labels, names(val_configs))
+  if (length(missing)) {
+    stop(sprintf(
+      "Missing val configs for bo labels: %s",
+      paste(missing, collapse = ", ")
+    ))
+  }
+  unknown <- setdiff(names(val_configs), bo_labels)
+  if (length(unknown)) {
+    stop(sprintf(
+      "Unknown val config labels: %s",
+      paste(unknown, collapse = ", ")
+    ))
+  }
+  mapply(
+    function(entry, label) {
+      entry$label <- label
+      resolve_desurv_val_config(entry, label)
+    },
+    val_configs[bo_labels],
+    bo_labels,
     SIMPLIFY = FALSE
   )
 }
@@ -305,9 +377,6 @@ validate_desurv_bo_config <- function(config) {
 
 validate_desurv_run_config <- function(config) {
   errors <- character(0)
-  if (is.null(config$bo_key) || !length(config$bo_key) || any(!nzchar(config$bo_key))) {
-    errors <- c(errors, "run_config$bo_key must be provided.")
-  }
   if (length(errors)) {
     stop(paste(errors, collapse = "\n"))
   }
@@ -318,9 +387,6 @@ validate_desurv_val_config <- function(config) {
   errors <- character(0)
   if (!(config$mode %in% c("external", "train_split"))) {
     errors <- c(errors, "val_config$mode must be 'external' or 'train_split'.")
-  }
-  if (is.null(config$run_key) || !nzchar(config$run_key)) {
-    errors <- c(errors, "val_config$run_key must be provided.")
   }
   if (identical(config$mode, "external") &&
       (is.null(config$val_datasets) || !length(config$val_datasets))) {
@@ -349,18 +415,25 @@ validate_desurv_configs <- function(bo_configs, run_configs, val_configs) {
 
   bo_labels <- vapply(bo_configs, function(entry) entry$label, character(1))
   run_labels <- vapply(run_configs, function(entry) entry$label, character(1))
+  val_labels <- vapply(val_configs, function(entry) entry$label, character(1))
   if (length(run_configs)) {
-    run_bo_keys <- unlist(lapply(run_configs, function(entry) entry$bo_key))
-    run_bo_keys <- run_bo_keys[!is.na(run_bo_keys)]
-    missing_bo <- setdiff(run_bo_keys, bo_labels)
-    if (length(missing_bo)) {
-      stop(sprintf("Unknown bo_key in run configs: %s", paste(unique(missing_bo), collapse = ", ")))
+    missing_run <- setdiff(bo_labels, run_labels)
+    if (length(missing_run)) {
+      stop(sprintf("Missing run configs for bo labels: %s", paste(missing_run, collapse = ", ")))
+    }
+    unknown_run <- setdiff(run_labels, bo_labels)
+    if (length(unknown_run)) {
+      stop(sprintf("Unknown run config labels: %s", paste(unknown_run, collapse = ", ")))
     }
   }
   if (length(val_configs)) {
-    missing_run <- setdiff(vapply(val_configs, function(entry) entry$run_key, character(1)), run_labels)
-    if (length(missing_run)) {
-      stop(sprintf("Unknown run_key in val configs: %s", paste(unique(missing_run), collapse = ", ")))
+    missing_val <- setdiff(bo_labels, val_labels)
+    if (length(missing_val)) {
+      stop(sprintf("Missing val configs for bo labels: %s", paste(missing_val, collapse = ", ")))
+    }
+    unknown_val <- setdiff(val_labels, bo_labels)
+    if (length(unknown_val)) {
+      stop(sprintf("Unknown val config labels: %s", paste(unknown_val, collapse = ", ")))
     }
   }
 
@@ -370,23 +443,9 @@ validate_desurv_configs <- function(bo_configs, run_configs, val_configs) {
     } else {
       list()
     }
-    run_by_label <- if (length(run_configs)) {
-      setNames(run_configs, run_labels)
-    } else {
-      list()
-    }
     for (entry in val_configs) {
       if (identical(entry$mode, "train_split")) {
-        run_cfg <- run_by_label[[entry$run_key]]
-        if (length(run_cfg$bo_key) != 1L) {
-          stop(sprintf(
-            "val_config '%s' uses train_split but run_config '%s' has %s bo_key values.",
-            entry$label,
-            run_cfg$label,
-            length(run_cfg$bo_key)
-          ))
-        }
-        bo_cfg <- bo_by_label[[run_cfg$bo_key]]
+        bo_cfg <- bo_by_label[[entry$label]]
         if (!identical(bo_cfg$data_mode, "split")) {
           stop(sprintf(
             "val_config '%s' uses train_split but bo_config '%s' is data_mode '%s'.",

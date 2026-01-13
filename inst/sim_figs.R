@@ -33,8 +33,21 @@ mean_lethal_metric <- function(tbl, metric) {
   mean(vals, na.rm = TRUE)
 }
 
-build_sim_fig_data <- function(sim_results_table, sim_analysis_result) {
-  results <- sim_results_table %>%
+build_sim_fig_data <- function(sim_results_table,
+                               analysis_id = NULL,
+                               scenario_id = NULL) {
+  results <- sim_results_table
+  if (!is.null(analysis_id)) {
+    results <- results %>%
+      dplyr::filter(.data$analysis_id %in% analysis_id)
+  }
+  if (!is.null(scenario_id)) {
+    results <- results %>%
+      dplyr::filter(.data$scenario_id %in% scenario_id)
+  }
+
+  scenario_col <- if ("scenario_id" %in% names(results)) "scenario_id" else "scenario"
+  results <- results %>%
     dplyr::mutate(
       method = dplyr::if_else(alpha == 0, "alpha=0", "DeSurv"),
       method = factor(method, levels = c("DeSurv", "alpha=0")),
@@ -43,22 +56,24 @@ build_sim_fig_data <- function(sim_results_table, sim_analysis_result) {
         mean_lethal_metric,
         metric = "best_precision"
       ),
-      scenario = factor(scenario, levels = unique(scenario))
+      scenario_panel = .data[[scenario_col]]
+    ) %>%
+    dplyr::mutate(
+      scenario_panel = factor(scenario_panel, levels = unique(scenario_panel))
     )
 
-  analysis_tbl <- dplyr::bind_rows(sim_analysis_result)
-  true_k_tbl <- if (nrow(analysis_tbl)) {
-    analysis_tbl %>%
-      dplyr::mutate(true_k = purrr::map_int(truth, ~ get_simulation_k(list(simulation = .x)))) %>%
-      dplyr::group_by(scenario_id, scenario) %>%
+  true_k_tbl <- if ("true_k" %in% names(results) && nrow(results)) {
+    results %>%
+      dplyr::filter(!is.na(true_k)) %>%
+      dplyr::group_by(scenario_panel) %>%
       dplyr::summarise(true_k = dplyr::first(true_k), .groups = "drop")
   } else {
-    tibble::tibble(scenario_id = character(), scenario = character(), true_k = integer())
+    tibble::tibble(scenario_panel = character(), true_k = integer())
   }
 
   k_plot_data <- results %>%
     dplyr::filter(!is.na(k)) %>%
-    dplyr::left_join(true_k_tbl, by = c("scenario_id", "scenario")) %>%
+    dplyr::left_join(true_k_tbl, by = "scenario_panel") %>%
     dplyr::mutate(k = as.integer(k))
 
   list(results = results, true_k_tbl = true_k_tbl, k_plot_data = k_plot_data)
@@ -74,12 +89,12 @@ plot_sim_k_hist <- function(k_plot_data, true_k_tbl, base_size = 12) {
     ) +
     ggplot2::geom_vline(
       data = true_k_tbl,
-      ggplot2::aes(xintercept = true_k),
-      color = "black",
-      linetype = "dashed",
-      linewidth = 0.4
-    ) +
-    ggplot2::facet_grid(scenario ~ method) +
+    ggplot2::aes(xintercept = true_k),
+    color = "black",
+    linetype = "dashed",
+    linewidth = 0.4
+  ) +
+    ggplot2::facet_grid(scenario_panel ~ method) +
     ggplot2::scale_fill_manual(values = sim_method_colors, guide = "none") +
     ggplot2::scale_x_continuous(breaks = sort(unique(k_plot_data$k))) +
     ggplot2::labs(
@@ -102,7 +117,7 @@ plot_sim_metric_box <- function(results, metric, title, ylab, base_size = 12) {
       size = 0.8,
       alpha = 0.35
     ) +
-    ggplot2::facet_wrap(~ scenario) +
+    ggplot2::facet_wrap(~ scenario_panel) +
     ggplot2::scale_fill_manual(values = sim_method_colors) +
     ggplot2::scale_color_manual(values = sim_method_colors, guide = "none") +
     ggplot2::labs(
@@ -114,8 +129,15 @@ plot_sim_metric_box <- function(results, metric, title, ylab, base_size = 12) {
     sim_pub_theme(base_size = base_size)
 }
 
-build_sim_figs <- function(sim_results_table, sim_analysis_result, base_size = 12) {
-  plot_data <- build_sim_fig_data(sim_results_table, sim_analysis_result)
+build_sim_figs <- function(sim_results_table,
+                           analysis_id = NULL,
+                           scenario_id = NULL,
+                           base_size = 12) {
+  plot_data <- build_sim_fig_data(
+    sim_results_table,
+    analysis_id = analysis_id,
+    scenario_id = scenario_id
+  )
 
   list(
     k_hist = plot_sim_k_hist(
@@ -154,10 +176,82 @@ save_sim_plot <- function(plot, path, width = 6.5, height = 4.5) {
   path
 }
 
+build_sim_figs_bundle <- function(sim_results_table,
+                                  analysis_id,
+                                  scenario_id = NULL,
+                                  base_size = 12) {
+  list(
+    analysis_id = analysis_id,
+    scenario_id = scenario_id,
+    plots = build_sim_figs(
+      sim_results_table,
+      analysis_id = analysis_id,
+      scenario_id = scenario_id,
+      base_size = base_size
+    )
+  )
+}
+
+sim_fig_basename <- function(filename) {
+  tools::file_path_sans_ext(filename)
+}
+
+sim_fig_suffix <- function(scenario_id) {
+  if (is.null(scenario_id) || is.na(scenario_id) || !nzchar(scenario_id)) {
+    return("combined")
+  }
+  scenario_id
+}
+
+save_sim_figs <- function(plots,
+                          sim_dir,
+                          analysis_id,
+                          figure_configs,
+                          scenario_id = NULL) {
+  out_dir <- file.path(sim_dir, analysis_id)
+  suffix <- sim_fig_suffix(scenario_id)
+  k_hist_path <- file.path(
+    out_dir,
+    sprintf("%s__%s.pdf", sim_fig_basename(figure_configs$k_hist$filename), suffix)
+  )
+  cindex_path <- file.path(
+    out_dir,
+    sprintf("%s__%s.pdf", sim_fig_basename(figure_configs$cindex_box$filename), suffix)
+  )
+  precision_path <- file.path(
+    out_dir,
+    sprintf(
+      "%s__%s.pdf",
+      sim_fig_basename(figure_configs$precision_box$filename),
+      suffix
+    )
+  )
+
+  c(
+    save_sim_plot(
+      plots$k_hist,
+      k_hist_path,
+      width = figure_configs$k_hist$width,
+      height = figure_configs$k_hist$height
+    ),
+    save_sim_plot(
+      plots$cindex_box,
+      cindex_path,
+      width = figure_configs$cindex_box$width,
+      height = figure_configs$cindex_box$height
+    ),
+    save_sim_plot(
+      plots$precision_box,
+      precision_path,
+      width = figure_configs$precision_box$width,
+      height = figure_configs$precision_box$height
+    )
+  )
+}
+
 if (interactive()) {
   library(targets)
   tar_load_globals(script = "_targets_sims.R")
   tar_load(sim_results_table)
-  tar_load(sim_analysis_result)
-  sim_plots <- build_sim_figs(sim_results_table, sim_analysis_result)
+  sim_plots <- build_sim_figs(sim_results_table)
 }

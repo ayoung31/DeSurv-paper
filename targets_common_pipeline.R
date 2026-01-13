@@ -973,7 +973,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
 COMMON_DESURV_VAL_TARGETS <- list(
   tar_target(
     val_run_bundle,
-    select_bundle_by_label(run_bundles, val_config_effective$run_key)
+    run_bundle
   ),
   tar_target(
     data_val_filtered,

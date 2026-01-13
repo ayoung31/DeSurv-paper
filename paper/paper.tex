@@ -172,12 +172,13 @@ Separating discovery from validation can risk overfitting and limits
 biological and clinical generalizability. Identified cell types may
 capture dataset-specific noise rather than reproducible biological
 signals, undermining their utility in downstream analyses or therapeutic
-targeting (7). Moreover, even when discovered cell types are
+targeting (6, 7). Moreover, even when discovered cell types are
 biologically valid and reproducible, they may not correspond to the
 cellular programs most relevant for predicting or influencing clinical
-outcomes (9). Therefore, there is a clear need for integrative methods
-that jointly uncover biologically meaningful programs while directly
-incorporating clinical endpoints to ensure prognostic relevance.
+outcomes (8, 9). Therefore, there is a clear need for integrative
+methods that jointly uncover biologically meaningful programs while
+directly incorporating clinical endpoints to ensure prognostic
+relevance.
 
 However, integrating patient outcomes into the discovery phase is not
 straightforward with current technology and methodology. Single-cell
@@ -192,25 +193,23 @@ discovery of novel programs (12).
 
 Nonnegative matrix factorization (NMF) is widely used in cancer genomics
 because its nonnegativity constraints produce biologically
-interpretable, additive molecular programs
-\citep{lee1999learning, Bailey2016, moffitt2015virtual, peng2019novo}.
-Although recent extensions have incorporated supervision into the
-factorization, most target regression or classification rather than
-time-to-event outcomes. Two studies have proposed survival-aware NMF
-formulations \citep{le2025survnmf, huang2020low}, but both integrate the
-survival objective through the sample-specific loadings rather than the
-gene-level programs. This design emphasizes prediction accuracy but
-limits the model's ability to restructure or refine the underlying
-molecular programs, reducing its value for biological interpretation and
-subtype discovery, which are core objectives in cancer transcriptomics.
-In addition, neither study provides a principled approach for
-hyperparameter selection or model assessment, and convergence properties
-are only briefly addressed in one manuscript. Both works remain
-unpublished and unreviewed, leaving their methodological robustness and
-reproducibility uncertain. These gaps highlight the need for a
-rigorously formulated, survival-aware deconvolution method that jointly
-estimates interpretable molecular programs and their prognostic
-relevance.
+interpretable, additive molecular programs (13--16). Although recent
+extensions have incorporated supervision into the factorization, most
+target regression or classification rather than time-to-event outcomes.
+Two studies have proposed survival-aware NMF formulations (17, 18), but
+both integrate the survival objective through the sample-specific
+loadings rather than the gene-level programs. This design emphasizes
+prediction accuracy but limits the model's ability to restructure or
+refine the underlying molecular programs, reducing its value for
+biological interpretation and subtype discovery, which are core
+objectives in cancer transcriptomics. In addition, neither study
+provides a principled approach for hyperparameter selection or model
+assessment, and convergence properties are only briefly addressed in one
+manuscript. Both works remain unpublished and unreviewed, leaving their
+methodological robustness and reproducibility uncertain. These gaps
+highlight the need for a rigorously formulated, survival-aware
+deconvolution method that jointly estimates interpretable molecular
+programs and their prognostic relevance.
 
 Here we present DeSurv, a Survival-supervised Deconvolution framework
 that integrates non-negative matrix factorization (NMF) with Cox
@@ -242,15 +241,16 @@ transcriptomic data.
 We have developed an integrated framework, DeSurv, that couples
 Nonnegative Matrix Factorization (NMF) with Cox proportional hazards
 regression to identify latent gene-expression programs associated with
-patient survival (Fig. 1). The model takes as input a bulk expression
-matrix of \(p\) genes by \(n\) patients (\(X_{Train}\)) together with
-corresponding survival times (\(y_{Train}\)) and censoring indicators
-(\(\delta_{Train}\)) (Fig. 1A).
+patient survival (Figure @ref(fig:fig-schema)). The model takes as input
+a bulk expression matrix of \(p\) genes by \(n\) patients
+(\(X_{Train}\)) together with corresponding survival times
+(\(y_{Train}\)) and censoring indicators (\(\delta_{Train}\)) (Figure
+@ref(fig:fig-schema)A).
 
 DeSurv optimizes a joint objective combining the NMF reconstruction loss
 and the Cox model's log-partial likelihood, weighted by a supervision
 parameter (\(\alpha\)) that determines the relative contribution of each
-term (Fig. 1B): \begin{align}
+term (Figure @ref(fig:fig-schema)B): \begin{align}
   (1-\alpha)\ &\mathcal{L}_{NMF}(X_{Train} \approx WH)\nonumber \\ - \alpha\ &\mathcal{L}_{Cox}(X_{Train}^TW\beta,y_{Train},\delta_{Train})
 \end{align} When \(\alpha=0\), the method reduces to standard
 unsupervised NMF; when \(\alpha>0\), survival information directly
@@ -264,15 +264,16 @@ higher activity of a given program corresponds to improved or reduced
 survival.
 
 Model training yields gene weights (\(\hat{W}\)), factor loadings
-(\(\hat{H}\)), and Cox coefficients (\(\hat{\beta}\)) (Fig. 1C), where
-the inner dimension (\(k\)) specifies the number of latent factors.
-Genes with high gene weights in one factor and low gene weights in all
-others define the factor-specific signature genes (Fig. 1D). By
-integrating survival supervision into the factorization, DeSurv not only
-reconstructs the underlying expression structure, preserving biologial
-interpretability, but also guides latent factors to be prognostically
-informative. Subsequent analyses can therefore focus on the
-survival-associated gene programs (Fig. 1E).
+(\(\hat{H}\)), and Cox coefficients (\(\hat{\beta}\)) (Figure
+@ref(fig:fig-schema)C), where the inner dimension (\(k\)) specifies the
+number of latent factors. Genes with high gene weights in one factor and
+low gene weights in all others define the factor-specific signature
+genes (Figure @ref(fig:fig-schema)D). By integrating survival
+supervision into the factorization, DeSurv not only reconstructs the
+underlying expression structure, preserving biologial interpretability,
+but also guides latent factors to be prognostically informative.
+Subsequent analyses can therefore focus on the survival-associated gene
+programs (Figure @ref(fig:fig-schema)E).
 
 \begin{figure*}[t]
 
@@ -297,33 +298,27 @@ surrogate models this surface and proposes new evaluations that balance
 exploration and exploitation, allowing the search to concentrate rapidly
 on high-performing regions.
 
-Figure @ref(fig:fig-bo) summarises the optimisation run. Panels A and B
-report the best cross-validated C-index obtained for each rank and the
-corresponding supervision weight when \(\alpha\) is tuned alongside
-\(k\). Panel C visualises the full BO history through a violin plot of
-all C-index evaluations per rank, revealing the uncertainty around the
-best-performing \(k\), while Panel D mirrors this distribution when the
-search is constrained to \(\alpha=0\). Panels E and F use the
-Gaussian-process surrogate to show the BO posterior mean C-index and its
-95\% confidence interval across \(k\) for the supervised and
-\(\alpha=0\) searches, respectively, capturing model-based uncertainty
-beyond the sampled runs. The final configuration of the supervised
-search converges to \(k=3\) and \(\alpha=0.7\), which provided the
-highest cross-validated C-index encountered by BO.
+Figure @ref(fig:fig-bo) summarises the optimisation run. Panel A uses
+the Gaussian-process surrogate to show the BO posterior mean C-index
+across \(k\) for the supervised and \(\alpha=0\) searches, with 90\%
+confidence bands capturing model-based uncertainty beyond the sampled
+runs. The final configuration of the supervised search converges to
+\(k=3\) and \(\alpha=0.7\), which provided the highest cross-validated
+C-index encountered by BO.
 
-For reference we still report the standard NMF heuristics (Panel G),
-which historically guide rank selection when a supervised criterion is
-unavailable. These diagnostics disagree on the optimal \(k\),
-underscoring the benefit of the BO-guided DeSurv procedure that
-explicitly maximises prognostic accuracy.
+For reference we still report standard NMF heuristics (Panels B-D:
+cophenetic, residuals, and silhouette), which historically guide rank
+selection when a supervised criterion is unavailable. These diagnostics
+disagree on the optimal \(k\), underscoring the benefit of the BO-guided
+DeSurv procedure that explicitly maximises prognostic accuracy.
 
 \begin{figure*}[t]
 
-{\centering \includegraphics[width=6in,height=5.5in]{../figures/fig_bo_easy_easy} 
+{\centering \includegraphics[width=6in,height=5.5in]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1} 
 
 }
 
-\caption{A-B. Best cross-validated C-index per rank and corresponding supervision weight when $\alpha$ is tuned jointly with k. C. Violin plot showing the distribution of CV C-index across all BO runs per k. D. Equivalent BO violin summary when $\alpha$ is fixed to 0. E-F. GP posterior mean and 95\% confidence bands of the CV C-index versus k for the supervised and $\alpha$ = 0 searches. G. Conventional NMF diagnostics (cophenetic, dispersion, residuals, explained variance, silhouette, sparseness) for the unsupervised baseline.}\label{fig:fig-bo}
+\caption{A. GP posterior mean and 90\% confidence bands of the CV C-index versus k for the supervised and $\alpha$ = 0 searches. B-D. Conventional NMF diagnostics (cophenetic, residuals, silhouette) for the unsupervised baseline.}\label{fig:fig-bo}
 \end{figure*}
 
 \subsection*{DeSurv provides biologically interpretable gene
@@ -333,17 +328,17 @@ interpretable gene signatures}
 
 For the selected DeSurv model (\(k=3, \alpha=0.7\)), we identified the
 top 50 factor-specific genes from each latent factor to characterize
-their underlying biological functions. Figures 3A--C summarize the
-results of an over-representation analysis (ORA) performed on these
-genes. The enrichment profiles reveal three distinct biological
-programs. Factor 1 is strongly enriched for immune-related pathways,
-including cytokine signaling, T-cell activation, and interferon
-response. Factor 2 shows enrichment for genes associated with normal
-pancreatic or exocrine function, suggesting that this component captures
-residual normal-tissue signal. Factor 3 is enriched for pathways linked
-to epithelial--mesenchymal transition, cell cycle progression, and KRAS
-signaling---features typically associated with the Basal-like subtype of
-pancreatic ductal adenocarcinoma (PDAC).
+their underlying biological functions. Panels A-C of Figure
+@ref(fig:fig-bio) summarize the results of an over-representation
+analysis (ORA) performed on these genes. The enrichment profiles reveal
+three distinct biological programs. Factor 1 is strongly enriched for
+immune-related pathways, including cytokine signaling, T-cell
+activation, and interferon response. Factor 2 shows enrichment for genes
+associated with normal pancreatic or exocrine function, suggesting that
+this component captures residual normal-tissue signal. Factor 3 is
+enriched for pathways linked to epithelial--mesenchymal transition, cell
+cycle progression, and KRAS signaling---features typically associated
+with the Basal-like subtype of pancreatic ductal adenocarcinoma (PDAC).
 
 Survival analysis of the factor signature scores on the training data
 demonstrates clear prognostic stratification. High expression of Factor
@@ -361,20 +356,20 @@ factors balance both survival relevance and expression reconstruction,
 preserving biologically necessary structure even when not directly
 linked to outcome.
 
-Figure 3D further examines the correlation between DeSurv factors and
-previously published PDAC gene signatures. Factor 1 aligns with
-signatures from classical tumor, iCAF and restCAF stroma, and immune
-infiltration, all of which are associated with favorable prognosis. In
-contrast, Factor 3 correlates with Basal-like tumor, proCAF, and
-activated stromal programs, which are generally linked to poor outcomes.
-These overlaps suggest that each factor represents a composite axis of
-tumor--stroma-immune interaction, capturing biologically coherent
-programs that align with known PDAC ecosystems but arise de novo from
-the DeSurv model.
+Panel D of Figure @ref(fig:fig-bio) further examines the correlation
+between DeSurv factors and previously published PDAC gene signatures.
+Factor 1 aligns with signatures from classical tumor, iCAF and restCAF
+stroma, and immune infiltration, all of which are associated with
+favorable prognosis. In contrast, Factor 3 correlates with Basal-like
+tumor, proCAF, and activated stromal programs, which are generally
+linked to poor outcomes. These overlaps suggest that each factor
+represents a composite axis of tumor--stroma-immune interaction,
+capturing biologically coherent programs that align with known PDAC
+ecosystems but arise de novo from the DeSurv model.
 
 \begin{figure*}[t]
 
-{\centering \includegraphics[width=\textwidth,height=4.5in]{../figures/fig_bio_easy_easy} 
+{\centering \includegraphics[width=\textwidth,height=4.5in]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1} 
 
 }
 
@@ -396,26 +391,27 @@ Unsupervised consensus clustering was performed on each cohort based on
 the expression of these prognostic genes. Three clusters were selected
 as the optimal solution, supported by inspection of the cumulative
 distribution function (CDF) plots, relative change in area under the CDF
-curve, consensus heatmaps, and cluster consensus scores (Fig. SX).
+curve, consensus heatmaps, and cluster consensus scores (SI Appendix).
 Importantly, the number of clusters was determined without incorporating
 any survival information, ensuring an unbiased evaluation of downstream
 prognostic performance.
 
 Expression heatmaps of the DeSurv prognostic signatures revealed three
-distinct transcriptional patterns across the external cohorts (Fig. 4A).
-Cluster 1 displayed high expression of the basal-like (Factor 3) gene
-set; Cluster 2 showed elevated expression of the immune/iCAF (Factor 1)
-signature and reduced basal activity; and Cluster 3 exhibited
-intermediate expression of both programs. These patterns suggest that
-survival prediction is primarily driven by the presence or absence of
-basal and immune/iCAF programs, rather than by a reciprocal contrast
-between basal versus classical tumor states or iCAF versus myCAF stromal
-signatures.
+distinct transcriptional patterns across the external cohorts (Figure
+@ref(fig:fig-clus)A). Cluster 1 displayed high expression of the
+basal-like (Factor 3) gene set; Cluster 2 showed elevated expression of
+the immune/iCAF (Factor 1) signature and reduced basal activity; and
+Cluster 3 exhibited intermediate expression of both programs. These
+patterns suggest that survival prediction is primarily driven by the
+presence or absence of basal and immune/iCAF programs, rather than by a
+reciprocal contrast between basal versus classical tumor states or iCAF
+versus myCAF stromal signatures.
 
 Additionally, DeSurv-derived clusters showed strong correspondence with
-established molecular classifiers. Column annotations in Fig. 4A and the
-contingency table in Fig. 4B demonstrate substantial overlap with PurIST
-and DeCAF subtype labels: for example, X\% of patients in Cluster 1 were
+established molecular classifiers. Column annotations in Figure
+@ref(fig:fig-clus)A and the contingency table in Figure
+@ref(fig:fig-clus)B demonstrate substantial overlap with PurIST and
+DeCAF subtype labels: for example, X\% of patients in Cluster 1 were
 classified as PurIST Basal-like and DeCAF proCAF, X\% of Cluster 2 as
 Classical + restCAF, and X\% of Cluster 3 as Classical + proCAF. The
 rarity of the Basal + restCAF subtype likely contributes to the
@@ -424,38 +420,39 @@ significant association between the DeSurv-defined clusters and existing
 classifier labels (\(\chi^2\) = 210.16 p \textless{} 2.2e-16).
 
 We next assessed the prognostic relevance of these clusters using
-overall survival data from the external cohorts (Fig. XC--D). Because
-DeSurv was trained exclusively on the TCGA-PAAD and CPTAC
-datasets---without access to the expression or outcome data of the
-external cohorts---this analysis represents an independent validation of
-the model's predictive generalizability. Kaplan--Meier analysis
-demonstrated that the DeSurv-derived clusters were strongly associated
-with survival (p = 4.8e-6). As expected, the Basal-like cluster (Cluster
-1) was associated with the poorest survival, the Classical + restCAF
-cluster (Cluster 2) exhibited the most favorable outcomes, and the
-Classical + proCAF cluster (Cluster 3) showed intermediate survival.
-This pattern mirrors previous findings describing the interplay between
-tumor-intrinsic and stromal subtypes in PDAC (e.g., (13)), supporting
-the robustness and biological validity of the DeSurv-derived signatures.
+overall survival data from the external cohorts (Figure
+@ref(fig:fig-clus)C). Because DeSurv was trained exclusively on the
+TCGA-PAAD and CPTAC datasets---without access to the expression or
+outcome data of the external cohorts---this analysis represents an
+independent validation of the model's predictive generalizability.
+Kaplan--Meier analysis demonstrated that the DeSurv-derived clusters
+were strongly associated with survival (p = 4.8e-6). As expected, the
+Basal-like cluster (Cluster 1) was associated with the poorest survival,
+the Classical + restCAF cluster (Cluster 2) exhibited the most favorable
+outcomes, and the Classical + proCAF cluster (Cluster 3) showed
+intermediate survival. This pattern mirrors previous findings describing
+the interplay between tumor-intrinsic and stromal subtypes in PDAC
+(e.g., (19)), supporting the robustness and biological validity of the
+DeSurv-derived signatures.
 
 \subsection*{Analysis of scRNA-seq}\label{analysis-of-scrna-seq}
 \addcontentsline{toc}{subsection}{Analysis of scRNA-seq}
 
 Next, we verify our findings at the cellular level using the Elyada
-scRNA-seq data (cite data). We found that our DeSurv factor 1 signature
-was expressed primarily in iCAF and B cells, factor 2 was expressed in
+scRNA-seq data (20). We found that our DeSurv factor 1 signature was
+expressed primarily in iCAF and B cells, factor 2 was expressed in
 Acinar and Classical PDAC 2, and factor 3 was expressed primarily in
-Basal-like PDAC cells (Figures 4B-E). This is consistent with our ORA
-analysis which found that factor 1 was mostly immune and factor 3 was
-basal-like, and with the overlap we saw with published gene lists that
-identified factor 1 as iCAF/classical/immune and factor 3 as basal-like.
-Interestingly, we do not see a large overlap of factor 1 with the
-classical PDAC cell types despite some overlap with classical gene
-lists. Need more here\ldots{}
+Basal-like PDAC cells (Figure @ref(fig:fig-sc)B-E). This is consistent
+with our ORA analysis which found that factor 1 was mostly immune and
+factor 3 was basal-like, and with the overlap we saw with published gene
+lists that identified factor 1 as iCAF/classical/immune and factor 3 as
+basal-like. Interestingly, we do not see a large overlap of factor 1
+with the classical PDAC cell types despite some overlap with classical
+gene lists. Need more here\ldots{}
 
 \begin{figure*}[t]
 
-{\centering \includegraphics[width=\textwidth,height=8in]{../figures/fig_sc_easy_easy} 
+{\centering \includegraphics[width=\textwidth,height=8in]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sc-1} 
 
 }
 
@@ -552,11 +549,10 @@ The joint objective is\\
 error and \(\mathcal{L}_{\mathrm{Cox}}(W,\beta)\) is the elastic-net
 penalized partial log-likelihood. Optimization proceeds by alternating
 updates for \(H\), \(W\), and \(\beta\), using multiplicative rules for
-\(H\) (\textbf{lee1999?}), projected gradients for \(W\), and coordinate
-descent for \(\beta\). Although non-convex, these updates are shown to
-converge to a stationary point under mild conditions (SI Appendix).
-Complete derivations and algorithmic details are provided in the SI
-Appendix.
+\(H\) (13), projected gradients for \(W\), and coordinate descent for
+\(\beta\). Although non-convex, these updates are shown to converge to a
+stationary point under mild conditions (SI Appendix). Complete
+derivations and algorithmic details are provided in the SI Appendix.
 
 \subsection{Hyperparameter selection and
 cross-validation}\label{hyperparameter-selection-and-cross-validation}
@@ -726,7 +722,7 @@ H \leftarrow
 divisions are elementwise, and \(\varepsilon_H > 0\) is a small floor to
 prevent entries from becoming exactly zero. This update is equivalent to
 a majorization--minimization step and guarantees a nonincreasing
-reconstruction term conditional on \(W\) (14,
+reconstruction term conditional on \(W\) (21,
 \textbf{lee2001algorithms?}). The \(\varepsilon_H\)-floor ensures that
 iterates remain in the interior of the nonnegative orthant, which
 simplifies the convergence analysis.
@@ -1223,11 +1219,11 @@ Classical nonnegative matrix factorization (NMF) is non-identifiable:
 for any invertible matrix \(R\) with nonnegative entries, the
 factorization \((W, H)\) can be transformed to \((W R, R^{-1} H)\)
 without changing the reconstruction error, yielding multiple valid
-solutions (15--17). Although normalizing columns of \(W\) or rows of
+solutions (22--24). Although normalizing columns of \(W\) or rows of
 \(H\) resolves the trivial scaling ambiguity, nonnegative mixing
 transformations persist, and empirical studies consistently show that
 the sample-loading matrix \(H\) is more sensitive to initialization and
-local minima than the program matrix \(W\) (18--20).
+local minima than the program matrix \(W\) (25--27).
 
 In DeSurv, survival supervision enters through the projection
 \(Z = X^\top W\) in the partial log-likelihood, so that the gradient of
@@ -1246,7 +1242,7 @@ the model could reduce the Cox loss by redistributing patient-specific
 coefficients while leaving the gene-level programs \(W\) nearly
 unchanged, a behavior documented in multiple supervised variants of NMF
 and supervised topic models, where supervision applied only to the
-coefficient matrix modifies \(H\) but not the basis \(W\) (21--23).
+coefficient matrix modifies \(H\) but not the basis \(W\) (28--30).
 
 Supervising \(W\) also provides a practical advantage for
 \textbf{portability}: because \(W\) defines gene-level programs, new
@@ -1318,6 +1314,17 @@ $
 \subsection{Survival Analysis}
 
 \pnasbreak
+
+\section*{Versioning}\label{versioning}
+\addcontentsline{toc}{section}{Versioning}
+
+\begin{verbatim}
+## DeSurv package version: 1.0.1
+## DeSurv git branch: 20260107bugfix
+## DeSurv git commit: fea641a96e4743315a35b9b6addcc1a1ff53da9d
+## Paper git branch: main
+## Paper git commit: 853dd47bb5800fc5e8d6ab543a780950e38a4222
+\end{verbatim}
 
 \phantomsection\label{refs}
 \begin{CSLReferences}{0}{1}
@@ -1397,14 +1404,57 @@ Fourteen years of cellular deconvolution: Methodology, applications,
 technical evaluation and outstanding challenges. \emph{Nucleic Acids
 Research} 52(9):4761--4783.}
 
-\bibitem[\citeproctext]{ref-peng2024determination}
+\bibitem[\citeproctext]{ref-lee1999learning}
 \CSLLeftMargin{13. }%
+\CSLRightInline{Lee DD, Seung HS (1999) Learning the parts of objects by
+non-negative matrix factorization. \emph{nature} 401(6755):788--791.}
+
+\bibitem[\citeproctext]{ref-Bailey2016}
+\CSLLeftMargin{14. }%
+\CSLRightInline{Bailey P, Chang DK, et al. (2016)
+\href{https://doi.org/10.1038/nature16965}{Genomic analyses identify
+molecular subtypes of pancreatic cancer}. \emph{Nature}
+531(7592):47--52.}
+
+\bibitem[\citeproctext]{ref-moffitt2015virtual}
+\CSLLeftMargin{15. }%
+\CSLRightInline{Moffitt RA, et al. (2015) Virtual microdissection
+identifies distinct tumor-and stroma-specific subtypes of pancreatic
+ductal adenocarcinoma. \emph{Nature genetics} 47(10):1168--1178.}
+
+\bibitem[\citeproctext]{ref-peng2019novo}
+\CSLLeftMargin{16. }%
+\CSLRightInline{Peng XL, Moffitt RA, Torphy RJ, Volmar KE, Yeh JJ (2019)
+De novo compartment deconvolution and weight estimation of tumor samples
+using DECODER. \emph{Nature communications} 10(1):4729.}
+
+\bibitem[\citeproctext]{ref-le2025survnmf}
+\CSLLeftMargin{17. }%
+\CSLRightInline{Le Goff V, et al. (2025) SurvNMF: Non-negative matrix
+factorization supervised for survival data analysis. PhD thesis
+(Institut Pasteur Paris; CEA).}
+
+\bibitem[\citeproctext]{ref-huang2020low}
+\CSLLeftMargin{18. }%
+\CSLRightInline{Huang Z, Salama P, Shao W, Zhang J, Huang K (2020)
+Low-rank reorganization via proportional hazards non-negative matrix
+factorization unveils survival associated gene clusters. \emph{arXiv
+preprint arXiv:200803776}.}
+
+\bibitem[\citeproctext]{ref-peng2024determination}
+\CSLLeftMargin{19. }%
 \CSLRightInline{Peng XL, et al. (2024) Determination of permissive and
 restraining cancer-associated fibroblast (DeCAF) subtypes.
 \emph{bioRxiv}.}
 
+\bibitem[\citeproctext]{ref-elyada2019cross}
+\CSLLeftMargin{20. }%
+\CSLRightInline{Elyada E, et al. (2019) Cross-species single-cell
+analysis of pancreatic ductal adenocarcinoma reveals antigen-presenting
+cancer-associated fibroblasts. \emph{Cancer Discovery} 9(8):1102--1123.}
+
 \bibitem[\citeproctext]{ref-pascualmontano2006nonsmooth}
-\CSLLeftMargin{14. }%
+\CSLLeftMargin{21. }%
 \CSLRightInline{Pascual-Montano A, Carazo JM, Kochi K, Lehmann D,
 Pascual-Marqui RD (2006)
 \href{https://doi.org/10.1109/TPAMI.2006.60}{Nonsmooth nonnegative
@@ -1412,56 +1462,56 @@ matrix factorization}. \emph{IEEE Transactions on Pattern Analysis and
 Machine Intelligence} 28(3):403--415.}
 
 \bibitem[\citeproctext]{ref-donoho2004nmf}
-\CSLLeftMargin{15. }%
+\CSLLeftMargin{22. }%
 \CSLRightInline{Donoho D, Stodden V (2004) When does non-negative matrix
 factorization give a correct decomposition into parts? \emph{Advances in
 Neural Information Processing Systems}.}
 
 \bibitem[\citeproctext]{ref-laurberg2008uniqueness}
-\CSLLeftMargin{16. }%
+\CSLLeftMargin{23. }%
 \CSLRightInline{Laurberg H, Christensen MG, Plumbley MD, Hansen LK,
 Jensen SH (2008) Theorems on the uniqueness of nonnegative matrix
 factorization. \emph{Neurocomputing} 71(1-3):606--616.}
 
 \bibitem[\citeproctext]{ref-gillis2014nmf}
-\CSLLeftMargin{17. }%
+\CSLLeftMargin{24. }%
 \CSLRightInline{Gillis N (2014) The why and how of nonnegative matrix
 factorization. \emph{Regularization, Optimization, Kernels, and Support
 Vector Machines} (Chapman; Hall/CRC), pp 257--291.}
 
 \bibitem[\citeproctext]{ref-brunet2004metagenes}
-\CSLLeftMargin{18. }%
+\CSLLeftMargin{25. }%
 \CSLRightInline{Brunet J-P, Tamayo P, Golub TR, Mesirov JP (2004)
 Metagenes and molecular pattern discovery using matrix factorization.
 \emph{Proceedings of the National Academy of Sciences}
 101(12):4164--4169.}
 
 \bibitem[\citeproctext]{ref-kim2007sparse}
-\CSLLeftMargin{19. }%
+\CSLLeftMargin{26. }%
 \CSLRightInline{Kim H, Park H (2007) Sparse non-negative matrix
 factorization for clustering. \emph{Journal of Scientific Computing}
 36:205--222.}
 
 \bibitem[\citeproctext]{ref-gillis2012accelerated}
-\CSLLeftMargin{20. }%
+\CSLLeftMargin{27. }%
 \CSLRightInline{Gillis N, Glineur F (2012) Accelerated multiplicative
 updates and hierarchical ALS algorithms for nonnegative matrix
 factorization. \emph{Neural Computation} 24(4):1085--1105.}
 
 \bibitem[\citeproctext]{ref-cai2011graph}
-\CSLLeftMargin{21. }%
+\CSLLeftMargin{28. }%
 \CSLRightInline{Cai D, He X, Han J (2011) Graph regularized nonnegative
 matrix factorization for data representation. \emph{IEEE Transactions on
 Pattern Analysis and Machine Intelligence}, pp 1548--1560.}
 
 \bibitem[\citeproctext]{ref-wang2014supervised}
-\CSLLeftMargin{22. }%
+\CSLLeftMargin{29. }%
 \CSLRightInline{Wang K, Yang P, Yang Y, Sun L (2014) A novel supervised
 nonnegative matrix factorization algorithm for gene expression
 classification. \emph{Computational Biology and Chemistry} 53:189--197.}
 
 \bibitem[\citeproctext]{ref-blei2007slda}
-\CSLLeftMargin{23. }%
+\CSLLeftMargin{30. }%
 \CSLRightInline{Blei DM, McAuliffe JD (2007) Supervised topic models.
 \emph{Advances in Neural Information Processing Systems}.}
 

@@ -164,7 +164,7 @@ resolve_target_name <- function(base, bo_label, run_label = NULL, val_label = NU
   candidates[1]
 }
 
-best_params <- tar_read(resolve_target_name(
+best_params <- tar_read_raw(resolve_target_name(
   "tar_params_best",
   bo_label = bo_label,
   available = available_targets
@@ -202,7 +202,7 @@ For reference we still report standard NMF heuristics (Panels B-D: cophenetic, r
 
 ```{r fig-bo, fig.width = 6, fig.height= 5.5, fig.cap="A. GP posterior mean and 90% confidence bands of the CV C-index versus k for the supervised and $\\alpha$ = 0 searches. B-D. Conventional NMF diagnostics (cophenetic, residuals, silhouette) for the unsupervised baseline." , fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
 
-fig_bo_plot <- tar_read(resolve_target_name(
+fig_bo_plot <- tar_read_raw(resolve_target_name(
   "fig_bo_plot",
   bo_label = bo_label,
   run_label = run_label,
@@ -220,7 +220,7 @@ Survival analysis of the factor signature scores on the training data demonstrat
 Panel D of Figure \@ref(fig:fig-bio) further examines the correlation between DeSurv factors and previously published PDAC gene signatures. Factor 1 aligns with signatures from classical tumor, iCAF and restCAF stroma, and immune infiltration, all of which are associated with favorable prognosis. In contrast, Factor 3 correlates with Basal-like tumor, proCAF, and activated stromal programs, which are generally linked to poor outcomes. These overlaps suggest that each factor represents a composite axis of tumor–stroma-immune interaction, capturing biologically coherent programs that align with known PDAC ecosystems but arise de novo from the DeSurv model.
 ```{r fig-bio, fig.cap="A-C. Dotplots of ORA analysis of top 50 genes from each DeSurv derived factor. D. Correlation between the DeSurv gene weights matrix and previously published PDAC gene signatures.", fig.env='figure*', fig.pos='t', out.height= "4.5in", out.width='\\textwidth'}
 
-fig_bio_plot <- tar_read(resolve_target_name(
+fig_bio_plot <- tar_read_raw(resolve_target_name(
   "fig_bio_plot",
   bo_label = bo_label,
   run_label = run_label,
@@ -250,7 +250,7 @@ Next, we verify our findings at the cellular level using the Elyada scRNA-seq da
 
 ```{r fig-sc, fig.cap="A. Cell type clusters from the Elyada scRNA-seq data. B-D. VAM scores for the DeSurv factor signatures in each cell shown on the UMAP of cells in the Elyada-sc data. E. Heatmap of average VAM scores by cell type and factor signature in the Elyada-sc data.", fig.env='figure*', fig.pos='t', out.height= "8in", out.width='\\textwidth'}
 
-fig_sc_plot <- tar_read(resolve_target_name(
+fig_sc_plot <- tar_read_raw(resolve_target_name(
   "fig_sc_plot",
   bo_label = bo_label,
   run_label = run_label,

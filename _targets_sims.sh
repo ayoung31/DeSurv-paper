@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#SBATCH --mem=32g
-#SBATCH -t 1-00:00:00
+#SBATCH --mem=64g
+#SBATCH -t 04:00:00
 #SBATCH --output=logs/_targets_sims.out
 #SBATCH --error=logs/_targets_sims.err
 

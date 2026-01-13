@@ -1,11 +1,13 @@
 targets_figure_configs <- function() {
+  figures_dir <- "figures"
   list(
-    figures_dir = "figures",
-    panel_dir = file.path("figures", "panels"),
+    figures_dir = figures_dir,
+    panel_dir = file.path(figures_dir, "panels"),
+    sim_dir = file.path(figures_dir, "sim"),
     paper_figure_keys = list(
-      bo_key = "easy",
-      run_key = "easy",
-      val_key = "full"
+      bo_key = "bladdereasy",
+      run_key = "bladdereasy",
+      val_key = "bladdereasy"
     ),
     sc_data_paths = list(
       all = "data/derv/Elyada_umap.Rds",

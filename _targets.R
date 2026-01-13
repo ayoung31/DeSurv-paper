@@ -18,16 +18,22 @@ source("targets_setup.R")
 source("targets_common_pipeline.R")
 
 RESOLVED_BO_CONFIGS <- resolve_desurv_bo_configs(BO_CONFIGS_RAW)
-RESOLVED_RUN_CONFIGS <- resolve_desurv_run_configs(RUN_CONFIGS_RAW)
-RESOLVED_VAL_CONFIGS <- resolve_desurv_val_configs(VAL_CONFIGS_RAW)
+RESOLVED_RUN_CONFIGS <- resolve_desurv_run_configs_by_bo(RESOLVED_BO_CONFIGS, RUN_CONFIGS_RAW)
+RESOLVED_VAL_CONFIGS <- resolve_desurv_val_configs_by_bo(RESOLVED_BO_CONFIGS, VAL_CONFIGS_RAW)
 validate_desurv_configs(RESOLVED_BO_CONFIGS, RESOLVED_RUN_CONFIGS, RESOLVED_VAL_CONFIGS)
 
 paper_deps <- local({
   paper_keys <- FIGURE_CONFIGS$paper_figure_keys
-  normalize_keys <- function(keys, available, key_name) {
+  normalize_keys <- function(keys, available, key_name, fallback = NULL) {
+    if (is.null(keys)) {
+      return(fallback)
+    }
     keys <- keys[!is.na(keys) & nzchar(keys)]
     if (!length(keys)) {
-      stop(sprintf("paper_figure_keys$%s must include at least one key.", key_name))
+      if (is.null(fallback)) {
+        stop(sprintf("paper_figure_keys$%s must include at least one key.", key_name))
+      }
+      return(fallback)
     }
     missing <- setdiff(keys, available)
     if (length(missing)) {
@@ -41,8 +47,18 @@ paper_deps <- local({
   }
 
   bo_labels <- normalize_keys(paper_keys$bo_key, names(RESOLVED_BO_CONFIGS), "bo_key")
-  run_labels <- normalize_keys(paper_keys$run_key, names(RESOLVED_RUN_CONFIGS), "run_key")
-  val_labels <- normalize_keys(paper_keys$val_key, names(RESOLVED_VAL_CONFIGS), "val_key")
+  run_labels <- normalize_keys(
+    paper_keys$run_key,
+    names(RESOLVED_RUN_CONFIGS),
+    "run_key",
+    fallback = bo_labels
+  )
+  val_labels <- normalize_keys(
+    paper_keys$val_key,
+    names(RESOLVED_VAL_CONFIGS),
+    "val_key",
+    fallback = bo_labels
+  )
   bo_bases <- c(
     "tar_params_best",
     "desurv_bo_history",
@@ -67,27 +83,17 @@ paper_deps <- local({
       unlist(lapply(bo_bases, function(base) paste(base, bo_labels, sep = "_")))
     )
   }
-  if (length(run_labels) && length(bo_labels)) {
-    run_combo <- as.vector(outer(
-      run_labels,
-      bo_labels,
-      function(run_label, bo_label) paste(run_label, bo_label, sep = "_")
-    ))
+  if (length(run_labels)) {
     deps <- c(
       deps,
-      unlist(lapply(run_bases, function(base) paste(base, run_combo, sep = "_")))
+      unlist(lapply(run_bases, function(base) paste(base, run_labels, sep = "_")))
     )
-    if (length(val_labels)) {
-      val_combo <- as.vector(outer(
-        val_labels,
-        run_combo,
-        function(val_label, run_combo_label) paste(val_label, run_combo_label, sep = "_")
-      ))
-      deps <- c(
-        deps,
-        unlist(lapply(val_bases, function(base) paste(base, val_combo, sep = "_")))
-      )
-    }
+  }
+  if (length(val_labels)) {
+    deps <- c(
+      deps,
+      unlist(lapply(val_bases, function(base) paste(base, val_labels, sep = "_")))
+    )
   }
   unique(deps[nzchar(deps)])
 })
@@ -96,6 +102,7 @@ targets_list <- tar_map(
   values = data.frame(
     bo_config_value = I(RESOLVED_BO_CONFIGS),
     bo_label = names(RESOLVED_BO_CONFIGS),
+    run_label = names(RESOLVED_BO_CONFIGS),
     stringsAsFactors = FALSE
   ),
   names = "bo_label",
@@ -160,84 +167,70 @@ targets_list <- tar_map(
     }
   ),
   COMMON_DESURV_BO_TARGETS,
-  tar_map(
-    values = data.frame(
-      run_config_value = I(RESOLVED_RUN_CONFIGS),
-      run_label = names(RESOLVED_RUN_CONFIGS),
-      stringsAsFactors = FALSE
-    ),
-    names = "run_label",
-    tar_target(
-      run_config,
-      run_config_value
-    ),
-    COMMON_DESURV_RUN_TARGETS,
-    tar_map(
-          values = data.frame(
-            val_config_value = I(unname(RESOLVED_VAL_CONFIGS)),
-            val_label = names(RESOLVED_VAL_CONFIGS),
-            stringsAsFactors = FALSE
-          ),
-      names = "val_label",
-      tar_target(
-        val_config,
-        val_config_value
-      ),
-      tar_target(
-        val_config_effective,
-        {
-          cfg <- val_config
-          if (identical(bo_config$data_mode, "split")) {
-            cfg$mode <- "train_split"
-            cfg$val_datasets <- character(0)
-          } else if (identical(bo_config$data_mode, "external")) {
-            cfg$mode <- "external"
-            val_datasets <- cfg$val_datasets
-            if (is.null(val_datasets)) {
-              val_datasets <- character(0)
-            }
-            if (!length(val_datasets)) {
-              stop(sprintf(
-                "val_config '%s' must define val_datasets for external validation.",
-                cfg$label
-              ))
-            }
-            overlap <- intersect(val_datasets, bo_config$train_datasets)
-            if (length(overlap)) {
-              val_datasets <- setdiff(val_datasets, overlap)
-            }
-            if (!length(val_datasets)) {
-              stop(sprintf(
-                "val_config '%s' has no external datasets after removing training data.",
-                cfg$label
-              ))
-            }
-            cfg$val_datasets <- val_datasets
-          } else {
-            stop(sprintf(
-              "bo_config '%s' has unsupported data_mode '%s'.",
-              bo_config$label,
-              bo_config$data_mode
-            ))
-          }
-
-          cfg$use_train_genes_for_val <- NULL
-          cfg$val_cluster_maxk <- NULL
-          cfg$val_cluster_reps <- NULL
-          cfg$val_cluster_pitem <- NULL
-          cfg$val_cluster_pfeature <- NULL
-          cfg$val_cluster_seed <- NULL
-
-          cfg$config_id <- desurv_val_config_hash(cfg)
-          cfg$short_id <- substr(cfg$config_id, 1, 8)
-          cfg$path_tag <- build_config_tag(cfg$label, cfg$config_id)
-          cfg
+  tar_target(
+    run_config,
+    RESOLVED_RUN_CONFIGS[[bo_label]]
+  ),
+  COMMON_DESURV_RUN_TARGETS,
+  tar_target(
+    val_config,
+    RESOLVED_VAL_CONFIGS[[bo_label]]
+  ),
+  tar_target(
+    val_config_effective,
+    {
+      cfg <- val_config
+      if (identical(bo_config$data_mode, "split")) {
+        cfg$mode <- "train_split"
+        cfg$val_datasets <- character(0)
+      } else if (identical(bo_config$data_mode, "external")) {
+        cfg$mode <- "external"
+        val_datasets <- cfg$val_datasets
+        if (is.null(val_datasets)) {
+          val_datasets <- character(0)
         }
-      ),
-      tar_target(
-        val_datasets_raw,
-        val_config_effective$val_datasets
-      ),
+        if (!length(val_datasets)) {
+          stop(sprintf(
+            "val_config '%s' must define val_datasets for external validation.",
+            cfg$label
+          ))
+        }
+        overlap <- intersect(val_datasets, bo_config$train_datasets)
+        if (length(overlap)) {
+          val_datasets <- setdiff(val_datasets, overlap)
+        }
+        if (!length(val_datasets)) {
+          stop(sprintf(
+            "val_config '%s' has no external datasets after removing training data.",
+            cfg$label
+          ))
+        }
+        cfg$val_datasets <- val_datasets
+      } else {
+        stop(sprintf(
+          "bo_config '%s' has unsupported data_mode '%s'.",
+          bo_config$label,
+          bo_config$data_mode
+        ))
+      }
+
+      cfg$use_train_genes_for_val <- NULL
+      cfg$val_cluster_maxk <- NULL
+      cfg$val_cluster_reps <- NULL
+      cfg$val_cluster_pitem <- NULL
+      cfg$val_cluster_pfeature <- NULL
+      cfg$val_cluster_seed <- NULL
+
+      cfg$config_id <- desurv_val_config_hash(cfg)
+      cfg$short_id <- substr(cfg$config_id, 1, 8)
+      cfg$path_tag <- build_config_tag(cfg$label, cfg$config_id)
+      cfg
+    }
+  ),
+  tar_target(
+    val_datasets_raw,
+    val_config_effective$val_datasets
+  ),
   tar_target(
     tar_val_datasets,
     if (length(val_datasets_raw)) val_datasets_raw else NA_character_
@@ -247,82 +240,80 @@ targets_list <- tar_map(
     tar_val_datasets,
     iteration = "vector"
   ),
-      tar_target(
-        raw_data_val,
-        if (val_config_effective$mode == "external") {
-          if (is.na(val_dataset_name) || !nzchar(val_dataset_name)) {
-            character(0)
-          } else {
-            c(
-              file.path("data/original", paste0(val_dataset_name, ".rds")),
-              file.path("data/original", paste0(val_dataset_name, ".survival_data.rds")),
-              file.path("data/original", paste0(val_dataset_name, "_subtype.csv"))
-            )
-          }
+  tar_target(
+    raw_data_val,
+    if (val_config_effective$mode == "external") {
+      if (is.na(val_dataset_name) || !nzchar(val_dataset_name)) {
+        character(0)
+      } else {
+        c(
+          file.path("data/original", paste0(val_dataset_name, ".rds")),
+          file.path("data/original", paste0(val_dataset_name, ".survival_data.rds")),
+          file.path("data/original", paste0(val_dataset_name, "_subtype.csv"))
+        )
+      }
+    } else {
+      character(0)
+    },
+    format = "file",
+    pattern = map(val_dataset_name)
+  ),
+  tar_target(
+    data_val,
+    {
+      if (val_config_effective$mode == "train_split") {
+        dataset <- val_run_bundle$bo_bundle$data_split$test
+        dataname <- infer_dataset_name(dataset)
+        setNames(list(dataset), dataname)
+      } else {
+        if (length(val_datasets_raw)) {
+          # Reference raw_data_val to establish dependency so file changes invalidate this target
+          raw_data_val
+          setNames(
+            lapply(val_datasets_raw, load_data),
+            val_datasets_raw
+          )
         } else {
-          character(0)
-        },
-        format = "file",
-        pattern = map(val_dataset_name)
-      ),
-      tar_target(
-        data_val,
-        {
-          if (val_config_effective$mode == "train_split") {
-            dataset <- val_run_bundle$bo_bundle$data_split$test
-            dataname <- infer_dataset_name(dataset)
-            setNames(list(dataset), dataname)
-          } else {
-            if (length(val_datasets_raw)) {
-              # Reference raw_data_val to establish dependency so file changes invalidate this target
-              raw_data_val
-              setNames(
-                lapply(val_datasets_raw, load_data),
-                val_datasets_raw
-              )
-            } else {
-              list()
-            }
-          }
+          list()
         }
-      ),
-      tar_target(
-        data_val_comb,
-        {
-          if (val_config_effective$mode == "external") {
-            if (length(val_datasets_raw)) {
-              raw_data_val
-              load_data(val_datasets_raw)
-            } else {
-              NULL
-            }
-          } else {
-            NULL
-          }
-        },
-      ),
-      tar_target(
-        data_val_comb_filtered,
-        {
-          if (val_config_effective$mode == "external") {
-            genes_train = rownames(val_run_bundle$bo_bundle$data_filtered$ex)
-            preprocess_validation_data(
-              dataset = data_val_comb,
-              genes = genes_train,
-              method_trans_train = val_run_bundle$bo_bundle$config$method_trans_train,
-              dataname = data_val_comb$dataname,
-              transform_target = val_run_bundle$bo_bundle$data_filtered$transform_target
-            )
-          } else {
-            NULL
-          }
-        },
-      ),
-      COMMON_DESURV_VAL_TARGETS,
-      FIGURE_VAL_TARGETS
-    ),
-    FIGURE_TARGETS
-  )
+      }
+    }
+  ),
+  tar_target(
+    data_val_comb,
+    {
+      if (val_config_effective$mode == "external") {
+        if (length(val_datasets_raw)) {
+          raw_data_val
+          load_data(val_datasets_raw)
+        } else {
+          NULL
+        }
+      } else {
+        NULL
+      }
+    },
+  ),
+  tar_target(
+    data_val_comb_filtered,
+    {
+      if (val_config_effective$mode == "external") {
+        genes_train = rownames(val_run_bundle$bo_bundle$data_filtered$ex)
+        preprocess_validation_data(
+          dataset = data_val_comb,
+          genes = genes_train,
+          method_trans_train = val_run_bundle$bo_bundle$config$method_trans_train,
+          dataname = data_val_comb$dataname,
+          transform_target = val_run_bundle$bo_bundle$data_filtered$transform_target
+        )
+      } else {
+        NULL
+      }
+    },
+  ),
+  COMMON_DESURV_VAL_TARGETS,
+  FIGURE_VAL_TARGETS,
+  FIGURE_TARGETS
 )
 
 c(
