@@ -86,6 +86,9 @@ figure_configs <- targets_figure_configs()
 available_targets <- get_store_targets(store)
 
 paper_keys <- figure_configs$paper_figure_keys
+paper_keys$bo_key <- "tcgacptac"
+paper_keys$run_key <- "tcgacptac"
+paper_keys$val_key <- "tcgacptac"
 
 bo_label <- get_param_value("bo_label", "")
 if (!nzchar(bo_label) && !is.null(paper_keys$bo_key) && nzchar(paper_keys$bo_key)) {
@@ -258,16 +261,5 @@ fig_extval_plot
 ```
 
 
-## Analysis of scRNA-seq {.unnumbered}
-Next, we verify our findings at the cellular level using the Elyada scRNA-seq data [@elyada2019cross]. We found that our DeSurv factor 1 signature was expressed primarily in iCAF and B cells, factor 2 was expressed in Acinar and Classical PDAC 2, and factor 3 was expressed primarily in Basal-like PDAC cells (Figure \@ref(fig:fig-sc)B-E). This is consistent with our ORA analysis which found that factor 1 was mostly immune and factor 3 was basal-like, and with the overlap we saw with published gene lists that identified factor 1 as iCAF/classical/immune and factor 3 as basal-like. Interestingly, we do not see a large overlap of factor 1 with the classical PDAC cell types despite some overlap with classical gene lists. Need more here...
-
-```{r fig-sc, fig.cap="A. Cell type clusters from the Elyada scRNA-seq data. B-D. VAM scores for the DeSurv factor signatures in each cell shown on the UMAP of cells in the Elyada-sc data. E. Heatmap of average VAM scores by cell type and factor signature in the Elyada-sc data.", fig.env='figure*', fig.pos='t', out.height= "8in", out.width='\\textwidth'}
-
-fig_sc_plot <- tar_read_raw(resolve_target_name(
-  "fig_sc_plot",
-  bo_label = bo_label,
-  run_label = run_label,
-  available = available_targets
-))
-fig_sc_plot
-```
+## Bladder cancer analysis {.unnumbered}
+We will report a focused bladder cancer analysis here, including a dedicated figure. Placeholder text: summary of bladder cohort preprocessing, DeSurv factor interpretation, and survival stratification results to be added once the bladder figure is finalized.
