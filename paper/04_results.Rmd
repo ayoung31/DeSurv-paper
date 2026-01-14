@@ -212,6 +212,17 @@ fig_bo_plot
 ```
 
 
+## DeSurv improves selection of prognostic gene signatures {.unnumbered}
+To test whether supervision improves the selection of prognostic gene signatures, we used simulations with known lethal factors and tuned the number of top genes per factor (\texttt{n_top}) using BO. We compared the supervised DeSurv model to the unsupervised $\alpha=0$ baseline across simulation regimes. Figure \@ref(fig:fig-sim-ntop)A shows the distribution of test C-index values, while Figure \@ref(fig:fig-sim-ntop)B reports the precision of recovered prognostic genes (mean across lethal factors). DeSurv consistently yields higher C-index and improved precision, indicating that survival supervision helps focus signatures on truly prognostic genes rather than reconstruction-only structure.
+
+```{r fig-sim-ntop, fig.cap="Simulation results for BO-tuned signature size. A. Test C-index across simulation regimes for DeSurv and the $\\alpha=0$ baseline. B. Precision of recovered prognostic genes (mean across lethal factors).", fig.env='figure*', fig.pos='t', out.width='0.49\\textwidth'}
+knitr::include_graphics(c(
+  file.path(repo_root, "figures", "sim", "bo_tune_ntop", "sim_cindex_boxplot__combined.pdf"),
+  file.path(repo_root, "figures", "sim", "bo_tune_ntop", "sim_precision_boxplot__combined.pdf")
+))
+```
+
+
 ## DeSurv provides biologically interpretable gene signatures {.unnumbered}
 For the selected DeSurv model ($k=3, \alpha=0.7$), we identified the top 50 factor-specific genes from each latent factor to characterize their underlying biological functions. Panels A-C of Figure \@ref(fig:fig-bio) summarize the results of an over-representation analysis (ORA) performed on these genes. The enrichment profiles reveal three distinct biological programs. Factor 1 is strongly enriched for immune-related pathways, including cytokine signaling, T-cell activation, and interferon response. Factor 2 shows enrichment for genes associated with normal pancreatic or exocrine function, suggesting that this component captures residual normal-tissue signal. Factor 3 is enriched for pathways linked to epithelial–mesenchymal transition, cell cycle progression, and KRAS signaling—features typically associated with the Basal-like subtype of pancreatic ductal adenocarcinoma (PDAC).
 
@@ -230,18 +241,20 @@ fig_bio_plot
 ```
 
 
-## Clustering patients from external cohorts on DeSurv gene signatures produces prognostic subtypes {.unnumbered}
-To evaluate the generalizability of DeSurv-derived prognostic signatures, we applied the exemplar genes from the survival-associated factors in the trained model (Factors 1 and 3) to multiple independent PDAC cohorts—including Dijk, PACA-AU (RNA-seq and microarray), Moffitt, and Puleo datasets—using their bulk gene-expression profiles. Unsupervised consensus clustering was performed on each cohort based on the expression of these prognostic genes. Three clusters were selected as the optimal solution, supported by inspection of the cumulative distribution function (CDF) plots, relative change in area under the CDF curve, consensus heatmaps, and cluster consensus scores (SI Appendix). Importantly, the number of clusters was determined without incorporating any survival information, ensuring an unbiased evaluation of downstream prognostic performance.
+## External validation with projected DeSurv factor scores {.unnumbered}
+To evaluate the generalizability of DeSurv-derived prognostic signatures, we projected the DeSurv weights onto multiple independent PDAC cohorts (Dijk, PACA-AU RNA-seq and microarray, Moffitt, and Puleo). We selected the two most prognostic factors using \texttt{select\_desurv\_factors}, rank-transformed expression within each sample over the union of the selected factor gene lists, and computed validation scores as $Z_{val} = X_{val}^T W$ restricted to the top-gene signatures. This yields continuous factor score vectors for each cohort without clustering.
 
-Expression heatmaps of the DeSurv prognostic signatures revealed three distinct transcriptional patterns across the external cohorts (Figure \@ref(fig:fig-clus)A). Cluster 1 displayed high expression of the basal-like (Factor 3) gene set; Cluster 2 showed elevated expression of the immune/iCAF (Factor 1) signature and reduced basal activity; and Cluster 3 exhibited intermediate expression of both programs. These patterns suggest that survival prediction is primarily driven by the presence or absence of basal and immune/iCAF programs, rather than by a reciprocal contrast between basal versus classical tumor states or iCAF versus myCAF stromal signatures.
+Figure \@ref(fig:fig-extval)A shows the ranked expression heatmap for the selected factor gene signatures, annotated with the continuous factor scores and the PurIST, DeCAF, and dataset labels. Figure \@ref(fig:fig-extval)B plots the top two factor scores for all samples, colored by PurIST subtype and shaped by DeCAF subtype to show how tumor- and stroma-associated programs align across cohorts. For survival assessment, we discretized each factor score within each cohort at its median and intersected the high/low calls to form four groups; Kaplan–Meier curves for these groups are shown in Figure \@ref(fig:fig-extval)C. Because DeSurv was trained only on TCGA-PAAD/CPTAC, these analyses represent an independent validation of prognostic signal transfer to external datasets.
+```{r fig-extval, fig.cap="External cohort validation. A. Heatmap of ranked expression values for genes in the selected DeSurv factor signatures with continuous factor-score annotations plus PurIST, DeCAF, and dataset labels. B. Scatter plot of the top two factor scores, colored by PurIST subtype and shaped by DeCAF subtype. C. Kaplan–Meier curves for the four groups formed by per-cohort median splits of the two factor scores.", fig.env='figure*', fig.pos='t', out.height= "4in", out.width='\\textwidth'}
 
-Additionally, DeSurv-derived clusters showed strong correspondence with established molecular classifiers. Column annotations in Figure \@ref(fig:fig-clus)A and the contingency table in Figure \@ref(fig:fig-clus)B demonstrate substantial overlap with PurIST and DeCAF subtype labels: for example, X% of patients in Cluster 1 were classified as PurIST Basal-like and DeCAF proCAF, X% of Cluster 2 as Classical + restCAF, and X% of Cluster 3 as Classical + proCAF. The rarity of the Basal + restCAF subtype likely contributes to the discovery of 3 rather than 4 clusters. A chi-squared test confirmed a significant association between the DeSurv-defined clusters and existing classifier labels ($\chi^2$ = 210.16 p < 2.2e-16).
-
-We next assessed the prognostic relevance of these clusters using overall survival data from the external cohorts (Figure \@ref(fig:fig-clus)C). Because DeSurv was trained exclusively on the TCGA-PAAD and CPTAC datasets—without access to the expression or outcome data of the external cohorts—this analysis represents an independent validation of the model’s predictive generalizability. Kaplan–Meier analysis demonstrated that the DeSurv-derived clusters were strongly associated with survival (p = 4.8e-6). As expected, the Basal-like cluster (Cluster 1) was associated with the poorest survival, the Classical + restCAF cluster (Cluster 2) exhibited the most favorable outcomes, and the Classical + proCAF cluster (Cluster 3) showed intermediate survival. This pattern mirrors previous findings describing the interplay between tumor-intrinsic and stromal subtypes in PDAC (e.g., [@peng2024determination]), supporting the robustness and biological validity of the DeSurv-derived signatures.
-```{r fig-clus, fig.cap="External cohort validation. A. Heatmap of expression values for genes in the DeSurv factor signatures in external cohorts. B. Table of DeSurv derived clusters by PurIST + DeCAF classifier subtypes in external cohorts. C. Kaplan Meier curves describing survival outcomes for patients from external cohorts in each of the DeSurv derived clusters.", fig.env='figure*', fig.pos='t', out.height= "4in", out.width='\\textwidth', eval=FALSE, include=FALSE}
-
-# Figure generation temporarily disabled.
-# knitr::include_graphics(file.path(repo_root, "figures", sprintf("fig_clus_%s_%s_%s.pdf", val_label, run_label, bo_label)))
+fig_extval_plot <- tar_read_raw(resolve_target_name(
+  "fig_extval_plot",
+  bo_label = bo_label,
+  run_label = run_label,
+  val_label = val_label,
+  available = available_targets
+))
+fig_extval_plot
 ```
 
 

@@ -1468,28 +1468,67 @@ FIGURE_TARGETS <- list(
 )
 
 FIGURE_VAL_TARGETS <- list(
-  # tar_target(
-  #   fig_clus,
-  #   save_fig_clus(
-  #     data_val_filtered = data_val_filtered,
-  #     fit_desurv = tar_fit_desurv,
-  #     tops_desurv = tar_tops_desurv,
-  #     path = file.path(
-  #       FIGURE_CONFIGS$figures_dir,
-  #       sprintf("fig_clus_%s_%s_%s.pdf", val_label, run_label, bo_label)
-  #     )
-  #   ),
-  #   format = "file",
-  #   packages = c(
-  #     "ggplot2",
-  #     "dplyr",
-  #     "cowplot",
-  #     "pheatmap",
-  #     "survival",
-  #     "survminer",
-  #     "gt",
-  #     "magick",
-  #     "ConsensusClusterPlus"
-  #   )
-  # )
+  tar_target(
+    fig_extval_panels,
+    build_fig_extval_panels(
+      data_val_filtered = data_val_filtered,
+      fit_desurv = tar_fit_desurv,
+      tops_desurv = tar_tops_desurv
+    ),
+    packages = c("ggplot2", "dplyr", "pheatmap", "cowplot", "survival", "survminer")
+  ),
+  tar_target(fig_extval_panel_a, fig_extval_panels$A),
+  tar_target(fig_extval_panel_b, fig_extval_panels$B),
+  tar_target(fig_extval_panel_c, fig_extval_panels$C),
+  tar_target(
+    fig_extval_panel_a_file,
+    save_plot_pdf(
+      fig_extval_panel_a,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_extval_%s_%s_%s_panel_a.pdf", val_label, run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_extval_panel_b_file,
+    save_plot_pdf(
+      fig_extval_panel_b,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_extval_%s_%s_%s_panel_b.pdf", val_label, run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_extval_panel_c_file,
+    save_plot_pdf(
+      fig_extval_panel_c,
+      file.path(
+        FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_extval_%s_%s_%s_panel_c.pdf", val_label, run_label, bo_label)
+      )
+    ),
+    format = "file"
+  ),
+  tar_target(
+    fig_extval_plot,
+    combine_fig_extval_panels(fig_extval_panels),
+    packages = c("cowplot")
+  ),
+  tar_target(
+    fig_extval,
+    save_plot_pdf(
+      fig_extval_plot,
+      file.path(
+        FIGURE_CONFIGS$figures_dir,
+        sprintf("fig_extval_%s_%s_%s.pdf", val_label, run_label, bo_label)
+      ),
+      width = 7.5,
+      height = 4.5
+    ),
+    format = "file"
+  )
 )

@@ -52,3 +52,44 @@ test_that("simulate_W_marker_background validates inputs", {
     "marker_overlap"
   )
 })
+
+test_that("select_k_by_lcb chooses smallest k within LCB of best observed", {
+  k_df <- data.frame(
+    k = c(2, 3, 4),
+    mean_cindex = c(0.70, 0.75, 0.74),
+    pred_mean = c(0.72, 0.73, 0.715),
+    pred_sd = c(0.005, 0.01, 0.005),
+    stringsAsFactors = FALSE
+  )
+  res <- select_k_by_lcb(k_df, lcb_level = 0.90)
+  expect_equal(res$k_selected, 2L)
+  expect_equal(res$k_best, 3L)
+  expect_true(is.finite(res$lcb_threshold))
+})
+
+test_that("select_k_by_lcb falls back when top prediction is missing", {
+  k_df <- data.frame(
+    k = c(2, 3),
+    mean_cindex = c(0.70, 0.75),
+    pred_mean = c(0.71, NA_real_),
+    pred_sd = c(0.01, NA_real_),
+    stringsAsFactors = FALSE
+  )
+  res <- select_k_by_lcb(k_df, lcb_level = 0.90)
+  expect_equal(res$k_selected, 3L)
+  expect_equal(res$reason, "missing_prediction")
+})
+
+test_that("select_bo_k_lcb uses best observed when GP is unavailable", {
+  history <- data.frame(
+    eval_id = 1:4,
+    k_grid = c(2, 2, 3, 3),
+    mean_cindex = c(0.65, 0.68, 0.70, 0.69),
+    status = "ok",
+    stringsAsFactors = FALSE
+  )
+  bo_results <- list(history = history, km_fit = NULL, bounds = data.frame())
+  res <- select_bo_k_lcb(bo_results, lcb_level = 0.90)
+  expect_equal(res$k_selected, 3L)
+  expect_equal(res$reason, "no_gp")
+})

@@ -835,7 +835,31 @@ select_desurv_factors <- function(fit, n = 2) {
   if (!length(beta)) {
     stop("DeSurv fit has empty beta coefficients.")
   }
-  ord <- order(abs(beta), decreasing = TRUE)
+  scaled_beta <- beta
+  sd_vec <- NULL
+  if (!is.null(fit$data) && !is.null(fit$data$X) && !is.null(fit$W)) {
+    X_train <- fit$data$X
+    W <- fit$W
+    if (!is.null(rownames(X_train)) && !is.null(rownames(W))) {
+      genes <- intersect(rownames(X_train), rownames(W))
+      if (length(genes)) {
+        X_train <- X_train[genes, , drop = FALSE]
+        W <- W[genes, , drop = FALSE]
+      }
+    }
+    if (nrow(X_train) && ncol(X_train) && nrow(W) && ncol(W) &&
+          nrow(X_train) == nrow(W)) {
+      z_train <- crossprod(X_train, W)
+      sd_vec <- apply(z_train, 2, stats::sd)
+    }
+  } else if (!is.null(fit$sdZ)) {
+    sd_vec <- as.numeric(fit$sdZ)
+  }
+  if (!is.null(sd_vec) && length(sd_vec) == length(beta)) {
+    sd_vec[is.na(sd_vec) | sd_vec < 1e-12] <- 1e-12
+    scaled_beta <- beta / sd_vec
+  }
+  ord <- order(abs(scaled_beta), decreasing = TRUE)
   ord[seq_len(min(n, length(ord)))]
 }
 
@@ -856,87 +880,141 @@ subset_validation_data <- function(dataset) {
   dataset
 }
 
-save_fig_clus <- function(data_val_filtered, fit_desurv, tops_desurv, path,
-                          width = 7.5, height = 4.5) {
+rank_transform_matrix <- function(mat) {
+  if (!nrow(mat) || !ncol(mat)) {
+    return(mat)
+  }
+  ranked <- apply(mat, 2, rank, ties.method = "average", na.last = "keep")
+  ranked <- as.matrix(ranked)
+  rownames(ranked) <- rownames(mat)
+  colnames(ranked) <- colnames(mat)
+  ranked
+}
+
+get_extval_factor_genes <- function(top_genes, factors) {
+  if (is.null(top_genes) || !length(top_genes)) {
+    stop("Top genes are missing for external validation.")
+  }
+  top_genes <- as.data.frame(top_genes, stringsAsFactors = FALSE)
+  if (max(factors) > ncol(top_genes)) {
+    stop("Top genes do not cover the selected factors.")
+  }
+  gene_lists <- lapply(factors, function(idx) {
+    genes <- unique(stats::na.omit(as.character(top_genes[[idx]])))
+    genes[genes != ""]
+  })
+  if (any(vapply(gene_lists, length, integer(1)) == 0)) {
+    stop("Selected factors have empty top-gene lists.")
+  }
+  names(gene_lists) <- paste0("factor", factors)
+  gene_lists
+}
+
+prepare_extval_dataset <- function(dataset, name, fit, factors, factor_gene_lists) {
+  dataset <- subset_validation_data(dataset)
+  if (is.null(dataset$sampInfo$dataset)) {
+    dataset$sampInfo$dataset <- name
+  }
+
+  ex_mat <- as.matrix(dataset$ex)
+  storage.mode(ex_mat) <- "numeric"
+  if (is.null(rownames(ex_mat)) || !nrow(ex_mat)) {
+    stop("Validation dataset has no expression rownames: ", name)
+  }
+  if (is.null(colnames(ex_mat))) {
+    colnames(ex_mat) <- seq_len(ncol(ex_mat))
+  }
+  if (is.null(fit$W) || is.null(rownames(fit$W))) {
+    stop("DeSurv fit W matrix must have gene rownames.")
+  }
+
+  union_genes <- unique(unlist(factor_gene_lists))
+  genes_use <- intersect(union_genes, rownames(ex_mat))
+  genes_use <- intersect(genes_use, rownames(fit$W))
+  if (!length(genes_use)) {
+    stop("No overlapping top genes for validation dataset: ", name)
+  }
+
+  X_sub <- ex_mat[genes_use, , drop = FALSE]
+  X_rank <- rank_transform_matrix(X_sub)
+
+  score_mat <- vapply(
+    seq_along(factors),
+    function(i) {
+      fac_genes <- intersect(factor_gene_lists[[i]], genes_use)
+      if (!length(fac_genes)) {
+        return(rep(NA_real_, ncol(X_rank)))
+      }
+      X_fac <- X_rank[fac_genes, , drop = FALSE]
+      w_fac <- fit$W[fac_genes, factors[i], drop = FALSE]
+      drop(crossprod(X_fac, w_fac))
+    },
+    numeric(ncol(X_rank))
+  )
+  score_mat <- as.matrix(score_mat)
+  rownames(score_mat) <- colnames(X_rank)
+  colnames(score_mat) <- paste0("factor", factors)
+
+  sampInfo <- dataset$sampInfo
+  if (!is.null(rownames(sampInfo)) && all(rownames(score_mat) %in% rownames(sampInfo))) {
+    sampInfo <- sampInfo[rownames(score_mat), , drop = FALSE]
+  } else {
+    rownames(sampInfo) <- rownames(score_mat)
+  }
+  score_cols <- paste0("factor", factors, "_score")
+  sampInfo[, score_cols] <- score_mat
+
+  list(rank = X_rank, sampInfo = sampInfo)
+}
+
+build_fig_extval_panels <- function(data_val_filtered, fit_desurv, tops_desurv) {
   if (is.null(data_val_filtered) || !length(data_val_filtered)) {
-    stop("No validation data supplied for clustering.")
+    stop("No validation data supplied for external validation.")
+  }
+  if (is.null(fit_desurv$W)) {
+    stop("DeSurv fit missing W for external validation.")
   }
 
   factors <- select_desurv_factors(fit_desurv, n = 2)
   if (length(factors) < 2) {
-    stop("Need at least two factors for clustering.")
+    stop("Need at least two factors for external validation.")
   }
 
-  clus_entries <- mapply(
+  factor_gene_lists <- get_extval_factor_genes(tops_desurv$top_genes, factors)
+  entries <- mapply(
     function(dataset, name) {
-      dataset <- subset_validation_data(dataset)
-      if (is.null(dataset$sampInfo$dataset)) {
-        dataset$sampInfo$dataset <- name
-      }
-      run_clustering(
-        tops = tops_desurv$top_genes,
-        data = dataset,
-        gene_lists = list(),
-        type = "bas/clas",
-        facs = factors,
-        maxKcol = 3,
-        maxKrow = length(factors),
-        plot = FALSE,
-        save = FALSE
-      )
+      prepare_extval_dataset(dataset, name, fit_desurv, factors, factor_gene_lists)
     },
     dataset = data_val_filtered,
     name = names(data_val_filtered),
     SIMPLIFY = FALSE
   )
 
-  cluster_col <- paste0("facs_", paste(factors, collapse = "_"), "_with_3clusters")
-  for (i in seq_along(clus_entries)) {
-    sampInfo <- clus_entries[[i]]$data$sampInfo
-    sampInfo$samp_cluster <- sampInfo[[cluster_col]]
-    clus_entries[[i]]$data$sampInfo <- sampInfo
-  }
+  rank_list <- lapply(entries, `[[`, "rank")
+  sinfos <- lapply(entries, `[[`, "sampInfo")
 
-  sinfos <- lapply(clus_entries, function(entry) entry$data$sampInfo)
-  sampInfo <- dplyr::bind_rows(sinfos)
-  sampInfo <- sampInfo[!is.na(sampInfo$samp_cluster), , drop = FALSE]
-
-  fit <- survival::survfit(survival::Surv(time, event) ~ samp_cluster, data = sampInfo)
-  p <- survminer::ggsurvplot(
-    fit,
-    data = sampInfo,
-    pval = TRUE,
-    risk.table = TRUE,
-    legend.labs = c("1", "2", "3"),
-    legend.title = "Cluster",
-    pval.coord = c(0, 0.05),
-    pval.size = 2.5,
-    censor.size = 2,
-    risk.table.fontsize = 2
-  )
-
-  ex_list <- list()
-  genes_list <- list()
-  samps_list <- list()
-  tops <- unlist(tops_desurv$top_genes[, factors, drop = FALSE])
-  for (i in seq_along(clus_entries)) {
-    data_entry <- clus_entries[[i]]$data
-    ex_mat <- as.matrix(data_entry$ex)
-    storage.mode(ex_mat) <- "numeric"
-    ex_list[[i]] <- ex_mat
-    genes_list[[i]] <- intersect(rownames(ex_list[[i]]), tops)
-    samps_list[[i]] <- data_entry$sampInfo
-  }
-
-  genes <- Reduce(intersect, genes_list)
+  genes <- Reduce(intersect, lapply(rank_list, rownames))
   if (!length(genes)) {
     stop("No shared genes available across validation datasets.")
   }
+  rank_list <- lapply(rank_list, function(x) x[genes, , drop = FALSE])
+  scaled_list <- lapply(rank_list, function(x) {
+    x_scaled <- t(scale(t(x)))
+    x_scaled[!is.finite(x_scaled)] <- 0
+    x_scaled
+  })
+  X <- do.call("cbind", scaled_list)
 
-  ex_list <- lapply(ex_list, function(x) t(scale(t(x[genes, , drop = FALSE]))))
-  X <- do.call("cbind", ex_list)
-  X <- X[genes, , drop = FALSE]
-  sampInfo <- do.call("rbind", samps_list)
+  sampInfo <- do.call("rbind", sinfos)
+  score_cols <- paste0("factor", factors, "_score")
+  if (!all(score_cols %in% names(sampInfo))) {
+    stop("Missing factor score columns in validation metadata.")
+  }
+
+  sampInfo$DeCAF <- as.character(sampInfo$DeCAF)
+  sampInfo$DeCAF[sampInfo$DeCAF == "permCAF"] <- "proCAF"
+  sampInfo$PurIST <- as.character(sampInfo$PurIST)
+  sampInfo$dataset <- as.character(sampInfo$dataset)
 
   n_samples <- nrow(sampInfo)
   get_meta_col <- function(name) {
@@ -949,60 +1027,90 @@ save_fig_clus <- function(data_val_filtered, fit_desurv, tops_desurv, path,
     }
     vals
   }
-  col_anno <- data.frame(
-    DeSurv_cluster = as.factor(sampInfo$samp_cluster),
-    DeCAF = get_meta_col("DeCAF"),
-    PurIST = get_meta_col("PurIST"),
-    dataset = get_meta_col("dataset")
-  )
-  col_anno$DeCAF <- ifelse(col_anno$DeCAF == "permCAF", "proCAF", col_anno$DeCAF)
-  rownames(col_anno) <- colnames(X)
-  X <- X[, order(col_anno$DeSurv_cluster)]
-  col_anno <- col_anno[order(col_anno$DeSurv_cluster), , drop = FALSE]
 
-  row_anno <- data.frame(gene = genes)
-  row_anno$`DeSurv factor` <- as.factor(
-    ifelse(genes %in% tops_desurv$top_genes[, factors[1]], factors[1], factors[2])
+  factor_display <- paste0("Factor ", factors)
+  score_display <- paste0("Factor ", factors, " score")
+  score_df <- sampInfo[, score_cols, drop = FALSE]
+  colnames(score_df) <- score_display
+
+  col_anno <- data.frame(
+    score_df,
+    PurIST = get_meta_col("PurIST"),
+    DeCAF = get_meta_col("DeCAF"),
+    dataset = get_meta_col("dataset"),
+    stringsAsFactors = FALSE
   )
-  rownames(row_anno) <- row_anno$gene
-  row_anno$gene <- NULL
+
+  col_anno$PurIST[is.na(col_anno$PurIST) | !nzchar(col_anno$PurIST)] <- "Unknown"
+  col_anno$DeCAF[is.na(col_anno$DeCAF) | !nzchar(col_anno$DeCAF)] <- "Unknown"
+  col_anno$dataset[is.na(col_anno$dataset) | !nzchar(col_anno$dataset)] <- "Unknown"
+
+  col_anno$PurIST <- factor(col_anno$PurIST, levels = c("Basal-like", "Classical", "Unknown"))
+  col_anno$DeCAF <- factor(col_anno$DeCAF, levels = c("proCAF", "restCAF", "Unknown"))
+  col_anno$dataset <- factor(col_anno$dataset)
+
+  rownames(col_anno) <- rownames(sampInfo)
+  group_order <- interaction(col_anno$PurIST, col_anno$DeCAF, drop = TRUE, sep = " / ")
+  order_idx <- order(group_order, col_anno$dataset)
+  sample_order <- rownames(col_anno)[order_idx]
+
+  X <- X[, sample_order, drop = FALSE]
+  col_anno <- col_anno[sample_order, , drop = FALSE]
+
+  gene_factor <- rep(factor_display[2], length(genes))
+  gene_factor[genes %in% factor_gene_lists[[1]]] <- factor_display[1]
+  row_anno <- data.frame(`DeSurv factor` = factor(gene_factor, levels = factor_display))
+  rownames(row_anno) <- genes
+
   X <- X[order(row_anno$`DeSurv factor`), , drop = FALSE]
   row_anno <- row_anno[order(row_anno$`DeSurv factor`), , drop = FALSE]
 
+  score_palette <- grDevices::colorRampPalette(c("navy", "white", "firebrick"))(100)
   annotation_colors <- list(
-    `DeSurv factor` = stats::setNames(
-      c("lightgrey", "black"),
-      as.character(factors[1:2])
-    ),
-    DeSurv_cluster = c(
-      `1` = "#F8766D",
-      `2` = "#00BA38",
-      `3` = "#619CFF"
+    `DeSurv factor` = stats::setNames(c("lightgrey", "black"), factor_display),
+    PurIST = c(
+      `Basal-like` = "orange",
+      Classical = "blue",
+      Unknown = "grey70"
     ),
     DeCAF = c(
       proCAF = "violetred2",
-      restCAF = "cyan4"
-    ),
-    PurIST = c(
-      `Basal-like` = "orange",
-      Classical = "blue"
+      restCAF = "cyan4",
+      Unknown = "grey70"
     )
   )
+  annotation_colors[[score_display[1]]] <- score_palette
+  annotation_colors[[score_display[2]]] <- score_palette
+
   if (!all(is.na(col_anno$dataset))) {
-    annotation_colors$dataset <- c(
+    dataset_vals <- sort(unique(as.character(col_anno$dataset)))
+    base_colors <- c(
       Dijk = "slateblue1",
       Moffitt_GEO_array = "springgreen4",
       PACA_AU_array = "yellow3",
       PACA_AU_seq = "coral",
       Puleo_array = "dodgerblue3"
     )
+    missing <- setdiff(dataset_vals, names(base_colors))
+    if (length(missing)) {
+      extra_cols <- grDevices::rainbow(length(missing))
+      names(extra_cols) <- missing
+      base_colors <- c(base_colors, extra_cols)
+    }
+    annotation_colors$dataset <- base_colors[dataset_vals]
   }
 
-  min_val <- -2
-  max_val <- 3.5
+  min_val <- stats::quantile(X, 0.02, na.rm = TRUE)
+  max_val <- stats::quantile(X, 0.98, na.rm = TRUE)
+  if (!is.finite(min_val) || !is.finite(max_val) || min_val >= max_val) {
+    min_val <- min(X, na.rm = TRUE)
+    max_val <- max(X, na.rm = TRUE)
+  }
+  min_val <- min(min_val, 0)
+  max_val <- max(max_val, 0)
+
   ncolors <- 500
   my_colors <- grDevices::colorRampPalette(c("blue", "white", "red"))(ncolors)
-
   breaks_centered <- c(
     seq(min_val, 0, length.out = ceiling(ncolors / 2) + 1),
     seq(0, max_val, length.out = floor(ncolors / 2) + 1)[-1]
@@ -1024,84 +1132,133 @@ save_fig_clus <- function(data_val_filtered, fit_desurv, tops_desurv, path,
     fontsize = 6
   )
 
-  ph_grob <- ph$gtable
-  pheat <- cowplot::ggdraw(ph_grob) +
+  pheat <- cowplot::ggdraw(ph$gtable) +
     ggplot2::theme(plot.margin = ggplot2::margin(0, -10, 0, 0))
+  panel_a <- add_panel_label(pheat, "A.")
 
-  sampInfo$subtype <- ifelse(
-    sampInfo$PurIST == "Basal-like",
-    "Basal-like",
-    ifelse(sampInfo$DeCAF == "restCAF", "Classical + restCAF", "Classical + proCAF")
+  plot_df <- sampInfo
+  plot_df$PurIST <- ifelse(
+    is.na(plot_df$PurIST) | !nzchar(plot_df$PurIST),
+    "Unknown",
+    plot_df$PurIST
   )
-  tbl <- table(sampInfo$samp_cluster, sampInfo$subtype)
+  plot_df$DeCAF <- ifelse(
+    is.na(plot_df$DeCAF) | !nzchar(plot_df$DeCAF),
+    "Unknown",
+    plot_df$DeCAF
+  )
+  plot_df$DeCAF[plot_df$DeCAF == "permCAF"] <- "proCAF"
+  plot_df$PurIST <- factor(plot_df$PurIST, levels = c("Basal-like", "Classical", "Unknown"))
+  plot_df$DeCAF <- factor(plot_df$DeCAF, levels = c("proCAF", "restCAF", "Unknown"))
+  plot_df$score_x <- as.numeric(plot_df[[score_cols[1]]])
+  plot_df$score_y <- as.numeric(plot_df[[score_cols[2]]])
+  plot_df <- plot_df[is.finite(plot_df$score_x) & is.finite(plot_df$score_y), , drop = FALSE]
 
-  gt_tbl <- gt::gt(as.data.frame.matrix(tbl), rownames_to_stub = TRUE) |>
-    gt::cols_width(gt::everything() ~ gt::px(120)) |>
-    gt::tab_options(table.font.size = gt::px(18)) |>
-    gt::cols_align(align = "center", columns = gt::everything()) |>
-    gt::tab_style(
-      style = list(
-        gt::cell_fill(color = "#F8766D"),
-        gt::cell_text(weight = "bold")
+  p_scatter <- ggplot2::ggplot(
+    plot_df,
+    ggplot2::aes(x = score_x, y = score_y, color = PurIST, shape = DeCAF)
+  ) +
+    ggplot2::geom_point(size = 1.4, alpha = 0.8) +
+    ggplot2::scale_color_manual(
+      values = c(
+        `Basal-like` = "orange",
+        Classical = "blue",
+        Unknown = "grey70"
       ),
-      locations = gt::cells_body(rows = 1, columns = `Basal-like`)
-    ) |>
-    gt::tab_style(
-      style = list(
-        gt::cell_fill(color = "#00BA38"),
-        gt::cell_text(weight = "bold")
-      ),
-      locations = gt::cells_body(rows = 2, columns = `Classical + restCAF`)
-    ) |>
-    gt::tab_style(
-      style = list(
-        gt::cell_fill(color = "#619CFF"),
-        gt::cell_text(weight = "bold")
-      ),
-      locations = gt::cells_body(rows = 3, columns = `Classical + proCAF`)
-    )
+      drop = FALSE
+    ) +
+    ggplot2::scale_shape_manual(
+      values = c(proCAF = 16, restCAF = 17, Unknown = 1),
+      drop = FALSE
+    ) +
+    ggplot2::labs(x = score_display[1], y = score_display[2], color = "PurIST", shape = "DeCAF") +
+    ggplot2::theme_minimal(base_size = 8)
+  panel_b <- add_panel_label(p_scatter, "B.")
 
-  table_path <- tempfile(fileext = ".png")
-  gt::gtsave(gt_tbl, table_path)
-  img <- magick::image_read(table_path)
-  table_plot <- cowplot::ggdraw() + cowplot::draw_image(img)
+  surv_df <- plot_df
+  if (!("time" %in% names(surv_df)) || !("event" %in% names(surv_df))) {
+    stop("Validation survival columns 'time' and 'event' are required.")
+  }
+  surv_df$dataset <- as.character(surv_df$dataset)
+  surv_df$dataset[is.na(surv_df$dataset) | !nzchar(surv_df$dataset)] <- "validation"
+
+  surv_df <- dplyr::group_by(surv_df, dataset) %>%
+    dplyr::mutate(
+      f1_group = ifelse(
+        is.na(score_x),
+        NA_character_,
+        ifelse(score_x >= stats::median(score_x, na.rm = TRUE), "High", "Low")
+      ),
+      f2_group = ifelse(
+        is.na(score_y),
+        NA_character_,
+        ifelse(score_y >= stats::median(score_y, na.rm = TRUE), "High", "Low")
+      )
+    ) %>%
+    dplyr::ungroup()
+
+  group_levels <- c(
+    paste0(factor_display[1], " Low / ", factor_display[2], " Low"),
+    paste0(factor_display[1], " Low / ", factor_display[2], " High"),
+    paste0(factor_display[1], " High / ", factor_display[2], " Low"),
+    paste0(factor_display[1], " High / ", factor_display[2], " High")
+  )
+  surv_df$group <- paste0(
+    factor_display[1], " ", surv_df$f1_group, " / ", factor_display[2], " ", surv_df$f2_group
+  )
+  surv_df$group <- factor(surv_df$group, levels = group_levels)
+  surv_df <- surv_df[!is.na(surv_df$group), , drop = FALSE]
+
+  fit <- survival::survfit(survival::Surv(time, event) ~ group, data = surv_df)
+  p <- survminer::ggsurvplot(
+    fit,
+    data = surv_df,
+    pval = TRUE,
+    risk.table = TRUE,
+    legend.title = "Median split",
+    pval.coord = c(0, 0.05),
+    pval.size = 2.5,
+    censor.size = 2,
+    risk.table.fontsize = 2
+  )
 
   sp <- p$plot +
     ggplot2::theme_minimal(base_size = 8) +
     ggplot2::theme(
       panel.border = ggplot2::element_rect(color = "black", fill = NA, linewidth = 0.5),
-      plot.margin = ggplot2::margin(20, 5, 0, 0)
+      plot.margin = ggplot2::margin(10, 5, 0, 0)
     )
   st <- p$table +
     ggplot2::theme_classic(base_size = 8) +
-    ggplot2::theme(plot.margin = ggplot2::margin(20, 40, 0, 10))
+    ggplot2::theme(plot.margin = ggplot2::margin(5, 20, 0, 10))
 
+  panel_c <- cowplot::plot_grid(sp, st, ncol = 1, rel_heights = c(3, 1))
+  panel_c <- add_panel_label(panel_c, "C.")
+
+  list(
+    A = panel_a,
+    B = panel_b,
+    C = panel_c
+  )
+}
+
+combine_fig_extval_panels <- function(panels) {
   right <- cowplot::plot_grid(
-    sp,
-    st,
-    NULL,
-    nrow = 3,
-    rel_heights = c(4, 2, 1),
-    labels = c("C.", "D."),
-    axis = "tblr"
+    panels$B,
+    panels$C,
+    ncol = 1,
+    rel_heights = c(1, 1.2)
   )
-  tab <- cowplot::plot_grid(table_plot, NULL, ncol = 2, rel_widths = c(3, 2))
-  left <- cowplot::plot_grid(
-    NULL,
-    pheat,
-    NULL,
-    NULL,
-    NULL,
-    tab,
-    rel_heights = c(4, 0.05, 1.5),
-    ncol = 2,
-    labels = c("A.", "", "B.", ""),
-    rel_widths = c(0.1, 1)
+  cowplot::plot_grid(panels$A, right, rel_widths = c(2.2, 1))
+}
+
+save_fig_extval <- function(data_val_filtered, fit_desurv, tops_desurv, path,
+                            width = 7.5, height = 4.5) {
+  panels <- build_fig_extval_panels(
+    data_val_filtered = data_val_filtered,
+    fit_desurv = fit_desurv,
+    tops_desurv = tops_desurv
   )
-
-  fig <- cowplot::plot_grid(left, right, rel_widths = c(3, 2))
-
-  dir.create(dirname(path), showWarnings = FALSE, recursive = TRUE)
-  ggplot2::ggsave(path, fig, width = width, height = height, units = "in")
-  path
+  fig <- combine_fig_extval_panels(panels)
+  save_plot_pdf(fig, path, width = width, height = height)
 }

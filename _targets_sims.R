@@ -98,6 +98,7 @@ SIM_BO_N_INIT <- 10L
 SIM_BO_N_ITER <- 20L
 SIM_BO_CANDIDATE_POOL <- 1500L
 SIM_BO_EXPLORATION_WEIGHT <- 0.01
+SIM_BO_K_LCB_LEVEL <- 0.90
 
 SIMULATION_SCENARIOS <- list(
   list(
@@ -1427,7 +1428,25 @@ run_bayesopt_analysis <- function(dataset_entry, analysis_spec) {
     verbose = TRUE
   )
   params_best <- standardize_bayes_params(bo_results$best$params)
-  final_params <- modifyList(params_best, analysis_spec$final_overrides %||% list())
+  overrides <- analysis_spec$final_overrides %||% list()
+  final_params <- modifyList(params_best, overrides)
+  override_k <- overrides$k
+  selection_info <- NULL
+  if (!is.null(override_k) && length(override_k)) {
+    final_params$k <- override_k
+    selection_info <- list(
+      k_selected = as.integer(round(override_k)),
+      k_best = NA_integer_,
+      lcb_threshold = NA_real_,
+      lcb_level = SIM_BO_K_LCB_LEVEL,
+      reason = "override"
+    )
+  } else {
+    selection_info <- select_bo_k_lcb(bo_results, lcb_level = SIM_BO_K_LCB_LEVEL)
+    if (!is.null(selection_info$k_selected)) {
+      final_params$k <- selection_info$k_selected
+    }
+  }
   dataset_k <- get_simulation_k(dataset_entry)
   final_params$ngene <- coerce_int(final_params$ngene, bo_fixed$ngene %||% SIM_DEFAULT_NGENE)
   final_params$k <- coerce_int(final_params$k, dataset_k)
@@ -1488,9 +1507,17 @@ run_bayesopt_analysis <- function(dataset_entry, analysis_spec) {
   fit <- fit_attempt$fit
   train_cindex <- fit_attempt$train
   test_cindex <- fit_attempt$test
+  bo_summary <- list(best_score = bo_results$best$mean_cindex)
+  if (!is.null(selection_info)) {
+    bo_summary$k_selected <- selection_info$k_selected %||% NA_integer_
+    bo_summary$k_best_observed <- selection_info$k_best %||% NA_integer_
+    bo_summary$k_lcb_threshold <- selection_info$lcb_threshold %||% NA_real_
+    bo_summary$k_lcb_level <- selection_info$lcb_level %||% SIM_BO_K_LCB_LEVEL
+    bo_summary$k_selection_reason <- selection_info$reason %||% NA_character_
+  }
   bo_details <- list(
     history = bo_results$history,
-    summary = list(best_score = bo_results$best$mean_cindex),
+    summary = bo_summary,
     diagnostics = bo_results$diagnostics,
     final_fit_error = fit_attempt$error
   )
