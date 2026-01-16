@@ -67,7 +67,7 @@ targets_bo_configs <- function() {
       desurv_parallel_grid = TRUE,
       desurv_ncores_grid = 30
     ),
-
+  
     cptac = list(
       data_mode = "external",
       data_loader = "load_data",
@@ -173,7 +173,7 @@ targets_bo_configs <- function() {
       desurv_parallel_grid = TRUE,
       desurv_ncores_grid = 30
     ),
-    
+
     bladder = list(
       data_mode = "split",
       data_loader = "load_data_bladder_vig",
@@ -193,7 +193,7 @@ targets_bo_configs <- function() {
       ntop_config = c(50,300),
       lambdaw_config = c(0),
       lambdah_config = c(0),
-      ninit = 50,
+      ninit = 30,
       bo_n_init = 50,
       bo_n_iter = 100,
       bo_candidate_pool = 4000,
@@ -209,9 +209,9 @@ targets_bo_configs <- function() {
       bo_maxit = 4000,
       nfold = 5,
       desurv_parallel_grid = TRUE,
-      desurv_ncores_grid = 50
+      desurv_ncores_grid = 30
     ),
-    
+
     pdacsplit = list(
       data_mode = "split",
       data_loader = "load_data_pdac_split",

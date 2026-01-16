@@ -82,6 +82,173 @@ make_bo_k_panels <- function(history_df, include_alpha = TRUE, cindex_label = "B
   panels
 }
 
+collect_bo_diagnostics <- function(bo_results, history_df = NULL) {
+  if (is.null(bo_results)) {
+    return(NULL)
+  }
+  if (!is.null(bo_results$diagnostics)) {
+    diag_df <- bo_results$diagnostics
+    if (!"run_id" %in% names(diag_df)) {
+      diag_df$run_id <- NA_integer_
+    }
+    if (!is.null(history_df) && nrow(history_df)) {
+      join_cols <- intersect(c("run_id", "eval_id"), names(diag_df))
+      join_cols <- join_cols[join_cols %in% names(history_df)]
+      if (!length(join_cols)) {
+        join_cols <- "eval_id"
+      }
+      diag_df <- dplyr::left_join(
+        diag_df,
+        history_df,
+        by = join_cols,
+        suffix = c("", "_history")
+      )
+    }
+    return(diag_df)
+  }
+  runs <- bo_results$runs
+  if (is.null(runs)) {
+    return(NULL)
+  }
+  diag_list <- lapply(seq_along(runs), function(idx) {
+    diag_df <- runs[[idx]]$diagnostics
+    if (is.null(diag_df) || !nrow(diag_df)) {
+      return(NULL)
+    }
+    diag_df$run_id <- idx
+    diag_df
+  })
+  diag_list <- diag_list[!vapply(diag_list, is.null, logical(1))]
+  if (!length(diag_list)) {
+    return(NULL)
+  }
+  diag_df <- do.call(rbind, diag_list)
+  if (!is.null(history_df) && nrow(history_df)) {
+    join_cols <- intersect(c("run_id", "eval_id"), names(diag_df))
+    join_cols <- join_cols[join_cols %in% names(history_df)]
+    if (!length(join_cols)) {
+      join_cols <- "eval_id"
+    }
+    diag_df <- dplyr::left_join(
+      diag_df,
+      history_df,
+      by = join_cols,
+      suffix = c("", "_history")
+    )
+  }
+  diag_df
+}
+
+compute_bo_eval_se <- function(diagnostics) {
+  if (is.null(diagnostics) || !nrow(diagnostics)) {
+    return(data.frame(eval_id = integer(0), c_se = numeric(0), n_folds = integer(0)))
+  }
+  if (!"eval_id" %in% names(diagnostics)) {
+    stop("BO diagnostics must include eval_id.")
+  }
+  if (!"fold" %in% names(diagnostics)) {
+    stop("BO diagnostics must include fold.")
+  }
+  if (!"val_cindex" %in% names(diagnostics)) {
+    stop("BO diagnostics must include val_cindex.")
+  }
+
+  safe_mean <- function(x) {
+    x <- x[is.finite(x)]
+    if (length(x) == 0L) return(NA_real_)
+    mean(x)
+  }
+  safe_se <- function(x) {
+    x <- x[is.finite(x)]
+    if (length(x) <= 1L) return(NA_real_)
+    stats::sd(x) / sqrt(length(x))
+  }
+
+  group_cols <- c("eval_id", "fold")
+  if ("run_id" %in% names(diagnostics)) {
+    group_cols <- c("run_id", group_cols)
+  }
+
+  fold_means <- diagnostics %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(group_cols))) %>%
+    dplyr::summarise(
+      fold_mean = safe_mean(val_cindex),
+      .groups = "drop"
+    )
+
+  se_group_cols <- "eval_id"
+  if ("run_id" %in% names(fold_means)) {
+    se_group_cols <- c("run_id", se_group_cols)
+  }
+
+  fold_means %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(se_group_cols))) %>%
+    dplyr::summarise(
+      c_se = safe_se(fold_mean),
+      n_folds = sum(is.finite(fold_mean)),
+      .groups = "drop"
+    )
+}
+
+summarize_bo_best_per_k <- function(history_df, eval_se_df, method_label) {
+  k_col <- intersect(c("k", "k_grid"), names(history_df))[1]
+  if (is.na(k_col)) {
+    stop("BO history must include k or k_grid.")
+  }
+  alpha_col <- intersect(c("alpha", "alpha_grid"), names(history_df))[1]
+  join_cols <- intersect(c("run_id", "eval_id"), names(history_df))
+  join_cols <- join_cols[join_cols %in% names(eval_se_df)]
+  if (!length(join_cols)) {
+    join_cols <- "eval_id"
+  }
+  history_df <- dplyr::left_join(history_df, eval_se_df, by = join_cols)
+
+  best_per_k <- history_df %>%
+    dplyr::group_by(.data[[k_col]]) %>%
+    {
+      if (is.na(alpha_col)) {
+        dplyr::arrange(., desc(mean_cindex))
+      } else {
+        dplyr::arrange(., desc(mean_cindex), .data[[alpha_col]])
+      }
+    } %>%
+    dplyr::slice_head(n = 1) %>%
+    dplyr::ungroup() %>%
+    dplyr::transmute(
+      k = as.numeric(.data[[k_col]]),
+      c_best = mean_cindex,
+      c_se = c_se,
+      method = method_label
+    ) %>%
+    dplyr::arrange(k)
+
+  best_per_k
+}
+
+make_bo_best_observed_plot_combined <- function(best_df, cindex_label = "Best observed CV C-index") {
+  ggplot2::ggplot(
+    best_df,
+    ggplot2::aes(x = k, y = c_best, color = method, group = method)
+  ) +
+    ggplot2::geom_errorbar(
+      ggplot2::aes(ymin = c_best - c_se, ymax = c_best + c_se),
+      width = 0.15
+    ) +
+    ggplot2::geom_line(linewidth = 0.7) +
+    ggplot2::geom_point(size = 2) +
+    ggplot2::scale_color_manual(
+      values = c("DeSurv" = "#33a02c", "alpha = 0" = "#1f78b4")
+    ) +
+    ggplot2::scale_x_continuous(breaks = sort(unique(best_df$k))) +
+    ggplot2::labs(
+      x = "Rank k",
+      y = cindex_label,
+      color = NULL
+    ) +
+    ggplot2::theme_minimal(base_size = 9) +
+    ggplot2::theme(legend.position = "bottom")
+}
+
 make_cindex_violin <- function(history_df, label) {
   k_col <- intersect(c("k", "k_grid"), names(history_df))[1]
   k_levels <- sort(unique(history_df[[k_col]]))
@@ -224,25 +391,31 @@ make_nmf_metric_plot <- function(fit_std, metric) {
 
 build_fig_bo_panels <- function(bo_history_path, bo_history_alpha0_path, bo_results_supervised,
                                 bo_results_alpha0, fit_std,
-                                cindex_label = "Best CV C-index across k") {
+                                cindex_label = "Best observed CV C-index") {
   bo_history_supervised <- prepare_bo_history(bo_history_path)
   bo_history_alpha0 <- prepare_bo_history(bo_history_alpha0_path)
-  gp_curve_supervised <- extract_gp_curve(
-    bo_results_supervised,
+  eval_se_supervised <- compute_bo_eval_se(
+    collect_bo_diagnostics(bo_results_supervised, bo_history_supervised)
+  )
+  eval_se_alpha0 <- compute_bo_eval_se(
+    collect_bo_diagnostics(bo_results_alpha0, bo_history_alpha0)
+  )
+  best_supervised <- summarize_bo_best_per_k(
     bo_history_supervised,
-    ci_level = 0.90
+    eval_se_supervised,
+    method_label = "DeSurv"
   )
-  gp_curve_alpha0 <- extract_gp_curve(
-    bo_results_alpha0,
+  best_alpha0 <- summarize_bo_best_per_k(
     bo_history_alpha0,
-    ci_level = 0.90
+    eval_se_alpha0,
+    method_label = "alpha = 0"
   )
+  best_all <- dplyr::bind_rows(best_supervised, best_alpha0)
 
-  gp_curve_supervised$method <- "DeSurv"
-  gp_curve_alpha0$method <- "alpha = 0"
-  gp_curve_all <- dplyr::bind_rows(gp_curve_supervised, gp_curve_alpha0)
-
-  panel_a <- add_panel_label(make_gp_curve_plot_combined(gp_curve_all), "A")
+  panel_a <- add_panel_label(
+    make_bo_best_observed_plot_combined(best_all, cindex_label = cindex_label),
+    "A"
+  )
 
   panel_b <- add_panel_label(make_nmf_metric_plot(fit_std, "cophenetic"), "B")
   panel_c <- add_panel_label(make_nmf_metric_plot(fit_std, "residuals"), "C")
@@ -311,20 +484,40 @@ build_fig_bio_panels <- function(ora_analysis, fit_desurv, tops_desurv, top_gene
   }
 
   p1 <- p1[!vapply(p1, is.null, logical(1))]
-  if (length(p1) < 3) {
-    stop("Need at least 3 ORA dotplots to build the ORA panel.")
-  }
+  empty_panel <- ggplot2::ggplot() + ggplot2::theme_void()
+  legend_shared <- grid::nullGrob()
 
-  all_dat <- do.call(rbind, lapply(p1[1:3], function(p) p$data))
+  if (length(p1)) {
+    n_use <- min(3, length(p1))
+    all_dat <- do.call(rbind, lapply(p1[seq_len(n_use)], function(p) p$data))
 
-  x_max <- max(all_dat$GeneRatio, na.rm = TRUE)
-  col_min <- min(all_dat$p.adjust, na.rm = TRUE)
-  col_max <- max(all_dat$p.adjust, na.rm = TRUE)
-  size_min <- min(all_dat$Count, na.rm = TRUE)
-  size_max <- max(all_dat$Count, na.rm = TRUE)
+    x_max <- max(all_dat$GeneRatio, na.rm = TRUE)
+    col_min <- min(all_dat$p.adjust, na.rm = TRUE)
+    col_max <- max(all_dat$p.adjust, na.rm = TRUE)
+    size_min <- min(all_dat$Count, na.rm = TRUE)
+    size_max <- max(all_dat$Count, na.rm = TRUE)
 
-  make_equal_scales <- function(p) {
-    p +
+    make_equal_scales <- function(p) {
+      p +
+        ggplot2::scale_x_continuous(limits = c(0, x_max)) +
+        ggplot2::scale_color_viridis_c(
+          limits = c(col_min, col_max),
+          direction = -1,
+          name = "Adjusted p-value"
+        ) +
+        ggplot2::scale_size_continuous(
+          limits = c(size_min, size_max),
+          name = "Gene count"
+        ) +
+        ggplot2::theme(legend.position = "none")
+    }
+
+    p_eq <- lapply(seq_len(n_use), function(i) make_equal_scales(p1[[i]]))
+    if (n_use < 3) {
+      p_eq <- c(p_eq, rep(list(empty_panel), 3 - n_use))
+    }
+
+    p_for_legend <- p1[[1]] +
       ggplot2::scale_x_continuous(limits = c(0, x_max)) +
       ggplot2::scale_color_viridis_c(
         limits = c(col_min, col_max),
@@ -335,37 +528,25 @@ build_fig_bio_panels <- function(ora_analysis, fit_desurv, tops_desurv, top_gene
         limits = c(size_min, size_max),
         name = "Gene count"
       ) +
-      ggplot2::theme(legend.position = "none")
+      ggplot2::theme(
+        legend.position = "bottom",
+        legend.box = "vertical",
+        legend.title = ggplot2::element_text(size = 6),
+        legend.text = ggplot2::element_text(size = 6)
+      )
+
+    g <- ggplot2::ggplotGrob(p_for_legend)
+    legend_idx <- which(vapply(g$grobs, function(x) x$name, character(1)) == "guide-box")
+    if (length(legend_idx)) {
+      legend_shared <- g$grobs[[legend_idx[[1]]]]
+    }
+  } else {
+    p_eq <- rep(list(empty_panel), 3)
   }
 
-  p1_eq <- make_equal_scales(p1[[1]])
-  p2_eq <- make_equal_scales(p1[[2]])
-  p3_eq <- make_equal_scales(p1[[3]])
-
-  p_for_legend <- p1[[1]] +
-    ggplot2::scale_x_continuous(limits = c(0, x_max)) +
-    ggplot2::scale_color_viridis_c(
-      limits = c(col_min, col_max),
-      direction = -1,
-      name = "Adjusted p-value"
-    ) +
-    ggplot2::scale_size_continuous(
-      limits = c(size_min, size_max),
-      name = "Gene count"
-    ) +
-    ggplot2::theme(
-      legend.position = "bottom",
-      legend.box = "vertical",
-      legend.title = ggplot2::element_text(size = 6),
-      legend.text = ggplot2::element_text(size = 6)
-    )
-
-  g <- ggplot2::ggplotGrob(p_for_legend)
-  legend_shared <- g$grobs[which(vapply(g$grobs, function(x) x$name, character(1)) == "guide-box")][[1]]
-
-  panel_a <- add_panel_label(p1_eq, "A.")
-  panel_b <- add_panel_label(p2_eq, "B.")
-  panel_c <- add_panel_label(p3_eq, "C.")
+  panel_a <- add_panel_label(p_eq[[1]], "A.")
+  panel_b <- add_panel_label(p_eq[[2]], "B.")
+  panel_c <- add_panel_label(p_eq[[3]], "C.")
 
   if (is.null(top_genes_ref) || !length(top_genes_ref)) {
     stop("Reference gene signatures are missing.")
@@ -526,13 +707,14 @@ build_fig_sc_panels <- function(tops_desurv, sc_all_path, sc_caf_path, sc_tum_pa
   }
 
   desurv_genesets <- as.list(tops_desurv$top_genes)
-  if (length(desurv_genesets) < 3) {
-    stop("Need at least 3 DeSurv factors to build the scRNA-seq figure.")
+  if (!length(desurv_genesets)) {
+    stop("No DeSurv factors available to build the scRNA-seq figure.")
   }
 
+  n_plot <- min(3, length(desurv_genesets))
   factor_names <- paste0("DeSurv Factor ", seq_along(desurv_genesets))
   names(desurv_genesets) <- factor_names
-  features_to_plot <- factor_names[seq_len(3)]
+  features_to_plot <- factor_names[seq_len(n_plot)]
 
   sc_all <- readRDS(sc_all_path)
   sc_caf <- readRDS(sc_caf_path)
@@ -576,9 +758,10 @@ build_fig_sc_panels <- function(tops_desurv, sc_all_path, sc_caf_path, sc_tum_pa
         legend.title = ggplot2::element_text(size = 6)
       )
   )
-  p_list_all[[1]] <- p_list_all[[1]] + ggplot2::theme(legend.position = "none")
-  p_list_all[[2]] <- p_list_all[[2]] + ggplot2::theme(legend.position = "none")
-  p_list_all[[3]] <- p_list_all[[3]] + ggplot2::theme(legend.position = "none")
+  p_list_all <- lapply(
+    p_list_all,
+    function(p) p + ggplot2::theme(legend.position = "none")
+  )
 
   p_list_caf <- lapply(features_to_plot, function(feat) {
     fp <- FeaturePlot(
@@ -686,10 +869,6 @@ build_fig_sc_panels <- function(tops_desurv, sc_all_path, sc_caf_path, sc_tum_pa
       plot.title = ggplot2::element_text(hjust = 0.5, face = "bold")
     )
 
-  labelmid <- grid::textGrob("DeSurv\nfactor 1", gp = grid::gpar(fontsize = 8, fontface = "bold"))
-  labelmid2 <- grid::textGrob("DeSurv\nfactor 2", gp = grid::gpar(fontsize = 8, fontface = "bold"))
-  labelbottom <- grid::textGrob("DeSurv\nfactor 3", gp = grid::gpar(fontsize = 8, fontface = "bold"))
-
   top <- cowplot::plot_grid(
     scplot_all[[1]],
     scplot_caf[[1]],
@@ -699,38 +878,37 @@ build_fig_sc_panels <- function(tops_desurv, sc_all_path, sc_caf_path, sc_tum_pa
   )
   panel_a <- add_panel_label(top, "A.")
 
-  mid <- cowplot::plot_grid(
-    labelmid,
-    p_list_all[[1]],
-    p_list_caf[[1]],
-    p_list_tum[[1]],
-    ncol = 4,
-    rel_widths = c(0.5, 1, 1, 1)
-  )
-  mid2 <- cowplot::plot_grid(
-    labelmid2,
-    p_list_all[[2]],
-    p_list_caf[[2]],
-    p_list_tum[[2]],
-    ncol = 4,
-    rel_widths = c(0.5, 1, 1, 1)
-  )
-  bottom <- cowplot::plot_grid(
-    labelbottom,
-    p_list_all[[3]],
-    p_list_caf[[3]],
-    p_list_tum[[3]],
-    ncol = 4,
-    rel_widths = c(0.5, 1, 1, 1)
+  label_grobs <- lapply(
+    seq_len(n_plot),
+    function(i) {
+      grid::textGrob(
+        sprintf("DeSurv\nfactor %d", i),
+        gp = grid::gpar(fontsize = 8, fontface = "bold")
+      )
+    }
   )
 
   add_outline <- function(p) {
     p + ggplot2::theme(panel.border = ggplot2::element_rect(color = "black", fill = NA, linewidth = 0.6))
   }
 
-  panel_b <- add_panel_label(add_outline(mid), "B.")
-  panel_c <- add_panel_label(add_outline(mid2), "C.")
-  panel_d <- add_panel_label(add_outline(bottom), "D.")
+  panel_labels <- c("B.", "C.", "D.")
+  panel_rows <- lapply(seq_len(n_plot), function(i) {
+    row <- cowplot::plot_grid(
+      label_grobs[[i]],
+      p_list_all[[i]],
+      p_list_caf[[i]],
+      p_list_tum[[i]],
+      ncol = 4,
+      rel_widths = c(0.5, 1, 1, 1)
+    )
+    add_panel_label(add_outline(row), panel_labels[[i]])
+  })
+
+  empty_row <- cowplot::plot_grid(NULL)
+  panel_b <- if (n_plot >= 1) panel_rows[[1]] else empty_row
+  panel_c <- if (n_plot >= 2) panel_rows[[2]] else empty_row
+  panel_d <- if (n_plot >= 3) panel_rows[[3]] else empty_row
 
   vam_mat <- t(as.matrix(GetAssayData(sc_all, assay = "VAMcdf", layer = "data")))
   sc_all@meta.data[, colnames(vam_mat)] <- vam_mat[rownames(sc_all@meta.data), ]
@@ -955,7 +1133,7 @@ prepare_extval_dataset <- function(dataset, name, fit, factors, factor_gene_list
   rownames(score_mat) <- colnames(X_rank)
   colnames(score_mat) <- paste0("factor", factors)
 
-  sampInfo <- dataset$sampInfo
+  sampInfo <- as.data.frame(dataset$sampInfo, stringsAsFactors = FALSE)
   if (!is.null(rownames(sampInfo)) && all(rownames(score_mat) %in% rownames(sampInfo))) {
     sampInfo <- sampInfo[rownames(score_mat), , drop = FALSE]
   } else {
@@ -1006,15 +1184,28 @@ build_fig_extval_panels <- function(data_val_filtered, fit_desurv, tops_desurv) 
   X <- do.call("cbind", scaled_list)
 
   sampInfo <- do.call("rbind", sinfos)
+  sampInfo <- as.data.frame(sampInfo, stringsAsFactors = FALSE)
   score_cols <- paste0("factor", factors, "_score")
-  if (!all(score_cols %in% names(sampInfo))) {
+  if (!all(score_cols %in% colnames(sampInfo))) {
     stop("Missing factor score columns in validation metadata.")
   }
 
-  sampInfo$DeCAF <- as.character(sampInfo$DeCAF)
-  sampInfo$DeCAF[sampInfo$DeCAF == "permCAF"] <- "proCAF"
-  sampInfo$PurIST <- as.character(sampInfo$PurIST)
+  if ("DeCAF" %in% names(sampInfo)) {
+    sampInfo$DeCAF <- as.character(sampInfo$DeCAF)
+    sampInfo$DeCAF[sampInfo$DeCAF == "permCAF"] <- "proCAF"
+  }
+  if ("PurIST" %in% names(sampInfo)) {
+    sampInfo$PurIST <- as.character(sampInfo$PurIST)
+  }
+  if ("Consensus" %in% names(sampInfo)) {
+    sampInfo$Consensus <- as.character(sampInfo$Consensus)
+  }
   sampInfo$dataset <- as.character(sampInfo$dataset)
+
+  use_consensus <- "Consensus" %in% names(sampInfo) &&
+    (any(grepl("imvigor|bladder", tolower(sampInfo$dataset))) || !("PurIST" %in% names(sampInfo)))
+  subtype_col <- if (use_consensus) "Consensus" else "PurIST"
+  subtype_label <- if (use_consensus) "Consensus" else "PurIST"
 
   n_samples <- nrow(sampInfo)
   get_meta_col <- function(name) {
@@ -1035,22 +1226,40 @@ build_fig_extval_panels <- function(data_val_filtered, fit_desurv, tops_desurv) 
 
   col_anno <- data.frame(
     score_df,
-    PurIST = get_meta_col("PurIST"),
+    Subtype = get_meta_col(subtype_col),
     DeCAF = get_meta_col("DeCAF"),
     dataset = get_meta_col("dataset"),
     stringsAsFactors = FALSE
   )
 
-  col_anno$PurIST[is.na(col_anno$PurIST) | !nzchar(col_anno$PurIST)] <- "Unknown"
+  col_anno$Subtype[is.na(col_anno$Subtype) | !nzchar(col_anno$Subtype)] <- "Unknown"
   col_anno$DeCAF[is.na(col_anno$DeCAF) | !nzchar(col_anno$DeCAF)] <- "Unknown"
   col_anno$dataset[is.na(col_anno$dataset) | !nzchar(col_anno$dataset)] <- "Unknown"
 
-  col_anno$PurIST <- factor(col_anno$PurIST, levels = c("Basal-like", "Classical", "Unknown"))
+  if (use_consensus) {
+    subtype_levels <- unique(col_anno$Subtype)
+    subtype_levels <- subtype_levels[!is.na(subtype_levels)]
+    if ("Unknown" %in% subtype_levels) {
+      subtype_levels <- c(setdiff(subtype_levels, "Unknown"), "Unknown")
+    }
+    col_anno$Subtype <- factor(col_anno$Subtype, levels = subtype_levels)
+    subtype_colors <- stats::setNames(grDevices::rainbow(length(subtype_levels)), subtype_levels)
+    if ("Unknown" %in% names(subtype_colors)) {
+      subtype_colors["Unknown"] <- "grey70"
+    }
+  } else {
+    col_anno$Subtype <- factor(col_anno$Subtype, levels = c("Basal-like", "Classical", "Unknown"))
+    subtype_colors <- c(
+      `Basal-like` = "orange",
+      Classical = "blue",
+      Unknown = "grey70"
+    )
+  }
   col_anno$DeCAF <- factor(col_anno$DeCAF, levels = c("proCAF", "restCAF", "Unknown"))
   col_anno$dataset <- factor(col_anno$dataset)
 
   rownames(col_anno) <- rownames(sampInfo)
-  group_order <- interaction(col_anno$PurIST, col_anno$DeCAF, drop = TRUE, sep = " / ")
+  group_order <- interaction(col_anno$Subtype, col_anno$DeCAF, drop = TRUE, sep = " / ")
   order_idx <- order(group_order, col_anno$dataset)
   sample_order <- rownames(col_anno)[order_idx]
 
@@ -1068,11 +1277,7 @@ build_fig_extval_panels <- function(data_val_filtered, fit_desurv, tops_desurv) 
   score_palette <- grDevices::colorRampPalette(c("navy", "white", "firebrick"))(100)
   annotation_colors <- list(
     `DeSurv factor` = stats::setNames(c("lightgrey", "black"), factor_display),
-    PurIST = c(
-      `Basal-like` = "orange",
-      Classical = "blue",
-      Unknown = "grey70"
-    ),
+    Subtype = subtype_colors,
     DeCAF = c(
       proCAF = "violetred2",
       restCAF = "cyan4",
@@ -1137,18 +1342,32 @@ build_fig_extval_panels <- function(data_val_filtered, fit_desurv, tops_desurv) 
   panel_a <- add_panel_label(pheat, "A.")
 
   plot_df <- sampInfo
-  plot_df$PurIST <- ifelse(
-    is.na(plot_df$PurIST) | !nzchar(plot_df$PurIST),
+  if (subtype_col %in% names(plot_df)) {
+    plot_df$Subtype <- plot_df[[subtype_col]]
+  } else {
+    plot_df$Subtype <- NA_character_
+  }
+  plot_df$Subtype <- ifelse(
+    is.na(plot_df$Subtype) | !nzchar(plot_df$Subtype),
     "Unknown",
-    plot_df$PurIST
+    plot_df$Subtype
   )
+  if ("DeCAF" %in% names(plot_df)) {
+    plot_df$DeCAF <- as.character(plot_df$DeCAF)
+  } else {
+    plot_df$DeCAF <- NA_character_
+  }
+  plot_df$DeCAF[plot_df$DeCAF == "permCAF"] <- "proCAF"
   plot_df$DeCAF <- ifelse(
     is.na(plot_df$DeCAF) | !nzchar(plot_df$DeCAF),
     "Unknown",
     plot_df$DeCAF
   )
-  plot_df$DeCAF[plot_df$DeCAF == "permCAF"] <- "proCAF"
-  plot_df$PurIST <- factor(plot_df$PurIST, levels = c("Basal-like", "Classical", "Unknown"))
+  if (use_consensus) {
+    plot_df$Subtype <- factor(plot_df$Subtype, levels = levels(col_anno$Subtype))
+  } else {
+    plot_df$Subtype <- factor(plot_df$Subtype, levels = c("Basal-like", "Classical", "Unknown"))
+  }
   plot_df$DeCAF <- factor(plot_df$DeCAF, levels = c("proCAF", "restCAF", "Unknown"))
   plot_df$score_x <- as.numeric(plot_df[[score_cols[1]]])
   plot_df$score_y <- as.numeric(plot_df[[score_cols[2]]])
@@ -1156,22 +1375,15 @@ build_fig_extval_panels <- function(data_val_filtered, fit_desurv, tops_desurv) 
 
   p_scatter <- ggplot2::ggplot(
     plot_df,
-    ggplot2::aes(x = score_x, y = score_y, color = PurIST, shape = DeCAF)
+    ggplot2::aes(x = score_x, y = score_y, color = Subtype, shape = DeCAF)
   ) +
     ggplot2::geom_point(size = 1.4, alpha = 0.8) +
-    ggplot2::scale_color_manual(
-      values = c(
-        `Basal-like` = "orange",
-        Classical = "blue",
-        Unknown = "grey70"
-      ),
-      drop = FALSE
-    ) +
+    ggplot2::scale_color_manual(values = subtype_colors, drop = FALSE) +
     ggplot2::scale_shape_manual(
       values = c(proCAF = 16, restCAF = 17, Unknown = 1),
       drop = FALSE
     ) +
-    ggplot2::labs(x = score_display[1], y = score_display[2], color = "PurIST", shape = "DeCAF") +
+    ggplot2::labs(x = score_display[1], y = score_display[2], color = subtype_label, shape = "DeCAF") +
     ggplot2::theme_minimal(base_size = 8)
   panel_b <- add_panel_label(p_scatter, "B.")
 

@@ -199,24 +199,22 @@ knitr::include_graphics(file.path(repo_root, "figures", "model_schematic_final.p
 ## Bayesian optimisation selects the DeSurv hyperparameters ($k$, $\alpha$) {.unnumbered}
 We now tune DeSurv with Bayesian optimisation (BO) rather than enumerating a dense cross-validation grid. Each BO evaluation fits the model for a single combination of $k$, $\alpha$, and penalty weights, measuring the mean validation C-index. A Gaussian-process surrogate models this surface and proposes new evaluations that balance exploration and exploitation, allowing the search to concentrate rapidly on high-performing regions.
 
-Figure \@ref(fig:fig-bo) summarises the optimisation run. Panel A uses the Gaussian-process surrogate to show the BO posterior mean C-index across $k$ for the supervised and $\alpha=0$ searches, with 90\% confidence bands capturing model-based uncertainty beyond the sampled runs. The final configuration of the supervised search converges to $k=3$ and $\alpha=0.7$, which provided the highest cross-validated C-index encountered by BO.
+Figure \@ref(fig:fig-bo) summarises the optimisation run. Panel A reports the best observed cross-validated C-index at each $k$ for the supervised and $\alpha=0$ searches, with error bars denoting the cross-validation standard error across folds. The final configuration of the supervised search converges to $k=3$ and $\alpha=0.7$, which provided the highest cross-validated C-index encountered by BO.
 
 For reference we still report standard NMF heuristics (Panels B-D: cophenetic, residuals, and silhouette), which historically guide rank selection when a supervised criterion is unavailable. These diagnostics disagree on the optimal $k$, underscoring the benefit of the BO-guided DeSurv procedure that explicitly maximises prognostic accuracy.
 
-```{r fig-bo, fig.width = 6, fig.height= 5.5, fig.cap="A. GP posterior mean and 90% confidence bands of the CV C-index versus k for the supervised and $\\alpha$ = 0 searches. B-D. Conventional NMF diagnostics (cophenetic, residuals, silhouette) for the unsupervised baseline." , fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
+```{r fig-bo, fig.width = 6, fig.height= 5.5, fig.cap="A. Best observed CV C-index versus k for the supervised and $\\alpha$ = 0 searches with cross-validation SE error bars. B-D. Conventional NMF diagnostics (cophenetic, residuals, silhouette) for the unsupervised baseline." , fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
 
-fig_bo_plot <- tar_read_raw(resolve_target_name(
-  "fig_bo_plot",
-  bo_label = bo_label,
-  run_label = run_label,
-  available = available_targets
+knitr::include_graphics(file.path(
+  repo_root,
+  "figures",
+  sprintf("fig_bo_%s.pdf", bo_label)
 ))
-fig_bo_plot
 ```
 
 
 ## DeSurv improves selection of prognostic gene signatures {.unnumbered}
-To test whether supervision improves the selection of prognostic gene signatures, we used simulations with known lethal factors and tuned the number of top genes per factor (\texttt{n_top}) using BO. We compared the supervised DeSurv model to the unsupervised $\alpha=0$ baseline across simulation regimes. Figure \@ref(fig:fig-sim-ntop)A shows the distribution of test C-index values, while Figure \@ref(fig:fig-sim-ntop)B reports the precision of recovered prognostic genes (mean across lethal factors). DeSurv consistently yields higher C-index and improved precision, indicating that survival supervision helps focus signatures on truly prognostic genes rather than reconstruction-only structure.
+To test whether supervision improves the selection of prognostic gene signatures, we used simulations with known lethal factors and tuned the number of top genes per factor (\texttt{n\_top}) using BO. We compared the supervised DeSurv model to the unsupervised $\alpha=0$ baseline across simulation regimes. Figure \@ref(fig:fig-sim-ntop)A shows the distribution of test C-index values, while Figure \@ref(fig:fig-sim-ntop)B reports the precision of recovered prognostic genes (mean across lethal factors). DeSurv consistently yields higher C-index and improved precision, indicating that survival supervision helps focus signatures on truly prognostic genes rather than reconstruction-only structure.
 
 ```{r fig-sim-ntop, fig.cap="Simulation results for BO-tuned signature size. A. Test C-index across simulation regimes for DeSurv and the $\\alpha=0$ baseline. B. Precision of recovered prognostic genes (mean across lethal factors).", fig.env='figure*', fig.pos='t', out.width='0.49\\textwidth'}
 knitr::include_graphics(c(
@@ -234,13 +232,11 @@ Survival analysis of the factor signature scores on the training data demonstrat
 Panel D of Figure \@ref(fig:fig-bio) further examines the correlation between DeSurv factors and previously published PDAC gene signatures. Factor 1 aligns with signatures from classical tumor, iCAF and restCAF stroma, and immune infiltration, all of which are associated with favorable prognosis. In contrast, Factor 3 correlates with Basal-like tumor, proCAF, and activated stromal programs, which are generally linked to poor outcomes. These overlaps suggest that each factor represents a composite axis of tumor–stroma-immune interaction, capturing biologically coherent programs that align with known PDAC ecosystems but arise de novo from the DeSurv model.
 ```{r fig-bio, fig.cap="A-C. Dotplots of ORA analysis of top 50 genes from each DeSurv derived factor. D. Correlation between the DeSurv gene weights matrix and previously published PDAC gene signatures.", fig.env='figure*', fig.pos='t', out.height= "4.5in", out.width='\\textwidth'}
 
-fig_bio_plot <- tar_read_raw(resolve_target_name(
-  "fig_bio_plot",
-  bo_label = bo_label,
-  run_label = run_label,
-  available = available_targets
+knitr::include_graphics(file.path(
+  repo_root,
+  "figures",
+  sprintf("fig_bio_%s.pdf", bo_label)
 ))
-fig_bio_plot
 ```
 
 
@@ -250,14 +246,11 @@ To evaluate the generalizability of DeSurv-derived prognostic signatures, we pro
 Figure \@ref(fig:fig-extval)A shows the ranked expression heatmap for the selected factor gene signatures, annotated with the continuous factor scores and the PurIST, DeCAF, and dataset labels. Figure \@ref(fig:fig-extval)B plots the top two factor scores for all samples, colored by PurIST subtype and shaped by DeCAF subtype to show how tumor- and stroma-associated programs align across cohorts. For survival assessment, we discretized each factor score within each cohort at its median and intersected the high/low calls to form four groups; Kaplan–Meier curves for these groups are shown in Figure \@ref(fig:fig-extval)C. Because DeSurv was trained only on TCGA-PAAD/CPTAC, these analyses represent an independent validation of prognostic signal transfer to external datasets.
 ```{r fig-extval, fig.cap="External cohort validation. A. Heatmap of ranked expression values for genes in the selected DeSurv factor signatures with continuous factor-score annotations plus PurIST, DeCAF, and dataset labels. B. Scatter plot of the top two factor scores, colored by PurIST subtype and shaped by DeCAF subtype. C. Kaplan–Meier curves for the four groups formed by per-cohort median splits of the two factor scores.", fig.env='figure*', fig.pos='t', out.height= "4in", out.width='\\textwidth'}
 
-fig_extval_plot <- tar_read_raw(resolve_target_name(
-  "fig_extval_plot",
-  bo_label = bo_label,
-  run_label = run_label,
-  val_label = val_label,
-  available = available_targets
+knitr::include_graphics(file.path(
+  repo_root,
+  "figures",
+  sprintf("fig_extval_%s.pdf", bo_label)
 ))
-fig_extval_plot
 ```
 
 

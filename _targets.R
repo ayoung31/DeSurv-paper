@@ -3,21 +3,35 @@ source("targets_run_configs.R")
 source("targets_val_configs.R")
 source("targets_figure_configs.R")
 BO_CONFIGS_RAW <- targets_bo_configs()
-RUN_CONFIGS_RAW <- targets_run_configs()
-VAL_CONFIGS_RAW <- targets_val_configs()
 FIGURE_CONFIGS <- targets_figure_configs()
+BO_LABELS_RAW <- names(BO_CONFIGS_RAW)
+if (is.null(BO_LABELS_RAW) || any(!nzchar(BO_LABELS_RAW))) {
+  BO_LABELS_RAW <- paste0("bo_", seq_along(BO_CONFIGS_RAW))
+  names(BO_CONFIGS_RAW) <- BO_LABELS_RAW
+}
+RUN_CONFIGS_RAW <- targets_run_configs(BO_LABELS_RAW)
 
 DEFAULT_NINIT <- if (length(BO_CONFIGS_RAW)) {
   max(vapply(BO_CONFIGS_RAW, function(cfg) if (is.null(cfg$ninit)) 50 else cfg$ninit, numeric(1)))
 } else {
   50
 }
-DEFAULT_NINIT_FULL <- 100
+DEFAULT_NINIT_FULL <- if (length(RUN_CONFIGS_RAW)) {
+  max(vapply(
+    RUN_CONFIGS_RAW,
+    function(cfg) if (is.null(cfg$ninit_full)) 100 else cfg$ninit_full,
+    numeric(1)
+  ))
+} else {
+  100
+}
 
 source("targets_setup.R")
 source("targets_common_pipeline.R")
 
 RESOLVED_BO_CONFIGS <- resolve_desurv_bo_configs(BO_CONFIGS_RAW)
+BO_LABELS <- names(RESOLVED_BO_CONFIGS)
+VAL_CONFIGS_RAW <- targets_val_configs(BO_LABELS)
 RESOLVED_RUN_CONFIGS <- resolve_desurv_run_configs_by_bo(RESOLVED_BO_CONFIGS, RUN_CONFIGS_RAW)
 RESOLVED_VAL_CONFIGS <- resolve_desurv_val_configs_by_bo(RESOLVED_BO_CONFIGS, VAL_CONFIGS_RAW)
 validate_desurv_configs(RESOLVED_BO_CONFIGS, RESOLVED_RUN_CONFIGS, RESOLVED_VAL_CONFIGS)
@@ -169,12 +183,12 @@ targets_list <- tar_map(
   COMMON_DESURV_BO_TARGETS,
   tar_target(
     run_config,
-    RESOLVED_RUN_CONFIGS[[bo_label]]
+    resolve_desurv_run_config(targets_run_config(bo_label), bo_label)
   ),
   COMMON_DESURV_RUN_TARGETS,
   tar_target(
     val_config,
-    RESOLVED_VAL_CONFIGS[[bo_label]]
+    resolve_desurv_val_config(targets_val_config(bo_label), bo_label)
   ),
   tar_target(
     val_config_effective,

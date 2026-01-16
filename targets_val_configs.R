@@ -1,6 +1,5 @@
-targets_val_configs <- function() {
-  bo_labels <- names(targets_bo_configs())
-  base_val <- list(
+targets_val_config <- function(label) {
+  list(
     mode = "external",
     val_datasets = c(
       "CPTAC",
@@ -11,7 +10,13 @@ targets_val_configs <- function() {
       "Puleo_array"
     )
   )
-  configs <- lapply(bo_labels, function(label) base_val)
+}
+
+targets_val_configs <- function(bo_labels = names(targets_bo_configs())) {
+  if (is.null(bo_labels)) {
+    bo_labels <- character(0)
+  }
+  configs <- lapply(bo_labels, targets_val_config)
   names(configs) <- bo_labels
   configs
 }

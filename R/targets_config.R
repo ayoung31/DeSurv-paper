@@ -268,6 +268,10 @@ resolve_desurv_run_configs_by_bo <- function(bo_configs, run_configs) {
   mapply(
     function(entry, label) {
       entry$label <- label
+      bo_config <- bo_configs[[label]]
+      if (is.null(entry$std_nmf_nrun) && !is.null(bo_config$ninit)) {
+        entry$std_nmf_nrun <- bo_config$ninit
+      }
       resolve_desurv_run_config(entry, label)
     },
     run_configs[bo_labels],
@@ -617,6 +621,34 @@ preprocess_validation_data <- function(dataset, genes = NULL, ngene = NULL, meth
   }
   prep <- do.call(DeSurv::preprocess_data, args)
   prep$dataname <- dataname
+  meta <- dataset$sampInfo
+  if (!is.null(meta) && nrow(meta)) {
+    prep_ids <- colnames(prep$ex)
+    if (is.null(prep_ids) && !is.null(rownames(prep$sampInfo))) {
+      prep_ids <- rownames(prep$sampInfo)
+    }
+    if (is.null(prep_ids) && "ID" %in% names(prep$sampInfo)) {
+      prep_ids <- prep$sampInfo$ID
+    }
+    if (!is.null(prep_ids) && length(prep_ids)) {
+      if (!"ID" %in% names(meta)) {
+        if (!is.null(rownames(meta))) {
+          meta$ID <- rownames(meta)
+        }
+      }
+      if ("ID" %in% names(meta)) {
+        idx <- match(prep_ids, meta$ID)
+        meta_use <- meta[idx, , drop = FALSE]
+        rownames(meta_use) <- prep_ids
+        prep$sampInfo <- as.data.frame(prep$sampInfo, stringsAsFactors = FALSE)
+        rownames(prep$sampInfo) <- prep_ids
+        extra_cols <- setdiff(names(meta_use), names(prep$sampInfo))
+        if (length(extra_cols)) {
+          prep$sampInfo[extra_cols] <- meta_use[extra_cols]
+        }
+      }
+    }
+  }
   prep
 }
 

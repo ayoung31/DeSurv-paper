@@ -77,8 +77,19 @@ COMMON_DESURV_BO_TARGETS <- list(
   ),
   
   tar_target(
+    tar_k_selection,
+    select_bo_k_by_cv_se(desurv_bo_results)
+  ),
+
+  tar_target(
     tar_params_best,
-    standardize_bo_params(desurv_bo_results$overall_best$params)
+    {
+      params <- standardize_bo_params(desurv_bo_results$overall_best$params)
+      if (!is.null(tar_k_selection$k_selected)) {
+        params$k <- tar_k_selection$k_selected
+      }
+      params
+    }
   ),
   
   tar_target(
@@ -219,9 +230,17 @@ COMMON_DESURV_BO_TARGETS <- list(
   ),
 
   tar_target(
+    tar_k_selection_alpha0,
+    select_bo_k_by_cv_se(desurv_bo_results_alpha0)
+  ),
+
+  tar_target(
     tar_params_best_alpha0,
     {
       params <- standardize_bo_params(desurv_bo_results_alpha0$overall_best$params)
+      if (!is.null(tar_k_selection_alpha0$k_selected)) {
+        params$k <- tar_k_selection_alpha0$k_selected
+      }
       params$alpha <- 0
       params
     }
@@ -541,9 +560,9 @@ COMMON_DESURV_RUN_TARGETS <- list(
     nmf(
       bo_bundle_selected$data_filtered$ex,
       run_config$std_nmf_k_grid,
-      nrun = run_config$std_nmf_nrun,
+      nrun = bo_bundle_selected$config$ninit,
       method = "lee",
-      .options = paste0("p", run_config$std_nmf_nrun)
+      .options = paste0("p", bo_bundle_selected$config$ninit)
     ),
     resources = tar_resources(
       crew = tar_resources_crew(controller = "cv")
@@ -1211,7 +1230,7 @@ FIGURE_TARGETS <- list(
       fig_bo_panel_a,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bo_%s_%s_panel_a.pdf", run_label, bo_label)
+        sprintf("fig_bo_%s_panel_a.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1222,7 +1241,7 @@ FIGURE_TARGETS <- list(
       fig_bo_panel_b,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bo_%s_%s_panel_b.pdf", run_label, bo_label)
+        sprintf("fig_bo_%s_panel_b.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1233,7 +1252,7 @@ FIGURE_TARGETS <- list(
       fig_bo_panel_c,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bo_%s_%s_panel_c.pdf", run_label, bo_label)
+        sprintf("fig_bo_%s_panel_c.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1244,7 +1263,7 @@ FIGURE_TARGETS <- list(
       fig_bo_panel_d,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bo_%s_%s_panel_d.pdf", run_label, bo_label)
+        sprintf("fig_bo_%s_panel_d.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1255,7 +1274,7 @@ FIGURE_TARGETS <- list(
       fig_bo_panel_e,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bo_%s_%s_panel_e.pdf", run_label, bo_label)
+        sprintf("fig_bo_%s_panel_e.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1266,7 +1285,7 @@ FIGURE_TARGETS <- list(
       fig_bo_panel_f,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bo_%s_%s_panel_f.pdf", run_label, bo_label)
+        sprintf("fig_bo_%s_panel_f.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1277,7 +1296,7 @@ FIGURE_TARGETS <- list(
       fig_bo_panel_g,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bo_%s_%s_panel_g.pdf", run_label, bo_label)
+        sprintf("fig_bo_%s_panel_g.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1293,7 +1312,7 @@ FIGURE_TARGETS <- list(
       fig_bo_plot,
       file.path(
         FIGURE_CONFIGS$figures_dir,
-        sprintf("fig_bo_%s_%s.pdf", run_label, bo_label)
+        sprintf("fig_bo_%s.pdf", bo_label)
       ),
       width = 6,
       height = 5.5
@@ -1321,7 +1340,7 @@ FIGURE_TARGETS <- list(
       fig_bio_panel_a,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bio_%s_%s_panel_a.pdf", run_label, bo_label)
+        sprintf("fig_bio_%s_panel_a.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1332,7 +1351,7 @@ FIGURE_TARGETS <- list(
       fig_bio_panel_b,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bio_%s_%s_panel_b.pdf", run_label, bo_label)
+        sprintf("fig_bio_%s_panel_b.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1343,7 +1362,7 @@ FIGURE_TARGETS <- list(
       fig_bio_panel_c,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bio_%s_%s_panel_c.pdf", run_label, bo_label)
+        sprintf("fig_bio_%s_panel_c.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1354,7 +1373,7 @@ FIGURE_TARGETS <- list(
       fig_bio_panel_d,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bio_%s_%s_panel_d.pdf", run_label, bo_label)
+        sprintf("fig_bio_%s_panel_d.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1370,7 +1389,7 @@ FIGURE_TARGETS <- list(
       fig_bio_plot,
       file.path(
         FIGURE_CONFIGS$figures_dir,
-        sprintf("fig_bio_%s_%s.pdf", run_label, bo_label)
+        sprintf("fig_bio_%s.pdf", bo_label)
       ),
       width = 7,
       height = 4.5
@@ -1398,7 +1417,7 @@ FIGURE_TARGETS <- list(
       fig_sc_panel_a,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_sc_%s_%s_panel_a.pdf", run_label, bo_label)
+        sprintf("fig_sc_%s_panel_a.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1409,7 +1428,7 @@ FIGURE_TARGETS <- list(
       fig_sc_panel_b,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_sc_%s_%s_panel_b.pdf", run_label, bo_label)
+        sprintf("fig_sc_%s_panel_b.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1420,7 +1439,7 @@ FIGURE_TARGETS <- list(
       fig_sc_panel_c,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_sc_%s_%s_panel_c.pdf", run_label, bo_label)
+        sprintf("fig_sc_%s_panel_c.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1431,7 +1450,7 @@ FIGURE_TARGETS <- list(
       fig_sc_panel_d,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_sc_%s_%s_panel_d.pdf", run_label, bo_label)
+        sprintf("fig_sc_%s_panel_d.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1442,7 +1461,7 @@ FIGURE_TARGETS <- list(
       fig_sc_panel_e,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_sc_%s_%s_panel_e.pdf", run_label, bo_label)
+        sprintf("fig_sc_%s_panel_e.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1458,7 +1477,7 @@ FIGURE_TARGETS <- list(
       fig_sc_plot,
       file.path(
         FIGURE_CONFIGS$figures_dir,
-        sprintf("fig_sc_%s_%s.pdf", run_label, bo_label)
+        sprintf("fig_sc_%s.pdf", bo_label)
       ),
       width = 7.5,
       height = 8
@@ -1486,7 +1505,7 @@ FIGURE_VAL_TARGETS <- list(
       fig_extval_panel_a,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_extval_%s_%s_%s_panel_a.pdf", val_label, run_label, bo_label)
+        sprintf("fig_extval_%s_panel_a.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1497,7 +1516,7 @@ FIGURE_VAL_TARGETS <- list(
       fig_extval_panel_b,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_extval_%s_%s_%s_panel_b.pdf", val_label, run_label, bo_label)
+        sprintf("fig_extval_%s_panel_b.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1508,7 +1527,7 @@ FIGURE_VAL_TARGETS <- list(
       fig_extval_panel_c,
       file.path(
         FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_extval_%s_%s_%s_panel_c.pdf", val_label, run_label, bo_label)
+        sprintf("fig_extval_%s_panel_c.pdf", bo_label)
       )
     ),
     format = "file"
@@ -1524,7 +1543,7 @@ FIGURE_VAL_TARGETS <- list(
       fig_extval_plot,
       file.path(
         FIGURE_CONFIGS$figures_dir,
-        sprintf("fig_extval_%s_%s_%s.pdf", val_label, run_label, bo_label)
+        sprintf("fig_extval_%s.pdf", bo_label)
       ),
       width = 7.5,
       height = 4.5
