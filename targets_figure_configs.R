@@ -5,9 +5,9 @@ targets_figure_configs <- function() {
     panel_dir = file.path(figures_dir, "panels"),
     sim_dir = file.path(figures_dir, "sim"),
     paper_figure_keys = list(
-      bo_key = "easy",
-      run_key = "easy",
-      val_key = "easy"
+      bo_key = "tcgacptac",
+      run_key = "tcgacptac",
+      val_key = "tcgacptac"
     ),
     sc_data_paths = list(
       all = "data/derv/Elyada_umap.Rds",

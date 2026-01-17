@@ -5,7 +5,7 @@ purrr::walk(
 )
 tar_load_globals(script="_targets_sims.R")
 
-data=simulate_desurv_scenario(scenario = "R1",seed=14537)
+data=simulate_desurv_scenario(scenario = "R_mixed",seed=14537)
 markers = data$marker_sets
 
 hist(data$X)
@@ -60,14 +60,14 @@ plot(dfit0$nlossit)
 plot(dfit0$slossit)
 
 tops0=get_top_genes(dfit0$W,150)$top_genes
-intersect(unlist(tops0),unlist(markers))
-precision_recall(list(unlist(tops0[,4])),list(unlist(markers[[1]])))
+intersect(unlist(tops0[,3]),unlist(markers[[1]]))
+# precision_recall(list(unlist(tops0[,4])),list(unlist(markers[[1]])))
 
 dfit0$cindex
 
 dfit0$beta*apply(t(data$X)%*%dfit0$W,2,sd)
 
-recon0 = norm(data$X - dfit0$W %*% dfit0$H, "F")
+recon0 = norm(train$ex - dfit0$W %*% dfit0$H, "F")
 
 
 #alpha>0 bo

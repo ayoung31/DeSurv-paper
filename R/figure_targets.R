@@ -1059,11 +1059,18 @@ subset_validation_data <- function(dataset) {
 }
 
 rank_transform_matrix <- function(mat) {
+  rank01 <- function(x) {
+    n <- sum(!is.na(x))
+    if (n <= 1) return(rep(NA_real_, length(x)))
+    r <- rank(x, na.last = "keep", ties.method = "average")
+    (r - 1) / (n - 1)
+  }
   if (!nrow(mat) || !ncol(mat)) {
     return(mat)
   }
-  ranked <- apply(mat, 2, rank, ties.method = "average", na.last = "keep")
+  ranked <- apply(mat, 2, rank01)
   ranked <- as.matrix(ranked)
+  ranked = (ranked - 1) / (nrow(ranked)-1)
   rownames(ranked) <- rownames(mat)
   colnames(ranked) <- colnames(mat)
   ranked
@@ -1170,6 +1177,8 @@ build_fig_extval_panels <- function(data_val_filtered, fit_desurv, tops_desurv) 
 
   rank_list <- lapply(entries, `[[`, "rank")
   sinfos <- lapply(entries, `[[`, "sampInfo")
+  # Avoid rbind prefixing rownames with list names.
+  sinfos <- unname(sinfos)
 
   genes <- Reduce(intersect, lapply(rank_list, rownames))
   if (!length(genes)) {
@@ -1185,6 +1194,13 @@ build_fig_extval_panels <- function(data_val_filtered, fit_desurv, tops_desurv) 
 
   sampInfo <- do.call("rbind", sinfos)
   sampInfo <- as.data.frame(sampInfo, stringsAsFactors = FALSE)
+  if (!all(rownames(sampInfo) %in% colnames(X))) {
+    missing <- setdiff(rownames(sampInfo), colnames(X))
+    stop(
+      "Validation metadata rownames do not match expression columns. Missing: ",
+      paste(head(missing, 10), collapse = ", ")
+    )
+  }
   score_cols <- paste0("factor", factors, "_score")
   if (!all(score_cols %in% colnames(sampInfo))) {
     stop("Missing factor score columns in validation metadata.")
@@ -1268,7 +1284,7 @@ build_fig_extval_panels <- function(data_val_filtered, fit_desurv, tops_desurv) 
 
   gene_factor <- rep(factor_display[2], length(genes))
   gene_factor[genes %in% factor_gene_lists[[1]]] <- factor_display[1]
-  row_anno <- data.frame(`DeSurv factor` = factor(gene_factor, levels = factor_display))
+  row_anno <- data.frame(`DeSurv factor` = factor(gene_factor, levels = factor_display),check.names = FALSE)
   rownames(row_anno) <- genes
 
   X <- X[order(row_anno$`DeSurv factor`), , drop = FALSE]

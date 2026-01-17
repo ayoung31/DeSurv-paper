@@ -22,6 +22,20 @@ sim_pub_theme <- function(base_size = 12) {
     )
 }
 
+normalize_scenario_id <- function(scenario_id) {
+  if (is.null(scenario_id) || !length(scenario_id)) {
+    return(NULL)
+  }
+  if (length(scenario_id) > 1) {
+    stop(
+      "Expected a single scenario_id, got: ",
+      paste(scenario_id, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  as.character(scenario_id[[1]])
+}
+
 mean_lethal_metric <- function(tbl, metric) {
   if (is.null(tbl) || !nrow(tbl)) {
     return(NA_real_)
@@ -37,13 +51,15 @@ build_sim_fig_data <- function(sim_results_table,
                                analysis_id = NULL,
                                scenario_id = NULL) {
   results <- sim_results_table
+  scen_id <- normalize_scenario_id(scenario_id)
+  anal_id = analysis_id
   if (!is.null(analysis_id)) {
     results <- results %>%
-      dplyr::filter(.data$analysis_id %in% analysis_id)
+      dplyr::filter(analysis_id == anal_id)
   }
   if (!is.null(scenario_id)) {
     results <- results %>%
-      dplyr::filter(.data$scenario_id %in% scenario_id)
+      dplyr::filter(scenario_id == scen_id)
   }
 
   scenario_col <- if ("scenario_id" %in% names(results)) "scenario_id" else "scenario"
@@ -108,25 +124,29 @@ plot_sim_k_hist <- function(k_plot_data, true_k_tbl, base_size = 12) {
 plot_sim_metric_box <- function(results, metric, title, ylab, base_size = 12) {
   plot_data <- results %>%
     dplyr::filter(!is.na(.data[[metric]]), !is.na(method))
-
-  ggplot2::ggplot(plot_data, ggplot2::aes(x = method, y = .data[[metric]], fill = method)) +
-    ggplot2::geom_boxplot(width = 0.55, outlier.shape = NA, alpha = 0.85) +
-    ggplot2::geom_jitter(
-      ggplot2::aes(color = method),
-      width = 0.15,
-      size = 0.8,
-      alpha = 0.35
-    ) +
-    ggplot2::facet_wrap(~ scenario_panel) +
-    ggplot2::scale_fill_manual(values = sim_method_colors) +
-    ggplot2::scale_color_manual(values = sim_method_colors, guide = "none") +
-    ggplot2::labs(
-      title = title,
-      x = NULL,
-      y = ylab,
-      fill = "Method"
-    ) +
-    sim_pub_theme(base_size = base_size)
+  if(nrow(plot_data) > 0){
+    ggplot2::ggplot(plot_data, ggplot2::aes(x = method, y = .data[[metric]], fill = method)) +
+      ggplot2::geom_boxplot(width = 0.55, outlier.shape = NA, alpha = 0.85) +
+      ggplot2::geom_jitter(
+        ggplot2::aes(color = method),
+        width = 0.15,
+        size = 0.8,
+        alpha = 0.35
+      ) +
+      ggplot2::facet_wrap(~ scenario_panel) +
+      ggplot2::scale_fill_manual(values = sim_method_colors) +
+      ggplot2::scale_color_manual(values = sim_method_colors, guide = "none") +
+      ggplot2::labs(
+        title = title,
+        x = NULL,
+        y = ylab,
+        fill = "Method"
+      ) +
+      sim_pub_theme(base_size = base_size)
+  }else{
+    NULL
+  }
+  
 }
 
 build_sim_figs <- function(sim_results_table,
@@ -177,9 +197,10 @@ save_sim_plot <- function(plot, path, width = 6.5, height = 4.5) {
 }
 
 build_sim_figs_bundle <- function(sim_results_table,
-                                  analysis_id,
+                                  analysis_id = NULL,
                                   scenario_id = NULL,
                                   base_size = 12) {
+  scenario_id <- normalize_scenario_id(scenario_id)
   list(
     analysis_id = analysis_id,
     scenario_id = scenario_id,
@@ -205,10 +226,10 @@ sim_fig_suffix <- function(scenario_id) {
 
 save_sim_figs <- function(plots,
                           sim_dir,
-                          analysis_id,
                           figure_configs,
                           scenario_id = NULL) {
-  out_dir <- file.path(sim_dir, analysis_id)
+  scenario_id <- normalize_scenario_id(scenario_id)
+  out_dir <- sim_dir
   suffix <- sim_fig_suffix(scenario_id)
   k_hist_path <- file.path(
     out_dir,
@@ -247,6 +268,39 @@ save_sim_figs <- function(plots,
       height = figure_configs$precision_box$height
     )
   )
+}
+
+save_sim_figs_by_scenario <- function(sim_results_table,
+                                      sim_dir,
+                                      figure_configs,
+                                      base_size = 12) {
+
+  scenario_ids <- sim_results_table$scenario_id
+  scenario_ids <- as.character(scenario_ids)
+  scenario_ids <- unique(scenario_ids)
+  scenario_ids <- scenario_ids[!is.na(scenario_ids) & nzchar(scenario_ids)]
+  scenario_ids <- sort(scenario_ids)
+  
+  analysis_ids = sim_results_table$analysis_id
+  analysis_ids = as.character(analysis_ids)
+  analysis_ids = unique(analysis_ids)
+  analysis_ids = analysis_ids[!is.na(analysis_ids) & nzchar(analysis_ids)]
+  analysis_ids = sort(analysis_ids)
+  
+  files <- purrr::map(scenario_ids, function(scenario_id) {
+    plots <- build_sim_figs(
+      sim_results_table,
+      scenario_id = scenario_id,
+      base_size = base_size
+    )
+    save_sim_figs(
+      plots,
+      sim_dir = sim_dir,
+      figure_configs = figure_configs,
+      scenario_id = scenario_id
+    )
+  })
+  unlist(files)
 }
 
 if (interactive()) {
