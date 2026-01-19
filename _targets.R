@@ -347,7 +347,7 @@ c(
     paper,
     "paper/paper.Rmd",
     quiet = FALSE,
-    output_file = sprintf("paper_%s.pdf", format(Sys.Date(), "%Y%m%d")),
+    output_file = "paper.pdf",
     output_dir = "paper"
   )
 )

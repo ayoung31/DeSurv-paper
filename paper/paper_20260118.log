@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.1.8)  18 JAN 2026 22:54
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.1.8)  18 JAN 2026 21:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**/work/users/a/y/ayoung31/DeSurv-paper/paper/paper.tex
-(/work/users/a/y/ayoung31/DeSurv-paper/paper/paper.tex
+**/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_20260118.tex
+(/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_20260118.tex
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-29>
 (./pnas-new.cls
@@ -931,8 +931,9 @@ Package: setspace 2022/12/04 v6.7b set line spacing
 Package: pnasresearcharticle 2018/05/06 v1.3 PNAS two column research article style
 \@float@every@sigstatement=\toks54
 \c@sigstatement=\count393
-) (./paper.aux)
-\openout1 = `paper.aux'.
+)
+No file paper_20260118.aux.
+\openout1 = `paper_20260118.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 140.
 LaTeX Font Info:    ... okay on input line 140.
@@ -959,9 +960,8 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 48
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
 Package hyperref Info: Link coloring ON on input line 140.
-(./paper.out) (./paper.out)
 \@outlinefile=\write4
-\openout4 = `paper.out'.
+\openout4 = `paper_20260118.out'.
 
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/draftwatermark/draftwatermark.sty
 Package: draftwatermark 2024/03/04 3.3 Put a gray textual watermark on document pages
@@ -1111,10 +1111,16 @@ Package mdframed Info: mdframed inside float
  mdframed uses option nobreak mdframed on input line 193.
 Package mdframed Info: mdframed inside a box 
  mdframed uses option nobreak mdframed on input line 193.
+
+LaTeX Warning: Reference `mdf@pagelabel-1' on page 1 undefined on input line 193.
+
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
 (Font)              scaled to size 5.69998pt on input line 193.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
 (Font)              scaled to size 6.64998pt on input line 226.
+
+LaTeX Warning: Reference `LastPage' on page 1 undefined on input line 226.
+
 LaTeX Font Info:    Trying to load font information for T1+bch on input line 226.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/psnfss/t1bch.fd
 File: t1bch.fd 2004/10/18 font definitions for T1/bch.
@@ -1128,7 +1134,7 @@ File: mt-bch.cfg 2007/03/03 v1.5 microtype config. file: Bitstream Charter (RS)
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
 (hyperref)                be the same. Added a new anchor on input line 239.
 
-<../figures/model_schematic_final.pdf, id=159, 578.16pt x 505.89pt>
+<../figures/model_schematic_final.pdf, id=23, 578.16pt x 505.89pt>
 File: ../figures/model_schematic_final.pdf Graphic file (type pdf)
 <use ../figures/model_schematic_final.pdf>
 Package pdftex.def Info: ../figures/model_schematic_final.pdf  used on input line 280.
@@ -1145,7 +1151,12 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\alpha' on input line 291.
 
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 320.
+<../figures/fig_bo_tcgacptac.pdf, id=24, 433.62pt x 397.485pt>
+File: ../figures/fig_bo_tcgacptac.pdf Graphic file (type pdf)
+<use ../figures/fig_bo_tcgacptac.pdf>
+Package pdftex.def Info: ../figures/fig_bo_tcgacptac.pdf  used on input line 316.
+(pdftex.def)             Requested size: 433.63878pt x 397.49614pt.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 330.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -1153,339 +1164,27 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `lmtt' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
-LaTeX Font Info:    Font shape `T1/phv/m/it' in size <7> not available
-(Font)              Font shape `T1/phv/m/sl' tried instead on input line 366.
-LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
-(Font)              scaled to size 6.64998pt on input line 366.
-[2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
-Underfull \vbox (badness 4752) has occurred while \output is active []
 
-[3 <../figures/model_schematic_final.pdf>]
-Underfull \hbox (badness 10000) in paragraph at lines 511--512
+! LaTeX Error: File `../figures/sim/bo_tune_ntop/sim_cindex_boxplot__combined' not found.
 
- []
-
-[4]
-LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 7.59998pt on input line 597.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 599.
-LaTeX Font Info:    Font shape `T1/phv/b/it' in size <8> not available
-(Font)              Font shape `T1/phv/b/sl' tried instead on input line 640.
-LaTeX Font Info:    Font shape `T1/phv/b/sl' will be
-(Font)              scaled to size 7.59998pt on input line 640.
-Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 648.
-
-Underfull \hbox (badness 10000) in paragraph at lines 654--655
-[]\T1/lmr/m/n/9 (+20) Ini-tial-ize $\OML/lmm/m/it/9 W[]; H[]$ \T1/lmr/m/n/9 (+20) with pos-i-tive en-tries (e.g.,
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 678.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 678.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 699.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 699.
-
-[5{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}]
-Overfull \hbox (8.5792pt too wide) in paragraph at lines 781--782
-[]   \T1/lmr/m/n/9 (-20) Com-pute $\OML/lmm/m/it/9 D \OT1/lmr/m/n/9 (-20) = [] []\OMS/lmsy/m/n/9 k\OML/lmm/m/it/9 W[]\OMS/lmsy/m/n/9 k[]\OML/lmm/m/it/9 ; [] ; \OMS/lmsy/m/n/9 k\OML/lmm/m/it/9 W[]\OMS/lmsy/m/n/9 k[][]$ 
- []
-
-
-Underfull \hbox (badness 1215) in paragraph at lines 782--783
-[]   \T1/lmr/m/n/9 (+20) and set $\OML/lmm/m/it/9 W[] \OMS/lmsy/m/n/9   \OML/lmm/m/it/9 W[]D[]$\T1/lmr/m/n/9 (+20) , $\OML/lmm/m/it/9 H[] \OMS/lmsy/m/n/9  
- []
-
-
-Underfull \hbox (badness 2717) in paragraph at lines 783--784
-[] \T1/lmr/bx/n/9 (+20) if $\OMS/lmsy/m/n/9 L\OT1/lmr/m/n/9 (+20) (\OML/lmm/m/it/9 W[]; H[]; ^^L[]\OT1/lmr/m/n/9 (+20) ) \OMS/lmsy/m/n/9 ^^T L\OT1/lmr/m/n/9 (+20) (\OML/lmm/m/it/9 W[]; H[]; ^^L[]\OT1/lmr/m/n/9 (+20) )$
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 804.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\beta' on input line 804.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 804.
-
-
-Overfull \hbox (30.546pt too wide) detected at line 863
-[]
- []
-
-
-Overfull \hbox (54.17964pt too wide) detected at line 884
-[]
- []
-
-[6] [7]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1140.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1140.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1184.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1184.
-
-
-pdfTeX warning (ext4): destination with the same identifier (name{equation.18}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.1235 ...ctors \(\hat{\eta}_i\): \begin{equation}
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
                                                   
-pdfTeX warning (ext4): destination with the same identifier (name{equation.18}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.1235 ...ctors \(\hat{\eta}_i\): \begin{equation}
+l.342 ...o_tune_ntop/sim_cindex_boxplot__combined}
                                                   
-pdfTeX warning (ext4): destination with the same identifier (name{equation.18}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.1235 ...ctors \(\hat{\eta}_i\): \begin{equation}
-                                                  
-pdfTeX warning (ext4): destination with the same identifier (name{equation.18}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.1235 ...ctors \(\hat{\eta}_i\): \begin{equation}
-                                                  
-Underfull \hbox (badness 10000) in paragraph at lines 1259--1260
-[] \T1/lmr/m/n/9 (+20) Split data into train-ing and val-i-da-tion
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1262--1263
-[] \T1/lmr/m/n/9 (+20) Ap-ply Al-go-rithm [][]1[][] with in-puts
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[8]
-Overfull \hbox (17.39114pt too wide) in paragraph at lines 1307--1307
-[]\T1/lmtt/m/n/8 ## DeSurv git commit: fea641a96e4743315a35b9b6addcc1a1ff53da9d[] 
- []
-
-
-Overfull \hbox (13.14114pt too wide) in paragraph at lines 1307--1307
-[]\T1/lmtt/m/n/8 ## Paper git commit: 97e4463585808cc7ff29713a6f49502318651f7b[] 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1312--1316
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1318--1322
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1324--1328
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1330--1334
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1336--1340
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1342--1347
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1349--1354
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1356--1362
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1364--1368
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1370--1374
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1376--1379
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1381--1386
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1388--1391
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1393--1398
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1400--1404
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1406--1410
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1412--1416
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1418--1423
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1425--1429
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1431--1437
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1439--1443
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1445--1449
-
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[9]
-Underfull \hbox (badness 10000) in paragraph at lines 1451--1455
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1457--1461
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1463--1467
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1469--1473
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1475--1479
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1481--1486
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1488--1492
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1494--1498
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1500--1504
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1506--1510
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1512--1515
-
- []
-
-[10
-
-] 
-enddocument/afterlastpage (AED): lastpage setting LastPage.
-(./paper.aux)
- ***********
-LaTeX2e <2025-11-01>
-L3 programming layer <2025-12-29>
- ***********
-Package rerunfilecheck Info: File `paper.out' has not changed.
-(rerunfilecheck)             Checksum: BC26F3D6451DF75932E152705FC3886B;7244.
- ) 
+I could not locate the file with any of these extensions:
+.pdf,.png,.jpg,.mps,.jpeg,.jbig2,.jb2,.PDF,.PNG,.JPG,.JPEG,.JBIG2,.JB2,.eps
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+ 
 Here is how much of TeX's memory you used:
- 31131 strings out of 469476
- 579539 string characters out of 5467115
- 1039220 words of memory out of 5000000
- 58593 multiletter control sequences out of 15000+600000
- 757683 words of font info for 370 fonts, out of 8000000 for 9000
+ 30523 strings out of 469476
+ 571607 string characters out of 5467115
+ 1029247 words of memory out of 5000000
+ 58365 multiletter control sequences out of 15000+600000
+ 708388 words of font info for 214 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 117i,14n,121p,1046b,1115s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvbo8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on paper.pdf (10 pages, 694820 bytes).
-PDF statistics:
- 511 PDF objects out of 1000 (max. 8388607)
- 425 compressed objects within 5 object streams
- 107 named destinations out of 1000 (max. 500000)
- 91954 words of extra memory for PDF output out of 106986 (max. 10000000)
-
+ 117i,14n,121p,1055b,1114s stack positions out of 10000i,1000n,20000p,200000b,200000s
+!  ==> Fatal error occurred, no output PDF file produced!

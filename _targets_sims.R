@@ -101,14 +101,14 @@ tar_option_set(
 
 
 SIM_DESURV_BO_BOUNDS <- list(
-  k_grid = list(lower = 2L, upper = 5L, type = "integer"),
+  k_grid = list(lower = 2L, upper = 12L, type = "integer"),
   alpha_grid = list(lower = 0, upper = .95, type = "continuous"),
   lambda_grid = list(lower = 1e-2, upper = 1e2, scale = "log10"),
   nu_grid = list(lower = 0, upper = 1, type = "continuous")
 )
 
-SIM_BO_N_INIT <- 10L
-SIM_BO_N_ITER <- 20L
+SIM_BO_N_INIT <- 20L
+SIM_BO_N_ITER <- 40L
 SIM_BO_CANDIDATE_POOL <- 1500L
 SIM_BO_EXPLORATION_WEIGHT <- 0.01
 SIM_BO_K_LCB_LEVEL <- 0.90
@@ -122,14 +122,15 @@ SIMULATION_SCENARIOS <- list(
     seed_offset = SIM_GLOBAL_SEED,
     overrides = list()
   ),
-  # list(
-  #   scenario_id = "R0k6",
-  #   scenario = "R0",
-  #   description = "R0 scenario with k = 6",
-  #   replicates = SIM_DATASETS_PER_SCENARIO,
-  #   seed_offset = SIM_GLOBAL_SEED + 4000L,
-  #   overrides = list(k_grid = 6L)
-  # ),
+  list(
+    scenario_id = "R0k6",
+    scenario = "R0",
+    description = "R0 scenario with k = 6",
+    replicates = SIM_DATASETS_PER_SCENARIO,
+    seed_offset = SIM_GLOBAL_SEED + 4000L,
+    overrides = list(K = 6L,
+                     beta = c(2.0,-1.5,1.0,0,0,0))
+  ),
   list(
     scenario_id = "R00_null",
     scenario = "R00",

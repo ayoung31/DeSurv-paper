@@ -1221,9 +1221,6 @@ FIGURE_TARGETS <- list(
   tar_target(fig_bo_panel_b, fig_bo_panels$B),
   tar_target(fig_bo_panel_c, fig_bo_panels$C),
   tar_target(fig_bo_panel_d, fig_bo_panels$D),
-  tar_target(fig_bo_panel_e, fig_bo_panels$E),
-  tar_target(fig_bo_panel_f, fig_bo_panels$F),
-  tar_target(fig_bo_panel_g, fig_bo_panels$G),
   tar_target(
     fig_bo_panel_a_file,
     save_plot_pdf(
@@ -1265,57 +1262,6 @@ FIGURE_TARGETS <- list(
         FIGURE_CONFIGS$panel_dir,
         sprintf("fig_bo_%s_panel_d.pdf", bo_label)
       )
-    ),
-    format = "file"
-  ),
-  tar_target(
-    fig_bo_panel_e_file,
-    save_plot_pdf(
-      fig_bo_panel_e,
-      file.path(
-        FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bo_%s_panel_e.pdf", bo_label)
-      )
-    ),
-    format = "file"
-  ),
-  tar_target(
-    fig_bo_panel_f_file,
-    save_plot_pdf(
-      fig_bo_panel_f,
-      file.path(
-        FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bo_%s_panel_f.pdf", bo_label)
-      )
-    ),
-    format = "file"
-  ),
-  tar_target(
-    fig_bo_panel_g_file,
-    save_plot_pdf(
-      fig_bo_panel_g,
-      file.path(
-        FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bo_%s_panel_g.pdf", bo_label)
-      )
-    ),
-    format = "file"
-  ),
-  tar_target(
-    fig_bo_plot,
-    combine_fig_bo_panels(fig_bo_panels),
-    packages = c("cowplot")
-  ),
-  tar_target(
-    fig_bo,
-    save_plot_pdf(
-      fig_bo_plot,
-      file.path(
-        FIGURE_CONFIGS$figures_dir,
-        sprintf("fig_bo_%s.pdf", bo_label)
-      ),
-      width = 6,
-      height = 5.5
     ),
     format = "file"
   ),
@@ -1375,24 +1321,6 @@ FIGURE_TARGETS <- list(
         FIGURE_CONFIGS$panel_dir,
         sprintf("fig_bio_%s_panel_d.pdf", bo_label)
       )
-    ),
-    format = "file"
-  ),
-  tar_target(
-    fig_bio_plot,
-    combine_fig_bio_panels(fig_bio_bundle),
-    packages = c("cowplot")
-  ),
-  tar_target(
-    fig_bio,
-    save_plot_pdf(
-      fig_bio_plot,
-      file.path(
-        FIGURE_CONFIGS$figures_dir,
-        sprintf("fig_bio_%s.pdf", bo_label)
-      ),
-      width = 7,
-      height = 4.5
     ),
     format = "file"
   ),
@@ -1465,24 +1393,6 @@ FIGURE_TARGETS <- list(
       )
     ),
     format = "file"
-  ),
-  tar_target(
-    fig_sc_plot,
-    combine_fig_sc_panels(fig_sc_panels),
-    packages = c("cowplot")
-  ),
-  tar_target(
-    fig_sc,
-    save_plot_pdf(
-      fig_sc_plot,
-      file.path(
-        FIGURE_CONFIGS$figures_dir,
-        sprintf("fig_sc_%s.pdf", bo_label)
-      ),
-      width = 7.5,
-      height = 8
-    ),
-    format = "file"
   )
 )
 
@@ -1529,24 +1439,6 @@ FIGURE_VAL_TARGETS <- list(
         FIGURE_CONFIGS$panel_dir,
         sprintf("fig_extval_%s_panel_c.pdf", bo_label)
       )
-    ),
-    format = "file"
-  ),
-  tar_target(
-    fig_extval_plot,
-    combine_fig_extval_panels(fig_extval_panels),
-    packages = c("cowplot")
-  ),
-  tar_target(
-    fig_extval,
-    save_plot_pdf(
-      fig_extval_plot,
-      file.path(
-        FIGURE_CONFIGS$figures_dir,
-        sprintf("fig_extval_%s.pdf", bo_label)
-      ),
-      width = 7.5,
-      height = 4.5
     ),
     format = "file"
   )
