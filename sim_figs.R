@@ -196,8 +196,9 @@ save_sim_plot <- function(plot, path, width = 6.5, height = 4.5) {
       dpi = 300,
       bg = "white"
     )
+    path
   }
-  path
+  
 }
 
 sim_fig_basename <- function(filename) {
@@ -281,9 +282,11 @@ build_sim_figs_by_scenario <- function(sim_results_table,
 }
 
 save_sim_figs_by_scenario = function(sim_figs,sim_dir,figure_configs){
+  paths = vector()
   for(i in 1:length(sim_figs)){
-    save_sim_figs(sim_figs[[i]],sim_dir,figure_configs)
+    paths = c(paths,save_sim_figs(sim_figs[[i]],sim_dir,figure_configs))
   }
+  paths
 }
 
 if (interactive()) {
