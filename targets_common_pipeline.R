@@ -314,6 +314,118 @@ COMMON_DESURV_BO_TARGETS <- list(
     }
     
   ),
+  
+  tar_target(
+    desurv_bo_results_elbowk,
+    {
+      bounds <- bo_config$desurv_bo_bounds
+      bounds <- maybe_add_numeric_bound(bounds, bo_config$ngene_config, "ngene", type = "integer")
+      bounds <- maybe_add_numeric_bound(bounds, bo_config$ntop_config, "ntop", type = "integer")
+      bounds <- maybe_add_numeric_bound(bounds, bo_config$lambdaw_config, "lambdaW_grid", log_scale = TRUE)
+      bounds <- maybe_add_numeric_bound(bounds, bo_config$lambdah_config, "lambdaH_grid", log_scale = TRUE)
+      bounds$k_grid=NULL
+      bo_fixed <- listbo_fixed <- listbo_fixed <- list(n_starts = bo_config$ninit)
+      if (!bo_config$tune_ngene) {
+        bo_fixed$ngene <- bo_config$ngene_default
+      }
+      if (!bo_config$tune_ntop) {
+        bo_fixed$ntop <- bo_config$ntop_default
+      }
+      if (!bo_config$tune_lambdaw) {
+        bo_fixed$lambdaW_grid <- bo_config$lambdaw_default
+      }
+      if (!bo_config$tune_lambdah) {
+        bo_fixed$lambdaH_grid <- bo_config$lambdah_default
+      }
+      
+      bo_fixed$k_grid = std_nmf_selected_k
+
+      DeSurv::desurv_cv_bayesopt_refine(
+        X = tar_data$ex,
+        y = tar_data$sampInfo$time,
+        d = tar_data$sampInfo$event,
+        dataset = tar_data$sampInfo$dataset,
+        samp_keeps = tar_data$samp_keeps,
+        preprocess = TRUE,
+        method_trans_train = bo_config$method_trans_train,
+        engine = "warmstart",
+        nfolds = bo_config$nfold,
+        tol = bo_config$bo_tol,
+        maxit = bo_config$bo_maxit,
+        coarse_bounds = bounds,
+        bo_fixed = bo_fixed,
+        max_refinements = bo_config$bo_max_refinements,
+        tol_gain = bo_config$bo_tol_gain,
+        plateau = bo_config$bo_plateau,
+        top_k = bo_config$bo_top_k,
+        shrink_base = bo_config$bo_shrink_base,
+        importance_gain = bo_config$bo_importance_gain,
+        coarse_control = bo_config$bo_coarse_control,
+        refine_control = bo_config$bo_refine_control,
+        verbose = TRUE,
+        parallel_grid = bo_config$desurv_parallel_grid,
+        ncores_grid = bo_config$desurv_ncores_grid
+      )
+    },
+    resources = tar_resources(
+      crew = tar_resources_crew(controller = "cv")
+    )
+  ),
+
+  tar_target(
+    tar_params_best_elbowk,
+    {
+      desurv_bo_results_elbowk$overall_best$params
+    }
+  ),
+  
+  tar_target(
+    tar_ngene_value_elbowk,
+    {
+      value <- tar_params_best_elbowk$ngene
+      if (is.null(value) || is.na(value)) {
+        as.integer(bo_config$ngene_default)
+      } else {
+        as.integer(round(value))
+      }
+    }
+  ),
+  tar_target(
+    tar_ntop_value_elbowk,
+    {
+      value <- tar_params_best_elbowk$ntop
+      if (is.null(value) || is.na(value)) {
+        as.integer(bo_config$ntop_default)
+      } else {
+        as.integer(round(value))
+      }
+    }
+  ),
+
+  tar_target(
+    tar_lambdaW_value_elbowk,
+    {
+      value <- tar_params_best_elbowk$lambdaW
+      if (is.null(value) || is.na(value)) {
+        as.numeric(bo_config$lambdaw_default)
+      } else {
+        as.numeric(value)
+      }
+    }
+  ),
+
+  tar_target(
+    tar_lambdaH_value_elbowk,
+    {
+      value <- tar_params_best_elbowk$lambdaH
+      if (is.null(value) || is.na(value)) {
+        as.numeric(bo_config$lambdah_default)
+      } else {
+        as.numeric(value)
+      }
+    }
+  ),
+  
 
   bo_bundle_target
 )
@@ -604,7 +716,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
  
 
   tar_target(
-    fit_std_beta,
+    fit_std_elbowk,
     {
       # selected k model
       selected_k = std_nmf_selected_k
@@ -622,41 +734,51 @@ COMMON_DESURV_RUN_TARGETS <- list(
       # dataframe
       df = cbind(tar_data_filtered$sampInfo,XtW)
       
-      # param grid
-      lam_lower = log10(bo_config$desurv_bo_bounds$lambda_grid$lower)
-      lam_upper = log10(bo_config$desurv_bo_bounds$lambda_grid$upper)
-      lam_grid = 10^seq(lam_lower,lam_upper)
-      nu_grid = seq(0,1,by=.05)
+      beta = fit_cox_model(XtW,df)
       
+      fit = list()
+      fit$W = fit_nmf@fit@W
+      fit$H = fit_nmf@fit@H
+      fit$beta = beta
       
-      # loop over nu and fit glmnet
-      cv = data.frame(matrix(ncol=3,nrow=0))
-      cvfits = list()
-      for(nu in nu_grid){
-        cvfit = cv.glmnet(x=XtW,
-                          y=Surv(df$time,df$event),
-                          family="cox",
-                          type.measure = "C",
-                          nfolds = bo_config$nfold,
-                          alpha = nu)
-        temp = data.frame(lambda=cvfit$lambda,cvm=cvfit$cvm,cvsd=cvfit$cvsd)
-        temp$nu = nu
-        cv = rbind(cv,temp)
-        cvfits[[as.character(nu)]] = cvfit
-      }
-      
-      tops = cv %>% group_by(nu) %>%
-        slice_max(order_by = cvm,n=1) %>%
-        ungroup()
-      best=tops[which.max(tops$cvm),]
-      sd = best$cvm - best$cvsd
-      selected = tops %>% filter(cvm > sd) %>% slice_max(order_by = lambda,n=1)
-      mod = cvfits[[as.character(selected$nu)]]
-      beta = coef(mod,s=selected$lambda)
-      
-      beta
+      fit
     }
   ),
+  
+  
+  tar_target(
+    fit_std_desurvk,
+    {
+      # selected k model
+      
+      selected_k = bo_bundle_selected$params_best$k
+      fit_nmf = fit_std$fit[[as.character(selected_k)]]
+      
+      # WTX
+      W = fit_nmf@fit@W
+      X = tar_data_filtered$ex
+      keep_genes = intersect(rownames(W),rownames(X))
+      W = W[keep_genes,]
+      X = X[keep_genes,]
+      XtW = t(X)%*%W
+      colnames(XtW) = paste0("XtW",1:ncol(XtW))
+      
+      # dataframe
+      df = cbind(tar_data_filtered$sampInfo,XtW)
+      
+      beta = fit_cox_model(XtW,df)
+      
+      fit = list()
+      fit$W = fit_nmf@fit@W
+      fit$H = fit_nmf@fit@H
+      fit$beta = beta
+      
+      fit
+    }
+  ),
+  
+  
+  
   run_bundle_target,
   run_bundles_target,
   tar_target(
