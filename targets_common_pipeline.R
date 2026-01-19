@@ -375,7 +375,8 @@ COMMON_DESURV_BO_TARGETS <- list(
   tar_target(
     tar_params_best_elbowk,
     {
-      desurv_bo_results_elbowk$overall_best$params
+      params <- standardize_bo_params(desurv_bo_results_elbowk$overall_best$params)
+      params
     }
   ),
   
@@ -666,6 +667,98 @@ COMMON_DESURV_RUN_TARGETS <- list(
       crew = tar_resources_crew(controller = "med_mem")
     )
   ),
+  
+  tar_target(
+    desurv_seed_fits_elbowk,
+    {
+      seeds <- seq_len(run_config$ninit_full)
+      fits <- vector("list", length(seeds))
+      scores <- rep(NA_real_, length(seeds))
+      for (i in seq_along(seeds)) {
+        fit_i <- try(
+          desurv_fit(
+            X = tar_data_filtered$ex,
+            y = tar_data_filtered$sampInfo$time,
+            d = tar_data_filtered$sampInfo$event,
+            k = params_best_elbowk$k,
+            alpha = params_best_elbowk$alpha,
+            lambda = params_best_elbowk$lambda,
+            nu = params_best_elbowk$nu,
+            lambdaW = lambdaW_value_elbowk,
+            lambdaH = lambdaH_value_elbowk,
+            seed = seeds[i],
+            tol = run_config$run_tol / 100,
+            tol_init = run_config$run_tol,
+            maxit = run_config$run_maxit,
+            imaxit = run_config$run_maxit,
+            ninit = 1,
+            parallel_init = FALSE,
+            verbose = FALSE
+          ),
+          silent = TRUE
+        )
+        if (!inherits(fit_i, "try-error") && inherits(fit_i, "desurv_fit")) {
+          fits[[i]] <- fit_i
+          scores[i] <- if (!is.null(fit_i$cindex)) fit_i$cindex else NA_real_
+        }
+      }
+      keep <- !vapply(fits, is.null, logical(1))
+      if (!any(keep)) {
+        stop("No successful full-model fits were obtained.")
+      }
+      list(
+        fits = fits[keep],
+        seeds = seeds[keep],
+        cindex = scores[keep]
+      )
+    },
+    resources = tar_resources(
+      crew = tar_resources_crew(controller = "med_mem")
+    )
+  ),
+  tar_target(
+    desurv_consensus_init_elbowk,
+    {
+      if (is.null(desurv_seed_fits_elbowk$fits) || !length(desurv_seed_fits_elbowk$fits)) {
+        stop("Consensus initialization requires at least one successful seed fit.")
+      }
+      DeSurv::desurv_consensus_seed(
+        fits = desurv_seed_fits_elbowk$fits,
+        X = tar_data_filtered$ex,
+        ntop = tar_ntop_value,
+        k = params_best_elbowk$k,
+        min_frequency = 0.3 * run_config$ninit_full
+      )
+    }
+  ),
+  tar_target(
+    tar_fit_desurv_elbowk,
+    {
+      init_vals <- desurv_consensus_init_elbowk
+      desurv_fit(
+        X = tar_data_filtered$ex,
+        y = tar_data_filtered$sampInfo$time,
+        d = tar_data_filtered$sampInfo$event,
+        k = params_best_elbowk$k,
+        alpha = params_best_elbowk$alpha,
+        lambda = params_best_elbowk$lambda,
+        nu = params_best_elbowk$nu,
+        lambdaW = lambdaW_value_elbowk,
+        lambdaH = lambdaH_value_elbowk,
+        W0 = init_vals$W0,
+        H0 = init_vals$H0,
+        beta0 = init_vals$beta0,
+        seed = NULL,
+        tol = run_config$run_tol / 100,
+        maxit = run_config$run_maxit,
+        verbose = FALSE
+      )
+    },
+    resources = tar_resources(
+      crew = tar_resources_crew(controller = "med_mem")
+    )
+  ),
+  
 
   tar_target(
     fit_std,
@@ -734,7 +827,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
       # dataframe
       df = cbind(tar_data_filtered$sampInfo,XtW)
       
-      beta = fit_cox_model(XtW,df)
+      beta = fit_cox_model(XtW,df,bo_config$nfold)
       
       fit = list()
       fit$W = fit_nmf@fit@W
@@ -766,7 +859,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
       # dataframe
       df = cbind(tar_data_filtered$sampInfo,XtW)
       
-      beta = fit_cox_model(XtW,df)
+      beta = fit_cox_model(XtW,df,bo_config$nfold)
       
       fit = list()
       fit$W = fit_nmf@fit@W
