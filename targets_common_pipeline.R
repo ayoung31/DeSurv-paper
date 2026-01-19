@@ -913,7 +913,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
   tar_target(
     tar_tops_std_elbowk,
     {
-      get_top_genes(W = fit_std_elbowk$W, ntop = bo_config$ntop_default)
+      get_top_genes(W = fit_std_elbowk$W, ntop = tar_ntop_value_elbowk)
     }
   ),
   tar_target(
@@ -927,7 +927,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
   tar_target(
     tar_tops_std_desurvk,
     {
-      get_top_genes(W = fit_std_desurvk$W, ntop = bo_config$ntop_default)
+      get_top_genes(W = fit_std_desurvk$W, ntop = tar_ntop_value)
     }
   ),
   tar_target(
@@ -1396,6 +1396,43 @@ COMMON_DESURV_VAL_TARGETS <- list(
     }
   ),
   tar_target(
+    val_latent_desurv_elbowk,
+    {
+      latent <- desurv_collect_validation_latent(
+        fit = tar_fit_desurv_elbowk,
+        data_list = data_val_filtered_elbowk,
+        top_genes = tar_tops_desurv_elbowk$top_genes
+      )
+      latent
+    }
+  ),
+  
+  tar_target(
+    val_latent_std_elbowk,
+    {
+      latent <- desurv_collect_validation_latent(
+        fit = fit_std_elbowk,
+        data_list = data_val_filtered_elbowk,
+        top_genes = tar_tops_std_elbowk$top_genes
+      )
+      latent
+    }
+  ),
+  
+  tar_target(
+    val_latent_std_desurvk,
+    {
+      latent <- desurv_collect_validation_latent(
+        fit = fit_std_desurvk,
+        data_list = data_val_filtered,
+        top_genes = tar_tops_std_desurvk$top_genes
+      )
+      latent
+    }
+  ),
+  
+  
+  tar_target(
     val_cindex_desurv,
     {
       summary_tbl <- summarize_validation_cindex(val_latent_desurv)
@@ -1440,6 +1477,27 @@ COMMON_DESURV_VAL_TARGETS <- list(
           row.names = FALSE
         )
       }
+      summary_tbl
+    }
+  ),
+  tar_target(
+    val_cindex_desurv_elbowk,
+    {
+      summary_tbl <- summarize_validation_cindex(val_latent_desurv_elbowk)
+      summary_tbl
+    }
+  ),
+  tar_target(
+    val_cindex_std_elbowk,
+    {
+      summary_tbl <- summarize_validation_cindex(val_latent_std_elbowk)
+      summary_tbl
+    }
+  ),
+  tar_target(
+    val_cindex_std_desurvk,
+    {
+      summary_tbl <- summarize_validation_cindex(val_latent_std_desurvk)
       summary_tbl
     }
   )
