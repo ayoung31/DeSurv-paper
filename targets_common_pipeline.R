@@ -591,100 +591,72 @@ COMMON_DESURV_RUN_TARGETS <- list(
     format="file"
   ),
   
-  # tar_target(
-  #   std_nmf_k_selection_table,
-  #   {
-  #     save_dir=dirname(std_nmf_k_selection_plots)
-  #     path <- file.path(save_dir,
-  #                       paste0("std_nmf_k_selection_table.csv")
-  #                       )
-  #     if(!file.exists(std_nmf_k_selection_plots)){
-  #       stop("Standard NMF k selection plots not generated")
-  #     }
-  #     build_std_nmf_k_selection_table(STD_NMF_K_GRID,path,fit_std)
-  #   },
-  # ),
+  tar_target(
+    std_nmf_selected_k,
+    {
+      #select k
+      ranks = fit_std$measures$rank
+      resids = fit_std$measures$residuals
+      pick_k_elbow(ranks,resids)
+    }
+  ),
   
-  # tar_target(
-  #   fit_std_selected_k,
-  #   {
-  #     std_nmf_k_table = read.csv(std_nmf_k_selection_table,
-  #                                stringsAsFactors = FALSE)
-  #     if(all(std_nmf_k_table$selected==FALSE)){
-  #       stop("Please edit std_nmf_k_selection.csv to select a k")
-  #     }
-  #     k_selected = std_nmf_k_table$rank[which(std_nmf_k_table$selected)]
-  #     print(paste0("You have selected ",k_selected," factors for standard NMF"))
-  #     fit_std$fit[[as.character(k_selected)]]
-  #   }
-  # ),
-  # 
-  # 
-  # tar_target(
-  #   fit_std_beta,
-  #   {
-  #     fit_list <- fit_std$fit
-  #     if (is.null(fit_list) || !length(fit_list)) {
-  #       stop("fit_std does not contain any fits to evaluate")
-  #     }
-  #     k_labels <- names(fit_list)
-  #     if (is.null(k_labels) || any(!nzchar(k_labels))) {
-  #       k_labels <- as.character(seq_along(fit_list))
-  #       names(fit_list) <- k_labels
-  #     }
-  #     X <- tar_data_filtered$ex
-  #     y <- tar_data_filtered$sampInfo$time
-  #     d <- tar_data_filtered$sampInfo$event
-  #     strata <- interaction(d, tar_data_filtered$sampInfo$dataset, drop = FALSE)
-  #     foldid <- caret::createFolds(strata, NFOLD, list = FALSE)
-  #     results <- setNames(vector("list", length(fit_list)), k_labels)
-  #     for (k_label in k_labels) {
-  #       nmf_fit <- fit_list[[k_label]]
-  #       W <- nmf_fit@fit@W
-  #       H <- nmf_fit@fit@H
-  #       genes <- intersect(rownames(W), rownames(X))
-  #       W_use <- W[genes, , drop = FALSE]
-  #       X_use <- X[genes, , drop = FALSE]
-  #       Z <- t(X_use) %*% W_use
-  #       gfit <- list()
-  #       mets <- vector("list", length(COXNET_ALPHA_GRID))
-  #       for (i in seq_along(COXNET_ALPHA_GRID)) {
-  #         alpha <- COXNET_ALPHA_GRID[[i]]
-  #         alpha_chr <- as.character(alpha)
-  #         cv_fit <- cv.glmnet(
-  #           Z,
-  #           Surv(y, d),
-  #           family = "cox",
-  #           type.measure = "C",
-  #           alpha = alpha,
-  #           lambda = COXNET_LAMBDA_GRID,
-  #           foldid = foldid
-  #         )
-  #         gfit[[alpha_chr]] <- cv_fit
-  #         ind <- which(cv_fit$lambda == cv_fit$lambda.1se)
-  #         mets[[i]] <- data.frame(
-  #           eta = alpha,
-  #           lambda = cv_fit$lambda.1se,
-  #           cvm = cv_fit$cvm[ind]
-  #         )
-  #       }
-  #       mets_all <- dplyr::bind_rows(mets)
-  #       mets_best <- mets_all[which.max(mets_all$cvm), , drop = FALSE]
-  #       best_fit <- gfit[[as.character(mets_best$eta)]]
-  #       beta <- coef(best_fit, s = best_fit$lambda.1se)
-  #       results[[k_label]] <- list(
-  #         k = suppressWarnings(as.numeric(k_label)),
-  #         W = W_use,
-  #         H = H,
-  #         beta = beta,
-  #         metrics = mets_all,
-  #         alpha = mets_best$eta,
-  #         lambda = mets_best$lambda
-  #       )
-  #     }
-  #     results
-  #   }
-  # ),
+ 
+
+  tar_target(
+    fit_std_beta,
+    {
+      # selected k model
+      selected_k = std_nmf_selected_k
+      fit_nmf = fit_std$fit[[as.character(selected_k)]]
+      
+      # WTX
+      W = fit_nmf@fit@W
+      X = tar_data_filtered$ex
+      keep_genes = intersect(rownames(W),rownames(X))
+      W = W[keep_genes,]
+      X = X[keep_genes,]
+      XtW = t(X)%*%W
+      colnames(XtW) = paste0("XtW",1:ncol(XtW))
+      
+      # dataframe
+      df = cbind(tar_data_filtered$sampInfo,XtW)
+      
+      # param grid
+      lam_lower = log10(bo_config$desurv_bo_bounds$lambda_grid$lower)
+      lam_upper = log10(bo_config$desurv_bo_bounds$lambda_grid$upper)
+      lam_grid = 10^seq(lam_lower,lam_upper)
+      nu_grid = seq(0,1,by=.05)
+      
+      
+      # loop over nu and fit glmnet
+      cv = data.frame(matrix(ncol=3,nrow=0))
+      cvfits = list()
+      for(nu in nu_grid){
+        cvfit = cv.glmnet(x=XtW,
+                          y=Surv(df$time,df$event),
+                          family="cox",
+                          type.measure = "C",
+                          nfolds = bo_config$nfold,
+                          alpha = nu)
+        temp = data.frame(lambda=cvfit$lambda,cvm=cvfit$cvm,cvsd=cvfit$cvsd)
+        temp$nu = nu
+        cv = rbind(cv,temp)
+        cvfits[[as.character(nu)]] = cvfit
+      }
+      
+      tops = cv %>% group_by(nu) %>%
+        slice_max(order_by = cvm,n=1) %>%
+        ungroup()
+      best=tops[which.max(tops$cvm),]
+      sd = best$cvm - best$cvsd
+      selected = tops %>% filter(cvm > sd) %>% slice_max(order_by = lambda,n=1)
+      mod = cvfits[[as.character(selected$nu)]]
+      beta = coef(mod,s=selected$lambda)
+      
+      beta
+    }
+  ),
   run_bundle_target,
   run_bundles_target,
   tar_target(
