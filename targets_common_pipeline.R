@@ -1287,6 +1287,33 @@ COMMON_DESURV_VAL_TARGETS <- list(
       )
     }
   ),
+  
+  tar_target(
+    data_val_filtered_elbowk,
+    {
+      datasets_named <- ensure_named_datasets(data_val)
+      setNames(
+        lapply(
+          seq_along(datasets_named),
+          function(idx) {
+            dataset <- datasets_named[[idx]]
+            dataname <- names(datasets_named)[idx]
+            genes_train <- rownames(tar_data_filtered_elbowk$ex)
+            preprocess_validation_data(
+              dataset = dataset,
+              genes = genes_train,
+              ngene = tar_ngene_value_elbowk,
+              method_trans_train = val_run_bundle$bo_bundle$config$method_trans_train,
+              dataname = dataname,
+              transform_target = val_run_bundle$bo_bundle$data_filtered$transform_target
+            )
+          }
+        ),
+        names(datasets_named)
+      )
+    }
+  ),
+  
   tar_target(
     val_predictions_desurv,
     desurv_predict_validation(
@@ -1303,6 +1330,31 @@ COMMON_DESURV_VAL_TARGETS <- list(
       top_genes = val_run_bundle$tops_desurv_alpha0$top_genes
     )
   ),
+  tar_target(
+    val_predictions_desurv_elbowk,
+    desurv_predict_validation(
+      fit = tar_fit_desurv_elbowk,
+      data_list = data_val_filtered_elbowk,
+      top_genes = tar_tops_desurv_elbowk$top_genes
+    )
+  ),
+  tar_target(
+    val_predictions_std_elbowk,
+    desurv_predict_validation(
+      fit = fit_std_elbowk,
+      data_list = data_val_filtered,
+      top_genes = tar_tops_std_elbowk$top_genes
+    )
+  ),
+  tar_target(
+    val_predictions_std_desurvk,
+    desurv_predict_validation(
+      fit = fit_std_desurvk,
+      data_list = data_val_filtered,
+      top_genes = tar_tops_std_desurvk$top_genes
+    )
+  ),
+  
   tar_target(
     val_latent_desurv,
     {
