@@ -1600,13 +1600,19 @@ targets_list <- list(
     }
   ),
   tar_target(
+    sim_figs_by_scenario,
+    {
+      build_sim_figs_by_scenario(
+        sim_results_table
+      )
+    }
+  ),
+  tar_target(
     sim_figs_by_scenario_files,
     {
-      save_sim_figs_by_scenario(
-        sim_results_table,
-        sim_dir = SIM_FIGURE_DIR,
-        figure_configs = SIM_FIGURE_CONFIGS
-      )
+      save_sim_figs_by_scenario(sim_figs_by_scenario,
+                                sim_dir = SIM_FIGURE_DIR,
+                                figure_configs = SIM_FIGURE_CONFIGS)
     },
     format = "file"
   )

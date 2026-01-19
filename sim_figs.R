@@ -48,14 +48,14 @@ mean_lethal_metric <- function(tbl, metric) {
 }
 
 build_sim_fig_data <- function(sim_results_table,
-                               analysis_id = NULL,
+                               analysis_id_base = NULL,
                                scenario_id = NULL) {
   results <- sim_results_table
   scen_id <- normalize_scenario_id(scenario_id)
-  anal_id = analysis_id
-  if (!is.null(analysis_id)) {
+  anal_id = analysis_id_base
+  if (!is.null(analysis_id_base)) {
     results <- results %>%
-      dplyr::filter(analysis_id == anal_id)
+      dplyr::filter(analysis_id_base == anal_id)
   }
   if (!is.null(scenario_id)) {
     results <- results %>%
@@ -150,12 +150,12 @@ plot_sim_metric_box <- function(results, metric, title, ylab, base_size = 12) {
 }
 
 build_sim_figs <- function(sim_results_table,
-                           analysis_id = NULL,
+                           analysis_id_base = NULL,
                            scenario_id = NULL,
                            base_size = 12) {
   plot_data <- build_sim_fig_data(
     sim_results_table,
-    analysis_id = analysis_id,
+    analysis_id_base = analysis_id_base,
     scenario_id = scenario_id
   )
 
@@ -178,39 +178,26 @@ build_sim_figs <- function(sim_results_table,
       "Best precision (mean across lethal factors)",
       "Precision",
       base_size = base_size
-    )
+    ),
+    analysis_id = analysis_id_base,
+    scenario_id = scenario_id
   )
 }
 
 save_sim_plot <- function(plot, path, width = 6.5, height = 4.5) {
-  dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
-  ggplot2::ggsave(
-    filename = path,
-    plot = plot,
-    width = width,
-    height = height,
-    units = "in",
-    dpi = 300,
-    bg = "white"
-  )
-  path
-}
-
-build_sim_figs_bundle <- function(sim_results_table,
-                                  analysis_id = NULL,
-                                  scenario_id = NULL,
-                                  base_size = 12) {
-  scenario_id <- normalize_scenario_id(scenario_id)
-  list(
-    analysis_id = analysis_id,
-    scenario_id = scenario_id,
-    plots = build_sim_figs(
-      sim_results_table,
-      analysis_id = analysis_id,
-      scenario_id = scenario_id,
-      base_size = base_size
+  if(!is.null(plot)){
+    dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
+    ggplot2::ggsave(
+      filename = path,
+      plot = plot,
+      width = width,
+      height = height,
+      units = "in",
+      dpi = 300,
+      bg = "white"
     )
-  )
+  }
+  path
 }
 
 sim_fig_basename <- function(filename) {
@@ -226,55 +213,42 @@ sim_fig_suffix <- function(scenario_id) {
 
 save_sim_figs <- function(plots,
                           sim_dir,
-                          figure_configs,
-                          scenario_id = NULL) {
-  scenario_id <- normalize_scenario_id(scenario_id)
+                          figure_configs) {
+  scenario_id = plots$scenario_id
+  analysis_id = plots$analysis_id
   out_dir <- sim_dir
-  suffix <- sim_fig_suffix(scenario_id)
   k_hist_path <- file.path(
     out_dir,
-    sprintf("%s__%s.pdf", sim_fig_basename(figure_configs$k_hist$filename), suffix)
+    sprintf("%s__%s-%s.pdf", "sim_selected_k_hist", scenario_id,analysis_id)
   )
   cindex_path <- file.path(
     out_dir,
-    sprintf("%s__%s.pdf", sim_fig_basename(figure_configs$cindex_box$filename), suffix)
+    sprintf("%s__%s-%s.pdf", "sim_cindex_boxplot",scenario_id,analysis_id)
   )
   precision_path <- file.path(
     out_dir,
-    sprintf(
-      "%s__%s.pdf",
-      sim_fig_basename(figure_configs$precision_box$filename),
-      suffix
-    )
+    sprintf("%s__%s-%s.pdf", "sim_precision_boxplot",scenario_id,analysis_id)
   )
 
   c(
     save_sim_plot(
       plots$k_hist,
-      k_hist_path,
-      width = figure_configs$k_hist$width,
-      height = figure_configs$k_hist$height
+      k_hist_path
     ),
     save_sim_plot(
       plots$cindex_box,
-      cindex_path,
-      width = figure_configs$cindex_box$width,
-      height = figure_configs$cindex_box$height
+      cindex_path
     ),
     save_sim_plot(
       plots$precision_box,
-      precision_path,
-      width = figure_configs$precision_box$width,
-      height = figure_configs$precision_box$height
+      precision_path
     )
   )
 }
 
-save_sim_figs_by_scenario <- function(sim_results_table,
-                                      sim_dir,
-                                      figure_configs,
+build_sim_figs_by_scenario <- function(sim_results_table,
                                       base_size = 12) {
-
+  sim_results_table$analysis_id_base = sub("_alpha0","",sim_results_table$analysis_id)
   scenario_ids <- sim_results_table$scenario_id
   scenario_ids <- as.character(scenario_ids)
   scenario_ids <- unique(scenario_ids)
@@ -287,20 +261,29 @@ save_sim_figs_by_scenario <- function(sim_results_table,
   analysis_ids = analysis_ids[!is.na(analysis_ids) & nzchar(analysis_ids)]
   analysis_ids = sort(analysis_ids)
   
-  files <- purrr::map(scenario_ids, function(scenario_id) {
-    plots <- build_sim_figs(
-      sim_results_table,
-      scenario_id = scenario_id,
-      base_size = base_size
-    )
-    save_sim_figs(
-      plots,
-      sim_dir = sim_dir,
-      figure_configs = figure_configs,
-      scenario_id = scenario_id
-    )
-  })
-  unlist(files)
+  analysis_ids_base = sub("_alpha0","",analysis_ids)
+  analysis_ids_base = unique(analysis_ids_base)
+  
+  plots = NULL
+  for(sid in scenario_ids){
+    for(aid in analysis_ids_base){
+      p <- build_sim_figs(
+        sim_results_table,
+        analysis_id_base = aid,
+        scenario_id = sid,
+        base_size = base_size
+      )
+      plots = append(plots,list(p))
+    }
+  }
+  
+  plots
+}
+
+save_sim_figs_by_scenario = function(sim_figs,sim_dir,figure_configs){
+  for(i in 1:length(sim_figs)){
+    save_sim_figs(sim_figs[[i]],sim_dir,figure_configs)
+  }
 }
 
 if (interactive()) {
