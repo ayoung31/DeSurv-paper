@@ -427,6 +427,19 @@ COMMON_DESURV_BO_TARGETS <- list(
     }
   ),
   
+  
+  tar_target(
+    tar_data_filtered_elbowk,
+    {
+      preprocess_training_data(
+        data = tar_data,
+        ngene = tar_ngene_value_elbowk,
+        method_trans_train = bo_config$method_trans_train
+      )
+    }
+    
+  ),
+  
 
   bo_bundle_target
 )
@@ -677,15 +690,15 @@ COMMON_DESURV_RUN_TARGETS <- list(
       for (i in seq_along(seeds)) {
         fit_i <- try(
           desurv_fit(
-            X = tar_data_filtered$ex,
-            y = tar_data_filtered$sampInfo$time,
-            d = tar_data_filtered$sampInfo$event,
-            k = params_best_elbowk$k,
-            alpha = params_best_elbowk$alpha,
-            lambda = params_best_elbowk$lambda,
-            nu = params_best_elbowk$nu,
-            lambdaW = lambdaW_value_elbowk,
-            lambdaH = lambdaH_value_elbowk,
+            X = tar_data_filtered_elbowk$ex,
+            y = tar_data_filtered_elbowk$sampInfo$time,
+            d = tar_data_filtered_elbowk$sampInfo$event,
+            k = tar_params_best_elbowk$k,
+            alpha = tar_params_best_elbowk$alpha,
+            lambda = tar_params_best_elbowk$lambda,
+            nu = tar_params_best_elbowk$nu,
+            lambdaW = tar_lambdaW_value_elbowk,
+            lambdaH = tar_lambdaH_value_elbowk,
             seed = seeds[i],
             tol = run_config$run_tol / 100,
             tol_init = run_config$run_tol,
@@ -724,9 +737,9 @@ COMMON_DESURV_RUN_TARGETS <- list(
       }
       DeSurv::desurv_consensus_seed(
         fits = desurv_seed_fits_elbowk$fits,
-        X = tar_data_filtered$ex,
-        ntop = tar_ntop_value,
-        k = params_best_elbowk$k,
+        X = tar_data_filtered_elbowk$ex,
+        ntop = tar_ntop_value_elbowk,
+        k = tar_params_best_elbowk$k,
         min_frequency = 0.3 * run_config$ninit_full
       )
     }
@@ -736,15 +749,15 @@ COMMON_DESURV_RUN_TARGETS <- list(
     {
       init_vals <- desurv_consensus_init_elbowk
       desurv_fit(
-        X = tar_data_filtered$ex,
-        y = tar_data_filtered$sampInfo$time,
-        d = tar_data_filtered$sampInfo$event,
-        k = params_best_elbowk$k,
-        alpha = params_best_elbowk$alpha,
-        lambda = params_best_elbowk$lambda,
-        nu = params_best_elbowk$nu,
-        lambdaW = lambdaW_value_elbowk,
-        lambdaH = lambdaH_value_elbowk,
+        X = tar_data_filtered_elbowk$ex,
+        y = tar_data_filtered_elbowk$sampInfo$time,
+        d = tar_data_filtered_elbowk$sampInfo$event,
+        k = tar_params_best_elbowk$k,
+        alpha = tar_params_best_elbowk$alpha,
+        lambda = tar_params_best_elbowk$lambda,
+        nu = tar_params_best_elbowk$nu,
+        lambdaW = tar_lambdaW_value_elbowk,
+        lambdaH = tar_lambdaH_value_elbowk,
         W0 = init_vals$W0,
         H0 = init_vals$H0,
         beta0 = init_vals$beta0,
@@ -817,7 +830,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
       
       # WTX
       W = fit_nmf@fit@W
-      X = tar_data_filtered$ex
+      X = tar_data_filtered_elbowk$ex
       keep_genes = intersect(rownames(W),rownames(X))
       W = W[keep_genes,]
       X = X[keep_genes,]
@@ -825,7 +838,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
       colnames(XtW) = paste0("XtW",1:ncol(XtW))
       
       # dataframe
-      df = cbind(tar_data_filtered$sampInfo,XtW)
+      df = cbind(tar_data_filtered_elbowk$sampInfo,XtW)
       
       beta = fit_cox_model(XtW,df,bo_config$nfold)
       
