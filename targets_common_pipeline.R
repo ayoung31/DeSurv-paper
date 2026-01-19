@@ -910,6 +910,47 @@ COMMON_DESURV_RUN_TARGETS <- list(
                    which.lists = "DECODER", color.lists = colors)
     }
   ),
+  tar_target(
+    tar_tops_std_elbowk,
+    {
+      get_top_genes(W = fit_std_elbowk$W, ntop = bo_config$ntop_default)
+    }
+  ),
+  tar_target(
+    gene_overlap_std_elbowk,
+    {
+      create_table(tops = tar_tops_std_elbowk$top_genes, gene_lists = top_genes,
+                   which.lists = "DECODER", color.lists = colors)
+    }
+  ),
+  
+  tar_target(
+    tar_tops_std_desurvk,
+    {
+      get_top_genes(W = fit_std_desurvk$W, ntop = bo_config$ntop_default)
+    }
+  ),
+  tar_target(
+    gene_overlap_std_desurvk,
+    {
+      create_table(tops = tar_tops_std_desurvk$top_genes, gene_lists = top_genes,
+                   which.lists = "DECODER", color.lists = colors)
+    }
+  ),
+  
+  tar_target(
+    tar_tops_desurv_elbowk,
+    {
+      get_top_genes(W = tar_fit_desurv_elbowk$W, ntop = bo_config$ntop_default)
+    }
+  ),
+  tar_target(
+    gene_overlap_desurv_elbowk,
+    {
+      create_table(tops = tar_tops_desurv_elbowk$top_genes, gene_lists = top_genes,
+                   which.lists = "DECODER", color.lists = colors)
+    }
+  ),
   # tar_target(
   #   tops_std,
   #   {
