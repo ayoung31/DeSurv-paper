@@ -693,7 +693,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
             X = tar_data_filtered_elbowk$ex,
             y = tar_data_filtered_elbowk$sampInfo$time,
             d = tar_data_filtered_elbowk$sampInfo$event,
-            k = tar_params_best_elbowk$k,
+            k = std_nmf_selected_k,
             alpha = tar_params_best_elbowk$alpha,
             lambda = tar_params_best_elbowk$lambda,
             nu = tar_params_best_elbowk$nu,
@@ -752,7 +752,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
         X = tar_data_filtered_elbowk$ex,
         y = tar_data_filtered_elbowk$sampInfo$time,
         d = tar_data_filtered_elbowk$sampInfo$event,
-        k = tar_params_best_elbowk$k,
+        k = std_nmf_selected_k,
         alpha = tar_params_best_elbowk$alpha,
         lambda = tar_params_best_elbowk$lambda,
         nu = tar_params_best_elbowk$nu,
@@ -984,6 +984,33 @@ COMMON_DESURV_RUN_TARGETS <- list(
       universe = rownames(bo_bundle_selected$data_filtered_alpha0$ex)
       organism <- org.Hs.eg.db
       ora(tar_tops_desurv_alpha0$top_genes,universe,organism)
+    }
+  ),
+  
+  tar_target(
+    ora_analysis_desurv_elbowk,
+    {
+      universe = rownames(tar_data_filtered_elbowk$ex)
+      organism <- org.Hs.eg.db
+      ora(tar_tops_desurv_elbowk$top_genes,universe,organism)
+    }
+  ),
+  
+  tar_target(
+    ora_analysis_std_elbowk,
+    {
+      universe = rownames(tar_data_filtered$ex)
+      organism <- org.Hs.eg.db
+      ora(tar_tops_std_elbowk$top_genes,universe,organism)
+    }
+  ),
+  
+  tar_target(
+    ora_analysis_std_desurvk,
+    {
+      universe = rownames(tar_data_filtered$ex)
+      organism <- org.Hs.eg.db
+      ora(tar_tops_std_desurvk$top_genes,universe,organism)
     }
   )
   
