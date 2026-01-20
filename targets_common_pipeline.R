@@ -1285,7 +1285,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
         ),
         names(datasets_named)
       )
-    }
+    },
+    iteration="list"
   ),
   
   tar_target(
@@ -1311,7 +1312,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
         ),
         names(datasets_named)
       )
-    }
+    },
+    iteration = "list"
   ),
   
   tar_target(
@@ -1500,87 +1502,34 @@ COMMON_DESURV_VAL_TARGETS <- list(
       summary_tbl <- summarize_validation_cindex(val_latent_std_desurvk)
       summary_tbl
     }
+  ),
+  
+  #clustering
+  tar_target(
+    clusters_desurv_X,
+    {
+      beta = tar_fit_desurv$beta
+      facs = which(beta != 0)
+      base_dir = file.path(
+        val_run_bundle$training_results_dir,
+        "validation",
+        val_config_effective$config_id,
+        "desurv"
+      )
+      run_clustering(tops = tar_tops_desurv$top_genes,
+                     data = data_val_filtered,
+                     gene_lists = top_genes,
+                     color.lists = colors,
+                     facs = facs,
+                     base_dir = base_dir,
+                     WtX = FALSE)
+    },
+    pattern = map(data_val_filtered),
+    resources = tar_resources(
+      crew = tar_resources_crew(controller = "med_mem")
+    )
   )
-  # tar_target(
-  #   val_clusters_desurv,
-  #   {
-  #     base_dir <- file.path(
-  #       val_run_bundle$training_results_dir,
-  #       "validation",
-  #       val_config$config_id,
-  #       "desurv",
-  #       "clusters"
-  #     )
-  #     dir.create(base_dir, recursive = TRUE, showWarnings = FALSE)
-  #     lapply(
-  #       val_latent_desurv,
-  #       function(entry) {
-  #         dataset_dir <- file.path(base_dir, entry$dataset)
-  #         dir.create(dataset_dir, recursive = TRUE, showWarnings = FALSE)
-  #         result <- cluster_validation_latent(
-  #           latent_entry = entry,
-  #           maxK = val_config$val_cluster_maxk,
-  #           reps = val_config$val_cluster_reps,
-  #           pItem = val_config$val_cluster_pitem,
-  #           pFeature = val_config$val_cluster_pfeature,
-  #           seed = val_config$val_cluster_seed,
-  #           dir = dataset_dir
-  #         )
-  #         if (nrow(result$assignments)) {
-  #           utils::write.csv(
-  #             result$assignments,
-  #             file = file.path(dataset_dir, "cluster_assignments.csv"),
-  #             row.names = FALSE
-  #           )
-  #         }
-  #         result
-  #       }
-  #     )
-  #   },
-  #   resources = tar_resources(
-  #     crew = tar_resources_crew(controller = "med_mem")
-  #   )
-  # ),
-  # tar_target(
-  #   val_clusters_desurv_alpha0,
-  #   {
-  #     base_dir <- file.path(
-  #       val_run_bundle$training_results_dir_alpha0,
-  #       "validation",
-  #       val_config$config_id,
-  #       "desurv_alpha0",
-  #       "clusters"
-  #     )
-  #     dir.create(base_dir, recursive = TRUE, showWarnings = FALSE)
-  #     lapply(
-  #       val_latent_desurv_alpha0,
-  #       function(entry) {
-  #         dataset_dir <- file.path(base_dir, entry$dataset)
-  #         dir.create(dataset_dir, recursive = TRUE, showWarnings = FALSE)
-  #         result <- cluster_validation_latent(
-  #           latent_entry = entry,
-  #           maxK = val_config$val_cluster_maxk,
-  #           reps = val_config$val_cluster_reps,
-  #           pItem = val_config$val_cluster_pitem,
-  #           pFeature = val_config$val_cluster_pfeature,
-  #           seed = val_config$val_cluster_seed,
-  #           dir = dataset_dir
-  #         )
-  #         if (nrow(result$assignments)) {
-  #           utils::write.csv(
-  #             result$assignments,
-  #             file = file.path(dataset_dir, "cluster_assignments.csv"),
-  #             row.names = FALSE
-  #           )
-  #         }
-  #         result
-  #       }
-  #     )
-  #   },
-  #   resources = tar_resources(
-  #     crew = tar_resources_crew(controller = "med_mem")
-  #   )
-  # )
+  # tar_target(clusters_desurv_X_align)
 )
 
 FIGURE_TARGETS <- list(

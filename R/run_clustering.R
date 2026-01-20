@@ -1,78 +1,46 @@
 
-#' Perform consensus clustering on selected gene sets
-#' @param tops A dataframe of top genes per factor
-#' @param data A list with expression matrix and sample metadata
-#' @param gene_lists A named list of gene sets
-#' @param color.lists Optional color annotations
-#' @param type "each", "bas/clas", or integer factor index
-#' @param save Logical, save plots
-#' @param plot Logical, generate plots
-#' @param facs Vector of factor indices to include (optional)
-#' @param maxKcol Max K for sample clustering
-#' @param maxKrow Max K for gene clustering
-#' @param reps Number of clustering iterations
-#' @param pFeature Proportion of features (genes) per iteration
-#' @param pItem Proportion of items (samples) per iteration
-#' @param seed Random seed
-#' @param clusterAlg Clustering algorithm
-#' @param distance Distance metric
-#' @return data with clustering assignments added
-run_clustering <- function(tops, data, gene_lists, color.lists = NULL, type = "bas/clas",
-                            save = FALSE, plot = TRUE, facs = NULL, dir = NULL,
-                            maxKcol = NULL, maxKrow = NULL,
-                            reps = 1000, pFeature = 1, pItem = .8, seed = 9999,
-                            clusterAlg = "km", distance = "euclidean",weight=TRUE,replace=TRUE) {
+run_clustering <- function(tops,
+                           data, 
+                           gene_lists, 
+                           color.lists = NULL,
+                           facs = NULL,
+                           base_dir,
+                           WtX = FALSE,
+                           reps = 1000, pFeature = 1, pItem = .8, seed = 9999,
+                           clusterAlg = "km", distance = "euclidean"){
   
-  if (is.null(facs) || !length(facs)) {
-    n_factors <- ncol(tops)
-    if (is.null(n_factors) || n_factors < 1) {
-      stop("Cannot determine factor indices because `tops` has zero columns.")
+  
+  clusCol=NULL
+  if(length(facs)>0 ){
+    if(WtX){
+      dataname = data$dataset
+      suffix = "WtX"
+    }else{
+      dataname = data$dataname
+      suffix = "X"
     }
-    facs <- seq_len(n_factors)
+    file_name = paste0("clustering","_",suffix,".pdf")
+    dir = file.path(base_dir,dataname)
+    # --- Prepare expression data ---
+    clus_data <- prepare_data_for_clustering(tops=tops,
+                                         data=data,
+                                         facs=facs,
+                                         WtX = WtX)
+    Xtemp <- clus_data$Xtemp
+    kept_sample_ids <- clus_data$kept_sample_ids
+    
+    
+    # --- Set defaults if needed ---
+    maxK <- length(facs) + 2
+    
+    # --- Consensus clustering on samples ---
+    clusCol <- run_consensus_clustering(
+      mat = Xtemp, maxK = maxK, reps = reps, pItem = pItem,
+      pFeature = pFeature, seed = seed, clusterAlg = clusterAlg,
+      distance = distance, dir = dir, file_name
+    )
   }
-  facs <- clean_factor_ids(facs)
-  if (!length(facs)) {
-    stop("No valid factor indices supplied to run_clustering.")
-  }
+
   
-  # Load dependency
-  if (!requireNamespace("ConsensusClusterPlus", quietly = TRUE)) {
-    stop("ConsensusClusterPlus package is required.")
-  }
-  
-  # Handle 'each' mode by recursive loop over all factors
-  if (type == "each") {
-    for (i in seq_len(ncol(tops))) {
-      data <- run_clustering_internal(tops, data, gene_lists, color.lists, type = i,
-                                      facs = facs, dir = dir,
-                                      maxKcol = maxKcol, maxKrow = maxKrow,
-                                      reps = reps, pFeature = pFeature, pItem = pItem,
-                                      seed = seed, clusterAlg = clusterAlg, distance = distance,
-                                      save = save, plot = plot, weight=weight, replace=replace)
-    }
-  }else if(type == "by tissue type"){
-    # id tumor factors
-    data <- run_clustering_internal(tops, data, gene_lists, color.lists, type = "tumor",
-                                    facs = facs, dir = dir,
-                                    maxKcol = maxKcol, maxKrow = maxKrow,
-                                    reps = reps, pFeature = pFeature, pItem = pItem,
-                                    seed = seed, clusterAlg = clusterAlg, distance = distance,
-                                    save = save, plot = plot, weight=weight, replace=replace)
-    # id stromal factors
-    data <- run_clustering_internal(tops, data, gene_lists, color.lists, type = "stroma",
-                                    facs = facs, dir = dir,
-                                    maxKcol = maxKcol, maxKrow = maxKrow,
-                                    reps = reps, pFeature = pFeature, pItem = pItem,
-                                    seed = seed, clusterAlg = clusterAlg, distance = distance,
-                                    save = save, plot = plot, weight=weight, replace=replace)
-  }else{
-    data <- run_clustering_internal(tops, data, gene_lists, color.lists, type = type,
-                                    facs = facs, dir = dir,
-                                    maxKcol = maxKcol, maxKrow = maxKrow,
-                                    reps = reps, pFeature = pFeature, pItem = pItem,
-                                    seed = seed, clusterAlg = clusterAlg, distance = distance,
-                                    save = save, plot = plot, weight=weight, replace=replace)
-  }
-  
-  return(data)
+  return(clusCol)
 }
