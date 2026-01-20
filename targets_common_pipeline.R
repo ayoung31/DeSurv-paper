@@ -1525,11 +1525,24 @@ COMMON_DESURV_VAL_TARGETS <- list(
                      WtX = FALSE)
     },
     pattern = map(data_val_filtered),
-    resources = tar_resources(
-      crew = tar_resources_crew(controller = "med_mem")
-    )
+    iteration = "list"
+  ),
+  tar_target(
+    nclusters_desurv_X,
+    {
+      sel = select_nclusters(clusters_desurv_X,k_max=length(clusters_desurv_X))
+      sel$k
+    },
+    iteration = "vector",
+    pattern = map(clusters_desurv_X)
   )
-  # tar_target(clusters_desurv_X_align)
+  # tar_target(
+  #   clusters_desurv_X_aligned,
+  #   {
+  #     
+  #   },
+  #   pattern = map(clusters_desurv_X)
+  #   )
 )
 
 FIGURE_TARGETS <- list(

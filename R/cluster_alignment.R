@@ -190,21 +190,3 @@ summarize_meta_alignment <- function(fit) {
   print(with(tab, table(meta_cluster, dataset_id)))
   invisible(supp)
 }
-
-#-----------------------------
-# Optional: quick diagnostic print
-#-----------------------------
-summarize_meta_alignment <- function(fit) {
-  tab <- fit$centroid_table
-  cat("Meta-clusters:", length(unique(tab$meta_cluster)), "\n")
-  cat("Total dataset-clusters:", nrow(tab), "\n\n")
-  
-  # how many datasets support each meta-cluster?
-  supp <- unique(tab[, c("meta_cluster", "n_datasets_supporting")])
-  supp <- supp[order(supp$meta_cluster), ]
-  print(supp, row.names = FALSE)
-  
-  cat("\nCounts by dataset within meta-cluster:\n")
-  print(with(tab, table(meta_cluster, dataset_id)))
-  invisible(supp)
-}

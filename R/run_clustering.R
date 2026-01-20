@@ -31,7 +31,7 @@ run_clustering <- function(tops,
     
     
     # --- Set defaults if needed ---
-    maxK <- length(facs) + 2
+    maxK <- length(facs) * 3
     
     # --- Consensus clustering on samples ---
     clusCol <- run_consensus_clustering(
