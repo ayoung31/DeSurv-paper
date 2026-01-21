@@ -280,6 +280,84 @@ make_bo_best_observed_plot <- function(bo_history_path, bo_results, method_label
     ggplot2::theme_minimal(base_size = 9)
 }
 
+
+summarize_bo_best_per_alpha <- function(history_df, eval_se_df, method_label) {
+  alpha_col <- intersect(c("alpha", "alpha_grid"), names(history_df))[1]
+  if (is.na(alpha_col)) {
+    stop("BO history must include k or k_grid.")
+  }
+  k_col <- intersect(c("k", "k_grid"), names(history_df))[1]
+  join_cols <- intersect(c("run_id", "eval_id"), names(history_df))
+  join_cols <- join_cols[join_cols %in% names(eval_se_df)]
+  if (!length(join_cols)) {
+    join_cols <- "eval_id"
+  }
+  history_df <- dplyr::left_join(history_df, eval_se_df, by = join_cols)
+  
+  # history_df$alpha_bin <- cut(
+  #   history_df$alpha_col,
+  #   breaks = c(-Inf,0,seq(.1, 1, by = 0.1)),
+  #   include.lowest = FALSE,
+  #   right = TRUE
+  # )
+  
+  history_df$k = history_df[[k_col]]
+  
+  history_df$alpha = ifelse(
+    abs(history_df[[alpha_col]]) < 1e-10,
+    0,
+    ceiling((history_df[[alpha_col]]-1e-10) * 10) / 10
+  )
+  
+  best_per_alpha <- history_df %>%
+    dplyr::group_by(alpha) %>%
+    dplyr::arrange(desc(mean_cindex), k) %>%
+    dplyr::slice_head(n = 1) %>%
+    dplyr::ungroup() %>%
+    dplyr::transmute(
+      c_best = mean_cindex,
+      c_se = c_se,
+      method = method_label,
+      alpha = alpha
+    ) %>%
+    dplyr::arrange(alpha)
+  
+  best_per_alpha
+}
+
+
+make_bo_best_observed_alpha_plot <- function(bo_history_path, bo_results, method_label = "none",
+                                       cindex_label = "Best observed CV C-index") {
+  bo_history <- prepare_bo_history(bo_history_path)
+  eval_se <- compute_bo_eval_se(
+    collect_bo_diagnostics(bo_results, bo_history)
+  )
+  best_df <- summarize_bo_best_per_alpha(
+    bo_history,
+    eval_se,
+    method_label = method_label
+  )
+  
+  ggplot2::ggplot(
+    best_df,
+    ggplot2::aes(x = alpha, y = c_best)
+  ) +
+    ggplot2::geom_errorbar(
+      ggplot2::aes(ymin = c_best - c_se, ymax = c_best + c_se),
+      width = 0.15
+    ) +
+    ggplot2::geom_line(linewidth = 0.7) +
+    ggplot2::geom_point(size = 2) +
+    ggplot2::scale_x_continuous(breaks = sort(unique(best_df$alpha))) +
+    ggplot2::labs(
+      x = "Supervision level",
+      y = cindex_label,
+      color = NULL
+    ) +
+    ggplot2::theme_minimal(base_size = 9)
+}
+
+
 make_cindex_violin <- function(history_df, label) {
   k_col <- intersect(c("k", "k_grid"), names(history_df))[1]
   k_levels <- sort(unique(history_df[[k_col]]))
@@ -1290,6 +1368,494 @@ prepare_extval_dataset <- function(dataset, name, fit, factors, factor_gene_list
   sampInfo[, score_cols] <- score_mat
 
   list(rank = X_rank, sampInfo = sampInfo)
+}
+
+make_expression_heatmap = function(data_val_filtered, fit_desurv, tops_desurv,
+                                   aligned_clusters = NULL,
+                                   clusters_desurv = NULL,
+                                   nclusters_desurv = NULL){
+  if (is.null(data_val_filtered) || !length(data_val_filtered)) {
+    stop("No validation data supplied for external validation.")
+  }
+  if (is.null(fit_desurv$W)) {
+    stop("DeSurv fit missing W for external validation.")
+  }
+  
+  factors <- select_desurv_factors(fit_desurv, n = 2)
+  if (length(factors) < 2) {
+    stop("Need at least two factors for external validation.")
+  }
+  
+  factor_gene_lists <- get_extval_factor_genes(tops_desurv$top_genes, factors)
+  entries <- mapply(
+    function(dataset, name) {
+      prepare_extval_dataset(dataset, name, fit_desurv, factors, factor_gene_lists)
+    },
+    dataset = data_val_filtered,
+    name = names(data_val_filtered),
+    SIMPLIFY = FALSE
+  )
+  
+  rank_list <- lapply(entries, `[[`, "rank")
+  sinfos <- lapply(entries, `[[`, "sampInfo")
+  # Avoid rbind prefixing rownames with list names.
+  sinfos <- unname(sinfos)
+  
+  genes <- Reduce(intersect, lapply(rank_list, rownames))
+  if (!length(genes)) {
+    stop("No shared genes available across validation datasets.")
+  }
+  rank_list <- lapply(rank_list, function(x) x[genes, , drop = FALSE])
+  scaled_list <- lapply(rank_list, function(x) {
+    x_scaled <- t(scale(t(x)))
+    x_scaled[!is.finite(x_scaled)] <- 0
+    x_scaled
+  })
+  X <- do.call("cbind", scaled_list)
+  
+  sampInfo <- do.call("rbind", sinfos)
+  sampInfo <- as.data.frame(sampInfo, stringsAsFactors = FALSE)
+  if (!all(rownames(sampInfo) %in% colnames(X))) {
+    missing <- setdiff(rownames(sampInfo), colnames(X))
+    stop(
+      "Validation metadata rownames do not match expression columns. Missing: ",
+      paste(head(missing, 10), collapse = ", ")
+    )
+  }
+  score_cols <- paste0("factor", factors, "_score")
+  if (!all(score_cols %in% colnames(sampInfo))) {
+    stop("Missing factor score columns in validation metadata.")
+  }
+  
+  if ("DeCAF" %in% names(sampInfo)) {
+    sampInfo$DeCAF <- as.character(sampInfo$DeCAF)
+    sampInfo$DeCAF[sampInfo$DeCAF == "permCAF"] <- "proCAF"
+  }
+  if ("PurIST" %in% names(sampInfo)) {
+    sampInfo$PurIST <- as.character(sampInfo$PurIST)
+  }
+  if ("Consensus" %in% names(sampInfo)) {
+    sampInfo$Consensus <- as.character(sampInfo$Consensus)
+  }
+  sampInfo$dataset <- as.character(sampInfo$dataset)
+  
+  use_consensus <- "Consensus" %in% names(sampInfo) &&
+    (any(grepl("imvigor|bladder", tolower(sampInfo$dataset))) || !("PurIST" %in% names(sampInfo)))
+  subtype_col <- if (use_consensus) "Consensus" else "PurIST"
+  subtype_label <- if (use_consensus) "Consensus" else "PurIST"
+  
+  n_samples <- nrow(sampInfo)
+  get_meta_col <- function(name) {
+    if (!name %in% names(sampInfo)) {
+      return(rep(NA_character_, n_samples))
+    }
+    vals <- sampInfo[[name]]
+    if (length(vals) != n_samples) {
+      return(rep(NA_character_, n_samples))
+    }
+    vals
+  }
+
+  resolve_dataset_labels <- function(data_val_filtered) {
+    labels <- names(data_val_filtered)
+    if (is.null(labels) || any(!nzchar(labels))) {
+      labels <- vapply(seq_along(data_val_filtered), function(i) {
+        entry <- data_val_filtered[[i]]
+        if (!is.null(entry$dataname) && nzchar(entry$dataname)) {
+          return(as.character(entry$dataname))
+        }
+        if (!is.null(entry$sampInfo$dataset)) {
+          val <- as.character(entry$sampInfo$dataset[1])
+          if (!is.na(val) && nzchar(val)) {
+            return(val)
+          }
+        }
+        paste0("D", i)
+      }, character(1))
+    }
+    labels
+  }
+
+  extract_sample_clusters_from_runs <- function(clusters_desurv,
+                                                nclusters_desurv,
+                                                dataset_labels) {
+    if (is.null(clusters_desurv) || is.null(nclusters_desurv)) {
+      return(NULL)
+    }
+    if (length(clusters_desurv) != length(nclusters_desurv)) {
+      stop("clusters_desurv and nclusters_desurv must have the same length.")
+    }
+    if (length(dataset_labels) != length(clusters_desurv)) {
+      stop("Dataset labels length does not match clusters_desurv.")
+    }
+    cluster_list <- Map(function(entry, k) {
+      if (is.null(entry$clus) || length(entry$clus) < k) {
+        stop("Missing clustering results for selected k.")
+      }
+      clus_k <- entry$clus[[k]]
+      if (is.null(clus_k$consensusClass)) {
+        stop("ConsensusClusterPlus result missing consensusClass.")
+      }
+      clus_k$consensusClass
+    }, clusters_desurv, nclusters_desurv)
+    names(cluster_list) <- dataset_labels
+    sample_cluster <- unlist(cluster_list, use.names = TRUE)
+    sample_dataset <- unlist(Map(function(cl, ds) {
+      rep(ds, length(cl))
+    }, cluster_list, names(cluster_list)), use.names = FALSE)
+    names(sample_dataset) <- names(sample_cluster)
+    list(
+      sample_cluster = sample_cluster,
+      sample_dataset = sample_dataset,
+      dataset_labels = names(cluster_list)
+    )
+  }
+
+  dataset_labels <- resolve_dataset_labels(data_val_filtered)
+  sample_cluster_info <- extract_sample_clusters_from_runs(
+    clusters_desurv,
+    nclusters_desurv,
+    dataset_labels
+  )
+
+  resolve_cluster_assignments <- function(aligned_clusters, sample_ids,
+                                          sampInfo = NULL,
+                                          sample_cluster_info = NULL) {
+    if (is.null(aligned_clusters)) {
+      return(NULL)
+    }
+
+    if (is.character(aligned_clusters) &&
+        length(aligned_clusters) == 1 &&
+        file.exists(aligned_clusters)) {
+      aligned_clusters <- utils::read.csv(aligned_clusters, stringsAsFactors = FALSE)
+    }
+
+    map_meta_clusters <- function(tab, sampInfo, sample_cluster_info) {
+      if (is.null(sampInfo)) {
+        stop("meta_cluster_align output requires sample metadata for mapping.")
+      }
+      sample_cluster <- NULL
+      sample_dataset <- NULL
+      if ("dataset" %in% names(sampInfo)) {
+        sample_dataset <- as.character(sampInfo$dataset)
+      }
+      sample_cluster_col <- intersect(
+        names(sampInfo),
+        c("samp_cluster", "cluster", "cluster_id", "cluster_assignment")
+      )
+      if (length(sample_cluster_col)) {
+        sample_cluster <- as.character(sampInfo[[sample_cluster_col[1]]])
+        names(sample_cluster) <- rownames(sampInfo)
+      } else if (!is.null(sample_cluster_info)) {
+        sample_cluster <- as.character(sample_cluster_info$sample_cluster)
+        sample_dataset <- as.character(sample_cluster_info$sample_dataset)
+      }
+      if (is.null(sample_cluster)) {
+        stop("Validation metadata must include sample cluster assignments for meta-cluster alignment.")
+      }
+      if (is.null(sample_dataset)) {
+        stop("Validation metadata missing dataset column for meta-cluster alignment.")
+      }
+      if (!is.null(names(sample_cluster)) &&
+          all(sample_ids %in% names(sample_cluster))) {
+        sample_cluster <- sample_cluster[sample_ids]
+        sample_dataset <- sample_dataset[sample_ids]
+      }
+      dataset_col <- if ("dataset_id" %in% names(tab)) {
+        "dataset_id"
+      } else if ("dataset" %in% names(tab)) {
+        "dataset"
+      } else {
+        NULL
+      }
+      cluster_col <- if ("cluster_id" %in% names(tab)) {
+        "cluster_id"
+      } else if ("cluster" %in% names(tab)) {
+        "cluster"
+      } else {
+        NULL
+      }
+      if (is.null(dataset_col) || is.null(cluster_col) ||
+          !"meta_cluster" %in% names(tab)) {
+        stop("meta_cluster_align centroid_table must include dataset_id, cluster_id, and meta_cluster.")
+      }
+      dataset_ids <- unique(as.character(tab[[dataset_col]]))
+      if (!length(dataset_ids)) {
+        stop("meta_cluster_align centroid_table missing dataset IDs.")
+      }
+      dataset_labels <- unique(as.character(sample_dataset))
+      dataset_labels <- dataset_labels[nzchar(dataset_labels)]
+      if (!length(dataset_labels)) {
+        stop("No dataset labels available for meta-cluster mapping.")
+      }
+      if (all(dataset_ids %in% dataset_labels)) {
+        dataset_map <- stats::setNames(dataset_ids, dataset_ids)
+      } else if (length(dataset_ids) == length(dataset_labels)) {
+        dataset_map <- stats::setNames(dataset_ids, dataset_labels)
+      } else {
+        stop("Unable to align meta-cluster dataset IDs with validation datasets.")
+      }
+      dataset_id_by_sample <- dataset_map[as.character(sample_dataset)]
+      map_key <- paste0(as.character(tab[[dataset_col]]), "||",
+                        as.character(tab[[cluster_col]]))
+      meta_vals <- as.character(tab$meta_cluster)
+      names(meta_vals) <- map_key
+      sample_key <- paste0(as.character(dataset_id_by_sample), "||",
+                           as.character(sample_cluster))
+      cluster_assignments <- meta_vals[sample_key]
+      names(cluster_assignments) <- sample_ids
+      cluster_assignments
+    }
+
+    if (is.list(aligned_clusters) && !is.data.frame(aligned_clusters) &&
+        "centroid_table" %in% names(aligned_clusters)) {
+      return(map_meta_clusters(aligned_clusters$centroid_table, sampInfo,
+                               sample_cluster_info))
+    }
+
+    if (is.data.frame(aligned_clusters)) {
+      if ("meta_cluster" %in% names(aligned_clusters) &&
+          any(c("dataset_id", "dataset") %in% names(aligned_clusters)) &&
+          any(c("cluster_id", "cluster") %in% names(aligned_clusters))) {
+        return(map_meta_clusters(aligned_clusters, sampInfo,
+                                 sample_cluster_info))
+      }
+      subject_cols <- grep("_subjects$", names(aligned_clusters), value = TRUE)
+      if (length(subject_cols)) {
+        cluster_col <- if ("dataset_cluster" %in% names(aligned_clusters)) {
+          "dataset_cluster"
+        } else {
+          names(aligned_clusters)[1]
+        }
+        cluster_assignments <- setNames(character(0), character(0))
+        for (i in seq_len(nrow(aligned_clusters))) {
+          cluster_id <- as.character(aligned_clusters[[cluster_col]][i])
+          if (is.na(cluster_id) || !nzchar(cluster_id)) {
+            next
+          }
+          for (col in subject_cols) {
+            cell <- aligned_clusters[[col]][i]
+            if (is.na(cell) || !nzchar(cell)) {
+              next
+            }
+            samples <- trimws(unlist(strsplit(as.character(cell), ",")))
+            samples <- samples[nzchar(samples)]
+            if (length(samples)) {
+              cluster_assignments[samples] <- cluster_id
+            }
+          }
+        }
+        return(cluster_assignments)
+      }
+
+      sample_col <- intersect(
+        names(aligned_clusters),
+        c("sample_id", "sample", "samp_id", "sampID", "sampid", "id")
+      )
+      cluster_col <- intersect(
+        names(aligned_clusters),
+        c("cluster", "aligned_cluster", "samp_cluster", "cluster_id", "meta_cluster")
+      )
+      if (length(cluster_col)) {
+        if (length(sample_col)) {
+          cluster_assignments <- as.character(aligned_clusters[[cluster_col[1]]])
+          names(cluster_assignments) <- as.character(aligned_clusters[[sample_col[1]]])
+          return(cluster_assignments)
+        }
+        if (!is.null(rownames(aligned_clusters)) &&
+            any(nzchar(rownames(aligned_clusters)))) {
+          cluster_assignments <- as.character(aligned_clusters[[cluster_col[1]]])
+          names(cluster_assignments) <- rownames(aligned_clusters)
+          return(cluster_assignments)
+        }
+      }
+    }
+
+    if (is.list(aligned_clusters) && !is.data.frame(aligned_clusters)) {
+      if (all(vapply(aligned_clusters, is.data.frame, logical(1)))) {
+        stacked <- do.call("rbind", aligned_clusters)
+        return(resolve_cluster_assignments(stacked, sample_ids, sampInfo = sampInfo,
+                                           sample_cluster_info = sample_cluster_info))
+      }
+      if (all(vapply(aligned_clusters, is.vector, logical(1)))) {
+        cluster_assignments <- unlist(aligned_clusters, use.names = TRUE)
+        if (!is.null(names(cluster_assignments))) {
+          return(cluster_assignments)
+        }
+      }
+    }
+
+    if (is.vector(aligned_clusters) && !is.null(names(aligned_clusters))) {
+      return(aligned_clusters)
+    }
+
+    stop("Aligned clustering results must map sample IDs to clusters.")
+  }
+
+  cluster_assign <- NULL
+  if (!is.null(aligned_clusters)) {
+    cluster_assignments <- resolve_cluster_assignments(aligned_clusters, rownames(sampInfo),
+                                                       sampInfo = sampInfo,
+                                                       sample_cluster_info = sample_cluster_info)
+    cluster_assign <- as.character(cluster_assignments[rownames(sampInfo)])
+    if (all(is.na(cluster_assign))) {
+      stop("Aligned clustering results do not match validation sample IDs.")
+    }
+  }
+  
+  factor_display <- paste0("Factor ", factors)
+  score_display <- paste0("Factor ", factors, " score")
+  score_df <- sampInfo[, score_cols, drop = FALSE]
+  colnames(score_df) <- score_display
+  
+  col_anno <- data.frame(score_df, stringsAsFactors = FALSE)
+  if (!is.null(cluster_assign)) {
+    col_anno$Cluster <- cluster_assign
+  }
+  col_anno$Subtype <- get_meta_col(subtype_col)
+  col_anno$DeCAF <- get_meta_col("DeCAF")
+  col_anno$dataset <- get_meta_col("dataset")
+  
+  col_anno$Subtype[is.na(col_anno$Subtype) | !nzchar(col_anno$Subtype)] <- "Unknown"
+  col_anno$DeCAF[is.na(col_anno$DeCAF) | !nzchar(col_anno$DeCAF)] <- "Unknown"
+  col_anno$dataset[is.na(col_anno$dataset) | !nzchar(col_anno$dataset)] <- "Unknown"
+  if (!is.null(cluster_assign)) {
+    col_anno$Cluster[is.na(col_anno$Cluster) | !nzchar(col_anno$Cluster)] <- "Unknown"
+  }
+  
+  if (use_consensus) {
+    subtype_levels <- unique(col_anno$Subtype)
+    subtype_levels <- subtype_levels[!is.na(subtype_levels)]
+    if ("Unknown" %in% subtype_levels) {
+      subtype_levels <- c(setdiff(subtype_levels, "Unknown"), "Unknown")
+    }
+    col_anno$Subtype <- factor(col_anno$Subtype, levels = subtype_levels)
+    subtype_colors <- stats::setNames(grDevices::rainbow(length(subtype_levels)), subtype_levels)
+    if ("Unknown" %in% names(subtype_colors)) {
+      subtype_colors["Unknown"] <- "grey70"
+    }
+  } else {
+    col_anno$Subtype <- factor(col_anno$Subtype, levels = c("Basal-like", "Classical", "Unknown"))
+    subtype_colors <- c(
+      `Basal-like` = "orange",
+      Classical = "blue",
+      Unknown = "grey70"
+    )
+  }
+  col_anno$DeCAF <- factor(col_anno$DeCAF, levels = c("proCAF", "restCAF", "Unknown"))
+  col_anno$dataset <- factor(col_anno$dataset)
+  if (!is.null(cluster_assign)) {
+    cluster_levels <- unique(col_anno$Cluster)
+    cluster_levels <- cluster_levels[!is.na(cluster_levels)]
+    unknown_present <- "Unknown" %in% cluster_levels
+    cluster_levels <- setdiff(cluster_levels, "Unknown")
+    if (length(cluster_levels)) {
+      if (all(grepl("^\\d+$", cluster_levels))) {
+        cluster_levels <- as.character(sort(as.integer(cluster_levels)))
+      } else {
+        cluster_levels <- sort(cluster_levels)
+      }
+    }
+    if (unknown_present) {
+      cluster_levels <- c(cluster_levels, "Unknown")
+    }
+    col_anno$Cluster <- factor(col_anno$Cluster, levels = cluster_levels)
+    cluster_colors <- stats::setNames(grDevices::rainbow(length(cluster_levels)),
+                                      cluster_levels)
+    if ("Unknown" %in% names(cluster_colors)) {
+      cluster_colors["Unknown"] <- "grey70"
+    }
+  }
+  
+  rownames(col_anno) <- rownames(sampInfo)
+  if (!is.null(cluster_assign)) {
+    order_idx <- order(col_anno$Cluster, col_anno$dataset, col_anno$Subtype, col_anno$DeCAF)
+  } else {
+    group_order <- interaction(col_anno$Subtype, col_anno$DeCAF, drop = TRUE, sep = " / ")
+    order_idx <- order(group_order, col_anno$dataset)
+  }
+  sample_order <- rownames(col_anno)[order_idx]
+  
+  X <- X[, sample_order, drop = FALSE]
+  col_anno <- col_anno[sample_order, , drop = FALSE]
+  
+  gene_factor <- rep(factor_display[2], length(genes))
+  gene_factor[genes %in% factor_gene_lists[[1]]] <- factor_display[1]
+  row_anno <- data.frame(`DeSurv factor` = factor(gene_factor, levels = factor_display),check.names = FALSE)
+  rownames(row_anno) <- genes
+  
+  X <- X[order(row_anno$`DeSurv factor`), , drop = FALSE]
+  row_anno <- row_anno[order(row_anno$`DeSurv factor`), , drop = FALSE]
+  
+  score_palette <- grDevices::colorRampPalette(c("navy", "white", "firebrick"))(100)
+  annotation_colors <- list(
+    `DeSurv factor` = stats::setNames(c("lightgrey", "black"), factor_display),
+    Subtype = subtype_colors,
+    DeCAF = c(
+      proCAF = "violetred2",
+      restCAF = "cyan4",
+      Unknown = "grey70"
+    )
+  )
+  annotation_colors[[score_display[1]]] <- score_palette
+  annotation_colors[[score_display[2]]] <- score_palette
+  if (!is.null(cluster_assign)) {
+    annotation_colors$Cluster <- cluster_colors
+  }
+  
+  if (!all(is.na(col_anno$dataset))) {
+    dataset_vals <- sort(unique(as.character(col_anno$dataset)))
+    base_colors <- c(
+      Dijk = "slateblue1",
+      Moffitt_GEO_array = "springgreen4",
+      PACA_AU_array = "yellow3",
+      PACA_AU_seq = "coral",
+      Puleo_array = "dodgerblue3"
+    )
+    missing <- setdiff(dataset_vals, names(base_colors))
+    if (length(missing)) {
+      extra_cols <- grDevices::rainbow(length(missing))
+      names(extra_cols) <- missing
+      base_colors <- c(base_colors, extra_cols)
+    }
+    annotation_colors$dataset <- base_colors[dataset_vals]
+  }
+  
+  min_val <- stats::quantile(X, 0.02, na.rm = TRUE)
+  max_val <- stats::quantile(X, 0.98, na.rm = TRUE)
+  if (!is.finite(min_val) || !is.finite(max_val) || min_val >= max_val) {
+    min_val <- min(X, na.rm = TRUE)
+    max_val <- max(X, na.rm = TRUE)
+  }
+  min_val <- min(min_val, 0)
+  max_val <- max(max_val, 0)
+  
+  ncolors <- 500
+  my_colors <- grDevices::colorRampPalette(c("blue", "white", "red"))(ncolors)
+  breaks_centered <- c(
+    seq(min_val, 0, length.out = ceiling(ncolors / 2) + 1),
+    seq(0, max_val, length.out = floor(ncolors / 2) + 1)[-1]
+  )
+  
+  ph <- pheatmap::pheatmap(
+    X,
+    annotation_col = col_anno,
+    annotation_row = row_anno,
+    annotation_colors = annotation_colors,
+    cluster_rows = FALSE,
+    cluster_cols = FALSE,
+    color = my_colors,
+    breaks = breaks_centered,
+    show_colnames = FALSE,
+    annotation_names_row = FALSE,
+    show_rownames = FALSE,
+    silent = TRUE,
+    fontsize = 6
+  )
+  
+  pheat <- cowplot::ggdraw(ph$gtable) +
+    ggplot2::theme(plot.margin = ggplot2::margin(0, -10, 0, 0))
 }
 
 build_fig_extval_panels <- function(data_val_filtered, fit_desurv, tops_desurv) {

@@ -54,9 +54,15 @@ For reference we still report standard NMF heuristics (Panels B-D: cophenetic, r
 
 ```{r fig-bo, fig.width = 6, fig.height= 5.5, fig.cap="A. Best observed CV C-index versus k for the supervised and $\\alpha$ = 0 searches with cross-validation SE error bars. B-D. Conventional NMF diagnostics (cophenetic, residuals, silhouette) for the unsupervised baseline." , fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
 tar_load(fig_bo_cvk_tcgacptac)
+tar_load(fig_bo_cvalpha_tcgacptac)
 tar_load(fig_residuals_tcgacptac)
 tar_load(fig_cophenetic_tcgacptac)
 tar_load(fig_silhouette_tcgacptac)
+
+upper = plot_grid(fig_bo_cvk_tcgacptac,fig_bo_cvalpha_tcgacptac,labels=c("A","B"))
+lower = plot_grid(fig_residuals_tcgacptac,fig_cophenetic_tcgacptac,fig_silhouette_tcgacptac,ncol = 3,labels = c("C","D","E"))
+
+plot_grid(upper,lower,nrow=2)
 
 ```
 

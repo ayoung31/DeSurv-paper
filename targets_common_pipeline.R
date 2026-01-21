@@ -1684,6 +1684,26 @@ FIGURE_TARGETS <- list(
     }
     
   ),
+  
+  tar_target(
+    fig_bo_cvalpha,
+    {
+      browser()
+      p = make_bo_best_observed_alpha_plot(bo_history_path = desurv_bo_history,
+                                     bo_results = desurv_bo_results,
+                                     method_label = "DeSurv")
+      save_plot_pdf(
+        p,
+        file.path(
+          FIGURE_CONFIGS$panel_dir,
+          sprintf("fig_bo_cvalpha_%s.pdf", bo_label)
+        )
+      )
+      p
+    }
+    
+  ),
+  
   tar_target(
     fig_residuals,
     {
@@ -1754,6 +1774,111 @@ FIGURE_TARGETS <- list(
         file.path(
           FIGURE_CONFIGS$panel_dir,
           sprintf("fig_gene_overlap_heatmap_desurv_%s.pdf", bo_label)
+        )
+      )
+      p
+    }
+  ),
+  
+  tar_target(
+    fig_dotplots_desurv_elbowk,
+    {
+      p = make_ora_dotplots(ora_analysis_desurv_elbowk)
+      for(i in 1:length(p)){
+        if(!is.null(p[[i]])){
+          save_plot_pdf(
+            p[[i]],
+            file.path(
+              FIGURE_CONFIGS$panel_dir,
+              sprintf("fig_dotplot_desurv_elbowk_factor%d_%s.pdf", i, bo_label)
+            )
+          )
+        }
+      }
+      p
+    }
+  ),
+  tar_target(
+    fig_gene_overlap_heatmap_desurv_elbowk,
+    {
+      p = make_gene_overlap_heatmap(tar_fit_desurv_elbowk,
+                                    tar_tops_desurv_elbowk$top_genes,
+                                    top_genes)
+      save_plot_pdf(
+        p,
+        file.path(
+          FIGURE_CONFIGS$panel_dir,
+          sprintf("fig_gene_overlap_heatmap_desurv_elbowk_%s.pdf", bo_label)
+        )
+      )
+      p
+    }
+  ),
+  
+  tar_target(
+    fig_dotplots_std_elbowk,
+    {
+      p = make_ora_dotplots(ora_analysis_std_elbowk)
+      for(i in 1:length(p)){
+        if(!is.null(p[[i]])){
+          save_plot_pdf(
+            p[[i]],
+            file.path(
+              FIGURE_CONFIGS$panel_dir,
+              sprintf("fig_dotplot_std_elbowk_factor%d_%s.pdf", i, bo_label)
+            )
+          )
+        }
+      }
+      p
+    }
+  ),
+  tar_target(
+    fig_gene_overlap_heatmap_std_elbowk,
+    {
+      p = make_gene_overlap_heatmap(fit_std_elbowk,
+                                    tar_tops_std_elbowk$top_genes,
+                                    top_genes)
+      save_plot_pdf(
+        p,
+        file.path(
+          FIGURE_CONFIGS$panel_dir,
+          sprintf("fig_gene_overlap_heatmap_std_elbowk_%s.pdf", bo_label)
+        )
+      )
+      p
+    }
+  ),
+  
+  tar_target(
+    fig_dotplots_std_desurvk,
+    {
+      p = make_ora_dotplots(ora_analysis_std_desurvk)
+      for(i in 1:length(p)){
+        if(!is.null(p[[i]])){
+          save_plot_pdf(
+            p[[i]],
+            file.path(
+              FIGURE_CONFIGS$panel_dir,
+              sprintf("fig_dotplot_std_desurvk_factor%d_%s.pdf", i, bo_label)
+            )
+          )
+        }
+      }
+      p
+    }
+  ),
+  tar_target(
+    fig_gene_overlap_heatmap_std_desurvk,
+    {
+      p = make_gene_overlap_heatmap(fit_std_desurvk,
+                                    tar_tops_std_desurvk$top_genes,
+                                    top_genes)
+      save_plot_pdf(
+        p,
+        file.path(
+          FIGURE_CONFIGS$panel_dir,
+          sprintf("fig_gene_overlap_heatmap_std_desurvk_%s.pdf", bo_label)
         )
       )
       p
@@ -1833,6 +1958,94 @@ FIGURE_TARGETS <- list(
 )
 
 FIGURE_VAL_TARGETS <- list(
+  tar_target(
+    fig_validation_heatmap_desurv,
+    {
+      browser()
+      p = make_expression_heatmap(data_val_filtered,
+                              tar_fit_desurv,
+                              tar_tops_desurv,
+                              clusters_desurv_X_aligned,
+                              clusters_desurv_X,
+                              nclusters_desurv_X)
+      save_plot_pdf(
+        p,
+        file.path(
+          FIGURE_CONFIGS$panel_dir,
+          sprintf("fig_val_heatmap_desurv_%s.pdf", bo_label)
+        )
+      )
+      p
+    }
+
+  ),
+  
+  tar_target(
+    fig_validation_heatmap_desurv_elbowk,
+    {
+      browser()
+      p = make_expression_heatmap(data_val_filtered_elbowk,
+                              tar_fit_desurv_elbowk,
+                              tar_tops_desurv_elbowk,
+                              clusters_desurv_elbowk_X_aligned,
+                              clusters_desurv_elbowk_X,
+                              nclusters_desurv_elbowk_X)
+      save_plot_pdf(
+        p,
+        file.path(
+          FIGURE_CONFIGS$panel_dir,
+          sprintf("fig_val_heatmap_desurv_elbowk_%s.pdf", bo_label)
+        )
+      )
+      p
+    }
+    
+  ),
+  
+  tar_target(
+    fig_validation_heatmap_std_elbowk,
+    {
+      browser()
+      p = make_expression_heatmap(data_val_filtered_elbowk,
+                                  fit_std_elbowk,
+                                  tar_tops_std_elbowk,
+                                  clusters_std_elbowk_X_aligned,
+                                  clusters_std_elbowk_X,
+                                  nclusters_std_elbowk_X)
+      save_plot_pdf(
+        p,
+        file.path(
+          FIGURE_CONFIGS$panel_dir,
+          sprintf("fig_val_heatmap_std_elbowk_%s.pdf", bo_label)
+        )
+      )
+      p
+    }
+    
+  ),
+  
+  tar_target(
+    fig_validation_heatmap_std_desurvk,
+    {
+      browser()
+      p = make_expression_heatmap(data_val_filtered,
+                                  fit_std_desurvk,
+                                  tar_tops_std_desurvk,
+                                  clusters_std_desurvk_X_aligned,
+                                  clusters_std_desurvk_X,
+                                  nclusters_std_desurvk_X)
+      save_plot_pdf(
+        p,
+        file.path(
+          FIGURE_CONFIGS$panel_dir,
+          sprintf("fig_val_heatmap_std_desurvk_%s.pdf", bo_label)
+        )
+      )
+      p
+    }
+    
+  ),
+  
   tar_target(
     fig_extval_panels,
     build_fig_extval_panels(
