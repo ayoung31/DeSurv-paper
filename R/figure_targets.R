@@ -516,87 +516,87 @@ make_ora_dotplots = function(ora_analysis){
   p1
 }
 
-# make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref){
-#   
-#   if (is.null(top_genes_ref) || !length(top_genes_ref)) {
-#     stop("Reference gene signatures are missing.")
-#   }
-#   
-#   top_genes_local <- top_genes_ref
-#   top_genes_local$deCAF <- list(
-#     proCAF = c("IGFL2", "NOX4", "VSNL1", "BICD1", "NPR3", "ETV1", "ITGA11", "CNIH3", "COL11A1"),
-#     restCAF = c("CHRDL1", "OGN", "PI16", "ANK2", "ABCA8", "TGFBR3", "FBLN5", "SCARA5", "KIAA1217")
-#   )
-#   if (length(top_genes_local) >= 3) names(top_genes_local)[3] <- "Moffitt"
-#   if (length(top_genes_local) >= 4) names(top_genes_local)[4] <- "Moffitt"
-#   if (length(top_genes_local) >= 13) names(top_genes_local)[13] <- "SCISSORS"
-#   if (length(top_genes_local) >= 16) names(top_genes_local)[16] <- "SCISSORS"
-#   if (length(top_genes_local) >= 12) names(top_genes_local)[12] <- "Elyada"
-#   
-#   temp <- purrr::list_flatten(top_genes_local)
-#   ref_sigs <- temp[
-#     !startsWith(names(temp), "Bailey") &
-#       !grepl("peri", names(temp)) &
-#       !startsWith(names(temp), "DECODER") &
-#       !startsWith(names(temp), "MSI") &
-#       !startsWith(names(temp), "PurISS")
-#   ]
-#   
-#   W <- fit_desurv$W
-# 
-#   W <- W[unlist(tops), , drop = FALSE]
-#   common_genes <- Reduce(intersect, list(rownames(W), unique(unlist(ref_sigs))))
-#   W <- W[common_genes, , drop = FALSE]
-#   
-#   cor_mat <- matrix(
-#     NA,
-#     ncol = ncol(W),
-#     nrow = length(ref_sigs),
-#     dimnames = list(names(ref_sigs), colnames(W))
-#   )
-#   p_mat <- matrix(
-#     NA,
-#     ncol = ncol(W),
-#     nrow = length(ref_sigs),
-#     dimnames = list(names(ref_sigs), colnames(W))
-#   )
-#   p_mat_adj <- matrix(
-#     NA,
-#     ncol = ncol(W),
-#     nrow = length(ref_sigs),
-#     dimnames = list(names(ref_sigs), colnames(W))
-#   )
-#   
-#   for (j in seq_len(ncol(W))) {
-#     wj <- W[, j]
-#     for (k in seq_along(ref_sigs)) {
-#       vk <- as.numeric(common_genes %in% ref_sigs[[k]])
-#       cor_mat[k, j] <- stats::cor(wj, vk, method = "spearman")
-#       p_mat[k, j] <- stats::cor.test(wj, vk, method = "spearman")$p.value
-#     }
-#     p_mat_adj[, j] <- stats::p.adjust(p_mat[, j], method = "BH")
-#   }
-#   
-#   keep <- vapply(seq_len(nrow(cor_mat)), function(j) {
-#     !any(is.na(cor_mat[j, ])) & sum(p_mat_adj[j, ] < 0.05) > 0
-#   }, logical(1))
-#   mat <- cor_mat[which(keep), , drop = FALSE]
-#   
-#   my_colors <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
-#   ph <- pheatmap::pheatmap(
-#     mat,
-#     cluster_cols = FALSE,
-#     color = my_colors,
-#     breaks = seq(-0.4, 0.4, length.out = 101),
-#     fontsize = 6,
-#     silent = TRUE,
-#     fontsize_number = 18,
-#     treeheight_row = 0
-#   )
-#   ph_grob <- ph$gtable
-#   pheat <- cowplot::plot_grid(NULL, cowplot::ggdraw(ph_grob), nrow = 2, rel_heights = c(0.25, 4))
-#   pheat
-# }
+make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref){
+  
+  if (is.null(top_genes_ref) || !length(top_genes_ref)) {
+    stop("Reference gene signatures are missing.")
+  }
+  
+  top_genes_local <- top_genes_ref
+  top_genes_local$deCAF <- list(
+    proCAF = c("IGFL2", "NOX4", "VSNL1", "BICD1", "NPR3", "ETV1", "ITGA11", "CNIH3", "COL11A1"),
+    restCAF = c("CHRDL1", "OGN", "PI16", "ANK2", "ABCA8", "TGFBR3", "FBLN5", "SCARA5", "KIAA1217")
+  )
+  if (length(top_genes_local) >= 3) names(top_genes_local)[3] <- "Moffitt"
+  if (length(top_genes_local) >= 4) names(top_genes_local)[4] <- "Moffitt"
+  if (length(top_genes_local) >= 13) names(top_genes_local)[13] <- "SCISSORS"
+  if (length(top_genes_local) >= 16) names(top_genes_local)[16] <- "SCISSORS"
+  if (length(top_genes_local) >= 12) names(top_genes_local)[12] <- "Elyada"
+  
+  temp <- purrr::list_flatten(top_genes_local)
+  ref_sigs <- temp[
+    !startsWith(names(temp), "Bailey") &
+      !grepl("peri", names(temp)) &
+      !startsWith(names(temp), "DECODER") &
+      !startsWith(names(temp), "MSI") &
+      !startsWith(names(temp), "PurISS")
+  ]
+  
+  W <- fit_desurv$W
+
+  W <- W[unlist(tops), , drop = FALSE]
+  common_genes <- Reduce(intersect, list(rownames(W), unique(unlist(ref_sigs))))
+  W <- W[common_genes, , drop = FALSE]
+  
+  cor_mat <- matrix(
+    NA,
+    ncol = ncol(W),
+    nrow = length(ref_sigs),
+    dimnames = list(names(ref_sigs), colnames(W))
+  )
+  p_mat <- matrix(
+    NA,
+    ncol = ncol(W),
+    nrow = length(ref_sigs),
+    dimnames = list(names(ref_sigs), colnames(W))
+  )
+  p_mat_adj <- matrix(
+    NA,
+    ncol = ncol(W),
+    nrow = length(ref_sigs),
+    dimnames = list(names(ref_sigs), colnames(W))
+  )
+  
+  for (j in seq_len(ncol(W))) {
+    wj <- W[, j]
+    for (k in seq_along(ref_sigs)) {
+      vk <- as.numeric(common_genes %in% ref_sigs[[k]])
+      cor_mat[k, j] <- stats::cor(wj, vk, method = "spearman")
+      p_mat[k, j] <- stats::cor.test(wj, vk, method = "spearman")$p.value
+    }
+    p_mat_adj[, j] <- stats::p.adjust(p_mat[, j], method = "BH")
+  }
+  
+  keep <- vapply(seq_len(nrow(cor_mat)), function(j) {
+    !any(is.na(cor_mat[j, ])) & sum(p_mat_adj[j, ] < 0.05) > 0
+  }, logical(1))
+  mat <- cor_mat[which(keep), , drop = FALSE]
+  
+  my_colors <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
+  ph <- pheatmap::pheatmap(
+    mat,
+    cluster_cols = FALSE,
+    color = my_colors,
+    breaks = seq(-0.4, 0.4, length.out = 101),
+    fontsize = 6,
+    silent = TRUE,
+    fontsize_number = 18,
+    treeheight_row = 0
+  )
+  ph_grob <- ph$gtable
+  pheat <- cowplot::plot_grid(NULL, cowplot::ggdraw(ph_grob), nrow = 2, rel_heights = c(0.25, 4))
+  pheat
+}
 
 build_fig_bio_panels <- function(ora_analysis, fit_desurv, tops_desurv, top_genes_ref) {
   ora_results <- ora_analysis$enrich_GO

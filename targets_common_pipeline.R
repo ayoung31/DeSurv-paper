@@ -1178,7 +1178,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
         top_genes = tar_tops_std_elbowk$top_genes
       )
       latent
-    }
+    },
+    iteration = "list"
   ),
   
   tar_target(
@@ -1190,7 +1191,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
         top_genes = tar_tops_std_desurvk$top_genes
       )
       latent
-    }
+    },
+    iteration = "list"
   ),
   
   
@@ -1460,6 +1462,105 @@ COMMON_DESURV_VAL_TARGETS <- list(
                               zscore_within_dataset = TRUE)
       temp
     }
+  ),
+  
+  tar_target(
+    clusters_std_elbowk_X,
+    {
+      beta = fit_std_elbowk$beta
+      facs = which(beta != 0)
+      base_dir = file.path(
+        val_run_bundle$training_results_dir,
+        "validation",
+        val_config_effective$config_id,
+        "std_elbowk"
+      )
+      run_clustering(tops = tar_tops_std_elbowk$top_genes,
+                     data = data_val_filtered_elbowk,
+                     gene_lists = top_genes,
+                     color.lists = colors,
+                     facs = facs,
+                     base_dir = base_dir,
+                     WtX = FALSE)
+    },
+    pattern = map(data_val_filtered_elbowk),
+    iteration = "list"
+  ),
+  tar_target(
+    nclusters_std_elbowk_X,
+    {
+      sel = select_nclusters(clusters_std_elbowk_X$clus,k_max=length(clusters_std_elbowk_X$clus))
+      sel$k
+    },
+    iteration = "vector",
+    pattern = map(clusters_std_elbowk_X)
+  ),
+  tar_target(
+    clusters_std_elbowk_X_aligned,
+    {
+      cluster_list = lapply(1:length(clusters_std_elbowk_X),function(i){
+        clusters_std_elbowk_X[[i]]$clus[[nclusters_std_elbowk_X[i]]]$consensusClass
+      })
+      scores_list = lapply(1:length(clusters_std_elbowk_X),function(i){
+        t(clusters_std_elbowk_X[[i]]$Xtemp)
+      })
+      
+      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
+                              linkage = "average",
+                              similarity_threshold = .5,
+                              zscore_within_dataset = TRUE)
+      temp
+    }
+  ),
+  
+  tar_target(
+    clusters_std_elbowk_WtX,
+    {
+      beta = fit_std_elbowk$beta
+      facs = which(beta != 0)
+      base_dir = file.path(
+        val_run_bundle$training_results_dir,
+        "validation",
+        val_config_effective$config_id,
+        "std_elbowk"
+      )
+      run_clustering(tops = tar_tops_std_elbowk$top_genes,
+                     data = val_latent_std_elbowk,
+                     gene_lists = top_genes,
+                     color.lists = colors,
+                     facs = facs,
+                     base_dir = base_dir,
+                     WtX = TRUE)
+    },
+    pattern = map(val_latent_std_elbowk),
+    iteration = "list"
+  ),
+  tar_target(
+    nclusters_std_elbowk_WtX,
+    {
+      sel = select_nclusters(clusters_std_elbowk_WtX$clus,
+                             k_max=length(clusters_std_elbowk_WtX$clus))
+      sel$k
+    },
+    iteration = "vector",
+    pattern = map(clusters_std_elbowk_WtX)
+  ),
+  tar_target(
+    clusters_std_elbowk_WtX_aligned,
+    {
+      cluster_list = lapply(1:length(clusters_std_elbowk_WtX),function(i){
+        clusters_std_elbowk_WtX[[i]]$clus[[nclusters_std_elbowk_WtX[i]]]$consensusClass
+      })
+      scores_list = lapply(1:length(val_latent_std_elbowk),function(i){
+        val_latent_std_elbowk[[i]]$Z_scaled
+      })
+      
+      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
+                              linkage = "average",
+                              similarity_threshold = .5,
+                              zscore_within_dataset = TRUE)
+      temp
+    }
   )
   
   
@@ -1585,7 +1686,7 @@ FIGURE_TARGETS <- list(
   #   format = "file"
   # ),
   tar_target(
-    fig_dotplots,
+    fig_dotplots_desurv,
     {
       p = make_ora_dotplots(ora_analysis_desurv)
       for(i in 1:length(p)){
@@ -1599,6 +1700,20 @@ FIGURE_TARGETS <- list(
           )
         }
       }
+      p
+    }
+  ),
+  tar_target(
+    fig_gene_overlap_heatmap_desurv,
+    {
+      p = make_gene_overlap_heatmap(tar_fit_desurv,tar_tops_desurv$top_genes,top_genes)
+      save_plot_pdf(
+        p,
+        file.path(
+          FIGURE_CONFIGS$panel_dir,
+          sprintf("fig_gene_overlap_heatmap_desurv_%s.pdf", bo_label)
+        )
+      )
       p
     }
   ),
