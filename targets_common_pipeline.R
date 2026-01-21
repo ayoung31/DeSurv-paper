@@ -1013,248 +1013,6 @@ COMMON_DESURV_RUN_TARGETS <- list(
       ora(tar_tops_std_desurvk$top_genes,universe,organism)
     }
   )
-  
-  # tar_target(
-  #   ora_analysis_std,
-  #   {
-  #     universe = rownames(tar_data_filtered$ex)
-  #     organism <- org.Hs.eg.db
-  #     ora(tops_std$top_genes,universe,organism)
-  #   }
-  # ),
-  
-  # 
-  # 
-  # tar_target(
-  #   selected_factors_desurv,
-  #   {
-  #     save_dir = file.path(tar_training_results_dir,"factor_selection","desurv")
-  #     dir.create(save_dir,showWarnings = FALSE,recursive = TRUE)
-  #     path = file.path(save_dir,"factor_selection.csv")
-  #     build_factor_selection_table(tar_tops_desurv$top_genes,path)
-  #   },
-  #   format="file"
-  # ),
-
-  # tar_target(
-  #   selected_factors_desurv_alpha0,
-  #   {
-  #     save_dir = file.path(tar_training_results_dir_alpha0,"factor_selection","desurv_alpha0")
-  #     dir.create(save_dir,showWarnings = FALSE,recursive = TRUE)
-  #     path = file.path(save_dir,"factor_selection.csv")
-  #     build_factor_selection_table(tar_tops_desurv_alpha0$top_genes,path)
-  #   },
-  #   format="file"
-  # ),
-  # 
-  # tar_target(
-  #   selected_factors_std,
-  #   {
-  #     save_dir = file.path(tar_training_results_dir,"factor_selection","std")
-  #     dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
-  #     path = file.path(save_dir,"factor_selection.csv")
-  #     build_factor_selection_table(tops_std$top_genes,path)
-  #   },
-  #   format="file"
-  # ),
-    # tar_target(
-    #   clusters_desurv,
-    #   {
-    #     sel = read_selected_factor_indices(
-    #       selected_factors_desurv,
-    #       label = "DeSurv factor selection table"
-    #     )
-    #     data <- unwrap_validation_dataset(data_val_filtered)
-    #     val_dataset <- infer_validation_dataset_name(data)
-    #     dir = create_filepath_clustering_output(tar_ngene_value, TOL, MAXIT, PKG_VERSION,
-    #                                             GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN,
-    #                                             ntop_value, val_dataset, "DeSurv")
-    #     run_clustering(
-    #       tar_tops_desurv$top_genes, data, top_genes, colors,
-    #       facs = sel, plot = FALSE, dir = dir,
-    #       maxKcol = 5, maxKrow = 5
-    #     )
-    #   },
-    #   pattern = map(data_val_filtered),
-    #   iteration = "list",
-    #   resources = tar_resources(
-    #     crew = tar_resources_crew(controller = "med_mem")
-    #   )
-    # ),
-    # 
-    # tar_target(
-    #   clusters_desurv_alpha0,
-    #   {
-    #     sel = read_selected_factor_indices(
-    #       selected_factors_desurv_alpha0,
-    #       label = "DeSurv alpha=0 factor selection table"
-    #     )
-    #     data <- unwrap_validation_dataset(data_val_filtered)
-    #     val_dataset <- infer_validation_dataset_name(data)
-    #     dir = create_filepath_clustering_output(tar_ngene_value_alpha0, TOL, MAXIT, PKG_VERSION,
-    #                                             GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN,
-    #                                             ntop_value_alpha0, val_dataset, "DeSurv_alpha0")
-    #     run_clustering(
-    #       tar_tops_desurv_alpha0$top_genes, data, top_genes, colors,
-    #       facs = sel, plot = FALSE, dir = dir,
-    #       maxKcol = 5, maxKrow = 5
-    #     )
-    #   },
-    #   pattern = map(data_val_filtered),
-    #   iteration = "list",
-    #   resources = tar_resources(
-    #     crew = tar_resources_crew(controller = "med_mem")
-    #   )
-    # )
-
-  #   tar_target(
-  #     clusters_std,
-  #     {
-  #       if(!file.exists(selected_factors_std)){
-  #         stop("first generate factor selection table for std nmf")
-  #       }
-  #       tbl = read.csv(selected_factors_std)
-  #       sel = tbl$factor[tbl$selected]
-  #       if(all(!sel)){
-  #         stop("No factor selected for std nmf clustering, please select at least 1")
-  #       }
-  #       data <- data_val_filtered
-  #       val_dataset = data$dataname
-  #       dir = create_filepath_clustering_output(tar_ngene_value, TOL, MAXIT, PKG_VERSION, 
-  #                                               GIT_BRANCH, TRAIN_PREFIX, METHOD_TRANS_TRAIN, 
-  #                                               ntop_value, val_dataset, "stdNMF")
-  #       run_clustering(tops_std$top_genes,data,top_genes,colors,
-  #                      facs=sel,plot=FALSE,dir=dir,
-  #                    maxKcol = 5, maxKrow = 5)
-  #   },
-  #   pattern=map(data_val_filtered),
-  #   iteration="list",
-  #   resources = tar_resources(
-  #     crew = tar_resources_crew(controller = "med_mem")
-  #   )
-  # ),
-  # 
-  # tar_target(
-  #   selected_nclusters_desurv,
-  #   {
-  #     save_dir = file.path(tar_training_results_dir,"ncluster_selection","desurv")
-  #     dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
-  #     path = file.path(save_dir,"ncluster_selection.csv")
-  #     build_ncluster_selection_table(clusters_desurv,path)
-  #   },
-  #   format="file"
-  # ),
-  # 
-  # tar_target(
-  #   selected_nclusters_std,
-  #   {
-  #     save_dir = file.path(tar_training_results_dir,"ncluster_selection","std")
-  #     dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
-  #     path = file.path(save_dir,"ncluster_selection.csv")
-  #     build_ncluster_selection_table(clusters_std,path)
-  #   },
-  #   format="file"
-  # ),
-  # 
-  # tar_target(
-  #   cluster_alignment_plot_desurv,
-  #   {
-  #     nclus_tbl = read.csv(selected_nclusters_desurv)
-  #     nclus_vec <- setNames(nclus_tbl$nclus, nclus_tbl$dataset)
-  #     save_dir = file.path(tar_training_results_dir,"cluster_alignment","desurv")
-  #     dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
-  #     path = file.path(save_dir,"cluster_alignment.pdf")
-  #     pdf(path)
-  #     plot_cluster_cor(clusters_desurv,tar_tops_desurv$top_genes,nclus_vec)
-  #     dev.off()
-  #   }
-  # ),
-  # 
-  # tar_target(
-  #   cluster_alignment_plot_std,
-  #   {
-  #     nclus_tbl = read.csv(selected_nclusters_std)
-  #     nclus_vec <- setNames(nclus_tbl$nclus, nclus_tbl$dataset)
-  #     save_dir = file.path(tar_training_results_dir,"cluster_alignment","std")
-  #     dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
-  #     path = file.path(save_dir,"cluster_alignment.pdf")
-  #     pdf(path)
-  #     plot_cluster_cor(clusters_std,tops_std$top_genes,nclus_vec)
-  #     dev.off()
-  #   }
-  # ),
-  # 
-  # tar_target(
-  #   cluster_alignment_table_desurv,
-  #   {
-  #     nclus_tbl = read.csv(selected_nclusters_desurv)
-  #     save_dir = file.path(tar_training_results_dir,"cluster_alignment","desurv")
-  #     dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
-  #     path = file.path(save_dir,"cluster_alignment.csv")
-  #     build_cluster_alignment_table(nclus_tbl,clusters_desurv,path)
-  #   },
-  #   format="file"
-  # ),
-  # 
-  # tar_target(
-  #   cluster_alignment_table_std,
-  #   {
-  #     nclus_tbl = read.csv(selected_nclusters_std)
-  #     save_dir = file.path(tar_training_results_dir,"cluster_alignment","std")
-  #     dir.create(save_dir,showWarnings = FALSE, recursive=TRUE)
-  #     path = file.path(save_dir,"cluster_alignment.csv")
-  #     build_cluster_alignment_table(nclus_tbl,clusters_std,path)
-  #   },
-  #   format="file"
-  # ),
-  # 
-  # tar_target(
-  #   aligned_clusters_desurv,
-  #   {
-  #     nclus_tbl = read.csv(selected_nclusters_desurv)
-  #     samp_clus = read.csv(cluster_alignment_table_desurv)
-  #     clus=clusters_desurv
-  #     datasets <- vapply(clus, function(x) x$data$dataname, character(1))
-  #     for(i in seq_along(clus)){
-  #       dataname=datasets[[i]]
-  #       nclus_i <- nclus_tbl$nclus[nclus_tbl$dataset==dataname]
-  #       if(length(nclus_i) != 1 || is.na(nclus_i)){
-  #         stop("Selected ncluster table missing entry for dataset: ", dataname)
-  #       }
-  #       nms = names(clus[[i]]$clus_res$clusCol[[nclus_i]]$consensusClass)
-  #       y = samp_clus[clus[[i]]$clus_res$clusCol[[nclus_i]]$consensusClass,dataname]
-  #       names(y) = nms
-  #       clus[[i]]$clus_res$clusCol[[nclus_i]]$consensusClass=y
-  # 
-  #       clus[[i]]$data$sampInfo$samp_cluster = clus[[i]]$clus_res$clusCol[[nclus_i]]$consensusClass
-  #     }
-  #     clus
-  #   }
-  # ),
-  # 
-  # tar_target(
-  #   aligned_clusters_std,
-  #   {
-  #     nclus_tbl = read.csv(selected_nclusters_std)
-  #     samp_clus = read.csv(cluster_alignment_table_std)
-  #      clus=clusters_std
-  #     datasets <- vapply(clus, function(x) x$data$dataname, character(1))
-  #     for(i in seq_along(clus)){
-  #       dataname=datasets[[i]]
-  #       nclus_i <- nclus_tbl$nclus[nclus_tbl$dataset==dataname]
-  #       if(length(nclus_i) != 1 || is.na(nclus_i)){
-  #         stop("Selected ncluster table missing entry for dataset: ", dataname)
-  #       }
-  #       nms = names(clus[[i]]$clus_res$clusCol[[nclus_i]]$consensusClass)
-  #       y = samp_clus[clus[[i]]$clus_res$clusCol[[nclus_i]]$consensusClass,dataname]
-  #       names(y) = nms
-  #       clus[[i]]$clus_res$clusCol[[nclus_i]]$consensusClass=y
-  #       
-  #       clus[[i]]$data$sampInfo$samp_cluster = clus[[i]]$clus_res$clusCol[[nclus_i]]$consensusClass
-  #     }
-  #     clus
-  #   }
-  # )
 )
 
 COMMON_DESURV_VAL_TARGETS <- list(
@@ -1407,7 +1165,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
         top_genes = tar_tops_desurv_elbowk$top_genes
       )
       latent
-    }
+    },
+    iteration = "list"
   ),
   
   tar_target(
@@ -1602,6 +1361,105 @@ COMMON_DESURV_VAL_TARGETS <- list(
                               zscore_within_dataset = TRUE)
       temp
     }
+  ),
+  
+  tar_target(
+    clusters_desurv_elbowk_X,
+    {
+      beta = tar_fit_desurv_elbowk$beta
+      facs = which(beta != 0)
+      base_dir = file.path(
+        val_run_bundle$training_results_dir,
+        "validation",
+        val_config_effective$config_id,
+        "desurv_elbowk"
+      )
+      run_clustering(tops = tar_tops_desurv_elbowk$top_genes,
+                     data = data_val_filtered_elbowk,
+                     gene_lists = top_genes,
+                     color.lists = colors,
+                     facs = facs,
+                     base_dir = base_dir,
+                     WtX = FALSE)
+    },
+    pattern = map(data_val_filtered_elbowk),
+    iteration = "list"
+  ),
+  tar_target(
+    nclusters_desurv_elbowk_X,
+    {
+      sel = select_nclusters(clusters_desurv_elbowk_X$clus,k_max=length(clusters_desurv_elbowk_X$clus))
+      sel$k
+    },
+    iteration = "vector",
+    pattern = map(clusters_desurv_elbowk_X)
+  ),
+  tar_target(
+    clusters_desurv_elbowk_X_aligned,
+    {
+      cluster_list = lapply(1:length(clusters_desurv_elbowk_X),function(i){
+        clusters_desurv_elbowk_X[[i]]$clus[[nclusters_desurv_elbowk_X[i]]]$consensusClass
+      })
+      scores_list = lapply(1:length(clusters_desurv_elbowk_X),function(i){
+        t(clusters_desurv_elbowk_X[[i]]$Xtemp)
+      })
+      
+      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
+                              linkage = "average",
+                              similarity_threshold = .5,
+                              zscore_within_dataset = TRUE)
+      temp
+    }
+  ),
+  
+  tar_target(
+    clusters_desurv_elbowk_WtX,
+    {
+      beta = tar_fit_desurv_elbowk$beta
+      facs = which(beta != 0)
+      base_dir = file.path(
+        val_run_bundle$training_results_dir,
+        "validation",
+        val_config_effective$config_id,
+        "desurv_elbowk"
+      )
+      run_clustering(tops = tar_tops_desurv_elbowk$top_genes,
+                     data = val_latent_desurv_elbowk,
+                     gene_lists = top_genes,
+                     color.lists = colors,
+                     facs = facs,
+                     base_dir = base_dir,
+                     WtX = TRUE)
+    },
+    pattern = map(val_latent_desurv_elbowk),
+    iteration = "list"
+  ),
+  tar_target(
+    nclusters_desurv_elbowk_WtX,
+    {
+      sel = select_nclusters(clusters_desurv_elbowk_WtX$clus,
+                             k_max=length(clusters_desurv_elbowk_WtX$clus))
+      sel$k
+    },
+    iteration = "vector",
+    pattern = map(clusters_desurv_elbowk_WtX)
+  ),
+  tar_target(
+    clusters_desurv_elbowk_WtX_aligned,
+    {
+      cluster_list = lapply(1:length(clusters_desurv_elbowk_WtX),function(i){
+        clusters_desurv_elbowk_WtX[[i]]$clus[[nclusters_desurv_elbowk_WtX[i]]]$consensusClass
+      })
+      scores_list = lapply(1:length(val_latent_desurv_elbowk),function(i){
+        val_latent_desurv_elbowk[[i]]$Z_scaled
+      })
+      
+      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
+                              linkage = "average",
+                              similarity_threshold = .5,
+                              zscore_within_dataset = TRUE)
+      temp
+    }
   )
   
   
@@ -1726,6 +1584,24 @@ FIGURE_TARGETS <- list(
   #   ),
   #   format = "file"
   # ),
+  tar_target(
+    fig_dotplots,
+    {
+      p = make_ora_dotplots(ora_analysis_desurv)
+      for(i in 1:length(p)){
+        if(!is.null(p[[i]])){
+          save_plot_pdf(
+            p[[i]],
+            file.path(
+              FIGURE_CONFIGS$panel_dir,
+              sprintf("fig_dotplot_desurv_factor%d_%s.pdf", i, bo_label)
+            )
+          )
+        }
+      }
+      p
+    }
+  ),
   tar_target(
     fig_bio_bundle,
     build_fig_bio_panels(

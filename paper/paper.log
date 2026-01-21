@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.1.8)  20 JAN 2026 18:56
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.1.8)  20 JAN 2026 21:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -919,6 +919,7 @@ Package: fontenc 2025/07/18 v2.1d Standard LaTeX package
 )
 \cslhangindent=\skip154
 \csllabelwidth=\skip155
+\cslentryspacingunit=\skip156
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/bbm-macros/bbm.sty
 Package: bbm 1999/03/15 V 1.2 provides fonts for set symbols - TH
 LaTeX Font Info:    Overwriting math alphabet `\mathbbm' in version `bold'
@@ -934,31 +935,31 @@ Package: pnasresearcharticle 2018/05/06 v1.3 PNAS two column research article st
 ) (./paper.aux)
 \openout1 = `paper.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 140.
-LaTeX Font Info:    ... okay on input line 140.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 140.
-LaTeX Font Info:    ... okay on input line 140.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 140.
-LaTeX Font Info:    ... okay on input line 140.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 140.
-LaTeX Font Info:    ... okay on input line 140.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 140.
-LaTeX Font Info:    ... okay on input line 140.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 140.
-LaTeX Font Info:    ... okay on input line 140.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 140.
-LaTeX Font Info:    ... okay on input line 140.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 140.
-LaTeX Font Info:    ... okay on input line 140.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 140.
-LaTeX Font Info:    ... okay on input line 140.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 134.
+LaTeX Font Info:    ... okay on input line 134.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 134.
+LaTeX Font Info:    ... okay on input line 134.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 134.
+LaTeX Font Info:    ... okay on input line 134.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 134.
+LaTeX Font Info:    ... okay on input line 134.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 134.
+LaTeX Font Info:    ... okay on input line 134.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 134.
+LaTeX Font Info:    ... okay on input line 134.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 134.
+LaTeX Font Info:    ... okay on input line 134.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 134.
+LaTeX Font Info:    ... okay on input line 134.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 134.
+LaTeX Font Info:    ... okay on input line 134.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
-Package hyperref Info: Link coloring ON on input line 140.
+Package hyperref Info: Link coloring ON on input line 134.
 (./paper.out) (./paper.out)
 \@outlinefile=\write4
 \openout4 = `paper.out'.
@@ -1010,17 +1011,17 @@ Package newfloat Info: `sidecap' package detected.
 
 Package sidecap Warning: Package `ragged2e' not found -- expect bad formatting.
 
-LaTeX Info: Redefining \microtypecontext on input line 140.
-Package microtype Info: Applying patch `item' on input line 140.
-Package microtype Info: Applying patch `toc' on input line 140.
+LaTeX Info: Redefining \microtypecontext on input line 134.
+Package microtype Info: Applying patch `item' on input line 134.
+Package microtype Info: Applying patch `toc' on input line 134.
 
-Package microtype Warning: Unable to apply patch `eqnum' on input line 140.
+Package microtype Warning: Unable to apply patch `eqnum' on input line 134.
 
 
-Package microtype Warning: Unable to apply patch `footnote' on input line 140.
+Package microtype Warning: Unable to apply patch `footnote' on input line 134.
 
-Package microtype Info: Applying patch `verbatim' on input line 140.
-LaTeX Info: Redefining \microtypesetup on input line 140.
+Package microtype Info: Applying patch `verbatim' on input line 134.
+LaTeX Info: Redefining \microtypesetup on input line 134.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
@@ -1034,88 +1035,88 @@ Package microtype Info: No adjustment of character kerning.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-cmr.cfg
 File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman (RS)
 )
-LaTeX Font Info:    Trying to load font information for T1+lmss on input line 148.
+LaTeX Font Info:    Trying to load font information for T1+lmss on input line 142.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/t1lmss.fd
 File: t1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Font shape `T1/lmss/b/n' in size <9> not available
-(Font)              Font shape `T1/lmss/bx/n' tried instead on input line 148.
+(Font)              Font shape `T1/lmss/bx/n' tried instead on input line 142.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `lmss' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `T1/lmss/b/n' in size <22> not available
-(Font)              Font shape `T1/lmss/bx/n' tried instead on input line 148.
-LaTeX Font Info:    Trying to load font information for T1+phv on input line 148.
+(Font)              Font shape `T1/lmss/bx/n' tried instead on input line 142.
+LaTeX Font Info:    Trying to load font information for T1+phv on input line 142.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/psnfss/t1phv.fd
 File: t1phv.fd 2020/03/25 scalable font definitions for T1/phv.
 )
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 8.54997pt on input line 148.
+(Font)              scaled to size 8.54997pt on input line 142.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `phv' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 8.54997pt on input line 148.
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 148.
+(Font)              scaled to size 8.54997pt on input line 142.
+LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 142.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 148.
+LaTeX Font Info:    Trying to load font information for OML+lmm on input line 142.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 148.
+LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 142.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 148.
+LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 142.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 148.
+(Font)              <9> on input line 142.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 148.
+(Font)              <6> on input line 142.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 148.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 148.
+(Font)              <5> on input line 142.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 142.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 148.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 142.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 5.69998pt on input line 148.
+(Font)              scaled to size 5.69998pt on input line 142.
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 6.64998pt on input line 148.
+(Font)              scaled to size 6.64998pt on input line 142.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 148.
+(Font)              <7> on input line 142.
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 4.74998pt on input line 148.
+(Font)              scaled to size 4.74998pt on input line 142.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 7.59998pt on input line 150.
-Package mdframed Info: mdframed works in twoside mode on input line 193.
+(Font)              scaled to size 7.59998pt on input line 144.
+Package mdframed Info: mdframed works in twoside mode on input line 187.
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 9.49997pt on input line 193.
+(Font)              scaled to size 9.49997pt on input line 187.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 9.49997pt on input line 193.
+(Font)              scaled to size 9.49997pt on input line 187.
 Package mdframed Info: mdframed inside float 
- mdframed uses option nobreak mdframed on input line 193.
+ mdframed uses option nobreak mdframed on input line 187.
 Package mdframed Info: mdframed inside a box 
- mdframed uses option nobreak mdframed on input line 193.
+ mdframed uses option nobreak mdframed on input line 187.
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 5.69998pt on input line 193.
+(Font)              scaled to size 5.69998pt on input line 187.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 6.64998pt on input line 226.
-LaTeX Font Info:    Trying to load font information for T1+bch on input line 226.
+(Font)              scaled to size 6.64998pt on input line 220.
+LaTeX Font Info:    Trying to load font information for T1+bch on input line 220.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/psnfss/t1bch.fd
 File: t1bch.fd 2004/10/18 font definitions for T1/bch.
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-bch.cfg
@@ -1126,26 +1127,26 @@ File: mt-bch.cfg 2007/03/03 v1.5 microtype config. file: Bitstream Charter (RS)
 ]
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
-(hyperref)                be the same. Added a new anchor on input line 239.
+(hyperref)                be the same. Added a new anchor on input line 235.
 
 <../figures/model_schematic_final.pdf, id=159, 578.16pt x 505.89pt>
 File: ../figures/model_schematic_final.pdf Graphic file (type pdf)
 <use ../figures/model_schematic_final.pdf>
-Package pdftex.def Info: ../figures/model_schematic_final.pdf  used on input line 280.
+Package pdftex.def Info: ../figures/model_schematic_final.pdf  used on input line 276.
 (pdftex.def)             Requested size: 505.69467pt x 289.08589pt.
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 291.
+(hyperref)                removing `math shift' on input line 288.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 291.
+(hyperref)                removing `math shift' on input line 288.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\alpha' on input line 291.
+(hyperref)                removing `\alpha' on input line 288.
 
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 320.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 318.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -1161,122 +1162,122 @@ LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
 Underfull \vbox (badness 4752) has occurred while \output is active []
 
 [3 <../figures/model_schematic_final.pdf>]
-Underfull \hbox (badness 10000) in paragraph at lines 511--512
+Underfull \hbox (badness 10000) in paragraph at lines 517--518
 
  []
 
 [4]
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 7.59998pt on input line 597.
+(Font)              scaled to size 7.59998pt on input line 608.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 599.
+(Font)              <8> on input line 610.
 LaTeX Font Info:    Font shape `T1/phv/b/it' in size <8> not available
-(Font)              Font shape `T1/phv/b/sl' tried instead on input line 640.
+(Font)              Font shape `T1/phv/b/sl' tried instead on input line 651.
 LaTeX Font Info:    Font shape `T1/phv/b/sl' will be
-(Font)              scaled to size 7.59998pt on input line 640.
-Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 648.
+(Font)              scaled to size 7.59998pt on input line 651.
+Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 659.
 
-Underfull \hbox (badness 10000) in paragraph at lines 654--655
+Underfull \hbox (badness 10000) in paragraph at lines 665--666
 []\T1/lmr/m/n/9 (+20) Ini-tial-ize $\OML/lmm/m/it/9 W[]; H[]$ \T1/lmr/m/n/9 (+20) with pos-i-tive en-tries (e.g.,
  []
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 678.
+(hyperref)                removing `math shift' on input line 689.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 678.
+(hyperref)                removing `math shift' on input line 689.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 699.
+(hyperref)                removing `math shift' on input line 710.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 699.
+(hyperref)                removing `math shift' on input line 710.
 
 [5{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}]
-Overfull \hbox (8.5792pt too wide) in paragraph at lines 781--782
+Overfull \hbox (8.5792pt too wide) in paragraph at lines 792--793
 []   \T1/lmr/m/n/9 (-20) Com-pute $\OML/lmm/m/it/9 D \OT1/lmr/m/n/9 (-20) = [] []\OMS/lmsy/m/n/9 k\OML/lmm/m/it/9 W[]\OMS/lmsy/m/n/9 k[]\OML/lmm/m/it/9 ; [] ; \OMS/lmsy/m/n/9 k\OML/lmm/m/it/9 W[]\OMS/lmsy/m/n/9 k[][]$ 
  []
 
 
-Underfull \hbox (badness 1215) in paragraph at lines 782--783
+Underfull \hbox (badness 1215) in paragraph at lines 793--794
 []   \T1/lmr/m/n/9 (+20) and set $\OML/lmm/m/it/9 W[] \OMS/lmsy/m/n/9   \OML/lmm/m/it/9 W[]D[]$\T1/lmr/m/n/9 (+20) , $\OML/lmm/m/it/9 H[] \OMS/lmsy/m/n/9  
  []
 
 
-Underfull \hbox (badness 2717) in paragraph at lines 783--784
+Underfull \hbox (badness 2717) in paragraph at lines 794--795
 [] \T1/lmr/bx/n/9 (+20) if $\OMS/lmsy/m/n/9 L\OT1/lmr/m/n/9 (+20) (\OML/lmm/m/it/9 W[]; H[]; ^^L[]\OT1/lmr/m/n/9 (+20) ) \OMS/lmsy/m/n/9 ^^T L\OT1/lmr/m/n/9 (+20) (\OML/lmm/m/it/9 W[]; H[]; ^^L[]\OT1/lmr/m/n/9 (+20) )$
  []
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 804.
+(hyperref)                removing `math shift' on input line 815.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\beta' on input line 804.
+(hyperref)                removing `\beta' on input line 815.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 804.
+(hyperref)                removing `math shift' on input line 815.
 
 
-Overfull \hbox (30.546pt too wide) detected at line 863
+Overfull \hbox (30.546pt too wide) detected at line 874
 []
  []
 
 
-Overfull \hbox (54.17964pt too wide) detected at line 884
+Overfull \hbox (54.17964pt too wide) detected at line 895
 []
  []
 
 [6] [7]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1140.
+(hyperref)                removing `math shift' on input line 1151.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1140.
+(hyperref)                removing `math shift' on input line 1151.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1184.
+(hyperref)                removing `math shift' on input line 1195.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1184.
+(hyperref)                removing `math shift' on input line 1195.
 
 
 pdfTeX warning (ext4): destination with the same identifier (name{equation.18}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.1235 ...ctors \(\hat{\eta}_i\): \begin{equation}
+l.1246 ...ctors \(\hat{\eta}_i\): \begin{equation}
                                                   
 pdfTeX warning (ext4): destination with the same identifier (name{equation.18}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.1235 ...ctors \(\hat{\eta}_i\): \begin{equation}
+l.1246 ...ctors \(\hat{\eta}_i\): \begin{equation}
                                                   
 pdfTeX warning (ext4): destination with the same identifier (name{equation.18}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.1235 ...ctors \(\hat{\eta}_i\): \begin{equation}
+l.1246 ...ctors \(\hat{\eta}_i\): \begin{equation}
                                                   
 pdfTeX warning (ext4): destination with the same identifier (name{equation.18}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.1235 ...ctors \(\hat{\eta}_i\): \begin{equation}
+l.1246 ...ctors \(\hat{\eta}_i\): \begin{equation}
                                                   
-Underfull \hbox (badness 10000) in paragraph at lines 1259--1260
+Underfull \hbox (badness 10000) in paragraph at lines 1270--1271
 [] \T1/lmr/m/n/9 (+20) Split data into train-ing and val-i-da-tion
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1262--1263
+Underfull \hbox (badness 10000) in paragraph at lines 1273--1274
 [] \T1/lmr/m/n/9 (+20) Ap-ply Al-go-rithm [][]1[][] with in-puts
  []
 
@@ -1284,151 +1285,278 @@ Underfull \hbox (badness 10000) in paragraph at lines 1262--1263
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [8]
-Overfull \hbox (17.39114pt too wide) in paragraph at lines 1307--1307
+Overfull \hbox (17.39114pt too wide) in paragraph at lines 1319--1319
 []\T1/lmtt/m/n/8 ## DeSurv git commit: fea641a96e4743315a35b9b6addcc1a1ff53da9d[] 
  []
 
 
-Overfull \hbox (13.13914pt too wide) in paragraph at lines 1307--1307
-[]\T1/lmtt/m/n/8 ## Paper git commit: b2e6127f8ac6f22c9c4fe6360f8bad832fc998e0[] 
+Overfull \hbox (13.14114pt too wide) in paragraph at lines 1319--1319
+[]\T1/lmtt/m/n/8 ## Paper git commit: 473fa698db611c8f65395f89dae872535d8cafdd[] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1312--1316
-
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1323--1328
+[][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1318--1322
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1324--1328
+Underfull \hbox (badness 10000) in paragraph at lines 1323--1328
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1330--1334
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1329--1334
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1329--1334
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1336--1340
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1335--1340
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1335--1340
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1342--1347
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1341--1346
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1341--1346
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1349--1354
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1347--1352
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1347--1352
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1356--1362
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1353--1358
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1353--1358
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1364--1368
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1359--1364
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1359--1364
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1370--1374
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1365--1371
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1365--1371
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1376--1379
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1372--1377
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1372--1377
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1381--1386
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1378--1383
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1378--1383
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1388--1391
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1384--1388
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1384--1388
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1393--1398
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1389--1395
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1389--1395
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1400--1404
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1396--1400
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1396--1400
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1406--1410
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1401--1406
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1401--1406
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1412--1416
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1407--1412
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1407--1412
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1418--1423
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1413--1418
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1413--1418
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1425--1429
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1419--1424
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1419--1424
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1431--1437
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1425--1431
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1425--1431
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1439--1443
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1432--1437
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1432--1437
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1445--1449
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1438--1444
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1438--1444
 
  []
 
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1445--1450
+[][] []
+ []
 
-[9]
-Underfull \hbox (badness 10000) in paragraph at lines 1451--1455
+
+Underfull \hbox (badness 10000) in paragraph at lines 1445--1450
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1457--1461
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1451--1456
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1451--1456
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1463--1467
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1457--1462
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1457--1462
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1469--1473
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1463--1468
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1463--1468
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1475--1479
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1469--1474
+[][] []
+ []
 
+
+Underfull \hbox (badness 10000) in paragraph at lines 1469--1474
+
+ []
+
+
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1475--1480
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1475--1480
+
+ []
+
+
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1481--1486
+[][] []
  []
 
 
@@ -1437,27 +1565,65 @@ Underfull \hbox (badness 10000) in paragraph at lines 1481--1486
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1488--1492
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[9]
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1487--1493
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1487--1493
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1494--1498
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1494--1499
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1494--1499
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1500--1504
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1500--1505
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1500--1505
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1506--1510
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1506--1511
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1506--1511
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1512--1515
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1512--1517
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1512--1517
+
+ []
+
+
+Overfull \hbox (1.88892pt too wide) in paragraph at lines 1518--1522
+[][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1518--1522
 
  []
 
@@ -1474,18 +1640,18 @@ Package rerunfilecheck Info: File `paper.out' has not changed.
 (rerunfilecheck)             Checksum: BC26F3D6451DF75932E152705FC3886B;7244.
  ) 
 Here is how much of TeX's memory you used:
- 31131 strings out of 469476
- 579539 string characters out of 5467115
- 1039220 words of memory out of 5000000
- 58593 multiletter control sequences out of 15000+600000
+ 31049 strings out of 469476
+ 577094 string characters out of 5467115
+ 1038177 words of memory out of 5000000
+ 58493 multiletter control sequences out of 15000+600000
  757683 words of font info for 370 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  117i,14n,121p,1046b,1115s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvbo8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on paper.pdf (10 pages, 694619 bytes).
+Output written on paper.pdf (10 pages, 694471 bytes).
 PDF statistics:
- 511 PDF objects out of 1000 (max. 8388607)
- 425 compressed objects within 5 object streams
- 107 named destinations out of 1000 (max. 500000)
+ 521 PDF objects out of 1000 (max. 8388607)
+ 435 compressed objects within 5 object streams
+ 125 named destinations out of 1000 (max. 500000)
  91954 words of extra memory for PDF output out of 106986 (max. 10000000)
 

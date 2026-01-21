@@ -14,35 +14,29 @@
 
 
 % Pandoc citation processing
-%From Pandoc 3.1.8
-% definitions for citeproc citations
-\NewDocumentCommand\citeproctext{}{}
-\NewDocumentCommand\citeproc{mm}{%
-  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
-\makeatletter
- % allow citations to break across lines
- \let\@cite@ofmt\@firstofone
- % avoid brackets around text for \cite:
- \def\@biblabel#1{}
- \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
-\makeatother
 \newlength{\cslhangindent}
 \setlength{\cslhangindent}{1.5em}
 \newlength{\csllabelwidth}
 \setlength{\csllabelwidth}{3em}
-\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
- {\begin{list}{}{%
-  \setlength{\itemindent}{0pt}
-  \setlength{\leftmargin}{0pt}
-  \setlength{\parsep}{0pt}
+\newlength{\cslentryspacingunit} % times entry-spacing
+\setlength{\cslentryspacingunit}{\parskip}
+% for Pandoc 2.8 to 2.10.1
+\newenvironment{cslreferences}%
+  {}%
+  {\par}
+% For Pandoc 2.11+
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
   % turn on hanging indent if param 1 is 1
   \ifodd #1
-   \setlength{\leftmargin}{\cslhangindent}
-   \setlength{\itemindent}{-1\cslhangindent}
+  \let\oldpar\par
+  \def\par{\hangindent=\cslhangindent\oldpar}
   \fi
   % set entry spacing
-  \setlength{\itemsep}{#2\baselineskip}}}
- {\end{list}}
+  \setlength{\parskip}{#2\cslentryspacingunit}
+ }%
+ {}
 \usepackage{calc}
 \newcommand{\CSLBlock}[1]{#1\hfill\break}
 \newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
@@ -232,10 +226,12 @@ methodological advance in translational cancer genomics and provides a
 general framework for deriving actionable insights from high-dimensional
 transcriptomic data.
 
-\section*{Results}\label{results}
+\hypertarget{results}{%
+\section*{Results}\label{results}}
 \addcontentsline{toc}{section}{Results}
 
-\subsection*{Model Overview}\label{model-overview}
+\hypertarget{model-overview}{%
+\subsection*{Model Overview}\label{model-overview}}
 \addcontentsline{toc}{subsection}{Model Overview}
 
 We have developed an integrated framework, DeSurv, that couples
@@ -284,9 +280,10 @@ programs (Figure @ref(fig:fig-schema)E).
 \caption{DeSurv overview. Overview of the DeSurv training pipeline. A. The input is a preprocessed bulk gene expression matrix and patient survival outcomes. B. The Desurv model optimizes a joint NMF + Cox loss function. C. The DeSurv model estimates three quantities: Gene weights matrix (W), Subject loadings matrix (H), and regression coefficients from the Cox model (beta). D. We extract the exemplar genes from each signature in the gene weights matrix. E. The exemplar genes from survival associated factors provide prognostic gene signatures.}\label{fig:fig-schema}
 \end{figure*}
 
+\hypertarget{bayesian-optimisation-selects-the-desurv-hyperparameters-k-alpha}{%
 \subsection*{\texorpdfstring{Bayesian optimisation selects the DeSurv
 hyperparameters (\(k\),
-\(\alpha\))}{Bayesian optimisation selects the DeSurv hyperparameters (k, \textbackslash alpha)}}\label{bayesian-optimisation-selects-the-desurv-hyperparameters-k-alpha}
+\(\alpha\))}{Bayesian optimisation selects the DeSurv hyperparameters (k, \textbackslash alpha)}}\label{bayesian-optimisation-selects-the-desurv-hyperparameters-k-alpha}}
 \addcontentsline{toc}{subsection}{Bayesian optimisation selects the
 DeSurv hyperparameters (\(k\), \(\alpha\))}
 
@@ -311,8 +308,9 @@ selection when a supervised criterion is unavailable. These diagnostics
 disagree on the optimal \(k\), underscoring the benefit of the BO-guided
 DeSurv procedure that explicitly maximises prognostic accuracy.
 
+\hypertarget{desurv-captures-prognostic-gene-signatures}{%
 \subsection*{DeSurv captures prognostic gene
-signatures}\label{desurv-captures-prognostic-gene-signatures}
+signatures}\label{desurv-captures-prognostic-gene-signatures}}
 \addcontentsline{toc}{subsection}{DeSurv captures prognostic gene
 signatures}
 
@@ -328,8 +326,9 @@ setting, performance compresses toward chance for both methods,
 suggesting that DeSurv does not manufacture prognostic structure when
 none is present.
 
+\hypertarget{desurv-improves-selection-of-prognostic-gene-signatures}{%
 \subsection*{DeSurv improves selection of prognostic gene
-signatures}\label{desurv-improves-selection-of-prognostic-gene-signatures}
+signatures}\label{desurv-improves-selection-of-prognostic-gene-signatures}}
 \addcontentsline{toc}{subsection}{DeSurv improves selection of
 prognostic gene signatures}
 
@@ -345,8 +344,9 @@ C-index and improved precision, indicating that survival supervision
 helps focus signatures on truly prognostic genes rather than
 reconstruction-only structure.
 
+\hypertarget{desurv-provides-biologically-interpretable-gene-signatures}{%
 \subsection*{DeSurv provides biologically interpretable gene
-signatures}\label{desurv-provides-biologically-interpretable-gene-signatures}
+signatures}\label{desurv-provides-biologically-interpretable-gene-signatures}}
 \addcontentsline{toc}{subsection}{DeSurv provides biologically
 interpretable gene signatures}
 
@@ -391,8 +391,9 @@ represents a composite axis of tumor--stroma-immune interaction,
 capturing biologically coherent programs that align with known PDAC
 ecosystems but arise de novo from the DeSurv model.
 
+\hypertarget{external-validation-with-projected-desurv-factor-scores}{%
 \subsection*{External validation with projected DeSurv factor
-scores}\label{external-validation-with-projected-desurv-factor-scores}
+scores}\label{external-validation-with-projected-desurv-factor-scores}}
 \addcontentsline{toc}{subsection}{External validation with projected
 DeSurv factor scores}
 
@@ -419,7 +420,8 @@ Kaplan--Meier curves for these groups are shown in Figure
 TCGA-PAAD/CPTAC, these analyses represent an independent validation of
 prognostic signal transfer to external datasets.
 
-\subsection*{Bladder cancer analysis}\label{bladder-cancer-analysis}
+\hypertarget{bladder-cancer-analysis}{%
+\subsection*{Bladder cancer analysis}\label{bladder-cancer-analysis}}
 \addcontentsline{toc}{subsection}{Bladder cancer analysis}
 
 We will report a focused bladder cancer analysis here, including a
@@ -427,7 +429,8 @@ dedicated figure. Placeholder text: summary of bladder cohort
 preprocessing, DeSurv factor interpretation, and survival stratification
 results to be added once the bladder figure is finalized.
 
-\section*{Discussion}\label{discussion}
+\hypertarget{discussion}{%
+\section*{Discussion}\label{discussion}}
 \addcontentsline{toc}{section}{Discussion}
 
 We present DeSurv, a survival-driven deconvolution framework that
@@ -486,11 +489,13 @@ time-varying outcomes, further enhancing its ability to resolve dynamic
 tumor--microenvironment interactions that shape disease progression and
 therapy response.
 
-\section*{Materials and methods}\label{materials-and-methods}
+\hypertarget{materials-and-methods}{%
+\section*{Materials and methods}\label{materials-and-methods}}
 \addcontentsline{toc}{section}{Materials and methods}
 
+\hypertarget{problem-formulation-and-notation}{%
 \subsection{Problem formulation and
-notation}\label{problem-formulation-and-notation}
+notation}\label{problem-formulation-and-notation}}
 
 Let \(X \in \mathbb{R}^{p \times n}_{\ge 0}\) denote the nonnegative
 gene expression matrix. DeSurv approximates \(X \approx WH\), where
@@ -502,7 +507,8 @@ censoring indicators, respectively. Survival outcomes are modeled
 through a cox proportional hazards model with covariates
 \(Z = W^\top X\).
 
-\subsection{The DeSurv Model}\label{the-desurv-model}
+\hypertarget{the-desurv-model}{%
+\subsection{The DeSurv Model}\label{the-desurv-model}}
 
 DeSurv integrates Nonnegative Matrix Factorization (NMF) with penalized
 Cox regression to identify gene programs associated with patient
@@ -524,8 +530,9 @@ shown to converge to a stationary point under mild conditions (SI
 Appendix). Complete derivations and algorithmic details are provided in
 the SI Appendix.
 
+\hypertarget{hyperparameter-selection-and-cross-validation}{%
 \subsection{Hyperparameter selection and
-cross-validation}\label{hyperparameter-selection-and-cross-validation}
+cross-validation}\label{hyperparameter-selection-and-cross-validation}}
 
 Hyperparameters \((k,\alpha,\lambda_H,\lambda,\xi)\) were selected by
 maximizing the cross-validated C-index using Bayesian optimization. Each
@@ -545,7 +552,8 @@ datasets \(X_new\) were clustered on genes in \(\tilde{W}\), and
 survival differences were analyzed for the derived clusters. Further
 training, validation, and runtime details appear in the SI Appendix.
 
-\subsection{Simulation studies}\label{simulation-studies}
+\hypertarget{simulation-studies}{%
+\subsection{Simulation studies}\label{simulation-studies}}
 
 Simulation studies were conducted to assess recovery of prognostic
 latent structure and survival prediction. Gene expression data were
@@ -567,9 +575,11 @@ inferred factors, and penalized Cox regression (CoxNet), with all
 methods tuned using the same cross-validated concordance index.
 Performance was summarized across repeated simulation replicates.
 
-\subsection{Evaluation metrics}\label{evaluation-metrics}
+\hypertarget{evaluation-metrics}{%
+\subsection{Evaluation metrics}\label{evaluation-metrics}}
 
-\subsection{Real-world datasets}\label{real-world-datasets}
+\hypertarget{real-world-datasets}{%
+\subsection{Real-world datasets}\label{real-world-datasets}}
 
 We analyzed publicly available RNA-seq and microarray cohorts of
 pancreatic ductal adenocarcinoma (PDAC) and bladder cancer with
@@ -585,8 +595,9 @@ gene expression data was within-subject rank transformed before model
 training. More details about the datasets can be found in the SI
 Appendix.
 
+\hypertarget{simulations-benchmarking-and-availability}{%
 \subsection{Simulations, Benchmarking, and
-Availability}\label{simulations-benchmarking-and-availability}
+Availability}\label{simulations-benchmarking-and-availability}}
 
 Code and processed data used in this study are available at
 {[}repository link{]}.
@@ -1295,7 +1306,8 @@ $
 
 \pnasbreak
 
-\section*{Versioning}\label{versioning}
+\hypertarget{versioning}{%
+\section*{Versioning}\label{versioning}}
 \addcontentsline{toc}{section}{Versioning}
 
 \begin{verbatim}
@@ -1303,213 +1315,208 @@ $
 ## DeSurv git branch: 20260107bugfix
 ## DeSurv git commit: fea641a96e4743315a35b9b6addcc1a1ff53da9d
 ## Paper git branch: main
-## Paper git commit: b2e6127f8ac6f22c9c4fe6360f8bad832fc998e0
+## Paper git commit: 473fa698db611c8f65395f89dae872535d8cafdd
 \end{verbatim}
 
-\phantomsection\label{refs}
-\begin{CSLReferences}{0}{1}
-\bibitem[\citeproctext]{ref-pareja2016triple}
-\CSLLeftMargin{1. }%
+\hypertarget{refs}{}
+\begin{CSLReferences}{0}{0}
+\leavevmode\vadjust pre{\hypertarget{ref-pareja2016triple}{}}%
+\CSLLeftMargin{1. }
 \CSLRightInline{Pareja F, et al. (2016) Triple-negative breast cancer:
 The importance of molecular and histologic subtyping, and recognition of
 low-grade variants. \emph{NPJ breast cancer} 2(1):1--11.}
 
-\bibitem[\citeproctext]{ref-dienstmann2018molecular}
-\CSLLeftMargin{2. }%
+\leavevmode\vadjust pre{\hypertarget{ref-dienstmann2018molecular}{}}%
+\CSLLeftMargin{2. }
 \CSLRightInline{Dienstmann R, Salazar R, Tabernero J (2018) Molecular
 subtypes and the evolution of treatment decisions in metastatic
 colorectal cancer. \emph{Am Soc Clin Oncol Educ Book} 38(38):231--8.}
 
-\bibitem[\citeproctext]{ref-zhou2021clinical}
-\CSLLeftMargin{3. }%
+\leavevmode\vadjust pre{\hypertarget{ref-zhou2021clinical}{}}%
+\CSLLeftMargin{3. }
 \CSLRightInline{Zhou X, et al. (2021) Clinical impact of molecular
 subtyping of pancreatic cancer. \emph{Frontiers in cell and
 developmental biology} 9:743908.}
 
-\bibitem[\citeproctext]{ref-seiler2017impact}
-\CSLLeftMargin{4. }%
+\leavevmode\vadjust pre{\hypertarget{ref-seiler2017impact}{}}%
+\CSLLeftMargin{4. }
 \CSLRightInline{Seiler R, et al. (2017) Impact of molecular subtypes in
 muscle-invasive bladder cancer on predicting response and survival after
 neoadjuvant chemotherapy. \emph{European urology} 72(4):544--554.}
 
-\bibitem[\citeproctext]{ref-prat2015clinical}
-\CSLLeftMargin{5. }%
+\leavevmode\vadjust pre{\hypertarget{ref-prat2015clinical}{}}%
+\CSLLeftMargin{5. }
 \CSLRightInline{Prat A, et al. (2015) Clinical implications of the
 intrinsic molecular subtypes of breast cancer. \emph{The Breast}
 24:S26--S35.}
 
-\bibitem[\citeproctext]{ref-Ou2021}
-\CSLLeftMargin{6. }%
+\leavevmode\vadjust pre{\hypertarget{ref-Ou2021}{}}%
+\CSLLeftMargin{6. }
 \CSLRightInline{Ou F, Michiels S, Shyr Y, Adjei AA, Oberg AL (2021)
-\href{https://doi.org/10.1016/j.jtho.2021.01.1616}{Biomarker discovery
-and validation: Statistical considerations}. \emph{Journal of Thoracic
-Oncology} 16(Suppl 15):S539--S547.}
+Biomarker discovery and validation: Statistical considerations.
+\emph{Journal of Thoracic Oncology} 16(Suppl 15):S539--S547.}
 
-\bibitem[\citeproctext]{ref-Planey2016}
-\CSLLeftMargin{7. }%
-\CSLRightInline{Planey Catherine\,R, Gevaert O (2016)
-\href{https://doi.org/10.1186/s13073-016-0281-4}{CoINcIDE: A framework
-for discovery of patient subtypes across multiple datasets}.
+\leavevmode\vadjust pre{\hypertarget{ref-Planey2016}{}}%
+\CSLLeftMargin{7. }
+\CSLRightInline{Planey Catherine\,R, Gevaert O (2016) CoINcIDE: A
+framework for discovery of patient subtypes across multiple datasets.
 \emph{Genome Medicine} 8(1):27.}
 
-\bibitem[\citeproctext]{ref-Prat2014}
-\CSLLeftMargin{8. }%
-\CSLRightInline{Prat A, Pineda E, Adamo B, et\,al. (2014)
-\href{https://doi.org/10.1093/jnci/dju152}{Molecular features and
-survival outcomes of the intrinsic subtypes in the international breast
-cancer study group trial 10‑93}.
+\leavevmode\vadjust pre{\hypertarget{ref-Prat2014}{}}%
+\CSLLeftMargin{8. }
+\CSLRightInline{Prat A, Pineda E, Adamo B, et\,al. (2014) Molecular
+features and survival outcomes of the intrinsic subtypes in the
+international breast cancer study group trial 10‑93.
 \emph{Journal\,of\,the\,National\,Cancer\,Institute} 106(8):dju152.}
 
-\bibitem[\citeproctext]{ref-ellrott2025classification}
-\CSLLeftMargin{9. }%
+\leavevmode\vadjust pre{\hypertarget{ref-ellrott2025classification}{}}%
+\CSLLeftMargin{9. }
 \CSLRightInline{Ellrott K, et al. (2025) Classification of non-TCGA
 cancer samples to TCGA molecular subtypes using compact feature sets.
 \emph{Cancer cell} 43(2):195--212.}
 
-\bibitem[\citeproctext]{ref-tomczak2015review}
-\CSLLeftMargin{10. }%
+\leavevmode\vadjust pre{\hypertarget{ref-tomczak2015review}{}}%
+\CSLLeftMargin{10. }
 \CSLRightInline{Tomczak K, Czerwińska P, Wiznerowicz M (2015) Review the
 cancer genome atlas (TCGA): An immeasurable source of knowledge.
 \emph{Contemporary Oncology/Wsp{ó}{ł}czesna Onkologia} 2015(1):68--77.}
 
-\bibitem[\citeproctext]{ref-zhang2019international}
-\CSLLeftMargin{11. }%
+\leavevmode\vadjust pre{\hypertarget{ref-zhang2019international}{}}%
+\CSLLeftMargin{11. }
 \CSLRightInline{Zhang J, et al. (2019) The international cancer genome
 consortium data portal. \emph{Nature biotechnology} 37(4):367--369.}
 
-\bibitem[\citeproctext]{ref-nguyen2024fourteen}
-\CSLLeftMargin{12. }%
+\leavevmode\vadjust pre{\hypertarget{ref-nguyen2024fourteen}{}}%
+\CSLLeftMargin{12. }
 \CSLRightInline{Nguyen H, Nguyen H, Tran D, Draghici S, Nguyen T (2024)
 Fourteen years of cellular deconvolution: Methodology, applications,
 technical evaluation and outstanding challenges. \emph{Nucleic Acids
 Research} 52(9):4761--4783.}
 
-\bibitem[\citeproctext]{ref-lee1999learning}
-\CSLLeftMargin{13. }%
+\leavevmode\vadjust pre{\hypertarget{ref-lee1999learning}{}}%
+\CSLLeftMargin{13. }
 \CSLRightInline{Lee DD, Seung HS (1999) Learning the parts of objects by
 non-negative matrix factorization. \emph{nature} 401(6755):788--791.}
 
-\bibitem[\citeproctext]{ref-Bailey2016}
-\CSLLeftMargin{14. }%
-\CSLRightInline{Bailey P, Chang DK, et al. (2016)
-\href{https://doi.org/10.1038/nature16965}{Genomic analyses identify
-molecular subtypes of pancreatic cancer}. \emph{Nature}
+\leavevmode\vadjust pre{\hypertarget{ref-Bailey2016}{}}%
+\CSLLeftMargin{14. }
+\CSLRightInline{Bailey P, Chang DK, et al. (2016) Genomic analyses
+identify molecular subtypes of pancreatic cancer. \emph{Nature}
 531(7592):47--52.}
 
-\bibitem[\citeproctext]{ref-moffitt2015virtual}
-\CSLLeftMargin{15. }%
+\leavevmode\vadjust pre{\hypertarget{ref-moffitt2015virtual}{}}%
+\CSLLeftMargin{15. }
 \CSLRightInline{Moffitt RA, et al. (2015) Virtual microdissection
 identifies distinct tumor-and stroma-specific subtypes of pancreatic
 ductal adenocarcinoma. \emph{Nature genetics} 47(10):1168--1178.}
 
-\bibitem[\citeproctext]{ref-peng2019novo}
-\CSLLeftMargin{16. }%
+\leavevmode\vadjust pre{\hypertarget{ref-peng2019novo}{}}%
+\CSLLeftMargin{16. }
 \CSLRightInline{Peng XL, Moffitt RA, Torphy RJ, Volmar KE, Yeh JJ (2019)
 De novo compartment deconvolution and weight estimation of tumor samples
 using DECODER. \emph{Nature communications} 10(1):4729.}
 
-\bibitem[\citeproctext]{ref-le2025survnmf}
-\CSLLeftMargin{17. }%
+\leavevmode\vadjust pre{\hypertarget{ref-le2025survnmf}{}}%
+\CSLLeftMargin{17. }
 \CSLRightInline{Le Goff V, et al. (2025) SurvNMF: Non-negative matrix
 factorization supervised for survival data analysis. PhD thesis
 (Institut Pasteur Paris; CEA).}
 
-\bibitem[\citeproctext]{ref-huang2020low}
-\CSLLeftMargin{18. }%
+\leavevmode\vadjust pre{\hypertarget{ref-huang2020low}{}}%
+\CSLLeftMargin{18. }
 \CSLRightInline{Huang Z, Salama P, Shao W, Zhang J, Huang K (2020)
 Low-rank reorganization via proportional hazards non-negative matrix
 factorization unveils survival associated gene clusters. \emph{arXiv
 preprint arXiv:200803776}.}
 
-\bibitem[\citeproctext]{ref-seung2001algorithms}
-\CSLLeftMargin{19. }%
+\leavevmode\vadjust pre{\hypertarget{ref-seung2001algorithms}{}}%
+\CSLLeftMargin{19. }
 \CSLRightInline{Seung D, Lee L (2001) Algorithms for non-negative matrix
 factorization. \emph{Advances in neural information processing systems}
 13(556-562):35.}
 
-\bibitem[\citeproctext]{ref-pascualmontano2006nonsmooth}
-\CSLLeftMargin{20. }%
+\leavevmode\vadjust pre{\hypertarget{ref-pascualmontano2006nonsmooth}{}}%
+\CSLLeftMargin{20. }
 \CSLRightInline{Pascual-Montano A, Carazo JM, Kochi K, Lehmann D,
-Pascual-Marqui RD (2006)
-\href{https://doi.org/10.1109/TPAMI.2006.60}{Nonsmooth nonnegative
-matrix factorization}. \emph{IEEE Transactions on Pattern Analysis and
-Machine Intelligence} 28(3):403--415.}
+Pascual-Marqui RD (2006) Nonsmooth nonnegative matrix factorization.
+\emph{IEEE Transactions on Pattern Analysis and Machine Intelligence}
+28(3):403--415.}
 
-\bibitem[\citeproctext]{ref-simon2011regularization}
-\CSLLeftMargin{21. }%
+\leavevmode\vadjust pre{\hypertarget{ref-simon2011regularization}{}}%
+\CSLLeftMargin{21. }
 \CSLRightInline{Simon N, Friedman JH, Hastie T, Tibshirani R (2011)
 Regularization paths for cox's proportional hazards model via coordinate
 descent. \emph{Journal of statistical software} 39:1--13.}
 
-\bibitem[\citeproctext]{ref-lin2007convergence}
-\CSLLeftMargin{22. }%
+\leavevmode\vadjust pre{\hypertarget{ref-lin2007convergence}{}}%
+\CSLLeftMargin{22. }
 \CSLRightInline{Lin C-J (2007) On the convergence of multiplicative
 update algorithms for nonnegative matrix factorization. \emph{IEEE
 Transactions on Neural Networks} 18(6):1589--1596.}
 
-\bibitem[\citeproctext]{ref-tseng2001convergence}
-\CSLLeftMargin{23. }%
+\leavevmode\vadjust pre{\hypertarget{ref-tseng2001convergence}{}}%
+\CSLLeftMargin{23. }
 \CSLRightInline{Tseng P (2001) Convergence of a block coordinate descent
 method for nondifferentiable minimization. \emph{Journal of optimization
 theory and applications} 109(3):475--494.}
 
-\bibitem[\citeproctext]{ref-grippo2000convergence}
-\CSLLeftMargin{24. }%
+\leavevmode\vadjust pre{\hypertarget{ref-grippo2000convergence}{}}%
+\CSLLeftMargin{24. }
 \CSLRightInline{Grippo L, Sciandrone M (2000) On the convergence of the
 block nonlinear gauss--seidel method under convex constraints.
 \emph{Operations research letters} 26(3):127--136.}
 
-\bibitem[\citeproctext]{ref-donoho2004nmf}
-\CSLLeftMargin{25. }%
+\leavevmode\vadjust pre{\hypertarget{ref-donoho2004nmf}{}}%
+\CSLLeftMargin{25. }
 \CSLRightInline{Donoho D, Stodden V (2004) When does non-negative matrix
 factorization give a correct decomposition into parts? \emph{Advances in
 Neural Information Processing Systems}.}
 
-\bibitem[\citeproctext]{ref-laurberg2008uniqueness}
-\CSLLeftMargin{26. }%
+\leavevmode\vadjust pre{\hypertarget{ref-laurberg2008uniqueness}{}}%
+\CSLLeftMargin{26. }
 \CSLRightInline{Laurberg H, Christensen MG, Plumbley MD, Hansen LK,
 Jensen SH (2008) Theorems on the uniqueness of nonnegative matrix
 factorization. \emph{Neurocomputing} 71(1-3):606--616.}
 
-\bibitem[\citeproctext]{ref-gillis2014nmf}
-\CSLLeftMargin{27. }%
+\leavevmode\vadjust pre{\hypertarget{ref-gillis2014nmf}{}}%
+\CSLLeftMargin{27. }
 \CSLRightInline{Gillis N (2014) The why and how of nonnegative matrix
 factorization. \emph{Regularization, Optimization, Kernels, and Support
 Vector Machines} (Chapman; Hall/CRC), pp 257--291.}
 
-\bibitem[\citeproctext]{ref-brunet2004metagenes}
-\CSLLeftMargin{28. }%
+\leavevmode\vadjust pre{\hypertarget{ref-brunet2004metagenes}{}}%
+\CSLLeftMargin{28. }
 \CSLRightInline{Brunet J-P, Tamayo P, Golub TR, Mesirov JP (2004)
 Metagenes and molecular pattern discovery using matrix factorization.
 \emph{Proceedings of the National Academy of Sciences}
 101(12):4164--4169.}
 
-\bibitem[\citeproctext]{ref-kim2007sparse}
-\CSLLeftMargin{29. }%
+\leavevmode\vadjust pre{\hypertarget{ref-kim2007sparse}{}}%
+\CSLLeftMargin{29. }
 \CSLRightInline{Kim H, Park H (2007) Sparse non-negative matrix
 factorization for clustering. \emph{Journal of Scientific Computing}
 36:205--222.}
 
-\bibitem[\citeproctext]{ref-gillis2012accelerated}
-\CSLLeftMargin{30. }%
+\leavevmode\vadjust pre{\hypertarget{ref-gillis2012accelerated}{}}%
+\CSLLeftMargin{30. }
 \CSLRightInline{Gillis N, Glineur F (2012) Accelerated multiplicative
 updates and hierarchical ALS algorithms for nonnegative matrix
 factorization. \emph{Neural Computation} 24(4):1085--1105.}
 
-\bibitem[\citeproctext]{ref-cai2011graph}
-\CSLLeftMargin{31. }%
+\leavevmode\vadjust pre{\hypertarget{ref-cai2011graph}{}}%
+\CSLLeftMargin{31. }
 \CSLRightInline{Cai D, He X, Han J (2011) Graph regularized nonnegative
 matrix factorization for data representation. \emph{IEEE Transactions on
 Pattern Analysis and Machine Intelligence}, pp 1548--1560.}
 
-\bibitem[\citeproctext]{ref-wang2014supervised}
-\CSLLeftMargin{32. }%
+\leavevmode\vadjust pre{\hypertarget{ref-wang2014supervised}{}}%
+\CSLLeftMargin{32. }
 \CSLRightInline{Wang K, Yang P, Yang Y, Sun L (2014) A novel supervised
 nonnegative matrix factorization algorithm for gene expression
 classification. \emph{Computational Biology and Chemistry} 53:189--197.}
 
-\bibitem[\citeproctext]{ref-blei2007slda}
-\CSLLeftMargin{33. }%
+\leavevmode\vadjust pre{\hypertarget{ref-blei2007slda}{}}%
+\CSLLeftMargin{33. }
 \CSLRightInline{Blei DM, McAuliffe JD (2007) Supervised topic models.
 \emph{Advances in Neural Information Processing Systems}.}
 
