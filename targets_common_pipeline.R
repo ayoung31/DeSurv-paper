@@ -1561,6 +1561,105 @@ COMMON_DESURV_VAL_TARGETS <- list(
                               zscore_within_dataset = TRUE)
       temp
     }
+  ),
+  
+  tar_target(
+    clusters_std_desurvk_X,
+    {
+      beta = fit_std_desurvk$beta
+      facs = which(beta != 0)
+      base_dir = file.path(
+        val_run_bundle$training_results_dir,
+        "validation",
+        val_config_effective$config_id,
+        "std_desurvk"
+      )
+      run_clustering(tops = tar_tops_std_desurvk$top_genes,
+                     data = data_val_filtered,
+                     gene_lists = top_genes,
+                     color.lists = colors,
+                     facs = facs,
+                     base_dir = base_dir,
+                     WtX = FALSE)
+    },
+    pattern = map(data_val_filtered),
+    iteration = "list"
+  ),
+  tar_target(
+    nclusters_std_desurvk_X,
+    {
+      sel = select_nclusters(clusters_std_desurvk_X$clus,k_max=length(clusters_std_desurvk_X$clus))
+      sel$k
+    },
+    iteration = "vector",
+    pattern = map(clusters_std_desurvk_X)
+  ),
+  tar_target(
+    clusters_std_desurvk_X_aligned,
+    {
+      cluster_list = lapply(1:length(clusters_std_desurvk_X),function(i){
+        clusters_std_desurvk_X[[i]]$clus[[nclusters_std_desurvk_X[i]]]$consensusClass
+      })
+      scores_list = lapply(1:length(clusters_std_desurvk_X),function(i){
+        t(clusters_std_desurvk_X[[i]]$Xtemp)
+      })
+      
+      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
+                              linkage = "average",
+                              similarity_threshold = .5,
+                              zscore_within_dataset = TRUE)
+      temp
+    }
+  ),
+  
+  tar_target(
+    clusters_std_desurvk_WtX,
+    {
+      beta = fit_std_desurvk$beta
+      facs = which(beta != 0)
+      base_dir = file.path(
+        val_run_bundle$training_results_dir,
+        "validation",
+        val_config_effective$config_id,
+        "std_desurvk"
+      )
+      run_clustering(tops = tar_tops_std_desurvk$top_genes,
+                     data = val_latent_std_desurvk,
+                     gene_lists = top_genes,
+                     color.lists = colors,
+                     facs = facs,
+                     base_dir = base_dir,
+                     WtX = TRUE)
+    },
+    pattern = map(val_latent_std_desurvk),
+    iteration = "list"
+  ),
+  tar_target(
+    nclusters_std_desurvk_WtX,
+    {
+      sel = select_nclusters(clusters_std_desurvk_WtX$clus,
+                             k_max=length(clusters_std_desurvk_WtX$clus))
+      sel$k
+    },
+    iteration = "vector",
+    pattern = map(clusters_std_desurvk_WtX)
+  ),
+  tar_target(
+    clusters_std_desurvk_WtX_aligned,
+    {
+      cluster_list = lapply(1:length(clusters_std_desurvk_WtX),function(i){
+        clusters_std_desurvk_WtX[[i]]$clus[[nclusters_std_desurvk_WtX[i]]]$consensusClass
+      })
+      scores_list = lapply(1:length(val_latent_std_desurvk),function(i){
+        val_latent_std_desurvk[[i]]$Z_scaled
+      })
+      
+      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
+                              linkage = "average",
+                              similarity_threshold = .5,
+                              zscore_within_dataset = TRUE)
+      temp
+    }
   )
   
   
