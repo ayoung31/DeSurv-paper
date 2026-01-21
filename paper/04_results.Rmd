@@ -16,10 +16,7 @@ library(viridis)
 library(ggplotify)
 library(NMF)
 
-tar_load(fig_bo_panel_a_tcgacptac)
-tar_load(fig_bo_panel_b_tcgacptac)
-tar_load(fig_bo_panel_c_tcgacptac)
-tar_load(fig_bo_panel_d_tcgacptac)
+
 tar_load(sim_figs_by_scenario)
 tar_load(fig_bio_panel_a_tcgacptac)
 tar_load(fig_bio_panel_b_tcgacptac)
@@ -59,7 +56,10 @@ Figure \@ref(fig:fig-bo) summarises the optimisation run. Panel A reports the be
 For reference we still report standard NMF heuristics (Panels B-D: cophenetic, residuals, and silhouette), which historically guide rank selection when a supervised criterion is unavailable. These diagnostics disagree on the optimal $k$, underscoring the benefit of the BO-guided DeSurv procedure that explicitly maximises prognostic accuracy.
 
 ```{r fig-bo, fig.width = 6, fig.height= 5.5, fig.cap="A. Best observed CV C-index versus k for the supervised and $\\alpha$ = 0 searches with cross-validation SE error bars. B-D. Conventional NMF diagnostics (cophenetic, residuals, silhouette) for the unsupervised baseline." , fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
-
+tar_load(fig_bo_cvk_tcgacptac)
+tar_load(fig_residuals_tcgacptac)
+tar_load(fig_cophenetic_tcgacptac)
+tar_load(fig_silhouette_tcgacptac)
 
 ```
 

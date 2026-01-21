@@ -230,7 +230,7 @@ desurv_validation_entry_cindex <- function(entry) {
   }
   surv_obj <- survival::Surv(surv_df$time[valid], surv_df$event[valid])
   cc <- tryCatch(
-    survival::concordance(surv_obj ~ risk[valid]),
+    survival::concordance(surv_obj ~ risk[valid],reverse=TRUE),
     error = function(e) survival::survConcordance(surv_obj ~ risk[valid])
   )
   unname(cc$concordance)

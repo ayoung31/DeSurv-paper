@@ -42,5 +42,5 @@ run_clustering <- function(tops,
   }
 
   
-  return(clusCol)
+  return(list(clus = clusCol, data = data, Xtemp = Xtemp))
 }

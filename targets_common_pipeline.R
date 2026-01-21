@@ -1375,7 +1375,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
         )
       )
       latent
-    }
+    },
+    iteration = "list"
   ),
   tar_target(
     val_latent_desurv_alpha0,
@@ -1530,81 +1531,201 @@ COMMON_DESURV_VAL_TARGETS <- list(
   tar_target(
     nclusters_desurv_X,
     {
-      sel = select_nclusters(clusters_desurv_X,k_max=length(clusters_desurv_X))
+      sel = select_nclusters(clusters_desurv_X$clus,k_max=length(clusters_desurv_X$clus))
       sel$k
     },
     iteration = "vector",
     pattern = map(clusters_desurv_X)
+  ),
+  tar_target(
+    clusters_desurv_X_aligned,
+    {
+      cluster_list = lapply(1:length(clusters_desurv_X),function(i){
+        clusters_desurv_X[[i]]$clus[[nclusters_desurv_X[i]]]$consensusClass
+      })
+      scores_list = lapply(1:length(clusters_desurv_X),function(i){
+        t(clusters_desurv_X[[i]]$Xtemp)
+      })
+
+      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
+                         linkage = "average",
+                         similarity_threshold = .5,
+                         zscore_within_dataset = TRUE)
+      temp
+    }
+  ),
+  
+  tar_target(
+    clusters_desurv_WtX,
+    {
+      beta = tar_fit_desurv$beta
+      facs = which(beta != 0)
+      base_dir = file.path(
+        val_run_bundle$training_results_dir,
+        "validation",
+        val_config_effective$config_id,
+        "desurv"
+      )
+      run_clustering(tops = tar_tops_desurv$top_genes,
+                     data = val_latent_desurv,
+                     gene_lists = top_genes,
+                     color.lists = colors,
+                     facs = facs,
+                     base_dir = base_dir,
+                     WtX = TRUE)
+    },
+    pattern = map(val_latent_desurv),
+    iteration = "list"
+  ),
+  tar_target(
+    nclusters_desurv_WtX,
+    {
+      sel = select_nclusters(clusters_desurv_WtX$clus,k_max=length(clusters_desurv_WtX$clus))
+      sel$k
+    },
+    iteration = "vector",
+    pattern = map(clusters_desurv_WtX)
+  ),
+  tar_target(
+    clusters_desurv_WtX_aligned,
+    {
+      cluster_list = lapply(1:length(clusters_desurv_WtX),function(i){
+        clusters_desurv_WtX[[i]]$clus[[nclusters_desurv_WtX[i]]]$consensusClass
+      })
+      scores_list = lapply(1:length(val_latent_desurv),function(i){
+        val_latent_desurv[[i]]$Z_scaled
+      })
+      
+      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
+                              linkage = "average",
+                              similarity_threshold = .5,
+                              zscore_within_dataset = TRUE)
+      temp
+    }
   )
-  # tar_target(
-  #   clusters_desurv_X_aligned,
-  #   {
-  #     
-  #   },
-  #   pattern = map(clusters_desurv_X)
-  #   )
+  
+  
 )
 
 FIGURE_TARGETS <- list(
+  # tar_target(
+  #   fig_bo_panels,
+  #   build_fig_bo_panels(
+  #     bo_history_path = desurv_bo_history,
+  #     bo_history_alpha0_path = desurv_bo_history_alpha0,
+  #     bo_results_supervised = desurv_bo_results,
+  #     bo_results_alpha0 = desurv_bo_results_alpha0,
+  #     fit_std = fit_std
+  #   ),
+  #   packages = c("ggplot2", "dplyr", "cowplot", "tibble", "DiceKriging", "NMF")
+  # ),
   tar_target(
-    fig_bo_panels,
-    build_fig_bo_panels(
-      bo_history_path = desurv_bo_history,
-      bo_history_alpha0_path = desurv_bo_history_alpha0,
-      bo_results_supervised = desurv_bo_results,
-      bo_results_alpha0 = desurv_bo_results_alpha0,
-      fit_std = fit_std
-    ),
-    packages = c("ggplot2", "dplyr", "cowplot", "tibble", "DiceKriging", "NMF")
-  ),
-  tar_target(fig_bo_panel_a, fig_bo_panels$A),
-  tar_target(fig_bo_panel_b, fig_bo_panels$B),
-  tar_target(fig_bo_panel_c, fig_bo_panels$C),
-  tar_target(fig_bo_panel_d, fig_bo_panels$D),
-  tar_target(
-    fig_bo_panel_a_file,
-    save_plot_pdf(
-      fig_bo_panel_a,
-      file.path(
-        FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bo_%s_panel_a.pdf", bo_label)
+    fig_bo_cvk,
+    {
+      p = make_bo_best_observed_plot(bo_history_path = desurv_bo_history,
+                                 bo_results = desurv_bo_results,
+                                 method_label = "DeSurv")
+      save_plot_pdf(
+        p,
+        file.path(
+          FIGURE_CONFIGS$panel_dir,
+          sprintf("fig_bo_cvk_%s.pdf", bo_label)
+        )
       )
-    ),
-    format = "file"
+      p
+    }
+    
   ),
   tar_target(
-    fig_bo_panel_b_file,
-    save_plot_pdf(
-      fig_bo_panel_b,
-      file.path(
-        FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bo_%s_panel_b.pdf", bo_label)
+    fig_residuals,
+    {
+      p=make_nmf_metric_plot(fit_std, "residuals")
+      save_plot_pdf(
+        p,
+        file.path(
+          FIGURE_CONFIGS$panel_dir,
+          sprintf("fig_residuals_%s.pdf", bo_label)
+        )
       )
-    ),
-    format = "file"
+      p
+    }
   ),
   tar_target(
-    fig_bo_panel_c_file,
-    save_plot_pdf(
-      fig_bo_panel_c,
-      file.path(
-        FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bo_%s_panel_c.pdf", bo_label)
+    fig_cophenetic,
+    {
+      p = make_nmf_metric_plot(fit_std, "cophenetic")
+      save_plot_pdf(
+        p,
+        file.path(
+          FIGURE_CONFIGS$panel_dir,
+          sprintf("fig_cophenetic_%s.pdf", bo_label)
+        )
       )
-    ),
-    format = "file"
+      p
+    }
   ),
   tar_target(
-    fig_bo_panel_d_file,
-    save_plot_pdf(
-      fig_bo_panel_d,
-      file.path(
-        FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bo_%s_panel_d.pdf", bo_label)
+    fig_silhouette,
+    {
+      p = make_nmf_metric_plot(fit_std, "silhouette")
+      save_plot_pdf(
+        p,
+        file.path(
+          FIGURE_CONFIGS$panel_dir,
+          sprintf("fig_cophenetic_%s.pdf", bo_label)
+        )
       )
-    ),
-    format = "file"
+      p
+    }
   ),
+  # tar_target(fig_bo_panel_a, fig_bo_panels$A),
+  # tar_target(fig_bo_panel_b, fig_bo_panels$B),
+  # tar_target(fig_bo_panel_c, fig_bo_panels$C),
+  # tar_target(fig_bo_panel_d, fig_bo_panels$D),
+  # tar_target(
+  #   fig_bo_panel_a_file,
+  #   save_plot_pdf(
+  #     fig_bo_panel_a,
+  #     file.path(
+  #       FIGURE_CONFIGS$panel_dir,
+  #       sprintf("fig_bo_%s_panel_a.pdf", bo_label)
+  #     )
+  #   ),
+  #   format = "file"
+  # ),
+  # tar_target(
+  #   fig_bo_panel_b_file,
+  #   save_plot_pdf(
+  #     fig_bo_panel_b,
+  #     file.path(
+  #       FIGURE_CONFIGS$panel_dir,
+  #       sprintf("fig_bo_%s_panel_b.pdf", bo_label)
+  #     )
+  #   ),
+  #   format = "file"
+  # ),
+  # tar_target(
+  #   fig_bo_panel_c_file,
+  #   save_plot_pdf(
+  #     fig_bo_panel_c,
+  #     file.path(
+  #       FIGURE_CONFIGS$panel_dir,
+  #       sprintf("fig_bo_%s_panel_c.pdf", bo_label)
+  #     )
+  #   ),
+  #   format = "file"
+  # ),
+  # tar_target(
+  #   fig_bo_panel_d_file,
+  #   save_plot_pdf(
+  #     fig_bo_panel_d,
+  #     file.path(
+  #       FIGURE_CONFIGS$panel_dir,
+  #       sprintf("fig_bo_%s_panel_d.pdf", bo_label)
+  #     )
+  #   ),
+  #   format = "file"
+  # ),
   tar_target(
     fig_bio_bundle,
     build_fig_bio_panels(

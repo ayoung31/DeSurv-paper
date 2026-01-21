@@ -138,7 +138,7 @@ meta_cluster_align <- function(scores_list,
   }
   
   # add assignments + a simple “support” metric per dataset
-  centroid_table$meta_cluster <- as.integer(meta_id[centroid_table$cluster_uid])
+  centroid_table$meta_cluster <- as.integer(meta_id[paste0(centroid_table$dataset_id,".",centroid_table$cluster_uid)])
   
   # per-meta-cluster support across datasets
   support <- aggregate(dataset_id ~ meta_cluster, data = centroid_table,

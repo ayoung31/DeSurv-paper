@@ -249,6 +249,37 @@ make_bo_best_observed_plot_combined <- function(best_df, cindex_label = "Best ob
     ggplot2::theme(legend.position = "bottom")
 }
 
+make_bo_best_observed_plot <- function(bo_history_path, bo_results, method_label = "none",
+                                       cindex_label = "Best observed CV C-index") {
+  bo_history <- prepare_bo_history(bo_history_path)
+  eval_se <- compute_bo_eval_se(
+    collect_bo_diagnostics(bo_results, bo_history)
+  )
+  best_df <- summarize_bo_best_per_k(
+    bo_history,
+    eval_se,
+    method_label = method_label
+  )
+  
+  ggplot2::ggplot(
+    best_df,
+    ggplot2::aes(x = k, y = c_best)
+  ) +
+    ggplot2::geom_errorbar(
+      ggplot2::aes(ymin = c_best - c_se, ymax = c_best + c_se),
+      width = 0.15
+    ) +
+    ggplot2::geom_line(linewidth = 0.7) +
+    ggplot2::geom_point(size = 2) +
+    ggplot2::scale_x_continuous(breaks = sort(unique(best_df$k))) +
+    ggplot2::labs(
+      x = "Rank k",
+      y = cindex_label,
+      color = NULL
+    ) +
+    ggplot2::theme_minimal(base_size = 9)
+}
+
 make_cindex_violin <- function(history_df, label) {
   k_col <- intersect(c("k", "k_grid"), names(history_df))[1]
   k_levels <- sort(unique(history_df[[k_col]]))
