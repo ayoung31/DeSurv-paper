@@ -281,6 +281,7 @@ make_bo_best_observed_plot <- function(bo_history_path, bo_results, method_label
 }
 
 
+
 summarize_bo_best_per_alpha <- function(history_df, eval_se_df, method_label) {
   alpha_col <- intersect(c("alpha", "alpha_grid"), names(history_df))[1]
   if (is.na(alpha_col)) {
@@ -394,7 +395,7 @@ normalize_gp_params <- function(param_df, bounds_df) {
   param_df
 }
 
-extract_gp_curve <- function(bo_results, history_df, ci_level = 0.95) {
+extract_gp_curve_k <- function(bo_results, ci_level = 0.95) {
   if (!is.numeric(ci_level) || length(ci_level) != 1 || ci_level <= 0 || ci_level >= 1) {
     stop("ci_level must be a single numeric value between 0 and 1.")
   }
@@ -406,15 +407,10 @@ extract_gp_curve <- function(bo_results, history_df, ci_level = 0.95) {
   if (is.null(param_names)) {
     stop("GP design matrix has no column names.")
   }
-
-  k_col <- intersect(c("k", "k_grid"), names(history_df))[1]
-  best_per_k <- history_df %>%
-    dplyr::group_by(.data[[k_col]]) %>%
-    dplyr::arrange(desc(mean_cindex)) %>%
-    dplyr::slice_head(n = 1) %>%
-    dplyr::ungroup() %>%
-    dplyr::mutate(k_numeric = as.numeric(.data[[k_col]])) %>%
-    dplyr::arrange(k_numeric)
+  selected = bo_results$overall_best$params
+  best_per_k = data.frame(k_grid = 2:12,alpha_grid = selected['alpha_grid'],
+             lambda_grid = selected['lambda_grid'],nu_grid = selected['nu_grid'],
+             ntop = selected['ntop'])
 
   newdata_actual <- best_per_k[, param_names, drop = FALSE]
   newdata_scaled <- normalize_gp_params(newdata_actual, bounds)
@@ -429,14 +425,52 @@ extract_gp_curve <- function(bo_results, history_df, ci_level = 0.95) {
 
   z_value <- stats::qnorm((1 + ci_level) / 2)
   tibble::tibble(
-    k = best_per_k$k_numeric,
+    k = best_per_k$k_grid,
     mean = preds$mean,
     lower = preds$mean - z_value * preds$sd,
     upper = preds$mean + z_value * preds$sd
   )
 }
 
-make_gp_curve_plot <- function(curve_df, label) {
+extract_gp_curve <- function(bo_results,params, ci_level = 0.95) {
+  if (!is.numeric(ci_level) || length(ci_level) != 1 || ci_level <= 0 || ci_level >= 1) {
+    stop("ci_level must be a single numeric value between 0 and 1.")
+  }
+  runs <- bo_results[["runs"]]
+  last_run <- runs[[length(runs)]]
+  km_fit <- last_run[["km_fit"]]
+  bounds <- last_run[["bounds"]]
+  param_names <- colnames(km_fit@X)
+  if (is.null(param_names)) {
+    stop("GP design matrix has no column names.")
+  }
+  selected = params
+  best_per_k = expand.grid(k_grid = 2:12,alpha_grid = seq(0,1,.1),
+                          lambda_grid = selected$lambda,nu_grid = selected$nu,
+                          ntop = selected$ntop)
+  
+  newdata_actual <- best_per_k[, param_names, drop = FALSE]
+  newdata_scaled <- normalize_gp_params(newdata_actual, bounds)
+  
+  preds <- DiceKriging::predict(
+    km_fit,
+    newdata = newdata_scaled,
+    type = "UK",
+    se.compute = TRUE,
+    cov.compute = FALSE
+  )
+  
+  z_value <- stats::qnorm((1 + ci_level) / 2)
+  tibble::tibble(
+    k = best_per_k$k_grid,
+    alpha = best_per_k$alpha_grid,
+    mean = preds$mean,
+    lower = preds$mean - z_value * preds$sd,
+    upper = preds$mean + z_value * preds$sd
+  )
+}
+
+make_gp_curve_plot_k <- function(curve_df, label) {
   ggplot2::ggplot(curve_df, ggplot2::aes(x = k, y = mean, group = 1)) +
     ggplot2::geom_ribbon(
       ggplot2::aes(ymin = lower, ymax = upper),
@@ -453,6 +487,25 @@ make_gp_curve_plot <- function(curve_df, label) {
     ) +
     ggplot2::theme_minimal(base_size = 9)
 }
+
+make_gp_curve_plot_alpha <- function(curve_df, label) {
+  ggplot2::ggplot(curve_df, ggplot2::aes(x = alpha, y = mean, group = 1)) +
+    ggplot2::geom_ribbon(
+      ggplot2::aes(ymin = lower, ymax = upper),
+      fill = "#b2df8a",
+      alpha = 0.4
+    ) +
+    ggplot2::geom_line(color = "#33a02c", linewidth = 0.7) +
+    ggplot2::geom_point(color = "#33a02c", size = 2) +
+    ggplot2::scale_x_continuous(breaks = curve_df$alpha) +
+    ggplot2::labs(
+      x = "Supervision strength",
+      y = "GP-predicted CV C-index",
+      tag = label
+    ) +
+    ggplot2::theme_minimal(base_size = 9)
+}
+
 
 make_gp_curve_plot_combined <- function(curve_df) {
   ggplot2::ggplot(

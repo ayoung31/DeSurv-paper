@@ -1705,6 +1705,38 @@ FIGURE_TARGETS <- list(
   ),
   
   tar_target(
+    fig_bo_heat,
+    {
+      curve = extract_gp_curve(desurv_bo_results,tar_params_best)
+      ggplot(curve, aes(x = k, y = alpha, fill = mean)) +
+        geom_tile(color = NA) +
+        scale_x_continuous(
+          breaks = function(x) seq(2,12, by = 1)
+        ) +
+        scale_fill_viridis_c(
+          name = "CV C-index",
+          option = "D",
+          guide = guide_colorbar(
+            barheight = unit(3, "cm"),
+            barwidth  = unit(0.4, "cm")
+          )
+        ) +
+        labs(
+          x = "Number of components (k)",
+          y = "Supervision strength"
+        ) +
+        theme_minimal(base_size = 12) +
+        theme(
+          panel.grid = element_blank(),
+          axis.title = element_text(face = "bold"),
+          axis.text  = element_text(color = "black"),
+          legend.title = element_text(face = "bold"),
+          legend.text  = element_text(color = "black")
+        )
+    }
+  ),
+  
+  tar_target(
     fig_residuals,
     {
       p=make_nmf_metric_plot(fit_std, "residuals")

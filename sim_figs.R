@@ -7,7 +7,7 @@ suppressPackageStartupMessages({
 
 sim_method_colors <- c(
   "DeSurv" = "#1f78b4",
-  "alpha=0" = "#e31a1c"
+  "NMF" = "#e31a1c"
 )
 
 sim_pub_theme <- function(base_size = 12) {
@@ -65,8 +65,8 @@ build_sim_fig_data <- function(sim_results_table,
   scenario_col <- if ("scenario_id" %in% names(results)) "scenario_id" else "scenario"
   results <- results %>%
     dplyr::mutate(
-      method = dplyr::if_else(alpha == 0, "alpha=0", "DeSurv"),
-      method = factor(method, levels = c("DeSurv", "alpha=0")),
+      method = dplyr::if_else(alpha == 0, "NMF", "DeSurv"),
+      method = factor(method, levels = c("DeSurv", "NMF")),
       precision = purrr::map_dbl(
         lethal_factor_metrics,
         mean_lethal_metric,
@@ -110,7 +110,7 @@ plot_sim_k_hist <- function(k_plot_data, true_k_tbl, base_size = 12) {
     linetype = "dashed",
     linewidth = 0.4
   ) +
-    ggplot2::facet_grid(scenario_panel ~ method) +
+    ggplot2::facet_grid(~ method) +
     ggplot2::scale_fill_manual(values = sim_method_colors, guide = "none") +
     ggplot2::scale_x_continuous(breaks = sort(unique(k_plot_data$k))) +
     ggplot2::labs(
@@ -133,7 +133,7 @@ plot_sim_metric_box <- function(results, metric, title, ylab, base_size = 12) {
         size = 0.8,
         alpha = 0.35
       ) +
-      ggplot2::facet_wrap(~ scenario_panel) +
+      # ggplot2::facet_wrap(~ scenario_panel) +
       ggplot2::scale_fill_manual(values = sim_method_colors) +
       ggplot2::scale_color_manual(values = sim_method_colors, guide = "none") +
       ggplot2::labs(
