@@ -1666,17 +1666,7 @@ COMMON_DESURV_VAL_TARGETS <- list(
 )
 
 FIGURE_TARGETS <- list(
-  # tar_target(
-  #   fig_bo_panels,
-  #   build_fig_bo_panels(
-  #     bo_history_path = desurv_bo_history,
-  #     bo_history_alpha0_path = desurv_bo_history_alpha0,
-  #     bo_results_supervised = desurv_bo_results,
-  #     bo_results_alpha0 = desurv_bo_results_alpha0,
-  #     fit_std = fit_std
-  #   ),
-  #   packages = c("ggplot2", "dplyr", "cowplot", "tibble", "DiceKriging", "NMF")
-  # ),
+
   tar_target(
     fig_bo_cvk,
     {
@@ -1736,54 +1726,7 @@ FIGURE_TARGETS <- list(
       p
     }
   ),
-  # tar_target(fig_bo_panel_a, fig_bo_panels$A),
-  # tar_target(fig_bo_panel_b, fig_bo_panels$B),
-  # tar_target(fig_bo_panel_c, fig_bo_panels$C),
-  # tar_target(fig_bo_panel_d, fig_bo_panels$D),
-  # tar_target(
-  #   fig_bo_panel_a_file,
-  #   save_plot_pdf(
-  #     fig_bo_panel_a,
-  #     file.path(
-  #       FIGURE_CONFIGS$panel_dir,
-  #       sprintf("fig_bo_%s_panel_a.pdf", bo_label)
-  #     )
-  #   ),
-  #   format = "file"
-  # ),
-  # tar_target(
-  #   fig_bo_panel_b_file,
-  #   save_plot_pdf(
-  #     fig_bo_panel_b,
-  #     file.path(
-  #       FIGURE_CONFIGS$panel_dir,
-  #       sprintf("fig_bo_%s_panel_b.pdf", bo_label)
-  #     )
-  #   ),
-  #   format = "file"
-  # ),
-  # tar_target(
-  #   fig_bo_panel_c_file,
-  #   save_plot_pdf(
-  #     fig_bo_panel_c,
-  #     file.path(
-  #       FIGURE_CONFIGS$panel_dir,
-  #       sprintf("fig_bo_%s_panel_c.pdf", bo_label)
-  #     )
-  #   ),
-  #   format = "file"
-  # ),
-  # tar_target(
-  #   fig_bo_panel_d_file,
-  #   save_plot_pdf(
-  #     fig_bo_panel_d,
-  #     file.path(
-  #       FIGURE_CONFIGS$panel_dir,
-  #       sprintf("fig_bo_%s_panel_d.pdf", bo_label)
-  #     )
-  #   ),
-  #   format = "file"
-  # ),
+
   tar_target(
     fig_dotplots_desurv,
     {
@@ -1816,65 +1759,7 @@ FIGURE_TARGETS <- list(
       p
     }
   ),
-  tar_target(
-    fig_bio_bundle,
-    build_fig_bio_panels(
-      ora_analysis = ora_analysis_desurv,
-      fit_desurv = tar_fit_desurv,
-      tops_desurv = tar_tops_desurv,
-      top_genes_ref = top_genes
-    ),
-    packages = c("ggplot2", "dplyr", "stringr", "viridis", "cowplot", "purrr", "enrichplot", "pheatmap")
-  ),
-  tar_target(fig_bio_panels, fig_bio_bundle$panels),
-  tar_target(fig_bio_panel_a, fig_bio_panels$A),
-  tar_target(fig_bio_panel_b, fig_bio_panels$B),
-  tar_target(fig_bio_panel_c, fig_bio_panels$C),
-  tar_target(fig_bio_panel_d, fig_bio_panels$D),
-  tar_target(
-    fig_bio_panel_a_file,
-    save_plot_pdf(
-      fig_bio_panel_a,
-      file.path(
-        FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bio_%s_panel_a.pdf", bo_label)
-      )
-    ),
-    format = "file"
-  ),
-  tar_target(
-    fig_bio_panel_b_file,
-    save_plot_pdf(
-      fig_bio_panel_b,
-      file.path(
-        FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bio_%s_panel_b.pdf", bo_label)
-      )
-    ),
-    format = "file"
-  ),
-  tar_target(
-    fig_bio_panel_c_file,
-    save_plot_pdf(
-      fig_bio_panel_c,
-      file.path(
-        FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bio_%s_panel_c.pdf", bo_label)
-      )
-    ),
-    format = "file"
-  ),
-  tar_target(
-    fig_bio_panel_d_file,
-    save_plot_pdf(
-      fig_bio_panel_d,
-      file.path(
-        FIGURE_CONFIGS$panel_dir,
-        sprintf("fig_bio_%s_panel_d.pdf", bo_label)
-      )
-    ),
-    format = "file"
-  ),
+  
   tar_target(
     fig_sc_panels,
     build_fig_sc_panels(

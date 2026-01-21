@@ -18,10 +18,7 @@ library(NMF)
 
 
 tar_load(sim_figs_by_scenario)
-tar_load(fig_bio_panel_a_tcgacptac)
-tar_load(fig_bio_panel_b_tcgacptac)
-tar_load(fig_bio_panel_c_tcgacptac)
-tar_load(fig_bio_panel_d_tcgacptac)
+
 tar_load(fig_extval_panel_a_tcgacptac)
 tar_load(fig_extval_panel_b_tcgacptac)
 tar_load(fig_extval_panel_c_tcgacptac)
@@ -68,7 +65,8 @@ tar_load(fig_silhouette_tcgacptac)
 To isolate how supervision shapes the recovered gene programs, we highlight the BO-tuned $\texttt{n\_top}$ simulations in two contrasting regimes. The R0\_easy setting contains a clear survival signal, whereas R00\_null contains no prognostic structure by design. Figure \@ref(fig:fig-sim-ntop-scenarios) shows that in R0\_easy, DeSurv attains higher test C-index and improved precision for lethal genes relative to the $\alpha=0$ baseline, indicating that supervision concentrates the signatures on true survival drivers. In the null setting, performance compresses toward chance for both methods, suggesting that DeSurv does not manufacture prognostic structure when none is present.
 
 ```{r fig-sim-ntop-scenarios, fig.width = 6.5, fig.height = 6, fig.cap="BO-tuned signature size in targeted simulation scenarios. A-B. Test C-index and precision (mean across lethal factors) for the R0_easy scenario. C-D. Corresponding results for the R00_null scenario. Boxes compare DeSurv to the $\\alpha=0$ baseline.", fig.env='figure*', fig.pos='t', out.width='\\textwidth'}
-
+tar_load(fig_dotplots_desurv_tcgacptac)
+tar_load(fig_gene_overlap_heatmap_desurv_tcgacptac)
 
 ```
 
