@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.1.22)  22 JAN 2026 02:13
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.1.22)  22 JAN 2026 02:22
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1131,66 +1131,66 @@ Package hyperref Warning: The anchor of a bookmark and its parent's must not
 <../figures/model_schematic_final.pdf, id=68, 578.16pt x 505.89pt>
 File: ../figures/model_schematic_final.pdf Graphic file (type pdf)
 <use ../figures/model_schematic_final.pdf>
-Package pdftex.def Info: ../figures/model_schematic_final.pdf  used on input line 280.
+Package pdftex.def Info: ../figures/model_schematic_final.pdf  used on input line 278.
 (pdftex.def)             Requested size: 505.69467pt x 433.62885pt.
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 291.
+(hyperref)                removing `math shift' on input line 289.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 291.
+(hyperref)                removing `math shift' on input line 289.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\alpha' on input line 291.
+(hyperref)                removing `\alpha' on input line 289.
 
 
-LaTeX Warning: Reference `fig:bo' on page 2 undefined on input line 303.
+LaTeX Warning: Reference `fig:bo' on page 2 undefined on input line 301.
 
 
-LaTeX Warning: Reference `fig:bo' on page 2 undefined on input line 327.
+LaTeX Warning: Reference `fig:bo' on page 2 undefined on input line 325.
 
 LaTeX Font Info:    Font shape `T1/phv/m/it' in size <7> not available
-(Font)              Font shape `T1/phv/m/sl' tried instead on input line 379.
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 377.
 LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
-(Font)              scaled to size 6.64998pt on input line 379.
+(Font)              scaled to size 6.64998pt on input line 377.
 [2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
-Underfull \hbox (badness 10000) in paragraph at lines 380--383
+Underfull \hbox (badness 10000) in paragraph at lines 378--381
 []\T1/lmr/m/n/9 (+20) tar_load(fig_bo_heat_tcgacptac)
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 380--383
+Underfull \hbox (badness 10000) in paragraph at lines 378--381
 \T1/lmr/m/n/9 (+20) tar_load(fig_residuals_tcgacptac)
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 380--383
+Underfull \hbox (badness 10000) in paragraph at lines 378--381
 \T1/lmr/m/n/9 (+20) tar_load(fig_cophenetic_tcgacptac)
  []
 
 
-Overfull \hbox (144.45717pt too wide) in paragraph at lines 385--385
+Overfull \hbox (144.45717pt too wide) in paragraph at lines 383--383
 |[]\T1/phv/b/n/10 (-20) upper = plot_grid(fig_bo_cvk_tcgacptac,fig_bo_cvalpha_tcgacptac,labels=c(``A'',``B''))| 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 387--390
+Underfull \hbox (badness 10000) in paragraph at lines 385--388
 \T1/lmr/m/n/9 (+20) upper = plot_grid(fig_residuals_tcgacptac,
  []
 
 
-Overfull \hbox (20.5562pt too wide) in paragraph at lines 391--393
+Overfull \hbox (20.5562pt too wide) in paragraph at lines 389--391
 []\T1/lmr/m/n/9 (-20) k_hist = plot_grid(alt_plots$k_hist,NULL,nrow=2,rel_heights
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 394--396
+Underfull \hbox (badness 10000) in paragraph at lines 392--394
 []\T1/lmr/m/n/9 (+20) lower = plot_grid(fig_bo_heat_tcgacptac,
  []
 
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 399.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 397.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -1367,12 +1367,12 @@ Overfull \hbox (448.47679pt too wide) in paragraph at lines 1257--1257
  []
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
 Overfull \hbox (89.37749pt too wide) in paragraph at lines 1257--1257
 []\T1/lmtt/m/n/9 Let $X \in \mathbb{R}_{\ge 0}^{p \times n}$ denote the nonnegative gene[] 
  []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Overfull \hbox (84.6525pt too wide) in paragraph at lines 1257--1257
@@ -1495,14 +1495,14 @@ Overfull \hbox (56.30255pt too wide) in paragraph at lines 1257--1257
  []
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[4]
 Overfull \hbox (13.77763pt too wide) in paragraph at lines 1257--1257
 []        \T1/lmtt/m/n/9 \While{$eps \geq tol$ \textbf{and} $t < maxit$}[] 
  []
 
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[4]
 Overfull \hbox (335.07701pt too wide) in paragraph at lines 1257--1257
 []            \T1/lmtt/m/n/9 \State \hspace{0.5cm} Update $H^{(t+1)}$ from $H^{(t)}$ using the multiplicative rule in Eq.~\ref{eqn:Hupdate},[] 
  []
@@ -1857,14 +1857,14 @@ Overfull \hbox (160.25235pt too wide) in paragraph at lines 1257--1257
  []
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[6]
 Overfull \hbox (439.02681pt too wide) in paragraph at lines 1257--1257
 []  \T1/lmtt/m/n/9 W^{(t)} =  \max \left(W \odot \frac{\frac{(1-\alpha)}{np} XH^T + \frac{2\alpha}{n_{event}} \nabla_W \ell}{\frac{(1-\alpha)}{np}WHH^T}, 0\right)[] 
  []
 
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[6]
 Overfull \hbox (453.20178pt too wide) in paragraph at lines 1257--1257
 []  \T1/lmtt/m/n/9 W^{(t)} =  W \odot \max \left( \frac{\frac{(1-\alpha)}{np} XH^T + \frac{2\alpha}{n_{event}} \nabla_W \ell}{\frac{(1-\alpha)}{np} WHH^T}, 0 \right)[] 
  []
@@ -1975,12 +1975,12 @@ Overfull \hbox (9.05264pt too wide) in paragraph at lines 1257--1257
  []
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
 Overfull \hbox (4.32765pt too wide) in paragraph at lines 1257--1257
 []          \T1/lmtt/m/n/9 \mathcal{L}(W^{(t)},H^{(t+1)},\beta^{(t)}).[] 
  []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
@@ -2128,6 +2128,9 @@ Overfull \hbox (113.00244pt too wide) in paragraph at lines 1257--1257
  []
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[7]
 Overfull \hbox (131.9024pt too wide) in paragraph at lines 1257--1257
 []\T1/lmtt/m/n/9 and $\{\mathcal{L}(\theta^{(t)})\}$ converges to a finite limit $\mathcal{L}^*$.[] 
  []
@@ -2138,9 +2141,6 @@ Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
  []
 
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[7]
 Overfull \hbox (103.55246pt too wide) in paragraph at lines 1257--1257
 []  \T1/lmtt/m/n/9 \mathcal{L}(\theta^{(t+1)}) \le \mathcal{L}(\theta^{(t)})\quad\forall t,[] 
  []
@@ -2201,12 +2201,12 @@ Overfull \hbox (4.32765pt too wide) in paragraph at lines 1257--1257
  []
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
 Overfull \hbox (349.25198pt too wide) in paragraph at lines 1257--1257
 []  \T1/lmtt/m/n/9 \min_{H \geq 0}\frac{(1-\alpha)}{np}(\lVert X-WH \rVert_F^2 + \frac{\lambda_H}{nk}||H||_F^2) + \text{const in $H$},\nonumber[] 
  []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
@@ -2399,6 +2399,9 @@ Overfull \hbox (155.52736pt too wide) in paragraph at lines 1257--1257
  []
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[8]
 Overfull \hbox (79.9275pt too wide) in paragraph at lines 1257--1257
 []\T1/lmtt/m/n/9 In this setting, any point that is optimal with respect to each block[] 
  []
@@ -2409,9 +2412,6 @@ Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
  []
 
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[8]
 Overfull \hbox (79.9275pt too wide) in paragraph at lines 1257--1257
 []\T1/lmtt/m/n/9 Hence every limit point of Algorithm~S\ref{alg:desurv} is stationary.[] 
  []
@@ -2542,6 +2542,9 @@ Overfull \hbox (98.82747pt too wide) in paragraph at lines 1257--1257
  []
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
 Overfull \hbox (13.77763pt too wide) in paragraph at lines 1257--1257
 []\T1/lmtt/m/n/9 reconstruction error, yielding multiple valid solutions[] 
  []
@@ -2550,9 +2553,6 @@ Overfull \hbox (13.77763pt too wide) in paragraph at lines 1257--1257
 Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
 []\T1/lmtt/m/n/9 [@donoho2004nmf; @laurberg2008uniqueness; @gillis2014nmf]. Although normalizing[] 
  []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Overfull \hbox (98.82747pt too wide) in paragraph at lines 1257--1257
@@ -2690,14 +2690,14 @@ Overfull \hbox (13.77763pt too wide) in paragraph at lines 1257--1257
  []
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[9]
 Overfull \hbox (94.10248pt too wide) in paragraph at lines 1257--1257
 []\T1/lmtt/m/n/9 \Statex Hyperparameters $k$, $\alpha$, $\lambda$, $\xi$, and $\lambda_H$[] 
  []
 
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[9]
 Overfull \hbox (372.87694pt too wide) in paragraph at lines 1257--1257
 []    \T1/lmtt/m/n/9 \State Split data into training and validation $(X_{(-f)},y_{(-f)}, \delta_{(-f)})$, and $(X_{(f)},y_{(f)}, \delta_{(f)})$ sets[] 
  []
@@ -2738,8 +2738,8 @@ Overfull \hbox (29.08209pt too wide) in paragraph at lines 1268--1268
  []
 
 
-Overfull \hbox (25.59125pt too wide) in paragraph at lines 1273--1274
-[] []|\T1/phv/b/n/9 (-20) E. Pa-per git com-mit: 524e354dd777e74a98130a69b6296cca4eefbd51.[]
+Overfull \hbox (21.47888pt too wide) in paragraph at lines 1273--1274
+[] []|\T1/phv/b/n/9 (-20) E. Pa-per git com-mit: ad79f03a9361188583683b8f487de53d14c9f023.[]
  []
 
 
@@ -2818,6 +2818,9 @@ Underfull \hbox (badness 10000) in paragraph at lines 1354--1357
  []
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[10]
 Underfull \hbox (badness 10000) in paragraph at lines 1359--1364
 
  []
@@ -2828,9 +2831,6 @@ Underfull \hbox (badness 10000) in paragraph at lines 1366--1370
  []
 
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[10]
 Underfull \hbox (badness 10000) in paragraph at lines 1372--1376
 
  []
@@ -2858,18 +2858,18 @@ L3 programming layer <2026-01-19>
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `paper.out' has not changed.
-(rerunfilecheck)             Checksum: D5A59224DE08109768D3524A90DACEEC;2869.
+(rerunfilecheck)             Checksum: 36DE7A12AC20A448B4E8266878792399;2869.
  ) 
 Here is how much of TeX's memory you used:
  30674 strings out of 469471
  572757 string characters out of 5467057
- 1090236 words of memory out of 5000000
+ 1090242 words of memory out of 5000000
  58440 multiletter control sequences out of 15000+600000
  717736 words of font info for 235 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 117i,14n,121p,1529b,1616s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 117i,14n,121p,1529b,1612s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on paper.pdf (12 pages, 500194 bytes).
+Output written on paper.pdf (12 pages, 499278 bytes).
 PDF statistics:
  291 PDF objects out of 1000 (max. 8388607)
  226 compressed objects within 3 object streams
