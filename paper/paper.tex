@@ -282,13 +282,11 @@ analyses can therefore focus on the survival-associated gene programs
 \caption{Overview of the DeSurv framework and data-driven model selection. (A) DeSurv integrates nonnegative matrix factorization (NMF) with survival modeling to learn prognostic gene programs from a gene expression matrix $X$. NMF decomposes $X \approx WH$, where $W$ represents gene programs and $H$ sample loadings; the learned programs $W$ are shared with a Cox proportional hazards model that links factor-derived scores $Z = X^\top W$ to survival outcomes via regression coefficients $\beta$. A tuning parameter $\alpha$ controls the balance between unsupervised structure learning ($\alpha = 0$) and supervised survival association ($\alpha = 1$). (B) Model complexity ($k$), supervision strength ($\alpha$), and regularization ($\lambda$) are selected via Bayesian optimization using cross-validated concordance index. \label{fig:schema}}\label{fig:fig-schema}
 \end{figure*}
 
-\subsection*{\texorpdfstring{Bayesian optimisation selects the DeSurv
-hyperparameters (\(k\),
-\(\alpha\))}{Bayesian optimisation selects the DeSurv hyperparameters (k, \textbackslash alpha)}}\label{bayesian-optimisation-selects-the-desurv-hyperparameters-k-alpha}
-\addcontentsline{toc}{subsection}{Bayesian optimisation selects the
-DeSurv hyperparameters (\(k\), \(\alpha\))}
-
-\subsection{Outcome-guided model selection resolves ambiguity in NMF rank choice}
+\subsection*{Outcome-guided model selection resolves ambiguity in NMF
+rank
+choice}\label{outcome-guided-model-selection-resolves-ambiguity-in-nmf-rank-choice}
+\addcontentsline{toc}{subsection}{Outcome-guided model selection
+resolves ambiguity in NMF rank choice}
 
 We examined the problem of selecting the number of latent components
 (\(k\)) in nonnegative matrix factorization (NMF) using gene expression
@@ -344,61 +342,31 @@ outcome information during model fitting improves the reliability of
 rank selection in settings where unsupervised criteria yield conflicting
 conclusions.
 
-```\{r fig-bo, fig.width = 6, fig.height= 5.5, fig.cap = ``(A-D)
-Analyses based on real pancreatic ductal adenocarcinoma (PDAC) gene
-expression data illustrate the ambiguity of rank selection in standard
-nonnegative matrix factorization (NMF) and the use of outcome
-supervision in DeSurv. (A-C) Commonly used unsupervised heuristics for
-selecting the number of components (k) yield inconsistent conclusions.
-(A) Reconstruction residuals decrease smoothly with increasing k and do
-not exhibit a clear elbow; diminishing returns could be inferred at
-intermediate (k \(\\approx\) 3-4) or larger (k \(\\approx\) 6-8) ranks.
-(B) The cophenetic correlation coefficient, often used to select the
-largest k prior to a marked loss of clustering stability, begins to
-decline at low ranks (k \(\\approx\) 3-4) but continues to fluctuate
-thereafter, providing no unambiguous selection criterion. (C) Mean
-silhouette width across multiple distance metrics is highest at small
-ranks (k \(\\approx\) 2-3) and decreases monotonically with increasing
-k, favoring lower-dimensional solutions that conflict with the other
-criteria. (D) Heatmap of the Gaussian process predicted mean
-cross-validated concordance index (C-index) from Bayesian optimization
-over the joint space of the number of components (k) and supervision
-strength (\(\\alpha\)), computed on the same PDAC data. The predicted
-performance surface summarizes survival prediction accuracy across
-parameter settings and illustrates how DeSurv uses outcome information
-to inform model selection. (E) Results from simulation studies with a
-known underlying rank (k = 3) showing the distribution of selected k
-values across repeated replicates. DeSurv more consistently recovers the
-true rank, yielding a concentrated distribution centered at k = 3,
-whereas standard NMF with post hoc Cox modeling (\(\\alpha=0\)) exhibits
-greater variability and a tendency toward under-selection.
-\textbackslash label\{fig:bo\}'', fig.env='figure*`, fig.pos='t',
-out.height= ``5.5in'', out.width=``6in''\}
+\begin{figure*}[t]
 
-tar\_load(fig\_bo\_heat\_tcgacptac) tar\_load(fig\_residuals\_tcgacptac)
-tar\_load(fig\_cophenetic\_tcgacptac)
-tar\_load(fig\_silhouette\_tcgacptac)
+{\centering \includegraphics[width=6in,height=5.5in]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1} 
 
-\section{upper =
-plot\_grid(fig\_bo\_cvk\_tcgacptac,fig\_bo\_cvalpha\_tcgacptac,labels=c(``A'',``B''))}\label{upper-plot_gridfig_bo_cvk_tcgacptacfig_bo_cvalpha_tcgacptaclabelscab}
+}
 
-upper = plot\_grid(fig\_residuals\_tcgacptac,
-fig\_cophenetic\_tcgacptac, fig\_silhouette\_tcgacptac, ncol = 3, labels
-= c(``A'',``B'',``C''))
+\caption{(A-D) Analyses based on real pancreatic ductal adenocarcinoma (PDAC) gene expression data illustrate the ambiguity of rank selection in standard nonnegative matrix factorization (NMF) and the use of outcome supervision in DeSurv. (A-C) Commonly used unsupervised heuristics for selecting the number of components (k) yield inconsistent conclusions. (A) Reconstruction residuals decrease smoothly with increasing k and do not exhibit a clear elbow; diminishing returns could be inferred at intermediate (k $\approx$ 3-4) or larger (k $\approx$ 6-8) ranks. (B) The cophenetic correlation coefficient, often used to select the largest k prior to a marked loss of clustering stability, begins to decline at low ranks (k $\approx$ 3-4) but continues to fluctuate thereafter, providing no unambiguous selection criterion. (C) Mean silhouette width across multiple distance metrics is highest at small ranks (k $\approx$ 2-3) and decreases monotonically with increasing k, favoring lower-dimensional solutions that conflict with the other criteria.(D) Heatmap of the Gaussian process predicted mean cross-validated concordance index (C-index) from Bayesian optimization over the joint space of the number of components (k) and supervision strength ($\alpha$), computed on the same PDAC data. The predicted performance surface summarizes survival prediction accuracy across parameter settings and illustrates how DeSurv uses outcome information to inform model selection. (E) Results from simulation studies with a known underlying rank (k = 3) showing the distribution of selected k values across repeated replicates. DeSurv more consistently recovers the true rank, yielding a concentrated distribution centered at k = 3, whereas standard NMF with post hoc Cox modeling ($\alpha=0$) exhibits greater variability and a tendency toward under-selection. \label{fig:bo}}\label{fig:fig-bo}
+\end{figure*}
 
-k\_hist = plot\_grid(alt\_plots\$k\_hist,NULL,nrow=2,rel\_heights =
-c(4,1))
+\subsection*{DeSurv improves selection of prognostic gene
+signatures}\label{desurv-improves-selection-of-prognostic-gene-signatures}
+\addcontentsline{toc}{subsection}{DeSurv improves selection of
+prognostic gene signatures}
 
-lower = plot\_grid(fig\_bo\_heat\_tcgacptac,
-k\_hist,ncol=2,labels=c(``D'',``E''),rel\_widths = c(3,2))
+To test whether supervision improves the selection of prognostic gene
+signatures, we used simulations with known lethal factors and tuned the
+number of top genes per factor (\texttt{n\_top}) using BO. We compared
+the supervised DeSurv model to the unsupervised \(\alpha=0\) baseline
+across simulation regimes. Figure \ref{fig:sim}A shows the distribution
+of test C-index values, while Figure \ref{fig:sim}B reports the
+precision of recovered prognostic genes (mean across lethal factors).
+DeSurv consistently yields higher C-index and improved precision,
+indicating that survival supervision helps focus signatures on truly
+prognostic genes rather than reconstruction-only structure.
 
-plot\_grid(upper,lower,nrow=2,rel\_heights = c(2,3))
-
-\begin{verbatim}
-
-
-## DeSurv improves selection of prognostic gene signatures {.unnumbered}
-To test whether supervision improves the selection of prognostic gene signatures, we used simulations with known lethal factors and tuned the number of top genes per factor (\texttt{n\_top}) using BO. We compared the supervised DeSurv model to the unsupervised $\alpha=0$ baseline across simulation regimes. Figure \ref{fig:sim}A shows the distribution of test C-index values, while Figure \ref{fig:sim}B reports the precision of recovered prognostic genes (mean across lethal factors). DeSurv consistently yields higher C-index and improved precision, indicating that survival supervision helps focus signatures on truly prognostic genes rather than reconstruction-only structure.
 \begin{figure*}[t]
 
 {\centering \includegraphics[width=\textwidth]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1} 
@@ -408,18 +376,71 @@ To test whether supervision improves the selection of prognostic gene signatures
 \caption{Performance comparison between DeSurv and unsupervised NMF ($\alpha = 0$) in simulation. (A) Distribution of cross-validated concordance index shows that DeSurv achieves consistently higher survival prediction performance than the unsupervised baseline. (B) Precision for recovering true underlying gene programs is substantially higher for DeSurv, whereas the unsupervised approach exhibits near-zero precision, indicating poor alignment with the ground-truth factors. \label{fig:sim}}\label{fig:fig-sim-ntop-scenarios}
 \end{figure*}
 
+\subsection*{Survival-informed factorization reorganizes transcriptional
+structure in pancreatic
+cancer}\label{survival-informed-factorization-reorganizes-transcriptional-structure-in-pancreatic-cancer}
+\addcontentsline{toc}{subsection}{Survival-informed factorization
+reorganizes transcriptional structure in pancreatic cancer}
 
+To assess the biological structure captured by standard nonnegative
+matrix factorization (NMF) and DeSurv, we examined the overlap between
+factor-specific gene rankings and established PDAC gene programs (Fig.
+\ref{fig:bio}A-B). Both approaches recovered recognizable biological
+signals; however, the organization of these signals across factors
+differed in ways that reflect the objectives of each method.
 
-## Survival-informed factorization reorganizes transcriptional structure in pancreatic cancer {.unnumbered}
-To assess the biological structure captured by standard nonnegative matrix factorization (NMF) and DeSurv, we examined the overlap between factor-specific gene rankings and established PDAC gene programs (Fig. \ref{fig:bio}A-B). Both approaches recovered recognizable biological signals; however, the organization of these signals across factors differed in ways that reflect the objectives of each method.
+In the standard NMF solution, factors largely reflected dominant sources
+of transcriptional variance. One factor was strongly associated with
+exocrine-associated expression and opposed immune and stromal
+signatures, consistent with a bulk composition axis separating normal or
+differentiated tissue from non-epithelial tumor content. A second factor
+aligned with classical tumor identity, while a third aggregated immune,
+fibroblast, and extracellular matrix--related programs into a single
+microenvironmental component. These patterns indicate that standard NMF
+captures major biological variation in bulk PDAC expression data, but
+merges distinct microenvironmental states and allocates substantial
+model capacity to differentiation-driven signals.
 
-In the standard NMF solution, factors largely reflected dominant sources of transcriptional variance. One factor was strongly associated with exocrine-associated expression and opposed immune and stromal signatures, consistent with a bulk composition axis separating normal or differentiated tissue from non-epithelial tumor content. A second factor aligned with classical tumor identity, while a third aggregated immune, fibroblast, and extracellular matrix–related programs into a single microenvironmental component. These patterns indicate that standard NMF captures major biological variation in bulk PDAC expression data, but merges distinct microenvironmental states and allocates substantial model capacity to differentiation-driven signals.
+By contrast, DeSurv produced a factorization that emphasized axes of
+variation more closely aligned with disease aggressiveness. One factor
+corresponded to classical tumor programs opposing basal-like expression,
+whereas another isolated an activated microenvironmental state
+characterized by immune infiltration and stromal remodeling. A third
+factor captured aggressive tumor-intrinsic programs associated with
+basal-like biology. Notably, exocrine-associated expression did not
+dominate any DeSurv factor, suggesting that survival-informed
+optimization deprioritizes differentiation-related variation that is
+weakly associated with outcome.
 
-By contrast, DeSurv produced a factorization that emphasized axes of variation more closely aligned with disease aggressiveness. One factor corresponded to classical tumor programs opposing basal-like expression, whereas another isolated an activated microenvironmental state characterized by immune infiltration and stromal remodeling. A third factor captured aggressive tumor-intrinsic programs associated with basal-like biology. Notably, exocrine-associated expression did not dominate any DeSurv factor, suggesting that survival-informed optimization deprioritizes differentiation-related variation that is weakly associated with outcome.
+These differences were reflected quantitatively by contrasting the
+fraction of expression variance explained by each factor with its
+contribution to survival (Fig. \ref{fig:bio}C). In the standard NMF
+solution, the factor explaining the largest proportion of
+transcriptional variance contributed little to survival, consistent with
+its enrichment for exocrine and composition-driven programs. In
+contrast, DeSurv concentrated survival signal into a single factor that
+explained substantially more variation in outcome despite accounting for
+a smaller fraction of expression variance. The remaining DeSurv factors
+contributed minimal survival signal, indicating that survival-relevant
+information was not diffusely distributed across components.
 
-These differences were reflected quantitatively by contrasting the fraction of expression variance explained by each factor with its contribution to survival (Fig. \ref{fig:bio}C). In the standard NMF solution, the factor explaining the largest proportion of transcriptional variance contributed little to survival, consistent with its enrichment for exocrine and composition-driven programs. In contrast, DeSurv concentrated survival signal into a single factor that explained substantially more variation in outcome despite accounting for a smaller fraction of expression variance. The remaining DeSurv factors contributed minimal survival signal, indicating that survival-relevant information was not diffusely distributed across components.
+To further characterize how DeSurv reorganizes the transcriptional
+structure learned by standard NMF, we examined the correspondence
+between factors derived from the two methods (Fig. \ref{fig:bio}D).
+Tumor-intrinsic structure was largely preserved, with one DeSurv factor
+showing strong correspondence to the classical tumor--associated NMF
+factor. In contrast, the microenvironmental factor identified by
+standard NMF mapped primarily to a single DeSurv factor enriched for
+activated immune and stromal programs, indicating that DeSurv refines
+variance-driven microenvironmental structure into a survival-aligned
+axis. Notably, the NMF factor dominated by exocrine-associated
+expression did not correspond strongly to any single DeSurv factor,
+consistent with the suppression of differentiation- and
+composition-driven signals observed in survival-informed factorization.
+Together, these results indicate that DeSurv selectively preserves tumor
+and microenvironmental structure while reorganizing or deprioritizing
+axes of variation that contribute little to survival.
 
-To further characterize how DeSurv reorganizes the transcriptional structure learned by standard NMF, we examined the correspondence between factors derived from the two methods (Fig. \ref{fig:bio}D). Tumor-intrinsic structure was largely preserved, with one DeSurv factor showing strong correspondence to the classical tumor–associated NMF factor. In contrast, the microenvironmental factor identified by standard NMF mapped primarily to a single DeSurv factor enriched for activated immune and stromal programs, indicating that DeSurv refines variance-driven microenvironmental structure into a survival-aligned axis. Notably, the NMF factor dominated by exocrine-associated expression did not correspond strongly to any single DeSurv factor, consistent with the suppression of differentiation- and composition-driven signals observed in survival-informed factorization. Together, these results indicate that DeSurv selectively preserves tumor and microenvironmental structure while reorganizing or deprioritizing axes of variation that contribute little to survival.
 \begin{figure*}[t]
 
 {\centering \includegraphics[width=\textwidth,height=4.5in]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1} 
@@ -429,15 +450,36 @@ To further characterize how DeSurv reorganizes the transcriptional structure lea
 \caption{Survival-informed factorization reorganizes transcriptional structure relative to variance-driven NMF. (A) Correlation of standard NMF factor gene rankings with established pancreatic ductal adenocarcinoma (PDAC) gene programs. NMF recovers variance-dominant structure, including an exocrine-associated factor opposing immune and stromal signatures, a classical tumor factor, and a composite microenvironmental factor. (B) Corresponding correlations for DeSurv. DeSurv isolates tumor-intrinsic classical and basal-like programs and resolves an activated immune–stromal microenvironment, while exocrine-associated expression does not dominate any factor. Asterisks indicate significant correlations after multiple testing correction. * Indicates an fdr adjusted p-value < 0.1 (C) Fraction of expression variance explained versus survival contribution for each factor, quantified by the change in partial log-likelihood from univariate Cox models. Standard NMF factors explain substantial variance with minimal survival relevance, whereas DeSurv concentrates survival signal into a single factor despite explaining less expression variance. (D) Pairwise correspondence between NMF and DeSurv factors. Tumor-intrinsic structure is preserved across methods, while variance-driven microenvironmental structure is reorganized into a survival-aligned axis; the exocrine-dominated NMF factor shows no strong one-to-one correspondence. \label{fig:bio}}\label{fig:fig-bio}
 \end{figure*}
 
+\subsection*{DeSurv-derived latent structure generalizes to independent
+datasets}\label{desurv-derived-latent-structure-generalizes-to-independent-datasets}
+\addcontentsline{toc}{subsection}{DeSurv-derived latent structure
+generalizes to independent datasets}
 
-## DeSurv-derived latent structure generalizes to independent datasets {.unnumbered}
-To assess generalization of DeSurv latent factors, the gene-level signatures learned in the training cohort were used to compute factor activity scores in independent validation datasets. For each validation sample, factor activity was quantified by applying the learned gene-factor weights to the sample’s gene expression profile ($W^TX$), yielding a continuous score for each factor.
+To assess generalization of DeSurv latent factors, the gene-level
+signatures learned in the training cohort were used to compute factor
+activity scores in independent validation datasets. For each validation
+sample, factor activity was quantified by applying the learned
+gene-factor weights to the sample's gene expression profile (\(W^TX\)),
+yielding a continuous score for each factor.
 
-For each method, we focused on the factor showing the largest increase in Cox model log partial likelihood in the training data. Across validation cohorts, this DeSurv-derived factor exhibited consistent survival effects, with hazard ratio estimates showing limited variability and predominantly protective associations (Fig. \ref{fig:extval}A). In contrast, the NMF factor identified by the same criterion showed greater heterogeneity across datasets and weaker survival associations.
+For each method, we focused on the factor showing the largest increase
+in Cox model log partial likelihood in the training data. Across
+validation cohorts, this DeSurv-derived factor exhibited consistent
+survival effects, with hazard ratio estimates showing limited
+variability and predominantly protective associations (Fig.
+\ref{fig:extval}A). In contrast, the NMF factor identified by the same
+criterion showed greater heterogeneity across datasets and weaker
+survival associations.
 
-When validation samples were pooled and stratified into high- and low-activity groups based on the DeSurv-derived factor, clear separation of survival trajectories was observed (Fig. \ref{fig:extval}B). Applying the same procedure to NMF resulted in weaker survival stratification (Fig. \ref{fig:extval}C).
+When validation samples were pooled and stratified into high- and
+low-activity groups based on the DeSurv-derived factor, clear separation
+of survival trajectories was observed (Fig. \ref{fig:extval}B). Applying
+the same procedure to NMF resulted in weaker survival stratification
+(Fig. \ref{fig:extval}C).
 
-Together, these results indicate that DeSurv identifies latent factors whose associations with survival are preserved across datasets.
+Together, these results indicate that DeSurv identifies latent factors
+whose associations with survival are preserved across datasets.
+
 \begin{figure*}[t]
 
 {\centering \includegraphics[width=\textwidth]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1} 
@@ -447,117 +489,208 @@ Together, these results indicate that DeSurv identifies latent factors whose ass
 \caption{Figure X. DeSurv learns prognostic structure that generalizes across independent cohorts. (A) Forest plot summarizing hazard ratios (HRs; 95\% CIs) for the latent factor most predictive of survival in held-out validation datasets. Estimates from DeSurv (blue) are more stable across cohorts than those obtained with standard NMF (red). (B) Kaplan–Meier curves for pooled validation samples stratified into high and low groups based on values of the DeSurv-derived factor providing the strongest survival signal. Median-based stratification yields clear separation of survival trajectories, indicating robust out-of-sample prognostic performance. (C) Corresponding analysis for the NMF-derived factor selected using the same survival-based criterion, showing weaker discrimination between risk groups. \label{fig:extval}}\label{fig:fig-extval}
 \end{figure*}
 
+\subsection*{Bladder cancer analysis}\label{bladder-cancer-analysis}
+\addcontentsline{toc}{subsection}{Bladder cancer analysis}
 
-## Bladder cancer analysis {.unnumbered}
-We will report a focused bladder cancer analysis here, including a dedicated figure. Placeholder text: summary of bladder cohort preprocessing, DeSurv factor interpretation, and survival stratification results to be added once the bladder figure is finalized.
+We will report a focused bladder cancer analysis here, including a
+dedicated figure. Placeholder text: summary of bladder cohort
+preprocessing, DeSurv factor interpretation, and survival stratification
+results to be added once the bladder figure is finalized.
 
+\section*{Discussion}\label{discussion}
+\addcontentsline{toc}{section}{Discussion}
 
+We present DeSurv, a survival-driven deconvolution framework that
+integrates nonnegative matrix factorization with Cox proportional
+hazards modeling to uncover latent gene-expression programs associated
+with patient outcomes. By coupling unsupervised matrix decomposition
+with direct survival supervision, DeSurv bridges the gap between
+descriptive molecular subtyping and prognostic modeling. Unlike
+conventional NMF, which identifies factors that explain transcriptional
+variance without regard to clinical relevance, DeSurv simultaneously
+optimizes reconstruction fidelity and survival discrimination, yielding
+interpretable gene programs that are both biologically coherent and
+clinically informative.
 
+In pancreatic ductal adenocarcinoma (PDAC), DeSurv identified three
+major transcriptional programs corresponding to immune/iCAF,
+normal/exocrine, and basal-like factors. The immune/iCAF factor was
+associated with prolonged survival and enriched for inflammatory and
+immune-response pathways, consistent with prior evidence linking
+tumor-infiltrating immune and inflammatory fibroblast populations to
+improved outcomes. In contrast, the basal-like factor was strongly
+associated with poor survival and enriched for epithelial--mesenchymal
+transition and cell-cycle programs characteristic of aggressive tumor
+phenotypes. The normal/exocrine factor, while not prognostic, captured
+background pancreatic tissue signal and contributed to accurate
+reconstruction, demonstrating that DeSurv can disentangle prognostic
+sources of variation while preserving biology.
 
-# Discussion {.unnumbered}
+Importantly, DeSurv outperformed unsupervised NMF in cross-validated
+concordance index, achieving higher predictive accuracy with fewer
+factors. This suggests that explicitly incorporating survival
+information regularizes the factorization, producing a more parsimonious
+representation that focuses on biologically and clinically relevant
+variation. Moreover, when applied to independent PDAC
+cohorts---including Dijk, PACA-AU, Moffitt, and Puleo---DeSurv-derived
+gene signatures stratified patients into three reproducible clusters
+with clear prognostic differences. These clusters aligned strongly with
+existing PurIST and DeCAF classifiers, recapitulating the interplay
+between tumor-intrinsic (Basal versus Classical) and stromal (proCAF
+versus restCAF/iCAF) subtypes. Notably, survival prediction appeared to
+depend on the presence or absence of basal and immune/iCAF programs
+rather than binary subtype identities, indicating that the co-activation
+or suppression of these programs better captures the biological
+continuum of PDAC progression.
 
+Beyond PDAC, DeSurv provides a generalizable framework for discovering
+prognostic transcriptional programs across complex cancers where tumor
+and stromal signals are interwoven. By integrating survival modeling
+into matrix factorization, it unifies molecular deconvolution and
+outcome prediction within a single, interpretable model. This approach
+complements both single-cell--based tumor--stroma characterization and
+bulk expression subtyping, offering a scalable route to translate
+transcriptomic heterogeneity into clinically actionable prognostic
+insight. Future work will extend DeSurv to multi-omic data and
+time-varying outcomes, further enhancing its ability to resolve dynamic
+tumor--microenvironment interactions that shape disease progression and
+therapy response.
 
-We present DeSurv, a survival-driven deconvolution framework that integrates nonnegative matrix factorization with Cox proportional hazards modeling to uncover latent gene-expression programs associated with patient outcomes. By coupling unsupervised matrix decomposition with direct survival supervision, DeSurv bridges the gap between descriptive molecular subtyping and prognostic modeling. Unlike conventional NMF, which identifies factors that explain transcriptional variance without regard to clinical relevance, DeSurv simultaneously optimizes reconstruction fidelity and survival discrimination, yielding interpretable gene programs that are both biologically coherent and clinically informative.
+\section*{Materials and methods}\label{materials-and-methods}
+\addcontentsline{toc}{section}{Materials and methods}
 
-In pancreatic ductal adenocarcinoma (PDAC), DeSurv identified three major transcriptional programs corresponding to immune/iCAF, normal/exocrine, and basal-like factors. The immune/iCAF factor was associated with prolonged survival and enriched for inflammatory and immune-response pathways, consistent with prior evidence linking tumor-infiltrating immune and inflammatory fibroblast populations to improved outcomes. In contrast, the basal-like factor was strongly associated with poor survival and enriched for epithelial–mesenchymal transition and cell-cycle programs characteristic of aggressive tumor phenotypes. The normal/exocrine factor, while not prognostic, captured background pancreatic tissue signal and contributed to accurate reconstruction, demonstrating that DeSurv can disentangle prognostic sources of variation while preserving biology.
+\subsection{Problem formulation and
+notation}\label{problem-formulation-and-notation}
 
-Importantly, DeSurv outperformed unsupervised NMF in cross-validated concordance index, achieving higher predictive accuracy with fewer factors. This suggests that explicitly incorporating survival information regularizes the factorization, producing a more parsimonious representation that focuses on biologically and clinically relevant variation. Moreover, when applied to independent PDAC cohorts—including Dijk, PACA-AU, Moffitt, and Puleo—DeSurv-derived gene signatures stratified patients into three reproducible clusters with clear prognostic differences. These clusters aligned strongly with existing PurIST and DeCAF classifiers, recapitulating the interplay between tumor-intrinsic (Basal versus Classical) and stromal (proCAF versus restCAF/iCAF) subtypes. Notably, survival prediction appeared to depend on the presence or absence of basal and immune/iCAF programs rather than binary subtype identities, indicating that the co-activation or suppression of these programs better captures the biological continuum of PDAC progression.
+Let \(X \in \mathbb{R}^{p \times n}_{\ge 0}\) denote the nonnegative
+gene expression matrix. DeSurv approximates \(X \approx WH\), where
+\(W \in \mathbb{R}^{p\times k}_{\ge0}\) contains nonnegative gene
+programs and \(H \in \mathbb{R}^{k\times n}_{\ge0}\) contains
+sample-level activations. Additionally, let
+\(y,\ \delta \in \mathbb{R}^n\) represent patient survival times and
+censoring indicators, respectively. Survival outcomes are modeled
+through a cox proportional hazards model with covariates
+\(Z = W^\top X\).
 
-Beyond PDAC, DeSurv provides a generalizable framework for discovering prognostic transcriptional programs across complex cancers where tumor and stromal signals are interwoven. By integrating survival modeling into matrix factorization, it unifies molecular deconvolution and outcome prediction within a single, interpretable model. This approach complements both single-cell–based tumor–stroma characterization and bulk expression subtyping, offering a scalable route to translate transcriptomic heterogeneity into clinically actionable prognostic insight. Future work will extend DeSurv to multi-omic data and time-varying outcomes, further enhancing its ability to resolve dynamic tumor–microenvironment interactions that shape disease progression and therapy response.
+\subsection{The DeSurv Model}\label{the-desurv-model}
 
-# Materials and methods {.unnumbered}
+DeSurv integrates Nonnegative Matrix Factorization (NMF) with penalized
+Cox regression to identify gene programs associated with patient
+survival.
 
-
-## Problem formulation and notation
-Let $X \in \mathbb{R}^{p \times n}_{\ge 0}$ denote the nonnegative gene expression matrix. DeSurv approximates $X \approx WH$, where $W \in \mathbb{R}^{p\times k}_{\ge0}$ contains nonnegative gene programs and $H \in \mathbb{R}^{k\times n}_{\ge0}$ contains sample-level activations. Additionally, let $y,\ \delta \in \mathbb{R}^n$ represent patient survival times and censoring indicators, respectively. Survival outcomes are modeled through a cox proportional hazards model with covariates $Z = W^\top X$.
-
-## The DeSurv Model
-DeSurv integrates Nonnegative Matrix Factorization (NMF) with penalized Cox regression to identify gene programs associated with patient survival. 
-
-The joint objective is  
+The joint objective is\\
 \begin{equation}
 \label{eqn:desurv}
 \mathcal{L}(W,H,\beta) =
 (1-\alpha)\,\mathcal{L}_{\mathrm{NMF}}(W,H)
 - \alpha\,\mathcal{L}_{\mathrm{Cox}}(W,\beta),
-\end{equation}
-where $\mathcal{L}_{\mathrm{NMF}}(W,H)$ is the NMF reconstruction error and $\mathcal{L}_{\mathrm{Cox}}(W,\beta)$ is the elastic-net penalized partial log-likelihood. Optimization proceeds by alternating updates for $H$, $W$, and $\beta$, using multiplicative rules for $H$ [@lee1999learning], projected gradients for $W$, and coordinate descent for $\beta$. Although non-convex, these updates are shown to converge to a stationary point under mild conditions (SI Appendix). Complete derivations and algorithmic details are provided in the SI Appendix.
+\end{equation} where \(\mathcal{L}_{\mathrm{NMF}}(W,H)\) is the NMF
+reconstruction error and \(\mathcal{L}_{\mathrm{Cox}}(W,\beta)\) is the
+elastic-net penalized partial log-likelihood. Optimization proceeds by
+alternating updates for \(H\), \(W\), and \(\beta\), using
+multiplicative rules for \(H\) (13), projected gradients for \(W\), and
+coordinate descent for \(\beta\). Although non-convex, these updates are
+shown to converge to a stationary point under mild conditions (SI
+Appendix). Complete derivations and algorithmic details are provided in
+the SI Appendix.
 
-## Hyperparameter selection and cross-validation 
-Hyperparameters $(k,\alpha,\lambda_H,\lambda,\xi)$ were selected by maximizing the cross-validated C-index using Bayesian optimization. Each fold was trained using multiple random initializations, and fold-level performance was defined as the average C-index across initializations. For stability, we used a consensus-based initialization for the final model, aggregating multiple DeSurv runs into a gene--gene co-occurrence matrix and constructing an initialization $W_0$ from the resulting clusters (SI Appendix). Before validation, each column of $W$ was truncated to its BO-selected number of top genes (details in SI Appendix), denoted $\tilde{W}$. External validation was performed by first projecting new datasets onto the learned programs via $Z = \tilde{W}^\top X_{\text{new}}$ and evaluating survival associations using C-index and log-rank statistics. To evaluate the quality of the DeSurv derived gene signatures for subtyping, the new datasets $X_new$ were clustered on genes in $\tilde{W}$, and survival differences were analyzed for the derived clusters. Further training, validation, and runtime details appear in the SI Appendix.
+\subsection{Hyperparameter selection and
+cross-validation}\label{hyperparameter-selection-and-cross-validation}
 
+Hyperparameters \((k,\alpha,\lambda_H,\lambda,\xi)\) were selected by
+maximizing the cross-validated C-index using Bayesian optimization. Each
+fold was trained using multiple random initializations, and fold-level
+performance was defined as the average C-index across initializations.
+For stability, we used a consensus-based initialization for the final
+model, aggregating multiple DeSurv runs into a gene--gene co-occurrence
+matrix and constructing an initialization \(W_0\) from the resulting
+clusters (SI Appendix). Before validation, each column of \(W\) was
+truncated to its BO-selected number of top genes (details in SI
+Appendix), denoted \(\tilde{W}\). External validation was performed by
+first projecting new datasets onto the learned programs via
+\(Z = \tilde{W}^\top X_{\text{new}}\) and evaluating survival
+associations using C-index and log-rank statistics. To evaluate the
+quality of the DeSurv derived gene signatures for subtyping, the new
+datasets \(X_new\) were clustered on genes in \(\tilde{W}\), and
+survival differences were analyzed for the derived clusters. Further
+training, validation, and runtime details appear in the SI Appendix.
 
-## Simulation studies
-Simulation studies were conducted to assess recovery of prognostic latent structure and survival prediction. Gene expression data were generated from a non-negative factor model $X=WH$, where gene loadings $W$ comprised three gene classes: marker genes, background genes, and noise genes. Marker genes were simulated to load strongly on a single factor and weakly on others, background genes to load strongly across all factors, and noise genes to have uniformly low loadings; each class was generated from a distinct gamma distribution. Sample-level factor activities $H$ were generated from a gamma distribution.
+\subsection{Simulation studies}\label{simulation-studies}
 
-Survival times were generated from an exponential proportional hazards model in which risk depended on marker gene structure through $X^T\tilde{W}$, where $\tilde{W}$ retained marker gene loadings for their corresponding factors and was zero otherwise; censoring times were generated independently from an exponential distribution. Each dataset was analyzed using DeSurv, standard NMF followed by Cox regression on inferred factors, and penalized Cox regression (CoxNet), with all methods tuned using the same cross-validated concordance index. Performance was summarized across repeated simulation replicates.
+Simulation studies were conducted to assess recovery of prognostic
+latent structure and survival prediction. Gene expression data were
+generated from a non-negative factor model \(X=WH\), where gene loadings
+\(W\) comprised three gene classes: marker genes, background genes, and
+noise genes. Marker genes were simulated to load strongly on a single
+factor and weakly on others, background genes to load strongly across
+all factors, and noise genes to have uniformly low loadings; each class
+was generated from a distinct gamma distribution. Sample-level factor
+activities \(H\) were generated from a gamma distribution.
 
-## Evaluation metrics
+Survival times were generated from an exponential proportional hazards
+model in which risk depended on marker gene structure through
+\(X^T\tilde{W}\), where \(\tilde{W}\) retained marker gene loadings for
+their corresponding factors and was zero otherwise; censoring times were
+generated independently from an exponential distribution. Each dataset
+was analyzed using DeSurv, standard NMF followed by Cox regression on
+inferred factors, and penalized Cox regression (CoxNet), with all
+methods tuned using the same cross-validated concordance index.
+Performance was summarized across repeated simulation replicates.
 
-## Real-world datasets 
-We analyzed publicly available RNA-seq and microarray cohorts of pancreatic ductal adenocarcinoma (PDAC) and bladder cancer with corresponding overall survival outcomes. Gene expression matrices were converted to TPM, log-transformed, and filtered to remove low-expression genes. Survival times and censoring indicators were taken from the associated clinical annotations. Of the seven PDAC cohorts we considered, two were used for training (TCGA and CPTAC) and the rest were used for external validation (Dijk, Moffitt, PACA, Puleo). The bladder cohort was split into training and validation cohorts via a 70/30 split. To harmonize differences in scale across cohorts, filtered gene expression data was within-subject rank transformed before model training. More details about the datasets can be found in the SI Appendix.
+\subsection{Evaluation metrics}\label{evaluation-metrics}
 
-## Simulations, Benchmarking, and Availability  
-Code and processed data used in this study are available at [repository link].
+\subsection{Real-world datasets}\label{real-world-datasets}
 
+We analyzed publicly available RNA-seq and microarray cohorts of
+pancreatic ductal adenocarcinoma (PDAC) and bladder cancer with
+corresponding overall survival outcomes. Gene expression matrices were
+converted to TPM, log-transformed, and filtered to remove low-expression
+genes. Survival times and censoring indicators were taken from the
+associated clinical annotations. Of the seven PDAC cohorts we
+considered, two were used for training (TCGA and CPTAC) and the rest
+were used for external validation (Dijk, Moffitt, PACA, Puleo). The
+bladder cohort was split into training and validation cohorts via a
+70/30 split. To harmonize differences in scale across cohorts, filtered
+gene expression data was within-subject rank transformed before model
+training. More details about the datasets can be found in the SI
+Appendix.
 
+\subsection{Simulations, Benchmarking, and
+Availability}\label{simulations-benchmarking-and-availability}
 
+Code and processed data used in this study are available at
+{[}repository link{]}.
 
-<!-- Leave these lines as they are at the end of your .Rmd file to ensure placement of methods & acknowledgements sections before the references-->
 \showmatmethods
 \showacknow
 
-# Supplementary Methods {.unnumbered}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\section*{Supplementary Methods}\label{supplementary-methods}
+\addcontentsline{toc}{section}{Supplementary Methods}
 
 \subsection{Model details}
-Let $X \in \mathbb{R}_{\ge 0}^{p \times n}$ denote the nonnegative gene
-expression matrix with $p$ genes and $n$ subjects. DeSurv approximates
-$X \approx WH$ with $W \in \mathbb{R}_{\ge 0}^{p \times k}$ and
-$H \in \mathbb{R}_{\ge 0}^{k \times n}$, and links the shared program matrix
-$W$ to survival via an elastic-net–penalized Cox model.
 
-Let $y \in \mathbb{R}^n_{\ge 0}$ be the observed survival times,
-$\delta \in \{0,1\}^n$ the event indicators, and
-$Z = X^\top W \in \mathbb{R}^{n \times k}$ the sample-wise program
-loadings. We write $Z_i^\top$ for the $i$th row of $Z$, and
-$n_{\text{event}} = \sum_{i=1}^n \delta_i$. For convenience we recall the
-DeSurv loss from Equation~\ref{eqn:desurv} in the main text and rewrite it as
-\begin{align}
+Let \(X \in \mathbb{R}_{\ge 0}^{p \times n}\) denote the nonnegative
+gene expression matrix with \(p\) genes and \(n\) subjects. DeSurv
+approximates \(X \approx WH\) with
+\(W \in \mathbb{R}_{\ge 0}^{p \times k}\) and
+\(H \in \mathbb{R}_{\ge 0}^{k \times n}\), and links the shared program
+matrix \(W\) to survival via an elastic-net--penalized Cox model.
+
+Let \(y \in \mathbb{R}^n_{\ge 0}\) be the observed survival times,
+\(\delta \in \{0,1\}^n\) the event indicators, and
+\(Z = X^\top W \in \mathbb{R}^{n \times k}\) the sample-wise program
+loadings. We write \(Z_i^\top\) for the \(i\)th row of \(Z\), and
+\(n_{\text{event}} = \sum_{i=1}^n \delta_i\). For convenience we recall
+the DeSurv loss from Equation\textasciitilde{}\ref{eqn:desurv} in the
+main text and rewrite it as \begin{align}
   \mathcal{L}(W,H,\beta) &=\nonumber \\
   &(1-\alpha)\left(\frac{1}{2np}\lVert X - WH \rVert_F^2 + \frac{\lambda_H}{2nk} \lVert H \rVert_F^2\right) \nonumber \\
   -&\alpha \left(\frac{2}{n_{event}}\ell(W,\beta) - \lambda \{ \xi \lVert \beta \rVert_1 + \tfrac{1-\xi}{2} \lVert \beta \rVert_2^2 \} \right) \nonumber
 \end{align}
 
-where $\lVert \cdot \rVert_F$ is the Frobenius norm and
-$\beta \in \mathbb{R}^k$ are the Cox coefficients. The Cox log-partial
-likelihood $\ell(W,\beta)$ is
-\begin{equation}
+where \(\lVert \cdot \rVert_F\) is the Frobenius norm and
+\(\beta \in \mathbb{R}^k\) are the Cox coefficients. The Cox log-partial
+likelihood \(\ell(W,\beta)\) is \begin{equation}
 \ell(W,\beta)
 =
 \sum_{i=1}^n
@@ -570,20 +703,19 @@ likelihood $\ell(W,\beta)$ is
     \exp(Z_j^\top \beta)
   \right)
 \right].
-\end{equation}
-Hyperparameters satisfy $\alpha \in [0,1)$,
-$\lambda_H \ge 0$, $\lambda \ge 0$, and $\xi \in [0,1]$.
-The constants $1/(2np)$, $2/n_{\text{event}}$, and $1/(2nk)$ are chosen
-for numerical convenience and do not affect the minimizer.
-
+\end{equation} Hyperparameters satisfy \(\alpha \in [0,1)\),
+\(\lambda_H \ge 0\), \(\lambda \ge 0\), and \(\xi \in [0,1]\). The
+constants \(1/(2np)\), \(2/n_{\text{event}}\), and \(1/(2nk)\) are
+chosen for numerical convenience and do not affect the minimizer.
 
 \subsection{Optimization Algorithm}
 
 \subsubsection{Block coordinate descent scheme}
-Algorithm~\ref{alg:desurv} summarizes the block coordinate descent (BCD)
-scheme used to minimize $\mathcal{L}(W,H,\beta)$. At each outer iteration,
-we update $H$, then $W$, then $\beta$ while holding the other blocks
-fixed.
+
+Algorithm\textasciitilde{}\ref{alg:desurv} summarizes the block
+coordinate descent (BCD) scheme used to minimize
+\(\mathcal{L}(W,H,\beta)\). At each outer iteration, we update \(H\),
+then \(W\), then \(\beta\) while holding the other blocks fixed.
 
 \begin{algorithm}[H]
 \caption{DeSurv block coordinate descent}
@@ -617,10 +749,10 @@ fixed.
 \end{algorithm}
 
 \subsubsection{Update for $H$}
-Conditional on $W$, the loss $\mathcal{L}(W,H,\beta)$ reduces to a strictly
-convex quadratic function of $H$. We adopt the standard NMF multiplicative
-update with $\ell_2$ penalty:
-\begin{equation}
+
+Conditional on \(W\), the loss \(\mathcal{L}(W,H,\beta)\) reduces to a
+strictly convex quadratic function of \(H\). We adopt the standard NMF
+multiplicative update with \(\ell_2\) penalty: \begin{equation}
 \label{eqn:Hupdate}
 H \leftarrow
 \max\!\left(
@@ -629,31 +761,27 @@ H \leftarrow
   },
   \varepsilon_H
 \right),
-\end{equation}
-where $\odot$ denotes elementwise multiplication, all divisions are
-elementwise, and $\varepsilon_H > 0$ is a small floor to prevent entries from
-becoming exactly zero. This update is equivalent to a majorization–minimization
-step and guarantees a nonincreasing reconstruction term conditional on $W$
-[@seung2001algorithms; @pascualmontano2006nonsmooth]. The $\varepsilon_H$-floor
-ensures that iterates remain in the interior of the nonnegative orthant, which
-simplifies the convergence analysis.
+\end{equation} where \(\odot\) denotes elementwise multiplication, all
+divisions are elementwise, and \(\varepsilon_H > 0\) is a small floor to
+prevent entries from becoming exactly zero. This update is equivalent to
+a majorization--minimization step and guarantees a nonincreasing
+reconstruction term conditional on \(W\) (19, 20). The
+\(\varepsilon_H\)-floor ensures that iterates remain in the interior of
+the nonnegative orthant, which simplifies the convergence analysis.
 
-  
 \subsubsection{Update for $W$}
-For $W$, we construct a hybrid multiplicative update that balances the
-contributions of the NMF and Cox gradients. Let
-\[
+
+For \(W\), we construct a hybrid multiplicative update that balances the
+contributions of the NMF and Cox gradients. Let \[
 \nabla_W \mathcal{L}_{\mathrm{NMF}}(W,H)
 =
 \frac{1}{np}(W H - X)H^\top,
-\]
-and let
-\[
+\] and let \[
 \nabla_W \mathcal{L}_{\mathrm{Cox}}(W,\beta)
 =
 \frac{2}{n_{event}}\nabla_W \ell(W,\beta).
-\]
-where $\nabla_W \ell(W,\beta)$ denotes the Cox gradient with respect to $W$. A closed-form expression for $\nabla_W \ell$ is
+\] where \(\nabla_W \ell(W,\beta)\) denotes the Cox gradient with
+respect to \(W\). A closed-form expression for \(\nabla_W \ell\) is
 \begin{equation}
 \nabla_W \ell(W,\beta)
 =
@@ -669,11 +797,9 @@ where $\nabla_W \ell(W,\beta)$ denotes the Cox gradient with respect to $W$. A c
         \exp(x_j^\top W \beta)
     }
 \right)\beta^\top,
-\end{equation}
-where $x_i$ denotes the $i$th column of $X$.
+\end{equation} where \(x_i\) denotes the \(i\)th column of \(X\).
 
-We define the gradient-balancing factor
-\begin{equation}
+We define the gradient-balancing factor \begin{equation}
 \label{eq:supp-delta}
 \delta^{(t)}
 =
@@ -682,13 +808,11 @@ We define the gradient-balancing factor
 }{
   \left\lVert \alpha \nabla_W \mathcal{L}_{Cox}(W^{(t)},\beta^{(t)}) \right\rVert_F^2
 },
-\end{equation}
-and clip $\delta^{(t)}$ to avoid extreme values:
-$\delta^{(t)} \leftarrow \min(\delta^{(t)}, \delta_{\max})$
-with $\delta_{\max} = 10^6$ in all experiments.
+\end{equation} and clip \(\delta^{(t)}\) to avoid extreme values:
+\(\delta^{(t)} \leftarrow \min(\delta^{(t)}, \delta_{\max})\) with
+\(\delta_{\max} = 10^6\) in all experiments.
 
-The multiplicative factor for $W$ is then
-\begin{equation}
+The multiplicative factor for \(W\) is then \begin{equation}
 R^{(t)}
 =
 \frac{
@@ -698,9 +822,7 @@ R^{(t)}
   \frac{(1-\alpha)}{np} W^{(t)} H^{(t+1)}H^{(t+1)\top}
   +\varepsilon_W
 },
-\end{equation}
-and the proposed update is
-\begin{equation}
+\end{equation} and the proposed update is \begin{equation}
 \label{eqn:W_update}
 W^{(t+1)}
 =
@@ -708,15 +830,14 @@ W^{(t+1)}
   W^{(t)} \odot R^{(t)},
   \varepsilon_W
 \right),
-\end{equation}
-with a small floor $\varepsilon_W > 0$. When $\alpha=0$, this reduces
-to the standard multiplicative update for NMF [@seung2001algorithms];
-for $\alpha>0$, the Cox gradient perturbs the update in a direction that
-decreases the supervised loss.
+\end{equation} with a small floor \(\varepsilon_W > 0\). When
+\(\alpha=0\), this reduces to the standard multiplicative update for NMF
+(19); for \(\alpha>0\), the Cox gradient perturbs the update in a
+direction that decreases the supervised loss.
 
-Because the combined multiplicative step does not, by itself, guarantee a
-nonincrease in the full loss $\mathcal{L}$, we embed it in a backtracking
-line search.
+Because the combined multiplicative step does not, by itself, guarantee
+a nonincrease in the full loss \(\mathcal{L}\), we embed it in a
+backtracking line search.
 
 \begin{algorithm}[H]
 \caption{$W$ update with backtracking}
@@ -748,15 +869,15 @@ line search.
     \end{algorithmic}
 \end{algorithm}
 
-The column normalization preserves both $WH$ and $W\beta$, and therefore
-leaves the loss $\mathcal{L}$ invariant up to numerical error. Backtracking
-guarantees that the accepted $W$ update does not increase $\mathcal{L}$.
+The column normalization preserves both \(WH\) and \(W\beta\), and
+therefore leaves the loss \(\mathcal{L}\) invariant up to numerical
+error. Backtracking guarantees that the accepted \(W\) update does not
+increase \(\mathcal{L}\).
 
-\subsubsection{Update for $\beta$} 
+\subsubsection{Update for $\beta$}
 
-Conditional on $(W,H)$, the loss in $\beta$ reduces to a convex
-elastic-net–penalized Cox problem:
-\[
+Conditional on \((W,H)\), the loss in \(\beta\) reduces to a convex
+elastic-net--penalized Cox problem: \[
 \min_{\beta \in \mathbb{R}^k}
 \left\{
   -\frac{2\alpha}{n_{\mathrm{event}}}\,\ell(W,\beta)
@@ -766,12 +887,10 @@ elastic-net–penalized Cox problem:
     +\frac{1-\xi}{2} \lVert \beta \rVert_2^2
   \right)
 \right\}.
-\]
-We solve this subproblem by cyclic coordinate descent following
-[@simon2011regularization]. Writing $\ell(\beta) = \ell(W,\beta)$ and
-$\tilde{\eta}_i = Z_i^\top \beta$, the update for coordinate $r$ has the
-closed form
-\begin{equation}
+\] We solve this subproblem by cyclic coordinate descent following (21).
+Writing \(\ell(\beta) = \ell(W,\beta)\) and
+\(\tilde{\eta}_i = Z_i^\top \beta\), the update for coordinate \(r\) has
+the closed form \begin{equation}
 \label{eqn:beta_update}
 \hat{\beta}_r
 =
@@ -788,102 +907,92 @@ closed form
 }{
   \frac{1}{n} \sum_{i=1}^n w(\tilde{\eta})_i z_{i,r}^2 + \lambda(1-\xi)
 },
-\end{equation}
-where $S(a,\tau) = \mathrm{sign}(a)\max(|a|-\tau,0)$ is the soft-thresholding
-operator, and $w(\tilde{\eta})$, $v(\tilde{\eta})$ are standard local
-quadratic approximations of the Cox log-partial likelihood [@simon2011regularization].
-We iterate coordinate updates until the subproblem converges to numerical
-tolerance, yielding a minimizer in $\beta$ for the current $W$.
-
+\end{equation} where \(S(a,\tau) = \mathrm{sign}(a)\max(|a|-\tau,0)\) is
+the soft-thresholding operator, and \(w(\tilde{\eta})\),
+\(v(\tilde{\eta})\) are standard local quadratic approximations of the
+Cox log-partial likelihood (21). We iterate coordinate updates until the
+subproblem converges to numerical tolerance, yielding a minimizer in
+\(\beta\) for the current \(W\).
 
 \subsubsection{Normalization of W}
 
-After each accepted $W$ update, we normalize the columns of $W$ as
-$W \leftarrow W D^{-1}$, and adjust $H$ and $\beta$ as
-\[
+After each accepted \(W\) update, we normalize the columns of \(W\) as
+\(W \leftarrow W D^{-1}\), and adjust \(H\) and \(\beta\) as \[
 H \leftarrow D H, \qquad \beta \leftarrow D \beta,
-\]
-where $D$ is the diagonal matrix of column $\ell_2$-norms of $W$.
-This preserves the reconstruction $WH$ and the linear predictor $W\beta$,
-leaving both the NMF and Cox terms in the loss unchanged. Normalization
-prevents degeneracy in the scale-nonidentifiable factorization and keeps
-columns of $W$ comparable in magnitude and interpretable as gene programs.
-
+\] where \(D\) is the diagonal matrix of column \(\ell_2\)-norms of
+\(W\). This preserves the reconstruction \(WH\) and the linear predictor
+\(W\beta\), leaving both the NMF and Cox terms in the loss unchanged.
+Normalization prevents degeneracy in the scale-nonidentifiable
+factorization and keeps columns of \(W\) comparable in magnitude and
+interpretable as gene programs.
 
 \subsubsection{Derivation of W update from projected coordinate descent}
-The W update can be derived directly from the projected coordinate descent update with a specific step size.
 
-Recall that the overall loss function is
-\begin{align}
+The W update can be derived directly from the projected coordinate
+descent update with a specific step size.
+
+Recall that the overall loss function is \begin{align}
     \mathcal{L}(W,H,\beta) = \frac{(1-\alpha)}{2np} ||X - WH||^2_F - \frac{2 \alpha}{n_{event}} \ell(W,\beta) + \lambda(\xi||\beta||_1 + \frac{(1-\xi)}{2},
-\end{align}
-where $\ell(W,\beta)$ is the log-partial likelihood for the Cox model. Let $\nabla_W \ell$ represent the derivative of $\ell(W,\beta)$ with respect to $W$. Then the derivative of the overall loss with respect to $W$ is
+\end{align} where \(\ell(W,\beta)\) is the log-partial likelihood for
+the Cox model. Let \(\nabla_W \ell\) represent the derivative of
+\(\ell(W,\beta)\) with respect to \(W\). Then the derivative of the
+overall loss with respect to \(W\) is
 
 \begin{equation}
   \frac{\partial L}{\partial W} = \frac{(1-\alpha)}{np}\left( WHH^T - XH^T \right) - \frac{2\alpha}{n_{event}} \nabla_W \ell
 \end{equation}
 
-Then the gradient descent update rule at iteration $t$ is
+Then the gradient descent update rule at iteration \(t\) is
 \begin{align}
   W^{(t)} &= W^{(t-1)} - \gamma \left( \frac{\partial L}{\partial W} \right) \nonumber \\
           &= W^{(t-1)} - \gamma \left( \frac{(1-\alpha)}{np}\left( WHH^T - XH^T \right) - \frac{2\alpha}{n_{event}} \nabla_W \ell \right)\\
-\end{align}
-Let the step size $\gamma$ be defined as in CITE:
+\end{align} Let the step size \(\gamma\) be defined as in CITE:
 \begin{equation}
   \gamma = \frac{np}{(1-\alpha)}\frac{W}{WHH^T}
-\end{equation}
-Then the update becomes
-\begin{align}
+\end{equation} Then the update becomes \begin{align}
   W^{(t)} &= W^{(t-1)} -\frac{np}{(1-\alpha)}\frac{W}{WHH^T} \left( \frac{(1-\alpha)}{np}\left( WHH^T - XH^T \right) - \frac{2\alpha}{n_{event}} \nabla_W \ell \right) \nonumber \\
           &= \frac{W}{WHH^T} XH^T + \frac{2\alpha np}{n_{event}(1-\alpha)} \nabla_W \ell \nonumber \\
           &= W \odot \frac{XH^T + \frac{2\alpha np}{n_{event}(1-\alpha)} \nabla_W \ell }{WHH^T} \nonumber \\
           &= W \odot \frac{\frac{(1-\alpha)}{np} XH^T + \frac{2\alpha}{n_{event}} \nabla_W \ell}{\frac{(1-\alpha)}{np} WHH^T}
-\end{align}
-Finally, projected coordinate descent projects the $W$ update in to the positive space
-\begin{equation}
+\end{align} Finally, projected coordinate descent projects the \(W\)
+update in to the positive space \begin{equation}
   W^{(t)} =  \max \left(W \odot \frac{\frac{(1-\alpha)}{np} XH^T + \frac{2\alpha}{n_{event}} \nabla_W \ell}{\frac{(1-\alpha)}{np}WHH^T}, 0\right)
-\end{equation}
-Since $W \geq 0$ this is equivalent to
-\begin{equation}
+\end{equation} Since \(W \geq 0\) this is equivalent to \begin{equation}
   W^{(t)} =  W \odot \max \left( \frac{\frac{(1-\alpha)}{np} XH^T + \frac{2\alpha}{n_{event}} \nabla_W \ell}{\frac{(1-\alpha)}{np} WHH^T}, 0 \right)
-\end{equation}
-which matches the multiplicative form used in the software implementation.
-
+\end{equation} which matches the multiplicative form used in the
+software implementation.
 
 \subsection{Convergence proof}
 
-We show that, under mild regularity conditions, the block coordinate descent
-(BCD) Algorithm~S\ref{alg:desurv} converges to a stationary point of the DeSurv
-loss function
-\[
+We show that, under mild regularity conditions, the block coordinate
+descent (BCD) Algorithm\textasciitilde S\ref{alg:desurv} converges to a
+stationary point of the DeSurv loss function \[
 \mathcal{L}(W,H,\beta).
-\]
-For clarity, we first analyze the algorithm \emph{without} the column
-normalization of $W$ inside the loop, and then argue in
-Section~\ref{subsec:conv_normalization} that the normalization step preserves
-stationarity of limit points.
+\] For clarity, we first analyze the algorithm \emph{without} the column
+normalization of \(W\) inside the loop, and then argue in
+Section\textasciitilde{}\ref{subsec:conv_normalization} that the
+normalization step preserves stationarity of limit points.
 
-Throughout, let $\theta = (W,H,\beta)$ and denote
-\(\mathcal{L}(\theta) = \mathcal{L}(W,H,\beta)\).
-The feasible set is
-\[
+Throughout, let \(\theta = (W,H,\beta)\) and denote
+\(\mathcal{L}(\theta) = \mathcal{L}(W,H,\beta)\). The feasible set is \[
 \Theta = \{(W,H,\beta):
   W \in \mathbb{R}_{\ge 0}^{p\times k},\;
   H \in \mathbb{R}_{\ge 0}^{k\times n},\;
   \beta \in \mathbb{R}^k\}.
 \]
 
-\textbf{Assumption 1 (Regularity and parameter space).}
-We assume:
+\textbf{Assumption 1 (Regularity and parameter space).} We assume:
+
 \begin{enumerate}[label=(\roman*)]
   \item The data $X \in \mathbb{R}_{\ge 0}^{p\times n}$, $y \in \mathbb{R}^n$, and $\delta \in \{0,1\}^n$ are fixed and bounded.
   \item The hyperparameters satisfy $\lambda_H > 0$, $\lambda>0$, $\alpha \in [0,1)$, and $\xi \in [0,1]$.
   \item The initial iterate $\theta^{(0)} = (W^{(0)},H^{(0)},\beta^{(0)})$ lies in $\Theta$ and satisfies $W^{(0)},H^{(0)} > 0$ elementwise.
 \end{enumerate}
 
-\textbf{Assumption 2 (Block updates).}
-At each outer iteration $t$, the three block updates in
-Algorithm~S\ref{alg:desurv} satisfy:
+\textbf{Assumption 2 (Block updates).} At each outer iteration \(t\),
+the three block updates in Algorithm\textasciitilde S\ref{alg:desurv}
+satisfy:
+
 \begin{enumerate}[label=(\roman*)]
   \item \emph{$H$-update.} For fixed $(W^{(t)},\beta^{(t)})$, the update
         $H^{(t)} \mapsto H^{(t+1)}$ is given by the multiplicative rule
@@ -924,83 +1033,77 @@ Algorithm~S\ref{alg:desurv} satisfy:
 \end{enumerate}
 
 \vspace{0.5em}
-\textbf{Lemma 1 (Continuity and bounded level sets).}
-Under Assumption 1, $\mathcal{L}:\Theta\to\mathbb{R}$ is continuous, and the
-initial sublevel set
-\[
+
+\textbf{Lemma 1 (Continuity and bounded level sets).} Under Assumption
+1, \(\mathcal{L}:\Theta\to\mathbb{R}\) is continuous, and the initial
+sublevel set \[
   \mathcal{S}_0 := \{\theta \in \Theta:
     \mathcal{L}(\theta) \le \mathcal{L}(\theta^{(0)})\}
-\]
-is nonempty, closed, and bounded.
+\] is nonempty, closed, and bounded.
 
-\emph{Proof.}
-The NMF term $\|X-WH\|_F^2$ is a polynomial in the entries of $W$ and $H$, hence
-is continuously differentiable. The penalty $\|H\|_F^2$ is continuous as well.
-The Cox partial log-likelihood is a smooth function of the linear predictor
-$\eta_i = x_i^\top W \beta$, which is linear in $(W,\beta)$, so this term is
-continuously differentiable in $(W,\beta)$. The $\ell_2$ penalty on $\beta$ is
-smooth, and the $\ell_1$ penalty is convex and lower semicontinuous. Therefore
-$\mathcal{L}$ is continuous on $\Theta$.
+\emph{Proof.} The NMF term \(\|X-WH\|_F^2\) is a polynomial in the
+entries of \(W\) and \(H\), hence is continuously differentiable. The
+penalty \(\|H\|_F^2\) is continuous as well. The Cox partial
+log-likelihood is a smooth function of the linear predictor
+\(\eta_i = x_i^\top W \beta\), which is linear in \((W,\beta)\), so this
+term is continuously differentiable in \((W,\beta)\). The \(\ell_2\)
+penalty on \(\beta\) is smooth, and the \(\ell_1\) penalty is convex and
+lower semicontinuous. Therefore \(\mathcal{L}\) is continuous on
+\(\Theta\).
 
-The constraints $W,H\ge 0$ define closed convex cones, and
-$\beta\in\mathbb{R}^k$ is unconstrained. Because $\lambda_H>0$ and $\lambda>0$,
-the terms $\tfrac{\lambda_H}{nk}\|H\|_F^2$ and
-$\lambda\tfrac{1-\xi}{2}\|\beta\|_2^2$ dominate the objective as
-$\|H\|_F\to\infty$ or $\|\beta\|_2\to\infty$, respectively. Thus the sublevel
-set $\mathcal{S}_0$ is bounded in $(H,\beta)$. Since $W\ge 0$ and $X$ is
-fixed, the reconstruction term and Cox term being bounded prevent $W$ from
-diverging while $\mathcal{L}$ remains below $\mathcal{L}(\theta^{(0)})$, so
-$W$ is bounded on $\mathcal{S}_0$. Because $\Theta$ is closed and
-$\mathcal{L}$ is continuous, $\mathcal{S}_0$ is closed. Nonemptiness follows
-from $\theta^{(0)}\in\mathcal{S}_0$. \hfill$\square$
+The constraints \(W,H\ge 0\) define closed convex cones, and
+\(\beta\in\mathbb{R}^k\) is unconstrained. Because \(\lambda_H>0\) and
+\(\lambda>0\), the terms \(\tfrac{\lambda_H}{nk}\|H\|_F^2\) and
+\(\lambda\tfrac{1-\xi}{2}\|\beta\|_2^2\) dominate the objective as
+\(\|H\|_F\to\infty\) or \(\|\beta\|_2\to\infty\), respectively. Thus the
+sublevel set \(\mathcal{S}_0\) is bounded in \((H,\beta)\). Since
+\(W\ge 0\) and \(X\) is fixed, the reconstruction term and Cox term
+being bounded prevent \(W\) from diverging while \(\mathcal{L}\) remains
+below \(\mathcal{L}(\theta^{(0)})\), so \(W\) is bounded on
+\(\mathcal{S}_0\). Because \(\Theta\) is closed and \(\mathcal{L}\) is
+continuous, \(\mathcal{S}_0\) is closed. Nonemptiness follows from
+\(\theta^{(0)}\in\mathcal{S}_0\). \hfill\(\square\)
 
 \vspace{0.5em}
-\textbf{Lemma 2 (Monotone descent and existence of limit points).}
-Under Assumptions 1 and 2, Algorithm~S\ref{alg:desurv} (without $W$
-normalization) generates a sequence $\{\theta^{(t)}\}_{t\ge 0}\subset\mathcal{S}_0$
-such that
-\[
-  \mathcal{L}(\theta^{(t+1)}) \le \mathcal{L}(\theta^{(t)})\quad \forall\,t,
-\]
-and $\{\mathcal{L}(\theta^{(t)})\}$ converges to a finite limit $\mathcal{L}^*$.
-Moreover, $\{\theta^{(t)}\}$ is bounded and therefore admits at least one limit
-point.
 
-\emph{Proof.}
-By Assumption 2(i),
-\[
+\textbf{Lemma 2 (Monotone descent and existence of limit points).} Under
+Assumptions 1 and 2, Algorithm\textasciitilde S\ref{alg:desurv} (without
+\(W\) normalization) generates a sequence
+\(\{\theta^{(t)}\}_{t\ge 0}\subset\mathcal{S}_0\) such that \[
+  \mathcal{L}(\theta^{(t+1)}) \le \mathcal{L}(\theta^{(t)})\quad \forall\,t,
+\] and \(\{\mathcal{L}(\theta^{(t)})\}\) converges to a finite limit
+\(\mathcal{L}^*\). Moreover, \(\{\theta^{(t)}\}\) is bounded and
+therefore admits at least one limit point.
+
+\emph{Proof.} By Assumption 2(i), \[
   \mathcal{L}(W^{(t)},H^{(t+1)},\beta^{(t)})
   \le
   \mathcal{L}(W^{(t)},H^{(t)},\beta^{(t)}).
-\]
-By Assumption 2(ii),
-\[
+\] By Assumption 2(ii), \[
   \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta^{(t)})
   \le
   \mathcal{L}(W^{(t)},H^{(t+1)},\beta^{(t)}).
-\]
-By Assumption 2(iii),
-\[
+\] By Assumption 2(iii), \[
   \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta^{(t+1)})
   \le
   \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta^{(t)}).
-\]
-Combining these inequalities gives
-\[
+\] Combining these inequalities gives \[
   \mathcal{L}(\theta^{(t+1)}) \le \mathcal{L}(\theta^{(t)})\quad\forall t,
-\]
-so $\{\mathcal{L}(\theta^{(t)})\}$ is monotonically nonincreasing. Since
-$\mathcal{L}$ is bounded below on $\Theta$, the sequence converges to some
-finite $\mathcal{L}^*$.
+\] so \(\{\mathcal{L}(\theta^{(t)})\}\) is monotonically nonincreasing.
+Since \(\mathcal{L}\) is bounded below on \(\Theta\), the sequence
+converges to some finite \(\mathcal{L}^*\).
 
-Each iterate lies in $\mathcal{S}_0$ by construction, and $\mathcal{S}_0$ is
-bounded by Lemma 1. Therefore $\{\theta^{(t)}\}$ is bounded and has at least
-one limit point by the Bolzano--Weierstrass theorem. \hfill$\square$
+Each iterate lies in \(\mathcal{S}_0\) by construction, and
+\(\mathcal{S}_0\) is bounded by Lemma 1. Therefore \(\{\theta^{(t)}\}\)
+is bounded and has at least one limit point by the Bolzano--Weierstrass
+theorem. \hfill\(\square\)
 
 \vspace{0.5em}
-\textbf{Lemma 3 (Blockwise optimality of limit points).}
-Let $\theta^*=(W^*,H^*,\beta^*)$ be any limit point of $\{\theta^{(t)}\}$ under
-Assumptions~1–2. Then:
+
+\textbf{Lemma 3 (Blockwise optimality of limit points).} Let
+\(\theta^*=(W^*,H^*,\beta^*)\) be any limit point of
+\(\{\theta^{(t)}\}\) under Assumptions\textasciitilde1--2. Then:
+
 \begin{enumerate}[label=(\roman*)]
   \item $H^*$ satisfies the KKT conditions for
         \[
@@ -1017,48 +1120,59 @@ Assumptions~1–2. Then:
         and satisfies the KKT conditions for the elastic-net Cox subproblem.
 \end{enumerate}
 
-\emph{Proof.}
-Let $\{t_j\}$ be a subsequence such that
-$\theta^{(t_j)}\to\theta^*=(W^*,H^*,\beta^*)$. By continuity of $\mathcal{L}$,
-$\mathcal{L}(\theta^{(t_j)})\to\mathcal{L}^*$.
+\emph{Proof.} Let \(\{t_j\}\) be a subsequence such that
+\(\theta^{(t_j)}\to\theta^*=(W^*,H^*,\beta^*)\). By continuity of
+\(\mathcal{L}\), \(\mathcal{L}(\theta^{(t_j)})\to\mathcal{L}^*\).
 
-(i) Conditional on $(W,\beta)$, the $H$-subproblem is
-\begin{equation}
-  \min_{H \geq 0}\frac{(1-\alpha)}{np}(\lVert X-WH \rVert_F^2 + \frac{\lambda_H}{nk}||H||_F^2) + \text{const in $H$},\nonumber
-\end{equation}
-a strictly convex quadratic program. The multiplicative update for $H$ is known
-to be a descent method whose fixed points coincide with the KKT points of this
-constrained subproblem [@seung2001algorithms; @lin2007convergence]. Since the full
-objective $\mathcal{L}(\theta^{(t)})$ converges, the per-iteration decrease
-in $\mathcal{L}$ due to the $H$-update must vanish along $\{t_j\}$.
-If $H^*$ were not KKT for the $H$-subproblem given $(W^*,\beta^*)$, there would
-exist a feasible descent direction for $H$ at $(W^*,\beta^*)$, implying that
-for sufficiently large $j$ the $H$-update would still produce a strict decrease
-in $\mathcal{L}$, contradicting convergence. Hence $H^*$ satisfies the KKT
-conditions.
-
-(ii) Conditional on $(H,\beta)$, the $W$-subproblem is differentiable and
-convex in $W$ (sum of a quadratic term and a negative Cox partial
-log-likelihood in a linear predictor). The hybrid multiplicative step with
-backtracking can be viewed as a projected gradient-like update onto the
-nonnegative orthant. Under mild conditions on the search direction and step
-sizes, any limit point of such a projected gradient scheme is a KKT point for
-the constrained subproblem; see, for example, [@tseng2001convergence; @grippo2000convergence].
-If $W^*$ did not satisfy the KKT conditions, there would be a feasible
-descent direction at $(W^*,H^*,\beta^*)$ and a sufficiently small step that
-reduces $\mathcal{L}$, which the line search would eventually accept. This
-would contradict the fact that $\mathcal{L}(\theta^{(t_j)})\to\mathcal{L}^*$.
-Therefore $W^*$ is KKT for the $W$-subproblem.
-
-(iii) For fixed $(W,H)$, the $\beta$-subproblem is the convex elastic-net
-penalized Cox objective. The coordinate descent algorithm converges to the unique minimizer. By Assumption 2(iii),$\beta^{(t+1)}$ is taken to be this minimizer at each iteration. Passing to the limit along $\{t_j\}$ shows that $\beta^*$ is the unique minimizer of the
-$\beta$-block given $(W^*,H^*)$ and hence satisfies its KKT conditions.
-\hfill$\square$
+\begin{enumerate}
+\def\labelenumi{(\roman{enumi})}
+\item
+  Conditional on \((W,\beta)\), the \(H\)-subproblem is \begin{equation}
+    \min_{H \geq 0}\frac{(1-\alpha)}{np}(\lVert X-WH \rVert_F^2 + \frac{\lambda_H}{nk}||H||_F^2) + \text{const in $H$},\nonumber
+  \end{equation} a strictly convex quadratic program. The multiplicative
+  update for \(H\) is known to be a descent method whose fixed points
+  coincide with the KKT points of this constrained subproblem (19, 22).
+  Since the full objective \(\mathcal{L}(\theta^{(t)})\) converges, the
+  per-iteration decrease in \(\mathcal{L}\) due to the \(H\)-update must
+  vanish along \(\{t_j\}\). If \(H^*\) were not KKT for the
+  \(H\)-subproblem given \((W^*,\beta^*)\), there would exist a feasible
+  descent direction for \(H\) at \((W^*,\beta^*)\), implying that for
+  sufficiently large \(j\) the \(H\)-update would still produce a strict
+  decrease in \(\mathcal{L}\), contradicting convergence. Hence \(H^*\)
+  satisfies the KKT conditions.
+\item
+  Conditional on \((H,\beta)\), the \(W\)-subproblem is differentiable
+  and convex in \(W\) (sum of a quadratic term and a negative Cox
+  partial log-likelihood in a linear predictor). The hybrid
+  multiplicative step with backtracking can be viewed as a projected
+  gradient-like update onto the nonnegative orthant. Under mild
+  conditions on the search direction and step sizes, any limit point of
+  such a projected gradient scheme is a KKT point for the constrained
+  subproblem; see, for example, (23, 24). If \(W^*\) did not satisfy the
+  KKT conditions, there would be a feasible descent direction at
+  \((W^*,H^*,\beta^*)\) and a sufficiently small step that reduces
+  \(\mathcal{L}\), which the line search would eventually accept. This
+  would contradict the fact that
+  \(\mathcal{L}(\theta^{(t_j)})\to\mathcal{L}^*\). Therefore \(W^*\) is
+  KKT for the \(W\)-subproblem.
+\item
+  For fixed \((W,H)\), the \(\beta\)-subproblem is the convex
+  elastic-net penalized Cox objective. The coordinate descent algorithm
+  converges to the unique minimizer. By Assumption
+  2(iii),\(\beta^{(t+1)}\) is taken to be this minimizer at each
+  iteration. Passing to the limit along \(\{t_j\}\) shows that
+  \(\beta^*\) is the unique minimizer of the \(\beta\)-block given
+  \((W^*,H^*)\) and hence satisfies its KKT conditions.
+  \hfill\(\square\)
+\end{enumerate}
 
 \vspace{0.5em}
-\textbf{Theorem 1 (Convergence to a stationary point).}
-Under Assumptions 1 and 2, the sequence $\{\theta^{(t)}\}$ produced by
-Algorithm~S\ref{alg:desurv} (without $W$ normalization) satisfies:
+
+\textbf{Theorem 1 (Convergence to a stationary point).} Under
+Assumptions 1 and 2, the sequence \(\{\theta^{(t)}\}\) produced by
+Algorithm\textasciitilde S\ref{alg:desurv} (without \(W\) normalization)
+satisfies:
+
 \begin{enumerate}[label=(\alph*)]
   \item The objective values $\{\mathcal{L}(\theta^{(t)})\}$ are monotonically
         nonincreasing and converge to a finite limit $\mathcal{L}^*$.
@@ -1070,125 +1184,128 @@ Algorithm~S\ref{alg:desurv} (without $W$ normalization) satisfies:
         \]
 \end{enumerate}
 
-\emph{Proof.}
-Part (a) is Lemma 2. For part (b), Lemma 3 shows that any limit point $\theta^*$
-is blockwise optimal: each block is optimal (in the KKT sense) when the others
-are held fixed.
+\emph{Proof.} Part (a) is Lemma 2. For part (b), Lemma 3 shows that any
+limit point \(\theta^*\) is blockwise optimal: each block is optimal (in
+the KKT sense) when the others are held fixed.
 
-The DeSurv loss can be written as
-\[
+The DeSurv loss can be written as \[
 \mathcal{L}(\theta) = f(W,H,\beta) + g(\beta)
                      + I_{\{W\ge 0\}}(W) + I_{\{H\ge 0\}}(H),
-\]
-where $f$ is continuously differentiable, $g(\beta)=\lambda\xi\|\beta\|_1$ is
-a separable convex (possibly nondifferentiable) penalty, and $I_C$ denotes the
-indicator of a closed convex set $C$. This is the smooth+nonsmooth composite
-form considered in block coordinate descent analyses such as [@tseng2001convergence].
-In this setting, any point that is optimal with respect to each block
-individually (a block coordinatewise minimizer) is a stationary point for the
-full problem: equivalently,
-\[
+\] where \(f\) is continuously differentiable,
+\(g(\beta)=\lambda\xi\|\beta\|_1\) is a separable convex (possibly
+nondifferentiable) penalty, and \(I_C\) denotes the indicator of a
+closed convex set \(C\). This is the smooth+nonsmooth composite form
+considered in block coordinate descent analyses such as (23). In this
+setting, any point that is optimal with respect to each block
+individually (a block coordinatewise minimizer) is a stationary point
+for the full problem: equivalently, \[
 0 \in \nabla_{W,H} f(W^*,H^*,\beta^*)
     + \partial I_{\{W\ge 0\}}(W^*)
     + \partial I_{\{H\ge 0\}}(H^*),
-\]
-\[
+\] \[
 0 \in \nabla_\beta f(W^*,H^*,\beta^*)
     + \partial g(\beta^*),
-\]
-which are precisely the KKT conditions for
-$\min_{\theta\in\Theta}\mathcal{L}(\theta)$.
-Hence every limit point of Algorithm~S\ref{alg:desurv} is stationary.
-\hfill$\square$
+\] which are precisely the KKT conditions for
+\(\min_{\theta\in\Theta}\mathcal{L}(\theta)\). Hence every limit point
+of Algorithm\textasciitilde S\ref{alg:desurv} is stationary.
+\hfill\(\square\)
 
 \subsubsection{Effect of column normalization of $W$}
 \label{subsec:conv_normalization}
 
-The above analysis omits the column-normalization step for $W$ used in
-Algorithm~S\ref{alg:backtrack}. We briefly argue that this normalization does
-not affect stationarity of limit points.
+The above analysis omits the column-normalization step for \(W\) used in
+Algorithm\textasciitilde S\ref{alg:backtrack}. We briefly argue that
+this normalization does not affect stationarity of limit points.
 
-Let $D$ be a diagonal matrix with strictly positive diagonal entries. The
-transformation
-\[
+Let \(D\) be a diagonal matrix with strictly positive diagonal entries.
+The transformation \[
   (W,H,\beta) \mapsto (W',H',\beta') = (W D^{-1},\, D H,\, D\beta)
-\]
-preserves both the product $WH$ and the linear predictor $W\beta$, and hence
-leaves $\mathcal{L}$ invariant. The column-normalization step is exactly such a
-transformation, with $D$ chosen from the column norms of $W$.
+\] preserves both the product \(WH\) and the linear predictor
+\(W\beta\), and hence leaves \(\mathcal{L}\) invariant. The
+column-normalization step is exactly such a transformation, with \(D\)
+chosen from the column norms of \(W\).
 
-Let $\{\theta^{(t)}\}$ be the sequence generated by the algorithm without
-normalization, and let $\{\tilde{\theta}^{(t)}\}$ be the sequence with
-normalization. For each $t$ there exists a diagonal $D^{(t)}$ with strictly
-positive entries such that
-\[
+Let \(\{\theta^{(t)}\}\) be the sequence generated by the algorithm
+without normalization, and let \(\{\tilde{\theta}^{(t)}\}\) be the
+sequence with normalization. For each \(t\) there exists a diagonal
+\(D^{(t)}\) with strictly positive entries such that \[
   \tilde{\theta}^{(t)} =
   (W^{(t)} D^{(t),-1},\, D^{(t)} H^{(t)},\, D^{(t)}\beta^{(t)}),
-\]
-and $\mathcal{L}(\tilde{\theta}^{(t)}) = \mathcal{L}(\theta^{(t)})$.
-Thus limit points of $\{\tilde{\theta}^{(t)}\}$ are obtained from limit points
-of $\{\theta^{(t)}\}$ by such invertible diagonal scalings.
+\] and
+\(\mathcal{L}(\tilde{\theta}^{(t)}) = \mathcal{L}(\theta^{(t)})\). Thus
+limit points of \(\{\tilde{\theta}^{(t)}\}\) are obtained from limit
+points of \(\{\theta^{(t)}\}\) by such invertible diagonal scalings.
 
-Since the KKT conditions are expressed in terms of the gradients with respect
-to $WH$ and $W\beta$, and these quantities are invariant under the above
-scaling, stationarity is preserved under the transformation. Therefore
-Theorem~1 implies that every limit point of the \emph{normalized} algorithm is
-also a stationary point of $\mathcal{L}$ (up to this scaling equivalence), which
+Since the KKT conditions are expressed in terms of the gradients with
+respect to \(WH\) and \(W\beta\), and these quantities are invariant
+under the above scaling, stationarity is preserved under the
+transformation. Therefore Theorem\textasciitilde1 implies that every
+limit point of the \emph{normalized} algorithm is also a stationary
+point of \(\mathcal{L}\) (up to this scaling equivalence), which
 establishes convergence of the implementation used in practice.
 
-\subsubsection{Remark (Coxnet implementation)} 
-Our implementation updates the $\beta$ block using a Coxnet-style coordinate descent that relies on an approximate Hessian. Consequently, the formal optimality proof is established for an idealized version of the $\beta$ update that assumes exact second-order information. Nonetheless, in empirical applications the approximate update is numerically stable and yields a monotone decrease in the objective, consistent with the behavior predicted by the idealized analysis. 
+\subsubsection{Remark (Coxnet implementation)}
 
+Our implementation updates the \(\beta\) block using a Coxnet-style
+coordinate descent that relies on an approximate Hessian. Consequently,
+the formal optimality proof is established for an idealized version of
+the \(\beta\) update that assumes exact second-order information.
+Nonetheless, in empirical applications the approximate update is
+numerically stable and yields a monotone decrease in the objective,
+consistent with the behavior predicted by the idealized analysis.
 
 \subsection{Supervision on \(W\) versus \(H\)}
 
-Classical nonnegative matrix factorization (NMF) is non-identifiable: for any
-invertible matrix \(R\) with nonnegative entries, the factorization
-\((W, H)\) can be transformed to \((W R, R^{-1} H)\) without changing the
-reconstruction error, yielding multiple valid solutions
-[@donoho2004nmf; @laurberg2008uniqueness; @gillis2014nmf]. Although normalizing
-columns of \(W\) or rows of \(H\) resolves the trivial scaling ambiguity,
-nonnegative mixing transformations persist, and empirical studies consistently
-show that the sample-loading matrix \(H\) is more sensitive to initialization
-and local minima than the program matrix \(W\)
-[@brunet2004metagenes; @kim2007sparse; @gillis2012accelerated].
+Classical nonnegative matrix factorization (NMF) is non-identifiable:
+for any invertible matrix \(R\) with nonnegative entries, the
+factorization \((W, H)\) can be transformed to \((W R, R^{-1} H)\)
+without changing the reconstruction error, yielding multiple valid
+solutions (25--27). Although normalizing columns of \(W\) or rows of
+\(H\) resolves the trivial scaling ambiguity, nonnegative mixing
+transformations persist, and empirical studies consistently show that
+the sample-loading matrix \(H\) is more sensitive to initialization and
+local minima than the program matrix \(W\) (28--30).
 
-In DeSurv, survival supervision enters through the projection $Z = X^\top W$ in the partial log-likelihood, so that the gradient of the DeSurv loss with respect to the programs is
-\[
+In DeSurv, survival supervision enters through the projection
+\(Z = X^\top W\) in the partial log-likelihood, so that the gradient of
+the DeSurv loss with respect to the programs is \[
 \nabla \mathcal{L} = (1-\alpha) \nabla_W \mathcal{L}_{\mathrm{Cox}}(W,H) - \alpha\nabla_W \mathcal{L}_{\mathrm{Cox}}(W,\beta),
-\]
-and therefore the update rule for $W$ as in Equation~\ref{eqn:W_update} relies on both the reconstruction term and the supervision term. As such, the gene-program definitions are directly shaped by their association with survival. This mechanism amplifies
-genes aligned with the hazard gradient and suppresses those that dilute
-prognostic structure, ensuring that the learned programs encode survival-relevant
-biological variation.
+\] and therefore the update rule for \(W\) as in
+Equation\textasciitilde{}\ref{eqn:W_update} relies on both the
+reconstruction term and the supervision term. As such, the gene-program
+definitions are directly shaped by their association with survival. This
+mechanism amplifies genes aligned with the hazard gradient and
+suppresses those that dilute prognostic structure, ensuring that the
+learned programs encode survival-relevant biological variation.
 
-By contrast, if supervision were applied to the sample loadings \(H\), the model
-could reduce the Cox loss by redistributing patient-specific coefficients while
-leaving the gene-level programs \(W\) nearly unchanged, a behavior documented in
-multiple supervised variants of NMF and supervised topic models, where
-supervision applied only to the coefficient matrix modifies \(H\) but not the
-basis \(W\) [@cai2011graph; @wang2014supervised; @blei2007slda].
+By contrast, if supervision were applied to the sample loadings \(H\),
+the model could reduce the Cox loss by redistributing patient-specific
+coefficients while leaving the gene-level programs \(W\) nearly
+unchanged, a behavior documented in multiple supervised variants of NMF
+and supervised topic models, where supervision applied only to the
+coefficient matrix modifies \(H\) but not the basis \(W\) (31--33).
 
-Supervising \(W\) also provides a practical advantage for **portability**:
-because \(W\) defines gene-level programs, new samples can be embedded by the
-closed-form projection \(Z_{\text{new}} = X_{\text{new}}^\top W\). In contrast,
-supervising \(H\) would not yield such a mapping; instead, obtaining sample
-loadings for external datasets would require solving a nonnegative least-squares
-(NNLS) problem for each new sample, introducing optimization noise and reducing
-reproducibility.
+Supervising \(W\) also provides a practical advantage for
+\textbf{portability}: because \(W\) defines gene-level programs, new
+samples can be embedded by the closed-form projection
+\(Z_{\text{new}} = X_{\text{new}}^\top W\). In contrast, supervising
+\(H\) would not yield such a mapping; instead, obtaining sample loadings
+for external datasets would require solving a nonnegative least-squares
+(NNLS) problem for each new sample, introducing optimization noise and
+reducing reproducibility.
 
-Together, these considerations motivate supervising through \(W\), which shapes
-the gene programs toward prognostic directions, stabilizes solutions across
-initializations, and yields biologically interpretable signatures that
-generalize across cohorts.
-
+Together, these considerations motivate supervising through \(W\), which
+shapes the gene programs toward prognostic directions, stabilizes
+solutions across initializations, and yields biologically interpretable
+signatures that generalize across cohorts.
 
 \subsection{Cross-validation procedure}
-Algorithm~S\ref{alg:cv} describes the cross validation procedure with $F$ folds and $R$ initializations.
-We define the c-index using comparable pairs
-$\mathcal{P} = \{(i,j) : y_i < y_j,\ \delta_i = 1\}$ and linear predictors
-$\hat{\eta}_i$:
-\begin{equation}
+
+Algorithm\textasciitilde S\ref{alg:cv} describes the cross validation
+procedure with \(F\) folds and \(R\) initializations. We define the
+c-index using comparable pairs
+\(\mathcal{P} = \{(i,j) : y_i < y_j,\ \delta_i = 1\}\) and linear
+predictors \(\hat{\eta}_i\): \begin{equation}
 \label{eqn:cindex}
 \hat{c} =
 \frac{1}{|\mathcal{P}|}
@@ -1239,7 +1356,6 @@ $
 \end{algorithmic}
 \end{algorithm}
 
-
 \subsection{Bayesian Optimization}
 
 \subsection{PDAC Datasets}
@@ -1252,25 +1368,16 @@ $
 
 \pnasbreak
 
-# Versioning {.unnumbered}
+\section*{Versioning}\label{versioning}
+\addcontentsline{toc}{section}{Versioning}
 
+\begin{verbatim}
+## DeSurv package version: 1.0.1
+## DeSurv git branch: 20260107bugfix
+## DeSurv git commit: fea641a96e4743315a35b9b6addcc1a1ff53da9d
+## Paper git branch: main
+## Paper git commit: f2b3031dc5fea0689481ecfc87d7dc79ffa35ecc
 \end{verbatim}
-
-\subsection{DeSurv package version:
-1.0.1}\label{desurv-package-version-1.0.1}
-
-\subsection{DeSurv git branch:
-20260107bugfix}\label{desurv-git-branch-20260107bugfix}
-
-\subsection{DeSurv git commit:
-fea641a96e4743315a35b9b6addcc1a1ff53da9d}\label{desurv-git-commit-fea641a96e4743315a35b9b6addcc1a1ff53da9d}
-
-\subsection{Paper git branch: main}\label{paper-git-branch-main}
-
-\subsection{Paper git commit:
-ad79f03a9361188583683b8f487de53d14c9f023}\label{paper-git-commit-ad79f03a9361188583683b8f487de53d14c9f023}
-
-```
 
 \phantomsection\label{refs}
 \begin{CSLReferences}{0}{1}
@@ -1386,6 +1493,98 @@ factorization supervised for survival data analysis. PhD thesis
 Low-rank reorganization via proportional hazards non-negative matrix
 factorization unveils survival associated gene clusters. \emph{arXiv
 preprint arXiv:200803776}.}
+
+\bibitem[\citeproctext]{ref-seung2001algorithms}
+\CSLLeftMargin{19. }%
+\CSLRightInline{Seung D, Lee L (2001) Algorithms for non-negative matrix
+factorization. \emph{Advances in neural information processing systems}
+13(556-562):35.}
+
+\bibitem[\citeproctext]{ref-pascualmontano2006nonsmooth}
+\CSLLeftMargin{20. }%
+\CSLRightInline{Pascual-Montano A, Carazo JM, Kochi K, Lehmann D,
+Pascual-Marqui RD (2006)
+\href{https://doi.org/10.1109/TPAMI.2006.60}{Nonsmooth nonnegative
+matrix factorization}. \emph{IEEE Transactions on Pattern Analysis and
+Machine Intelligence} 28(3):403--415.}
+
+\bibitem[\citeproctext]{ref-simon2011regularization}
+\CSLLeftMargin{21. }%
+\CSLRightInline{Simon N, Friedman JH, Hastie T, Tibshirani R (2011)
+Regularization paths for cox's proportional hazards model via coordinate
+descent. \emph{Journal of statistical software} 39:1--13.}
+
+\bibitem[\citeproctext]{ref-lin2007convergence}
+\CSLLeftMargin{22. }%
+\CSLRightInline{Lin C-J (2007) On the convergence of multiplicative
+update algorithms for nonnegative matrix factorization. \emph{IEEE
+Transactions on Neural Networks} 18(6):1589--1596.}
+
+\bibitem[\citeproctext]{ref-tseng2001convergence}
+\CSLLeftMargin{23. }%
+\CSLRightInline{Tseng P (2001) Convergence of a block coordinate descent
+method for nondifferentiable minimization. \emph{Journal of optimization
+theory and applications} 109(3):475--494.}
+
+\bibitem[\citeproctext]{ref-grippo2000convergence}
+\CSLLeftMargin{24. }%
+\CSLRightInline{Grippo L, Sciandrone M (2000) On the convergence of the
+block nonlinear gauss--seidel method under convex constraints.
+\emph{Operations research letters} 26(3):127--136.}
+
+\bibitem[\citeproctext]{ref-donoho2004nmf}
+\CSLLeftMargin{25. }%
+\CSLRightInline{Donoho D, Stodden V (2004) When does non-negative matrix
+factorization give a correct decomposition into parts? \emph{Advances in
+Neural Information Processing Systems}.}
+
+\bibitem[\citeproctext]{ref-laurberg2008uniqueness}
+\CSLLeftMargin{26. }%
+\CSLRightInline{Laurberg H, Christensen MG, Plumbley MD, Hansen LK,
+Jensen SH (2008) Theorems on the uniqueness of nonnegative matrix
+factorization. \emph{Neurocomputing} 71(1-3):606--616.}
+
+\bibitem[\citeproctext]{ref-gillis2014nmf}
+\CSLLeftMargin{27. }%
+\CSLRightInline{Gillis N (2014) The why and how of nonnegative matrix
+factorization. \emph{Regularization, Optimization, Kernels, and Support
+Vector Machines} (Chapman; Hall/CRC), pp 257--291.}
+
+\bibitem[\citeproctext]{ref-brunet2004metagenes}
+\CSLLeftMargin{28. }%
+\CSLRightInline{Brunet J-P, Tamayo P, Golub TR, Mesirov JP (2004)
+Metagenes and molecular pattern discovery using matrix factorization.
+\emph{Proceedings of the National Academy of Sciences}
+101(12):4164--4169.}
+
+\bibitem[\citeproctext]{ref-kim2007sparse}
+\CSLLeftMargin{29. }%
+\CSLRightInline{Kim H, Park H (2007) Sparse non-negative matrix
+factorization for clustering. \emph{Journal of Scientific Computing}
+36:205--222.}
+
+\bibitem[\citeproctext]{ref-gillis2012accelerated}
+\CSLLeftMargin{30. }%
+\CSLRightInline{Gillis N, Glineur F (2012) Accelerated multiplicative
+updates and hierarchical ALS algorithms for nonnegative matrix
+factorization. \emph{Neural Computation} 24(4):1085--1105.}
+
+\bibitem[\citeproctext]{ref-cai2011graph}
+\CSLLeftMargin{31. }%
+\CSLRightInline{Cai D, He X, Han J (2011) Graph regularized nonnegative
+matrix factorization for data representation. \emph{IEEE Transactions on
+Pattern Analysis and Machine Intelligence}, pp 1548--1560.}
+
+\bibitem[\citeproctext]{ref-wang2014supervised}
+\CSLLeftMargin{32. }%
+\CSLRightInline{Wang K, Yang P, Yang Y, Sun L (2014) A novel supervised
+nonnegative matrix factorization algorithm for gene expression
+classification. \emph{Computational Biology and Chemistry} 53:189--197.}
+
+\bibitem[\citeproctext]{ref-blei2007slda}
+\CSLLeftMargin{33. }%
+\CSLRightInline{Blei DM, McAuliffe JD (2007) Supervised topic models.
+\emph{Advances in Neural Information Processing Systems}.}
 
 \end{CSLReferences}
 

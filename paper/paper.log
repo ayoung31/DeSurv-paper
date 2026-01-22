@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.1.22)  22 JAN 2026 02:22
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.1.22)  22 JAN 2026 02:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1128,69 +1128,17 @@ File: mt-bch.cfg 2007/03/03 v1.5 microtype config. file: Bitstream Charter (RS)
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
 (hyperref)                be the same. Added a new anchor on input line 239.
 
-<../figures/model_schematic_final.pdf, id=68, 578.16pt x 505.89pt>
+<../figures/model_schematic_final.pdf, id=168, 578.16pt x 505.89pt>
 File: ../figures/model_schematic_final.pdf Graphic file (type pdf)
 <use ../figures/model_schematic_final.pdf>
 Package pdftex.def Info: ../figures/model_schematic_final.pdf  used on input line 278.
 (pdftex.def)             Requested size: 505.69467pt x 433.62885pt.
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 289.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 289.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\alpha' on input line 289.
-
-
-LaTeX Warning: Reference `fig:bo' on page 2 undefined on input line 301.
-
-
-LaTeX Warning: Reference `fig:bo' on page 2 undefined on input line 325.
-
-LaTeX Font Info:    Font shape `T1/phv/m/it' in size <7> not available
-(Font)              Font shape `T1/phv/m/sl' tried instead on input line 377.
-LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
-(Font)              scaled to size 6.64998pt on input line 377.
-[2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
-Underfull \hbox (badness 10000) in paragraph at lines 378--381
-[]\T1/lmr/m/n/9 (+20) tar_load(fig_bo_heat_tcgacptac)
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 378--381
-\T1/lmr/m/n/9 (+20) tar_load(fig_residuals_tcgacptac)
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 378--381
-\T1/lmr/m/n/9 (+20) tar_load(fig_cophenetic_tcgacptac)
- []
-
-
-Overfull \hbox (144.45717pt too wide) in paragraph at lines 383--383
-|[]\T1/phv/b/n/10 (-20) upper = plot_grid(fig_bo_cvk_tcgacptac,fig_bo_cvalpha_tcgacptac,labels=c(``A'',``B''))| 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 385--388
-\T1/lmr/m/n/9 (+20) upper = plot_grid(fig_residuals_tcgacptac,
- []
-
-
-Overfull \hbox (20.5562pt too wide) in paragraph at lines 389--391
-[]\T1/lmr/m/n/9 (-20) k_hist = plot_grid(alt_plots$k_hist,NULL,nrow=2,rel_heights
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 392--394
-[]\T1/lmr/m/n/9 (+20) lower = plot_grid(fig_bo_heat_tcgacptac,
- []
-
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 397.
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf, id=171, 433.62pt x 397.485pt>
+File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf Graphic file (type pdf)
+<use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf>
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf  used on input line 347.
+(pdftex.def)             Requested size: 433.63878pt x 397.49614pt.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 361.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -1198,1681 +1146,352 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `lmtt' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
-
-Overfull \hbox (94.10248pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 ## DeSurv improves selection of prognostic gene signatures {.unnumbered}[] 
- []
-
-
-Overfull \hbox (2971.6219pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 To test whether supervision improves the selection of prognostic gene signatures, we used simulations with known lethal factors and tuned the number of top genes per factor (\texttt{n\_top}) using BO. We compared the supervised DeSurv model to the unsupervised $\alpha=0$ baseline across simulation regimes. Figure \ref{fig:sim}A shows the distribution of test C-index values, while Figure \ref{fig:sim}B reports the precision of recovered prognostic genes (mean across lethal factors). DeSurv consistently yields higher C-index and improved precision, indicating that survival supervision helps focus signatures on truly prognostic genes rather than reconstruction-only structure.[] 
- []
-
-
-Overfull \hbox (420.12685pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 {\centering \includegraphics[width=\textwidth]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1}[] 
- []
-
-
-Overfull \hbox (2253.4233pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 \caption{Performance comparison between DeSurv and unsupervised NMF ($\alpha = 0$) in simulation. (A) Distribution of cross-validated concordance index shows that DeSurv achieves consistently higher survival prediction performance than the unsupervised baseline. (B) Precision for recovering true underlying gene programs is substantially higher for DeSurv, whereas the unsupervised approach exhibits near-zero precision, indicating poor alignment with the ground-truth factors. \label{fig:sim}}\label{fig:fig-sim-ntop-scenarios}[] 
- []
-
-
-Overfull \hbox (259.47716pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 ## Survival-informed factorization reorganizes transcriptional structure in pancreatic cancer {.unnumbered}[] 
- []
-
-
-Overfull \hbox (1672.24942pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 To assess the biological structure captured by standard nonnegative matrix factorization (NMF) and DeSurv, we examined the overlap between factor-specific gene rankings and established PDAC gene programs (Fig. \ref{fig:bio}A-B). Both approaches recovered recognizable biological signals; however, the organization of these signals across factors differed in ways that reflect the objectives of each method.[] 
- []
-
-
-Overfull \hbox (3292.92128pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 In the standard NMF solution, factors largely reflected dominant sources of transcriptional variance. One factor was strongly associated with exocrine-associated expression and opposed immune and stromal signatures, consistent with a bulk composition axis separating normal or differentiated tissue from non-epithelial tumor content. A second factor aligned with classical tumor identity, while a third aggregated immune, fibroblast, and extracellular matrix^^Urelated programs into a single microenvironmental component. These patterns indicate that standard NMF captures major biological variation in bulk PDAC expression data, but merges distinct microenvironmental states and allocates substantial model capacity to differentiation-driven signals.[] 
- []
-
-
-Overfull \hbox (2792.07225pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 By contrast, DeSurv produced a factorization that emphasized axes of variation more closely aligned with disease aggressiveness. One factor corresponded to classical tumor programs opposing basal-like expression, whereas another isolated an activated microenvironmental state characterized by immune infiltration and stromal remodeling. A third factor captured aggressive tumor-intrinsic programs associated with basal-like biology. Notably, exocrine-associated expression did not dominate any DeSurv factor, suggesting that survival-informed optimization deprioritizes differentiation-related variation that is weakly associated with outcome.[] 
- []
-
-
-Overfull \hbox (3269.29633pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 These differences were reflected quantitatively by contrasting the fraction of expression variance explained by each factor with its contribution to survival (Fig. \ref{fig:bio}C). In the standard NMF solution, the factor explaining the largest proportion of transcriptional variance contributed little to survival, consistent with its enrichment for exocrine and composition-driven programs. In contrast, DeSurv concentrated survival signal into a single factor that explained substantially more variation in outcome despite accounting for a smaller fraction of expression variance. The remaining DeSurv factors contributed minimal survival signal, indicating that survival-relevant information was not diffusely distributed across components.[] 
- []
-
-
-Overfull \hbox (4804.91835pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 To further characterize how DeSurv reorganizes the transcriptional structure learned by standard NMF, we examined the correspondence between factors derived from the two methods (Fig. \ref{fig:bio}D). Tumor-intrinsic structure was largely preserved, with one DeSurv factor showing strong correspondence to the classical tumor^^Uassociated NMF factor. In contrast, the microenvironmental factor identified by standard NMF mapped primarily to a single DeSurv factor enriched for activated immune and stromal programs, indicating that DeSurv refines variance-driven microenvironmental structure into a survival-aligned axis. Notably, the NMF factor dominated by exocrine-associated expression did not correspond strongly to any single DeSurv factor, consistent with the suppression of differentiation- and composition-driven signals observed in survival-informed factorization. Together, these results indicate that DeSurv selectively preserves tumor and microenvironmental structure while reorganizing or deprioritizing axes of variation that contribute little to survival.[] 
- []
-
-
-Overfull \hbox (410.67686pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 {\centering \includegraphics[width=\textwidth,height=4.5in]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1}[] 
- []
-
-
-Overfull \hbox (6704.36467pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 \caption{Survival-informed factorization reorganizes transcriptional structure relative to variance-driven NMF. (A) Correlation of standard NMF factor gene rankings with established pancreatic ductal adenocarcinoma (PDAC) gene programs. NMF recovers variance-dominant structure, including an exocrine-associated factor opposing immune and stromal signatures, a classical tumor factor, and a composite microenvironmental factor. (B) Corresponding correlations for DeSurv. DeSurv isolates tumor-intrinsic classical and basal-like programs and resolves an activated immune^^Ustromal microenvironment, while exocrine-associated expression does not dominate any factor. Asterisks indicate significant correlations after multiple testing correction. * Indicates an fdr adjusted p-value < 0.1 (C) Fraction of expression variance explained versus survival contribution for each factor, quantified by the change in partial log-likelihood from univariate Cox models. Standard NMF factors explain substantial variance with minimal survival relevance, whereas DeSurv concentrates survival signal into a single factor despite explaining less expression variance. (D) Pairwise correspondence between NMF and DeSurv factors. Tumor-intrinsic structure is preserved across methods, while variance-driven microenvironmental structure is reorganized into a survival-aligned axis; the exocrine-dominated NMF factor shows no strong one-to-one correspondence. \label{fig:bio}}\label{fig:fig-bio}[] 
- []
-
-
-Overfull \hbox (150.80237pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 ## DeSurv-derived latent structure generalizes to independent datasets {.unnumbered}[] 
- []
-
-
-Overfull \hbox (1573.02461pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 To assess generalization of DeSurv latent factors, the gene-level signatures learned in the training cohort were used to compute factor activity scores in independent validation datasets. For each validation sample, factor activity was quantified by applying the learned gene-factor weights to the sample's gene expression profile ($W^TX$), yielding a continuous score for each factor.[] 
- []
-
-
-Overfull \hbox (2045.5237pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 For each method, we focused on the factor showing the largest increase in Cox model log partial likelihood in the training data. Across validation cohorts, this DeSurv-derived factor exhibited consistent survival effects, with hazard ratio estimates showing limited variability and predominantly protective associations (Fig. \ref{fig:extval}A). In contrast, the NMF factor identified by the same criterion showed greater heterogeneity across datasets and weaker survival associations.[] 
- []
-
-
-Overfull \hbox (1199.75034pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 When validation samples were pooled and stratified into high- and low-activity groups based on the DeSurv-derived factor, clear separation of survival trajectories was observed (Fig. \ref{fig:extval}B). Applying the same procedure to NMF resulted in weaker survival stratification (Fig. \ref{fig:extval}C).[] 
- []
-
-
-Overfull \hbox (387.05191pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Together, these results indicate that DeSurv identifies latent factors whose associations with survival are preserved across datasets.[] 
- []
-
-
-Overfull \hbox (363.42696pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 {\centering \includegraphics[width=\textwidth]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1}[] 
- []
-
-
-Overfull \hbox (3774.87035pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 \caption{Figure X. DeSurv learns prognostic structure that generalizes across independent cohorts. (A) Forest plot summarizing hazard ratios (HRs; 95\% CIs) for the latent factor most predictive of survival in held-out validation datasets. Estimates from DeSurv (blue) are more stable across cohorts than those obtained with standard NMF (red). (B) Kaplan^^UMeier curves for pooled validation samples stratified into high and low groups based on values of the DeSurv-derived factor providing the strongest survival signal. Median-based stratification yields clear separation of survival trajectories, indicating robust out-of-sample prognostic performance. (C) Corresponding analysis for the NMF-derived factor selected using the same survival-based criterion, showing weaker discrimination between risk groups. \label{fig:extval}}\label{fig:fig-extval}[] 
- []
-
-
-Overfull \hbox (977.67577pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 We will report a focused bladder cancer analysis here, including a dedicated figure. Placeholder text: summary of bladder cohort preprocessing, DeSurv factor interpretation, and survival stratification results to be added once the bladder figure is finalized.[] 
- []
-
-
-Overfull \hbox (3085.02168pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 We present DeSurv, a survival-driven deconvolution framework that integrates nonnegative matrix factorization with Cox proportional hazards modeling to uncover latent gene-expression programs associated with patient outcomes. By coupling unsupervised matrix decomposition with direct survival supervision, DeSurv bridges the gap between descriptive molecular subtyping and prognostic modeling. Unlike conventional NMF, which identifies factors that explain transcriptional variance without regard to clinical relevance, DeSurv simultaneously optimizes reconstruction fidelity and survival discrimination, yielding interpretable gene programs that are both biologically coherent and clinically informative.[] 
- []
-
-
-Overfull \hbox (3803.22029pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 In pancreatic ductal adenocarcinoma (PDAC), DeSurv identified three major transcriptional programs corresponding to immune/iCAF, normal/exocrine, and basal-like factors. The immune/iCAF factor was associated with prolonged survival and enriched for inflammatory and immune-response pathways, consistent with prior evidence linking tumor-infiltrating immune and inflammatory fibroblast populations to improved outcomes. In contrast, the basal-like factor was strongly associated with poor survival and enriched for epithelial^^Umesenchymal transition and cell-cycle programs characteristic of aggressive tumor phenotypes. The normal/exocrine factor, while not prognostic, captured background pancreatic tissue signal and contributed to accurate reconstruction, demonstrating that DeSurv can disentangle prognostic sources of variation while preserving biology.[] 
- []
-
-
-Overfull \hbox (4691.51857pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Importantly, DeSurv outperformed unsupervised NMF in cross-validated concordance index, achieving higher predictive accuracy with fewer factors. This suggests that explicitly incorporating survival information regularizes the factorization, producing a more parsimonious representation that focuses on biologically and clinically relevant variation. Moreover, when applied to independent PDAC cohorts^^Vincluding Dijk, PACA-AU, Moffitt, and Puleo^^VDeSurv-derived gene signatures stratified patients into three reproducible clusters with clear prognostic differences. These clusters aligned strongly with existing PurIST and DeCAF classifiers, recapitulating the interplay between tumor-intrinsic (Basal versus Classical) and stromal (proCAF versus restCAF/iCAF) subtypes. Notably, survival prediction appeared to depend on the presence or absence of basal and immune/iCAF programs rather than binary subtype identities, indicating that the co-activation or suppression of these programs better captures the biological continuum of PDAC progression.[] 
- []
-
-
-Overfull \hbox (3406.32106pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Beyond PDAC, DeSurv provides a generalizable framework for discovering prognostic transcriptional programs across complex cancers where tumor and stromal signals are interwoven. By integrating survival modeling into matrix factorization, it unifies molecular deconvolution and outcome prediction within a single, interpretable model. This approach complements both single-cell^^Ubased tumor^^Ustroma characterization and bulk expression subtyping, offering a scalable route to translate transcriptomic heterogeneity into clinically actionable prognostic insight. Future work will extend DeSurv to multi-omic data and time-varying outcomes, further enhancing its ability to resolve dynamic tumor^^Umicroenvironment interactions that shape disease progression and therapy response.[] 
- []
-
-
-Overfull \hbox (2144.7485pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Let $X \in \mathbb{R}^{p \times n}_{\ge 0}$ denote the nonnegative gene expression matrix. DeSurv approximates $X \approx WH$, where $W \in \mathbb{R}^{p\times k}_{\ge0}$ contains nonnegative gene programs and $H \in \mathbb{R}^{k\times n}_{\ge0}$ contains sample-level activations. Additionally, let $y,\ \delta \in \mathbb{R}^n$ represent patient survival times and censoring indicators, respectively. Survival outcomes are modeled through a cox proportional hazards model with covariates $Z = W^\top X$.[] 
- []
-
-
-Overfull \hbox (443.7518pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 DeSurv integrates Nonnegative Matrix Factorization (NMF) with penalized Cox regression to identify gene programs associated with patient survival.[] 
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
+LaTeX Font Info:    Font shape `T1/phv/m/it' in size <7> not available
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 369.
+LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
+(Font)              scaled to size 6.64998pt on input line 369.
+[2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf, id=186, 469.755pt x 216.81pt>
+File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf Graphic file (type pdf)
+<use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf>
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf  used on input line 372.
+(pdftex.def)             Requested size: 505.69374pt x 233.39702pt.
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf, id=190, 469.755pt x 325.215pt>
+File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf Graphic file (type pdf)
+<use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf>
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf  used on input line 446.
+(pdftex.def)             Requested size: 505.69357pt x 325.23901pt.
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf, id=194, 469.755pt x 325.215pt>
+File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf Graphic file (type pdf)
+<use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf>
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf  used on input line 485.
+(pdftex.def)             Requested size: 505.69374pt x 350.09555pt.
 [3]
-Overfull \hbox (2362.09808pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 where $\mathcal{L}_{\mathrm{NMF}}(W,H)$ is the NMF reconstruction error and $\mathcal{L}_{\mathrm{Cox}}(W,\beta)$ is the elastic-net penalized partial log-likelihood. Optimization proceeds by alternating updates for $H$, $W$, and $\beta$, using multiplicative rules for $H$ [@lee1999learning], projected gradients for $W$, and coordinate descent for $\beta$. Although non-convex, these updates are shown to converge to a stationary point under mild conditions (SI Appendix). Complete derivations and algorithmic details are provided in the SI Appendix.[] 
+Underfull \hbox (badness 10000) in paragraph at lines 581--582
+
  []
-
-
-Overfull \hbox (5168.74265pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Hyperparameters $(k,\alpha,\lambda_H,\lambda,\xi)$ were selected by maximizing the cross-validated C-index using Bayesian optimization. Each fold was trained using multiple random initializations, and fold-level performance was defined as the average C-index across initializations. For stability, we used a consensus-based initialization for the final model, aggregating multiple DeSurv runs into a gene--gene co-occurrence matrix and constructing an initialization $W_0$ from the resulting clusters (SI Appendix). Before validation, each column of $W$ was truncated to its BO-selected number of top genes (details in SI Appendix), denoted $\tilde{W}$. External validation was performed by first projecting new datasets onto the learned programs via $Z = \tilde{W}^\top X_{\text{new}}$ and evaluating survival associations using C-index and log-rank statistics. To evaluate the quality of the DeSurv derived gene signatures for subtyping, the new datasets $X_new$ were clustered on genes in $\tilde{W}$, and survival differences were analyzed for the derived clusters. Further training, validation, and runtime details appear in the SI Appendix.[] 
- []
-
-
-Overfull \hbox (2655.04752pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Simulation studies were conducted to assess recovery of prognostic latent structure and survival prediction. Gene expression data were generated from a non-negative factor model $X=WH$, where gene loadings $W$ comprised three gene classes: marker genes, background genes, and noise genes. Marker genes were simulated to load strongly on a single factor and weakly on others, background genes to load strongly across all factors, and noise genes to have uniformly low loadings; each class was generated from a distinct gamma distribution. Sample-level factor activities $H$ were generated from a gamma distribution.[] 
- []
-
-
-Overfull \hbox (2636.14755pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Survival times were generated from an exponential proportional hazards model in which risk depended on marker gene structure through $X^T\tilde{W}$, where $\tilde{W}$ retained marker gene loadings for their corresponding factors and was zero otherwise; censoring times were generated independently from an exponential distribution. Each dataset was analyzed using DeSurv, standard NMF followed by Cox regression on inferred factors, and penalized Cox regression (CoxNet), with all methods tuned using the same cross-validated concordance index. Performance was summarized across repeated simulation replicates.[] 
- []
-
-
-Overfull \hbox (3642.5706pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 We analyzed publicly available RNA-seq and microarray cohorts of pancreatic ductal adenocarcinoma (PDAC) and bladder cancer with corresponding overall survival outcomes. Gene expression matrices were converted to TPM, log-transformed, and filtered to remove low-expression genes. Survival times and censoring indicators were taken from the associated clinical annotations. Of the seven PDAC cohorts we considered, two were used for training (TCGA and CPTAC) and the rest were used for external validation (Dijk, Moffitt, PACA, Puleo). The bladder cohort was split into training and validation cohorts via a 70/30 split. To harmonize differences in scale across cohorts, filtered gene expression data was within-subject rank transformed before model training. More details about the datasets can be found in the SI Appendix.[] 
- []
-
-
-Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Code and processed data used in this study are available at [repository link].[] 
- []
-
-
-Overfull \hbox (448.47679pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 <!-- Leave these lines as they are at the end of your .Rmd file to ensure placement of methods & acknowledgements sections before the references-->[] 
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
-Overfull \hbox (89.37749pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Let $X \in \mathbb{R}_{\ge 0}^{p \times n}$ denote the nonnegative gene[] 
- []
-
-
-Overfull \hbox (84.6525pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 expression matrix with $p$ genes and $n$ subjects. DeSurv approximates[] 
- []
-
-
-Overfull \hbox (51.57756pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $X \approx WH$ with $W \in \mathbb{R}_{\ge 0}^{p \times k}$ and[] 
- []
-
-
-Overfull \hbox (113.00244pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $H \in \mathbb{R}_{\ge 0}^{k \times n}$, and links the shared program matrix[] 
- []
-
-
-Overfull \hbox (13.77763pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $W$ to survival via an elastic-net^^Upenalized Cox model.[] 
- []
-
-
-Overfull \hbox (56.30255pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Let $y \in \mathbb{R}^n_{\ge 0}$ be the observed survival times,[] 
- []
-
-
-Overfull \hbox (65.75253pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $Z = X^\top W \in \mathbb{R}^{n \times k}$ the sample-wise program[] 
- []
-
-
-Overfull \hbox (32.6776pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 loadings. We write $Z_i^\top$ for the $i$th row of $Z$, and[] 
- []
-
-
-Overfull \hbox (98.82747pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $n_{\text{event}} = \sum_{i=1}^n \delta_i$. For convenience we recall the[] 
- []
-
-
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 DeSurv loss from Equation~\ref{eqn:desurv} in the main text and rewrite it as[] 
- []
-
-
-Overfull \hbox (320.90204pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 &(1-\alpha)\left(\frac{1}{2np}\lVert X - WH \rVert_F^2 + \frac{\lambda_H}{2nk} \lVert H \rVert_F^2\right) \nonumber \\[] 
- []
-
-
-Overfull \hbox (472.10175pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 -&\alpha \left(\frac{2}{n_{event}}\ell(W,\beta) - \lambda \{ \xi \lVert \beta \rVert_1 + \tfrac{1-\xi}{2} \lVert \beta \rVert_2^2 \} \right) \nonumber[] 
- []
-
-
-Overfull \hbox (13.77763pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 where $\lVert \cdot \rVert_F$ is the Frobenius norm and[] 
- []
-
-
-Overfull \hbox (84.6525pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $\beta \in \mathbb{R}^k$ are the Cox coefficients. The Cox log-partial[] 
- []
-
-
-Overfull \hbox (18.50262pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $\lambda_H \ge 0$, $\lambda \ge 0$, and $\xi \in [0,1]$.[] 
- []
-
-
-Overfull \hbox (89.37749pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 The constants $1/(2np)$, $2/n_{\text{event}}$, and $1/(2nk)$ are chosen[] 
- []
-
-
-Overfull \hbox (27.9526pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 for numerical convenience and do not affect the minimizer.[] 
- []
-
-
-Overfull \hbox (94.10248pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Algorithm~\ref{alg:desurv} summarizes the block coordinate descent (BCD)[] 
- []
-
-
-Overfull \hbox (103.55246pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 scheme used to minimize $\mathcal{L}(W,H,\beta)$. At each outer iteration,[] 
- []
-
-
-Overfull \hbox (75.20251pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 we update $H$, then $W$, then $\beta$ while holding the other blocks[] 
- []
-
-
-Overfull \hbox (1067.45059pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 \Require $X \in \mathbb{R}_{\geq 0}^{p \times n}$, survival times $y \in \mathbb{R}^n_{\geq 0}$, event indicators $\delta \in \{0,1\}^{n}$, tolerance $tol$, maximum iterations $maxit$, supervision parameter $\alpha$, rank $k$, penalties $\lambda_H$, $\lambda$, and $\xi$[] 
- []
-
-
-Overfull \hbox (9.05264pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 \Ensure Fitted DeSurv parameters $(W,H,\beta)$[] 
- []
-
-
-Overfull \hbox (339.802pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 \State Initialize $W^{(0)}, H^{(0)}$ with positive entries (e.g., $W^{(0)},H^{(0)} \sim \mathrm{Uniform}(0,\max X)$)[] 
- []
-
-
-Overfull \hbox (103.55246pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 \State Initialize $\beta^{(0)}$ (e.g., $\beta^{(0)} = \mathbf{1}$)[] 
- []
-
-
-Overfull \hbox (56.30255pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 \State $loss = \mathcal{L}(W^{(0)},H^{(0)},\beta^{(0)})$[] 
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [4]
-Overfull \hbox (13.77763pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 \While{$eps \geq tol$ \textbf{and} $t < maxit$}[] 
- []
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 7.59998pt on input line 670.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <8> on input line 672.
+LaTeX Font Info:    Font shape `T1/phv/b/it' in size <8> not available
+(Font)              Font shape `T1/phv/b/sl' tried instead on input line 713.
+LaTeX Font Info:    Font shape `T1/phv/b/sl' will be
+(Font)              scaled to size 7.59998pt on input line 713.
+Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 721.
 
-
-Overfull \hbox (335.07701pt too wide) in paragraph at lines 1257--1257
-[]            \T1/lmtt/m/n/9 \State \hspace{0.5cm} Update $H^{(t+1)}$ from $H^{(t)}$ using the multiplicative rule in Eq.~\ref{eqn:Hupdate},[] 
- []
-
-
-Overfull \hbox (113.00244pt too wide) in paragraph at lines 1257--1257
-[]            \T1/lmtt/m/n/9 \State \hspace{0.5cm} holding $W^{(t)}$ and $\beta^{(t)}$ fixed.[] 
- []
-
-
-Overfull \hbox (372.87694pt too wide) in paragraph at lines 1257--1257
-[]            \T1/lmtt/m/n/9 \State \hspace{0.5cm} Update $W^{(t+1)}$ from $W^{(t)}$ using the hybrid multiplicative rule in Eq.~\ref{eqn:W_update},[] 
- []
-
-
-Overfull \hbox (287.8271pt too wide) in paragraph at lines 1257--1257
-[]            \T1/lmtt/m/n/9 \State \hspace{0.5cm} holding $H^{(t+1)}$ and $\beta^{(t)}$ fixed, and perform backtracking to ensure[] 
- []
-
-
-Overfull \hbox (65.75253pt too wide) in paragraph at lines 1257--1257
-[]            \T1/lmtt/m/n/9 \State \hspace{0.5cm} $\mathcal{L}$ does not increase.[] 
- []
-
-
-Overfull \hbox (306.72707pt too wide) in paragraph at lines 1257--1257
-[]            \T1/lmtt/m/n/9 \State \hspace{0.5cm} Update $\beta^{(t+1)}$ from $\beta^{(t)}$ using a Newton-like step for the Cox loss[] 
- []
-
-
-Overfull \hbox (250.02718pt too wide) in paragraph at lines 1257--1257
-[]            \T1/lmtt/m/n/9 \State \hspace{0.5cm} (Eq.~\ref{eqn:beta_update}), holding $W^{(t+1)}$ and $H^{(t+1)}$ fixed.[] 
- []
-
-
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]            \T1/lmtt/m/n/9 \State $lossNew = \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta^{(t+1)})$[] 
- []
-
-
-Overfull \hbox (188.6023pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 \State \Return $\hat{W} = W^{(t+1)}, \hat{H} = H^{(t+1)}, \hat{\beta}=\beta^{(t+1)}$[] 
- []
-
-
-Overfull \hbox (108.27745pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Conditional on $W$, the loss $\mathcal{L}(W,H,\beta)$ reduces to a strictly[] 
- []
-
-
-Overfull \hbox (103.55246pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 convex quadratic function of $H$. We adopt the standard NMF multiplicative[] 
- []
-
-
-Overfull \hbox (70.47752pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 where $\odot$ denotes elementwise multiplication, all divisions are[] 
- []
-
-
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 elementwise, and $\varepsilon_H > 0$ is a small floor to prevent entries from[] 
- []
-
-
-Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 becoming exactly zero. This update is equivalent to a majorization^^Uminimization[] 
- []
-
-
-Overfull \hbox (103.55246pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 step and guarantees a nonincreasing reconstruction term conditional on $W$[] 
- []
-
-
-Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 [@seung2001algorithms; @pascualmontano2006nonsmooth]. The $\varepsilon_H$-floor[] 
- []
-
-
-Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 ensures that iterates remain in the interior of the nonnegative orthant, which[] 
- []
-
-
-Overfull \hbox (84.6525pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 For $W$, we construct a hybrid multiplicative update that balances the[] 
- []
-
-
-Overfull \hbox (339.802pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 where $\nabla_W \ell(W,\beta)$ denotes the Cox gradient with respect to $W$. A closed-form expression for $\nabla_W \ell$ is[] 
+Underfull \hbox (badness 10000) in paragraph at lines 727--728
+[]\T1/lmr/m/n/9 (+20) Ini-tial-ize $\OML/lmm/m/it/9 W[]; H[]$ \T1/lmr/m/n/9 (+20) with pos-i-tive en-tries (e.g.,
  []
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
-Overfull \hbox (207.50226pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 \left\lVert (1-\alpha) \nabla_W \mathcal{L}_{\mathrm{NMF}}(W^{(t)},H^{(t+1)}) \right\rVert_F^2[] 
- []
-
-
-Overfull \hbox (155.52736pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 \left\lVert \alpha \nabla_W \mathcal{L}_{Cox}(W^{(t)},\beta^{(t)}) \right\rVert_F^2[] 
- []
-
-
-Overfull \hbox (32.6776pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $\delta^{(t)} \leftarrow \min(\delta^{(t)}, \delta_{\max})$[] 
- []
-
-
-Overfull \hbox (164.97734pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 +\frac{2\alpha}{n_{\mathrm{event}}}\,\delta^{(t)}\,\nabla_W \ell(W^{(t)},\beta^{(t)})[] 
- []
-
-
-Overfull \hbox (9.05264pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 \frac{(1-\alpha)}{np} W^{(t)} H^{(t+1)}H^{(t+1)\top}[] 
- []
-
-
-Overfull \hbox (79.9275pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 with a small floor $\varepsilon_W > 0$. When $\alpha=0$, this reduces[] 
- []
-
-
-Overfull \hbox (79.9275pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 to the standard multiplicative update for NMF [@seung2001algorithms];[] 
- []
-
-
-Overfull \hbox (94.10248pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 for $\alpha>0$, the Cox gradient perturbs the update in a direction that[] 
- []
-
-
-Overfull \hbox (98.82747pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Because the combined multiplicative step does not, by itself, guarantee a[] 
- []
-
-
-Overfull \hbox (98.82747pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 nonincrease in the full loss $\mathcal{L}$, we embed it in a backtracking[] 
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[5]
-Overfull \hbox (883.17595pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 \Require Value of $W$ and the previous iteration $t$: $W^{(t)}$, the multiplicative update term at the current iteration $R^{(t+1)}$, the max number of backtracking updates $max\_bt$, the backtracking parameter $\rho \subset (0,1)$[] 
- []
-
-
-Overfull \hbox (155.52736pt too wide) in paragraph at lines 1257--1257
-[]            \T1/lmtt/m/n/9 \State $W^{(t+1)}_{cand} = W^{(t)} \odot [(1-\theta) + \theta R^{(t+1)}]$[] 
- []
-
-
-Overfull \hbox (472.10175pt too wide) in paragraph at lines 1257--1257
-[]            \T1/lmtt/m/n/9 \State \hspace{0.5cm} Compute $D = \mathrm{diag}\!\big(\lVert W^{(t+1)}_{(:,1)cand}\rVert_2,\dots,\lVert W^{(t+1)}_{(:,k)cand}\rVert_2\big)$[] 
- []
-
-
-Overfull \hbox (646.9264pt too wide) in paragraph at lines 1257--1257
-[]            \T1/lmtt/m/n/9 \State \hspace{0.5cm} and set $W^{(t+1)}_{cand} \leftarrow W^{(t+1)}_{cand} D^{-1}$, $H^{(t+1)}_{cand} \leftarrow D H^{(t+1)}$, and $\beta^{(t)}_{cand} \leftarrow D \beta^{(t)}$[] 
- []
-
-
-Overfull \hbox (311.45206pt too wide) in paragraph at lines 1257--1257
-[]            \T1/lmtt/m/n/9 \If{$\mathcal{L}(W^{(t+1)}_{cand},H^{(t+1)},\beta^{(t)}) \leq \mathcal{L}(W^{(t)},H^{(t+1)},\beta^{(t)})$}[] 
- []
-
-
-Overfull \hbox (13.77763pt too wide) in paragraph at lines 1257--1257
-[]              \T1/lmtt/m/n/9 \State $\beta^{(t)} = \beta^{(t)}_{cand}$[] 
- []
-
-
-Overfull \hbox (94.10248pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 The column normalization preserves both $WH$ and $W\beta$, and therefore[] 
- []
-
-
-Overfull \hbox (108.27745pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 leaves the loss $\mathcal{L}$ invariant up to numerical error. Backtracking[] 
- []
-
-
-Overfull \hbox (94.10248pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 guarantees that the accepted $W$ update does not increase $\mathcal{L}$.[] 
- []
-
-
-Overfull \hbox (51.57756pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Conditional on $(W,H)$, the loss in $\beta$ reduces to a convex[] 
- []
-
-
-Overfull \hbox (51.57756pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 We solve this subproblem by cyclic coordinate descent following[] 
- []
-
-
-Overfull \hbox (79.9275pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 [@simon2011regularization]. Writing $\ell(\beta) = \ell(W,\beta)$ and[] 
- []
-
-
-Overfull \hbox (94.10248pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $\tilde{\eta}_i = Z_i^\top \beta$, the update for coordinate $r$ has the[] 
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
-Overfull \hbox (18.50262pt too wide) in paragraph at lines 1257--1257
-[]      \T1/lmtt/m/n/9 v(\tilde{\eta})_i - \sum_{j \ne r} z_{i,j} \beta_j[] 
- []
-
-
-Overfull \hbox (89.37749pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 \frac{1}{n} \sum_{i=1}^n w(\tilde{\eta})_i z_{i,r}^2 + \lambda(1-\xi)[] 
- []
-
-
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 where $S(a,\tau) = \mathrm{sign}(a)\max(|a|-\tau,0)$ is the soft-thresholding[] 
- []
-
-
-Overfull \hbox (79.9275pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 operator, and $w(\tilde{\eta})$, $v(\tilde{\eta})$ are standard local[] 
- []
-
-
-Overfull \hbox (160.25235pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 quadratic approximations of the Cox log-partial likelihood [@simon2011regularization].[] 
- []
-
-
-Overfull \hbox (98.82747pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 We iterate coordinate updates until the subproblem converges to numerical[] 
- []
-
-
-Overfull \hbox (51.57756pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 tolerance, yielding a minimizer in $\beta$ for the current $W$.[] 
- []
-
-
-Overfull \hbox (65.75253pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 After each accepted $W$ update, we normalize the columns of $W$ as[] 
- []
-
-
-Overfull \hbox (9.05264pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $W \leftarrow W D^{-1}$, and adjust $H$ and $\beta$ as[] 
- []
-
-
-Overfull \hbox (61.02754pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 where $D$ is the diagonal matrix of column $\ell_2$-norms of $W$.[] 
- []
-
-
-Overfull \hbox (98.82747pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 This preserves the reconstruction $WH$ and the linear predictor $W\beta$,[] 
- []
-
-
-Overfull \hbox (89.37749pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 leaving both the NMF and Cox terms in the loss unchanged. Normalization[] 
- []
-
-
-Overfull \hbox (94.10248pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 prevents degeneracy in the scale-nonidentifiable factorization and keeps[] 
- []
-
-
-Overfull \hbox (103.55246pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 columns of $W$ comparable in magnitude and interpretable as gene programs.[] 
- []
-
-
-Overfull \hbox (94.10248pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 \subsubsection{Derivation of W update from projected coordinate descent}[] 
- []
-
-
-Overfull \hbox (264.20215pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 The W update can be derived directly from the projected coordinate descent update with a specific step size.[] 
- []
-
-
-Overfull \hbox (486.27672pt too wide) in paragraph at lines 1257--1257
-[]    \T1/lmtt/m/n/9 \mathcal{L}(W,H,\beta) = \frac{(1-\alpha)}{2np} ||X - WH||^2_F - \frac{2 \alpha}{n_{event}} \ell(W,\beta) + \lambda(\xi||\beta||_1 + \frac{(1-\xi)}{2},[] 
- []
-
-
-Overfull \hbox (783.95114pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 where $\ell(W,\beta)$ is the log-partial likelihood for the Cox model. Let $\nabla_W \ell$ represent the derivative of $\ell(W,\beta)$ with respect to $W$. Then the derivative of the overall loss with respect to $W$ is[] 
- []
-
-
-Overfull \hbox (339.802pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 \frac{\partial L}{\partial W} = \frac{(1-\alpha)}{np}\left( WHH^T - XH^T \right) - \frac{2\alpha}{n_{event}} \nabla_W \ell[] 
- []
-
-
-Overfull \hbox (23.22762pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Then the gradient descent update rule at iteration $t$ is[] 
- []
-
-
-Overfull \hbox (174.42732pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 W^{(t)} &= W^{(t-1)} - \gamma \left( \frac{\partial L}{\partial W} \right) \nonumber \\[] 
- []
-
-
-Overfull \hbox (410.67686pt too wide) in paragraph at lines 1257--1257
-[]          \T1/lmtt/m/n/9 &= W^{(t-1)} - \gamma \left( \frac{(1-\alpha)}{np}\left( WHH^T - XH^T \right) - \frac{2\alpha}{n_{event}} \nabla_W \ell \right)\\[] 
- []
-
-
-Overfull \hbox (599.6765pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 W^{(t)} &= W^{(t-1)} -\frac{np}{(1-\alpha)}\frac{W}{WHH^T} \left( \frac{(1-\alpha)}{np}\left( WHH^T - XH^T \right) - \frac{2\alpha}{n_{event}} \nabla_W \ell \right) \nonumber \\[] 
- []
-
-
-Overfull \hbox (231.12721pt too wide) in paragraph at lines 1257--1257
-[]          \T1/lmtt/m/n/9 &= \frac{W}{WHH^T} XH^T + \frac{2\alpha np}{n_{event}(1-\alpha)} \nabla_W \ell \nonumber \\[] 
- []
-
-
-Overfull \hbox (264.20215pt too wide) in paragraph at lines 1257--1257
-[]          \T1/lmtt/m/n/9 &= W \odot \frac{XH^T + \frac{2\alpha np}{n_{event}(1-\alpha)} \nabla_W \ell }{WHH^T} \nonumber \\[] 
- []
-
-
-Overfull \hbox (344.527pt too wide) in paragraph at lines 1257--1257
-[]          \T1/lmtt/m/n/9 &= W \odot \frac{\frac{(1-\alpha)}{np} XH^T + \frac{2\alpha}{n_{event}} \nabla_W \ell}{\frac{(1-\alpha)}{np} WHH^T}[] 
- []
-
-
-Overfull \hbox (160.25235pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Finally, projected coordinate descent projects the $W$ update in to the positive space[] 
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[6]
-Overfull \hbox (439.02681pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 W^{(t)} =  \max \left(W \odot \frac{\frac{(1-\alpha)}{np} XH^T + \frac{2\alpha}{n_{event}} \nabla_W \ell}{\frac{(1-\alpha)}{np}WHH^T}, 0\right)[] 
- []
-
-
-Overfull \hbox (453.20178pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 W^{(t)} =  W \odot \max \left( \frac{\frac{(1-\alpha)}{np} XH^T + \frac{2\alpha}{n_{event}} \nabla_W \ell}{\frac{(1-\alpha)}{np} WHH^T}, 0 \right)[] 
- []
-
-
-Overfull \hbox (103.55246pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 which matches the multiplicative form used in the software implementation.[] 
- []
-
-
-Overfull \hbox (113.00244pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 We show that, under mild regularity conditions, the block coordinate descent[] 
- []
-
-
-Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 (BCD) Algorithm~S\ref{alg:desurv} converges to a stationary point of the DeSurv[] 
- []
-
-
-Overfull \hbox (79.9275pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 For clarity, we first analyze the algorithm \emph{without} the column[] 
- []
-
-
-Overfull \hbox (13.77763pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 normalization of $W$ inside the loop, and then argue in[] 
- []
-
-
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Section~\ref{subsec:conv_normalization} that the normalization step preserves[] 
- []
-
-
-Overfull \hbox (13.77763pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 \textbf{Assumption 1 (Regularity and parameter space).}[] 
- []
-
-
-Overfull \hbox (358.70197pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 \item The data $X \in \mathbb{R}_{\ge 0}^{p\times n}$, $y \in \mathbb{R}^n$, and $\delta \in \{0,1\}^n$ are fixed and bounded.[] 
- []
-
-
-Overfull \hbox (254.75217pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 \item The hyperparameters satisfy $\lambda_H > 0$, $\lambda>0$, $\alpha \in [0,1)$, and $\xi \in [0,1]$.[] 
- []
-
-
-Overfull \hbox (415.40186pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 \item The initial iterate $\theta^{(0)} = (W^{(0)},H^{(0)},\beta^{(0)})$ lies in $\Theta$ and satisfies $W^{(0)},H^{(0)} > 0$ elementwise.[] 
- []
-
-
-Overfull \hbox (13.77763pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 At each outer iteration $t$, the three block updates in[] 
- []
-
-
-Overfull \hbox (94.10248pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 \item \emph{$H$-update.} For fixed $(W^{(t)},\beta^{(t)})$, the update[] 
- []
-
-
-Overfull \hbox (89.37749pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 $H^{(t)} \mapsto H^{(t+1)}$ is given by the multiplicative rule[] 
- []
-
-
-Overfull \hbox (89.37749pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 H \leftarrow H \odot \frac{W^\top X}{W^\top W H + \lambda_H H},[] 
- []
-
-
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 applied at $(W^{(t)},H^{(t)})$. This rule preserves nonnegativity and[] 
- []
-
-
-Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 yields a nonincreasing value of the reconstruction term conditional on[] 
- []
-
-
-Overfull \hbox (141.35239pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 [@seung2001algorithms; @pascualmontano2006nonsmooth; @lin2007convergence].[] 
- []
-
-
-Overfull \hbox (103.55246pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 \item \emph{$W$-update.} For fixed $(H^{(t+1)},\beta^{(t)})$, the update[] 
- []
-
-
-Overfull \hbox (79.9275pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 $W^{(t)} \mapsto W^{(t+1)}$ is the hybrid multiplicative step[] 
- []
-
-
-Overfull \hbox (131.9024pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 followed by backtracking as in Algorithm~S\ref{alg:backtrack}, producing[] 
- []
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 751.
 
 
-Overfull \hbox (9.05264pt too wide) in paragraph at lines 1257--1257
-[]          \T1/lmtt/m/n/9 \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta^{(t)})[] 
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
-Overfull \hbox (4.32765pt too wide) in paragraph at lines 1257--1257
-[]          \T1/lmtt/m/n/9 \mathcal{L}(W^{(t)},H^{(t+1)},\beta^{(t)}).[] 
- []
-
-
-Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 If no candidate satisfies the Armijo-type condition within the allowed[] 
- []
-
-
-Overfull \hbox (18.50262pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 number of backtracking steps, the algorithm sets[] 
- []
-
-
-Overfull \hbox (113.00244pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 \item \emph{$\beta$-update.} For fixed $(W^{(t+1)},H^{(t+1)})$, the update[] 
- []
-
-
-Overfull \hbox (84.6525pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 $\beta^{(t)} \mapsto \beta^{(t+1)}$ is obtained by running the[] 
- []
-
-
-Overfull \hbox (193.32729pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 coordinate descent method of [@simon2011regularization] on the convex elastic-net Cox[] 
- []
-
-
-Overfull \hbox (18.50262pt too wide) in paragraph at lines 1257--1257
-[]          \T1/lmtt/m/n/9 \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta^{(t+1)})[] 
- []
-
-
-Overfull \hbox (13.77763pt too wide) in paragraph at lines 1257--1257
-[]          \T1/lmtt/m/n/9 \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta^{(t)}).[] 
- []
-
-
-Overfull \hbox (4.32765pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 \textbf{Lemma 1 (Continuity and bounded level sets).}[] 
- []
-
-
-Overfull \hbox (113.00244pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Under Assumption 1, $\mathcal{L}:\Theta\to\mathbb{R}$ is continuous, and the[] 
- []
-
-
-Overfull \hbox (13.77763pt too wide) in paragraph at lines 1257--1257
-[]    \T1/lmtt/m/n/9 \mathcal{L}(\theta) \le \mathcal{L}(\theta^{(0)})\}[] 
- []
-
-
-Overfull \hbox (131.9024pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 The NMF term $\|X-WH\|_F^2$ is a polynomial in the entries of $W$ and $H$, hence[] 
- []
-
-
-Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 is continuously differentiable. The penalty $\|H\|_F^2$ is continuous as well.[] 
- []
-
-
-Overfull \hbox (108.27745pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 The Cox partial log-likelihood is a smooth function of the linear predictor[] 
- []
-
-
-Overfull \hbox (113.00244pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $\eta_i = x_i^\top W \beta$, which is linear in $(W,\beta)$, so this term is[] 
- []
-
-
-Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 continuously differentiable in $(W,\beta)$. The $\ell_2$ penalty on $\beta$ is[] 
- []
-
-
-Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 smooth, and the $\ell_1$ penalty is convex and lower semicontinuous. Therefore[] 
- []
-
-
-Overfull \hbox (27.9526pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 The constraints $W,H\ge 0$ define closed convex cones, and[] 
- []
-
-
-Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $\beta\in\mathbb{R}^k$ is unconstrained. Because $\lambda_H>0$ and $\lambda>0$,[] 
- []
-
-
-Overfull \hbox (56.30255pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $\lambda\tfrac{1-\xi}{2}\|\beta\|_2^2$ dominate the objective as[] 
- []
-
-
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $\|H\|_F\to\infty$ or $\|\beta\|_2\to\infty$, respectively. Thus the sublevel[] 
- []
-
-
-Overfull \hbox (94.10248pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 set $\mathcal{S}_0$ is bounded in $(H,\beta)$. Since $W\ge 0$ and $X$ is[] 
- []
-
-
-Overfull \hbox (103.55246pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 fixed, the reconstruction term and Cox term being bounded prevent $W$ from[] 
- []
-
-
-Overfull \hbox (108.27745pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 diverging while $\mathcal{L}$ remains below $\mathcal{L}(\theta^{(0)})$, so[] 
- []
-
-
-Overfull \hbox (61.02754pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $W$ is bounded on $\mathcal{S}_0$. Because $\Theta$ is closed and[] 
- []
-
-
-Overfull \hbox (113.00244pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $\mathcal{L}$ is continuous, $\mathcal{S}_0$ is closed. Nonemptiness follows[] 
- []
-
-
-Overfull \hbox (65.75253pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 \textbf{Lemma 2 (Monotone descent and existence of limit points).}[] 
- []
-
-
-Overfull \hbox (70.47752pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Under Assumptions 1 and 2, Algorithm~S\ref{alg:desurv} (without $W$[] 
- []
-
-
-Overfull \hbox (146.07738pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 normalization) generates a sequence $\{\theta^{(t)}\}_{t\ge 0}\subset\mathcal{S}_0$[] 
- []
-
-
-Overfull \hbox (113.00244pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 \mathcal{L}(\theta^{(t+1)}) \le \mathcal{L}(\theta^{(t)})\quad \forall\,t,[] 
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[7]
-Overfull \hbox (131.9024pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 and $\{\mathcal{L}(\theta^{(t)})\}$ converges to a finite limit $\mathcal{L}^*$.[] 
- []
-
-
-Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Moreover, $\{\theta^{(t)}\}$ is bounded and therefore admits at least one limit[] 
- []
-
-
-Overfull \hbox (103.55246pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 \mathcal{L}(\theta^{(t+1)}) \le \mathcal{L}(\theta^{(t)})\quad\forall t,[] 
- []
-
-
-Overfull \hbox (94.10248pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 so $\{\mathcal{L}(\theta^{(t)})\}$ is monotonically nonincreasing. Since[] 
- []
-
-
-Overfull \hbox (103.55246pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $\mathcal{L}$ is bounded below on $\Theta$, the sequence converges to some[] 
- []
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 751.
 
 
-Overfull \hbox (113.00244pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Each iterate lies in $\mathcal{S}_0$ by construction, and $\mathcal{S}_0$ is[] 
- []
-
-
-Overfull \hbox (113.00244pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 bounded by Lemma 1. Therefore $\{\theta^{(t)}\}$ is bounded and has at least[] 
- []
-
-
-Overfull \hbox (75.20251pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 one limit point by the Bolzano--Weierstrass theorem. \hfill$\square$[] 
- []
-
-
-Overfull \hbox (18.50262pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 \textbf{Lemma 3 (Blockwise optimality of limit points).}[] 
- []
-
-
-Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Let $\theta^*=(W^*,H^*,\beta^*)$ be any limit point of $\{\theta^{(t)}\}$ under[] 
- []
-
-
-Overfull \hbox (61.02754pt too wide) in paragraph at lines 1257--1257
-[]          \T1/lmtt/m/n/9 \min_{\beta\in\mathbb{R}^k} \mathcal{L}(W^*,H^*,\beta),[] 
- []
-
-
-Overfull \hbox (113.00244pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 and satisfies the KKT conditions for the elastic-net Cox subproblem.[] 
- []
-
-
-Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $\theta^{(t_j)}\to\theta^*=(W^*,H^*,\beta^*)$. By continuity of $\mathcal{L}$,[] 
- []
-
-
-Overfull \hbox (4.32765pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 (i) Conditional on $(W,\beta)$, the $H$-subproblem is[] 
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
-Overfull \hbox (349.25198pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 \min_{H \geq 0}\frac{(1-\alpha)}{np}(\lVert X-WH \rVert_F^2 + \frac{\lambda_H}{nk}||H||_F^2) + \text{const in $H$},\nonumber[] 
- []
-
-
-Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 a strictly convex quadratic program. The multiplicative update for $H$ is known[] 
- []
-
-
-Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 to be a descent method whose fixed points coincide with the KKT points of this[] 
- []
-
-
-Overfull \hbox (141.35239pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 constrained subproblem [@seung2001algorithms; @lin2007convergence]. Since the full[] 
- []
-
-
-Overfull \hbox (108.27745pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 objective $\mathcal{L}(\theta^{(t)})$ converges, the per-iteration decrease[] 
- []
-
-
-Overfull \hbox (70.47752pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 in $\mathcal{L}$ due to the $H$-update must vanish along $\{t_j\}$.[] 
- []
-
-
-Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 If $H^*$ were not KKT for the $H$-subproblem given $(W^*,\beta^*)$, there would[] 
- []
-
-
-Overfull \hbox (113.00244pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 exist a feasible descent direction for $H$ at $(W^*,\beta^*)$, implying that[] 
- []
-
-
-Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 for sufficiently large $j$ the $H$-update would still produce a strict decrease[] 
- []
-
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 772.
 
-Overfull \hbox (103.55246pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 in $\mathcal{L}$, contradicting convergence. Hence $H^*$ satisfies the KKT[] 
- []
-
-
-Overfull \hbox (98.82747pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 (ii) Conditional on $(H,\beta)$, the $W$-subproblem is differentiable and[] 
- []
-
-
-Overfull \hbox (61.02754pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 convex in $W$ (sum of a quadratic term and a negative Cox partial[] 
- []
-
-
-Overfull \hbox (103.55246pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 log-likelihood in a linear predictor). The hybrid multiplicative step with[] 
- []
-
-
-Overfull \hbox (89.37749pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 backtracking can be viewed as a projected gradient-like update onto the[] 
- []
-
-
-Overfull \hbox (108.27745pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 nonnegative orthant. Under mild conditions on the search direction and step[] 
- []
-
-
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 sizes, any limit point of such a projected gradient scheme is a KKT point for[] 
- []
-
-
-Overfull \hbox (198.05228pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 the constrained subproblem; see, for example, [@tseng2001convergence; @grippo2000convergence].[] 
- []
-
-
-Overfull \hbox (84.6525pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 If $W^*$ did not satisfy the KKT conditions, there would be a feasible[] 
- []
-
-
-Overfull \hbox (108.27745pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 descent direction at $(W^*,H^*,\beta^*)$ and a sufficiently small step that[] 
- []
-
-
-Overfull \hbox (103.55246pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 reduces $\mathcal{L}$, which the line search would eventually accept. This[] 
- []
-
-
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 would contradict the fact that $\mathcal{L}(\theta^{(t_j)})\to\mathcal{L}^*$.[] 
- []
-
-
-Overfull \hbox (98.82747pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 (iii) For fixed $(W,H)$, the $\beta$-subproblem is the convex elastic-net[] 
- []
-
-
-Overfull \hbox (1015.4757pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 penalized Cox objective. The coordinate descent algorithm converges to the unique minimizer. By Assumption 2(iii),$\beta^{(t+1)}$ is taken to be this minimizer at each iteration. Passing to the limit along $\{t_j\}$ shows that $\beta^*$ is the unique minimizer of the[] 
- []
-
 
-Overfull \hbox (89.37749pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $\beta$-block given $(W^*,H^*)$ and hence satisfies its KKT conditions.[] 
- []
-
-
-Overfull \hbox (13.77763pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 \textbf{Theorem 1 (Convergence to a stationary point).}[] 
- []
-
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 772.
 
-Overfull \hbox (84.6525pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Under Assumptions 1 and 2, the sequence $\{\theta^{(t)}\}$ produced by[] 
+[5{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}]
+Overfull \hbox (8.5792pt too wide) in paragraph at lines 854--855
+[]   \T1/lmr/m/n/9 (-20) Com-pute $\OML/lmm/m/it/9 D \OT1/lmr/m/n/9 (-20) = [] []\OMS/lmsy/m/n/9 k\OML/lmm/m/it/9 W[]\OMS/lmsy/m/n/9 k[]\OML/lmm/m/it/9 ; [] ; \OMS/lmsy/m/n/9 k\OML/lmm/m/it/9 W[]\OMS/lmsy/m/n/9 k[][]$ 
  []
 
 
-Overfull \hbox (65.75253pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Algorithm~S\ref{alg:desurv} (without $W$ normalization) satisfies:[] 
+Underfull \hbox (badness 1215) in paragraph at lines 855--856
+[]   \T1/lmr/m/n/9 (+20) and set $\OML/lmm/m/it/9 W[] \OMS/lmsy/m/n/9   \OML/lmm/m/it/9 W[]D[]$\T1/lmr/m/n/9 (+20) , $\OML/lmm/m/it/9 H[] \OMS/lmsy/m/n/9  
  []
 
 
-Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 \item The objective values $\{\mathcal{L}(\theta^{(t)})\}$ are monotonically[] 
+Underfull \hbox (badness 2717) in paragraph at lines 856--857
+[] \T1/lmr/bx/n/9 (+20) if $\OMS/lmsy/m/n/9 L\OT1/lmr/m/n/9 (+20) (\OML/lmm/m/it/9 W[]; H[]; ^^L[]\OT1/lmr/m/n/9 (+20) ) \OMS/lmsy/m/n/9 ^^T L\OT1/lmr/m/n/9 (+20) (\OML/lmm/m/it/9 W[]; H[]; ^^L[]\OT1/lmr/m/n/9 (+20) )$
  []
 
 
-Overfull \hbox (79.9275pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 nonincreasing and converge to a finite limit $\mathcal{L}^*$.[] 
- []
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 877.
 
 
-Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 \item Every limit point $\theta^* = (W^*,H^*,\beta^*)$ of $\{\theta^{(t)}\}$[] 
- []
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\beta' on input line 877.
 
 
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 is a stationary point of $\mathcal{L}$ on $\Theta$, i.e. it satisfies[] 
- []
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 877.
 
 
-Overfull \hbox (4.32765pt too wide) in paragraph at lines 1257--1257
-[]          \T1/lmtt/m/n/9 \min_{\theta\in\Theta} \mathcal{L}(\theta).[] 
+Overfull \hbox (30.546pt too wide) detected at line 936
+[]
  []
 
 
-Overfull \hbox (131.9024pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Part (a) is Lemma 2. For part (b), Lemma 3 shows that any limit point $\theta^*$[] 
+Overfull \hbox (54.17964pt too wide) detected at line 957
+[]
  []
 
+[6] [7]
 
-Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 is blockwise optimal: each block is optimal (in the KKT sense) when the others[] 
- []
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1213.
 
 
-Overfull \hbox (42.12758pt too wide) in paragraph at lines 1257--1257
-[]                     \T1/lmtt/m/n/9 + I_{\{W\ge 0\}}(W) + I_{\{H\ge 0\}}(H),[] 
- []
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1213.
 
 
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 where $f$ is continuously differentiable, $g(\beta)=\lambda\xi\|\beta\|_1$ is[] 
- []
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1257.
 
 
-Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 a separable convex (possibly nondifferentiable) penalty, and $I_C$ denotes the[] 
- []
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1257.
 
 
-Overfull \hbox (113.00244pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 indicator of a closed convex set $C$. This is the smooth+nonsmooth composite[] 
+pdfTeX warning (ext4): destination with the same identifier (name{equation.18}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.1308 ...ctors \(\hat{\eta}_i\): \begin{equation}
+                                                  
+pdfTeX warning (ext4): destination with the same identifier (name{equation.18}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.1308 ...ctors \(\hat{\eta}_i\): \begin{equation}
+                                                  
+pdfTeX warning (ext4): destination with the same identifier (name{equation.18}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.1308 ...ctors \(\hat{\eta}_i\): \begin{equation}
+                                                  
+pdfTeX warning (ext4): destination with the same identifier (name{equation.18}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.1308 ...ctors \(\hat{\eta}_i\): \begin{equation}
+                                                  
+Underfull \hbox (badness 10000) in paragraph at lines 1332--1333
+[] \T1/lmr/m/n/9 (+20) Split data into train-ing and val-i-da-tion
  []
 
 
-Overfull \hbox (155.52736pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 form considered in block coordinate descent analyses such as [@tseng2001convergence].[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1335--1336
+[] \T1/lmr/m/n/9 (+20) Ap-ply Al-go-rithm [][]1[][] with in-puts
  []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [8]
-Overfull \hbox (79.9275pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 In this setting, any point that is optimal with respect to each block[] 
+Overfull \hbox (17.39114pt too wide) in paragraph at lines 1380--1380
+[]\T1/lmtt/m/n/8 ## DeSurv git commit: fea641a96e4743315a35b9b6addcc1a1ff53da9d[] 
  []
 
 
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 individually (a block coordinatewise minimizer) is a stationary point for the[] 
+Overfull \hbox (13.14714pt too wide) in paragraph at lines 1380--1380
+[]\T1/lmtt/m/n/8 ## Paper git commit: f2b3031dc5fea0689481ecfc87d7dc79ffa35ecc[] 
  []
 
 
-Overfull \hbox (79.9275pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Hence every limit point of Algorithm~S\ref{alg:desurv} is stationary.[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1385--1389
+
  []
 
 
-Overfull \hbox (4.32765pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 \subsubsection{Effect of column normalization of $W$}[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1391--1395
+
  []
 
 
-Overfull \hbox (84.6525pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 The above analysis omits the column-normalization step for $W$ used in[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1397--1401
+
  []
 
 
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Algorithm~S\ref{alg:backtrack}. We briefly argue that this normalization does[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1403--1407
+
  []
 
 
-Overfull \hbox (98.82747pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Let $D$ be a diagonal matrix with strictly positive diagonal entries. The[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1409--1413
+
  []
 
 
-Overfull \hbox (65.75253pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 (W,H,\beta) \mapsto (W',H',\beta') = (W D^{-1},\, D H,\, D\beta)[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1415--1420
+
  []
 
 
-Overfull \hbox (113.00244pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 preserves both the product $WH$ and the linear predictor $W\beta$, and hence[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1422--1427
+
  []
 
 
-Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 leaves $\mathcal{L}$ invariant. The column-normalization step is exactly such a[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1429--1435
+
  []
 
 
-Overfull \hbox (42.12758pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 transformation, with $D$ chosen from the column norms of $W$.[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1437--1441
+
  []
 
 
-Overfull \hbox (98.82747pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Let $\{\theta^{(t)}\}$ be the sequence generated by the algorithm without[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1443--1447
+
  []
 
 
-Overfull \hbox (84.6525pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 normalization, and let $\{\tilde{\theta}^{(t)}\}$ be the sequence with[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1449--1452
+
  []
 
 
-Overfull \hbox (108.27745pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 normalization. For each $t$ there exists a diagonal $D^{(t)}$ with strictly[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1454--1459
+
  []
 
 
-Overfull \hbox (56.30255pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 (W^{(t)} D^{(t),-1},\, D^{(t)} H^{(t)},\, D^{(t)}\beta^{(t)}),[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1461--1464
+
  []
 
 
-Overfull \hbox (75.20251pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 and $\mathcal{L}(\tilde{\theta}^{(t)}) = \mathcal{L}(\theta^{(t)})$.[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1466--1471
+
  []
 
 
-Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Thus limit points of $\{\tilde{\theta}^{(t)}\}$ are obtained from limit points[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1473--1477
+
  []
 
 
-Overfull \hbox (32.6776pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 of $\{\theta^{(t)}\}$ by such invertible diagonal scalings.[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1479--1483
+
  []
 
 
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Since the KKT conditions are expressed in terms of the gradients with respect[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1485--1489
+
  []
 
 
-Overfull \hbox (94.10248pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 to $WH$ and $W\beta$, and these quantities are invariant under the above[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1491--1496
+
  []
 
 
-Overfull \hbox (84.6525pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 scaling, stationarity is preserved under the transformation. Therefore[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1498--1502
+
  []
 
 
-Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Theorem~1 implies that every limit point of the \emph{normalized} algorithm is[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1504--1510
+
  []
 
 
-Overfull \hbox (131.9024pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 also a stationary point of $\mathcal{L}$ (up to this scaling equivalence), which[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1512--1516
+
  []
 
 
-Overfull \hbox (51.57756pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 establishes convergence of the implementation used in practice.[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1518--1522
+
  []
 
 
-Overfull \hbox (1979.37383pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Our implementation updates the $\beta$ block using a Coxnet-style coordinate descent that relies on an approximate Hessian. Consequently, the formal optimality proof is established for an idealized version of the $\beta$ update that assumes exact second-order information. Nonetheless, in empirical applications the approximate update is numerically stable and yields a monotone decrease in the objective, consistent with the behavior predicted by the idealized analysis.[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1524--1528
+
  []
 
 
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Classical nonnegative matrix factorization (NMF) is non-identifiable: for any[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1530--1534
+
  []
 
 
-Overfull \hbox (70.47752pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 invertible matrix \(R\) with nonnegative entries, the factorization[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1536--1540
+
  []
 
 
-Overfull \hbox (98.82747pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 \((W, H)\) can be transformed to \((W R, R^{-1} H)\) without changing the[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1542--1546
+
  []
 
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Underfull \hbox (badness 10000) in paragraph at lines 1548--1552
 
-
-Overfull \hbox (13.77763pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 reconstruction error, yielding multiple valid solutions[] 
  []
 
 
-Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 [@donoho2004nmf; @laurberg2008uniqueness; @gillis2014nmf]. Although normalizing[] 
+Underfull \hbox (badness 10000) in paragraph at lines 1554--1559
+
  []
 
 
-Overfull \hbox (98.82747pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 columns of \(W\) or rows of \(H\) resolves the trivial scaling ambiguity,[] 
- []
+Underfull \hbox (badness 10000) in paragraph at lines 1561--1565
 
-
-Overfull \hbox (122.45242pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 nonnegative mixing transformations persist, and empirical studies consistently[] 
- []
-
-
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 show that the sample-loading matrix \(H\) is more sensitive to initialization[] 
- []
-
-
-Overfull \hbox (51.57756pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 [@brunet2004metagenes; @kim2007sparse; @gillis2012accelerated].[] 
- []
-
-
-Overfull \hbox (599.6765pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 In DeSurv, survival supervision enters through the projection $Z = X^\top W$ in the partial log-likelihood, so that the gradient of the DeSurv loss with respect to the programs is[] 
- []
-
-
-Overfull \hbox (349.25198pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 \nabla \mathcal{L} = (1-\alpha) \nabla_W \mathcal{L}_{\mathrm{Cox}}(W,H) - \alpha\nabla_W \mathcal{L}_{\mathrm{Cox}}(W,\beta),[] 
- []
-
-
-Overfull \hbox (958.7758pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 and therefore the update rule for $W$ as in Equation~\ref{eqn:W_update} relies on both the reconstruction term and the supervision term. As such, the gene-program definitions are directly shaped by their association with survival. This mechanism amplifies[] 
- []
-
-
-Overfull \hbox (89.37749pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 genes aligned with the hazard gradient and suppresses those that dilute[] 
- []
-
-
-Overfull \hbox (136.6274pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 prognostic structure, ensuring that the learned programs encode survival-relevant[] 
- []
-
-
-Overfull \hbox (131.9024pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 By contrast, if supervision were applied to the sample loadings \(H\), the model[] 
- []
-
-
-Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 could reduce the Cox loss by redistributing patient-specific coefficients while[] 
- []
-
-
-Overfull \hbox (131.9024pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 leaving the gene-level programs \(W\) nearly unchanged, a behavior documented in[] 
- []
-
-
-Overfull \hbox (84.6525pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 multiple supervised variants of NMF and supervised topic models, where[] 
- []
-
-
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 supervision applied only to the coefficient matrix modifies \(H\) but not the[] 
- []
-
-
-Overfull \hbox (56.30255pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 basis \(W\) [@cai2011graph; @wang2014supervised; @blei2007slda].[] 
- []
-
-
-Overfull \hbox (103.55246pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Supervising \(W\) also provides a practical advantage for **portability**:[] 
- []
-
-
-Overfull \hbox (117.72743pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 because \(W\) defines gene-level programs, new samples can be embedded by the[] 
- []
-
-
-Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 closed-form projection \(Z_{\text{new}} = X_{\text{new}}^\top W\). In contrast,[] 
- []
-
-
-Overfull \hbox (108.27745pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 supervising \(H\) would not yield such a mapping; instead, obtaining sample[] 
- []
-
-
-Overfull \hbox (131.9024pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 loadings for external datasets would require solving a nonnegative least-squares[] 
- []
-
-
-Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 (NNLS) problem for each new sample, introducing optimization noise and reducing[] 
- []
-
-
-Overfull \hbox (127.17741pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Together, these considerations motivate supervising through \(W\), which shapes[] 
- []
-
-
-Overfull \hbox (108.27745pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 the gene programs toward prognostic directions, stabilizes solutions across[] 
- []
-
-
-Overfull \hbox (84.6525pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 initializations, and yields biologically interpretable signatures that[] 
- []
-
-
-Overfull \hbox (245.30219pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 Algorithm~S\ref{alg:cv} describes the cross validation procedure with $F$ folds and $R$ initializations.[] 
- []
-
-
-Overfull \hbox (103.55246pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 $\mathcal{P} = \{(i,j) : y_i < y_j,\ \delta_i = 1\}$ and linear predictors[] 
- []
-
-
-Overfull \hbox (13.77763pt too wide) in paragraph at lines 1257--1257
-[]  \T1/lmtt/m/n/9 + \tfrac{1}{2}\mathbb{1}(\hat{\eta}_i = \hat{\eta}_j)[] 
  []
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [9]
-Overfull \hbox (94.10248pt too wide) in paragraph at lines 1257--1257
-[]\T1/lmtt/m/n/9 \Statex Hyperparameters $k$, $\alpha$, $\lambda$, $\xi$, and $\lambda_H$[] 
- []
-
-
-Overfull \hbox (372.87694pt too wide) in paragraph at lines 1257--1257
-[]    \T1/lmtt/m/n/9 \State Split data into training and validation $(X_{(-f)},y_{(-f)}, \delta_{(-f)})$, and $(X_{(f)},y_{(f)}, \delta_{(f)})$ sets[] 
- []
-
-
-Overfull \hbox (415.40186pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 \State Apply Algorithm~\ref{alg:desurv} with inputs $(X_{(-f)},y_{(-f)}, \delta_{(-f)})$, and $(k, \alpha, \lambda, \xi, \lambda_H)$[] 
- []
-
-
-Overfull \hbox (183.8773pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 \State Obtain $\hat{W}$ and $\hat{\beta}$ as output from Algorithm~\ref{alg:desurv}[] 
- []
-
-
-Overfull \hbox (9.05264pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 \State Compute the estimated linear predictor:[] 
- []
-
-
-Overfull \hbox (207.50226pt too wide) in paragraph at lines 1257--1257
-[]        \T1/lmtt/m/n/9 \State Compute c-index, denoted $\hat{c}_{(f)r}$, according to Equation~\ref{eqn:cindex}[] 
- []
-
-
-Overfull \hbox (27.9526pt too wide) in paragraph at lines 1257--1257
-[]    \T1/lmtt/m/n/9 \State Compute average c-index across initializations:[] 
- []
-
-
-Overfull \hbox (23.22762pt too wide) in paragraph at lines 1257--1257
-[]    \T1/lmtt/m/n/9 \hat{c}_{(f)} = \frac{1}{r}\sum_{r=1}^R\hat{c}_{(f)r}[] 
- []
-
-
-Overfull \hbox (29.08209pt too wide) in paragraph at lines 1268--1268
-[] []|\T1/phv/b/n/9 (-20) C. DeSurv git com-mit: fea641a96e4743315a35b9b6addcc1a1ff53da9d.[] 
- []
-
-
-Overfull \hbox (21.47888pt too wide) in paragraph at lines 1273--1274
-[] []|\T1/phv/b/n/9 (-20) E. Pa-per git com-mit: ad79f03a9361188583683b8f487de53d14c9f023.[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1278--1282
+Underfull \hbox (badness 10000) in paragraph at lines 1567--1571
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1284--1288
+Underfull \hbox (badness 10000) in paragraph at lines 1573--1577
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1290--1294
+Underfull \hbox (badness 10000) in paragraph at lines 1579--1583
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1296--1300
+Underfull \hbox (badness 10000) in paragraph at lines 1585--1588
 
  []
 
+[10
 
-Underfull \hbox (badness 10000) in paragraph at lines 1302--1306
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1308--1313
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1315--1320
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1322--1328
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1330--1334
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1336--1340
-
- []
-
-
-Overfull \hbox (0.8797pt too wide) in paragraph at lines 1344--1344
-\T1/lmr/m/n/9 (-20) consortium data portal. \T1/lmr/m/it/9 (-20) Nature biotechnology \T1/lmr/m/n/9 (-20) 37(4):367--
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1342--1345
-
- []
-
-
-Underfull \hbox (badness 1708) in paragraph at lines 1351--1351
-\T1/lmr/m/n/9 (+20) out-stand-ing chal-lenges. \T1/lmr/m/it/9 (+20) Nu-cleic Acids Re-search
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1347--1352
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1354--1357
-
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[10]
-Underfull \hbox (badness 10000) in paragraph at lines 1359--1364
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1366--1370
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1372--1376
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1378--1382
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1384--1389
-
- []
-
-[11
-
-] [12 <../figures/model_schematic_final.pdf>] 
+] [11 <../figures/model_schematic_final.pdf>] [12 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf>] [13 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf>] [14 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf>] [15 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf>] 
 enddocument/afterlastpage (AED): lastpage setting LastPage.
 (./paper.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
-
-LaTeX Warning: There were undefined references.
-
 Package rerunfilecheck Info: File `paper.out' has not changed.
-(rerunfilecheck)             Checksum: 36DE7A12AC20A448B4E8266878792399;2869.
+(rerunfilecheck)             Checksum: 5E3A572F05B0F56F9175D691930B8E10;7352.
  ) 
 Here is how much of TeX's memory you used:
- 30674 strings out of 469471
- 572757 string characters out of 5467057
- 1090242 words of memory out of 5000000
- 58440 multiletter control sequences out of 15000+600000
- 717736 words of font info for 235 fonts, out of 8000000 for 9000
+ 31236 strings out of 469471
+ 583660 string characters out of 5467057
+ 1065518 words of memory out of 5000000
+ 58646 multiletter control sequences out of 15000+600000
+ 758981 words of font info for 400 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 117i,14n,121p,1529b,1612s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on paper.pdf (12 pages, 499278 bytes).
+ 117i,14n,121p,2048b,1115s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvbo8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
+Output written on paper.pdf (15 pages, 779915 bytes).
 PDF statistics:
- 291 PDF objects out of 1000 (max. 8388607)
- 226 compressed objects within 3 object streams
- 42 named destinations out of 1000 (max. 500000)
- 68194 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 609 PDF objects out of 1000 (max. 8388607)
+ 501 compressed objects within 6 object streams
+ 116 named destinations out of 1000 (max. 500000)
+ 90950 words of extra memory for PDF output out of 106986 (max. 10000000)
 
