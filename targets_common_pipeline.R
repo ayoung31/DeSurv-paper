@@ -1918,6 +1918,71 @@ FIGURE_TARGETS <- list(
   ),
   
   tar_target(
+    fig_variation_explained,
+    {
+      df_nmf <- build_variance_survival_df(
+        X = tar_data_filtered$ex,
+        scores = fit_std_desurvk$W,
+        loadings = fit_std_desurvk$H,
+        time = tar_data_filtered$sampInfo$time,
+        event = tar_data_filtered$sampInfo$event,
+        method = "Std NMF"
+      )
+      
+      df_desurv <- build_variance_survival_df(
+        X = tar_data_filtered$ex,
+        scores = tar_fit_desurv$W,
+        loadings = tar_fit_desurv$H,
+        time = tar_data_filtered$sampInfo$time,
+        event = tar_data_filtered$sampInfo$event,
+        method = "DeSurv"
+      )
+      
+      df_plot = rbind(df_nmf,df_desurv)
+      
+      ggplot(df_plot,
+             aes(x = variance_explained,
+                 y = delta_loglik,
+                 label = paste0("F", factor),
+                 shape = method)) +
+        geom_point(size = 4) +
+        geom_text_repel(
+          size = 4,
+          max.overlaps = Inf,
+          box.padding = 0.4,
+          point.padding = 0.3,
+          segment.size = 0.3
+        ) +
+        scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
+        labs(
+          x = "Fraction of expression variance explained",
+          y = "Δ partial log-likelihood (survival)",
+          shape = "Method"
+        ) +
+        theme_classic(base_size = 12)
+      
+    }
+  ),
+  
+  tar_target(
+    fig_desurv_std_correlation,
+    {
+      c = cor(fit_std_desurvk$W,tar_fit_desurv$W)
+      rownames(c) = paste0("NMF F",1:ncol(c))
+      colnames(c) = paste0("DeSurv F",1:ncol(c))
+      ph = pheatmap::pheatmap(c,
+                         cluster_rows = FALSE,
+                         cluster_cols = FALSE,
+                         show_colnames = TRUE,
+                         show_rownames = TRUE,
+                         silent = TRUE)
+      ph_grob <- ph$gtable
+      pheat <- cowplot::plot_grid(NULL, cowplot::ggdraw(ph_grob), nrow = 2, rel_heights = c(0.25, 4))
+      pheat
+    }
+  ),
+  
+  tar_target(
     fig_sc_panels,
     build_fig_sc_panels(
       tops_desurv = tar_tops_desurv,

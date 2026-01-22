@@ -674,6 +674,8 @@ make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref){
   ]
   
   W <- fit_desurv$W
+  
+  tops = tops[1:50,]
 
   W <- W[unlist(tops), , drop = FALSE]
   common_genes <- Reduce(intersect, list(rownames(W), unique(unlist(ref_sigs))))
@@ -709,20 +711,30 @@ make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref){
   }
   
   keep <- vapply(seq_len(nrow(cor_mat)), function(j) {
-    !any(is.na(cor_mat[j, ])) & sum(p_mat_adj[j, ] < 0.05) > 0
+    !any(is.na(cor_mat[j, ])) #& sum(p_mat_adj[j, ] < 0.1) > 0
   }, logical(1))
   mat <- cor_mat[which(keep), , drop = FALSE]
+  p_mat_adj = p_mat_adj[which(keep),,drop=FALSE]
+  sig = matrix("",nrow=nrow(mat),ncol=ncol(mat))
+  sig[p_mat_adj < .1] = "*"
+  
+  colnames(mat) = paste0("F",1:ncol(mat))
+
   
   my_colors <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
   ph <- pheatmap::pheatmap(
     mat,
     cluster_cols = FALSE,
+    #display_numbers = TRUE,
+    display_numbers = sig,
+    number_color = "white",
     color = my_colors,
-    breaks = seq(-0.4, 0.4, length.out = 101),
+    breaks = seq(-0.6, 0.6, length.out = 101),
     fontsize = 6,
     silent = TRUE,
-    fontsize_number = 18,
-    treeheight_row = 0
+    fontsize_number = 20,
+    treeheight_row = 0,
+    show_colnames = TRUE
   )
   ph_grob <- ph$gtable
   pheat <- cowplot::plot_grid(NULL, cowplot::ggdraw(ph_grob), nrow = 2, rel_heights = c(0.25, 4))
@@ -2249,3 +2261,48 @@ save_fig_extval <- function(data_val_filtered, fit_desurv, tops_desurv, path,
   fig <- combine_fig_extval_panels(panels)
   save_plot_pdf(fig, path, width = width, height = height)
 }
+
+
+compute_variance_explained <- function(X, scores, loadings) {
+  total_var <- var(as.numeric(X))
+  
+  tibble::tibble(
+    factor = seq_len(ncol(scores)),
+    variance_explained = purrr::map_dbl(seq_len(ncol(scores)), function(k) {
+      X_hat_k <- scores[, k, drop = FALSE] %*% t(loadings[, k, drop = FALSE])
+      var(as.numeric(X_hat_k)) / total_var
+    })
+  )
+}
+
+compute_survival_explained <- function(X, scores, time, event) {
+  null_fit <- coxph(Surv(time, event) ~ 1)
+  ll_null <- null_fit$loglik
+  
+  keep = intersect(rownames(X),rownames(scores))
+  XtW = t(X[keep,]) %*% scores[keep,]
+  
+  tibble::tibble(
+    factor = seq_len(ncol(scores)),
+    delta_loglik = apply(XtW,2, function(s) {
+      fit <- coxph(Surv(time, event) ~ s)
+      fit$loglik[2] - ll_null
+    })
+  )
+}
+
+build_variance_survival_df <- function(
+    X,
+    scores,
+    loadings,
+    time,
+    event,
+    method
+) {
+  var_df <- compute_variance_explained(X, scores, loadings)
+  surv_df <- compute_survival_explained(X, scores, time, event)
+  
+  dplyr::left_join(var_df, surv_df, by = "factor") |>
+    dplyr::mutate(method = method)
+}
+

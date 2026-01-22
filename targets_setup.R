@@ -154,7 +154,7 @@ active_controller <- crew_controller_group(default_controller,
 # ---- Global options ----
 TARGET_PACKAGES = c(
   "clusterProfiler","org.Hs.eg.db","DeSurv","pheatmap","NMF","tidyverse","tidyselect","survival","cvwrapr","rmarkdown","dplyr","digest",
-  "parallel","foreach","doParallel","doMC","pec","glmnet","webshot2","caret"
+  "parallel","foreach","doParallel","doMC","pec","glmnet","webshot2","caret","ggrepel"
 )
 
 tar_option_set(
