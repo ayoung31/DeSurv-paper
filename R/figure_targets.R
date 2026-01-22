@@ -737,7 +737,8 @@ make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref){
     show_colnames = TRUE
   )
   ph_grob <- ph$gtable
-  pheat <- cowplot::plot_grid(NULL, cowplot::ggdraw(ph_grob), nrow = 2, rel_heights = c(0.25, 4))
+  
+  pheat <- cowplot::plot_grid(NULL, cowplot::ggdraw(ph_grob), nrow = 2, rel_heights = c(0.25, 4)) 
   pheat
 }
 
@@ -2304,5 +2305,65 @@ build_variance_survival_df <- function(
   
   dplyr::left_join(var_df, surv_df, by = "factor") |>
     dplyr::mutate(method = method)
+}
+
+
+compute_hrs = function(data_val_filtered,tar_fit_desurv,method){
+  df=list()
+  for(i in 1:length(data_val_filtered)){
+    dat = data_val_filtered[[i]]
+    keep = intersect(rownames(dat$ex),rownames(tar_fit_desurv$W))
+    W=tar_fit_desurv$W[keep,]
+    X=dat$ex[keep,]
+    
+    
+    XtW = t(X) %*% W
+    hr=numeric()
+    lower=numeric()
+    upper=numeric()
+    for(j in 1:ncol(XtW)){
+      fit=coxph(Surv(dat$sampInfo$time,dat$sampInfo$event)~scale(XtW[,j]))
+      temp=summary(fit)
+      lower[j] = temp$conf.int[3]
+      upper[j] = temp$conf.int[4]
+      hr[j]=exp(fit$coefficients)
+    }
+    df[[i]]=data.frame(factor=1:ncol(XtW),HR=hr,lower=lower,upper=upper,dataset=dat$dataname)
+  }
+  df=do.call("rbind",df)
+  df$method = method
+  df
+}
+
+splot_median = function(data_val_filtered,tar_fit_desurv,factor){
+  df=list()
+  for(i in 1:length(data_val_filtered)){
+    dat = data_val_filtered[[i]]
+    keep = intersect(rownames(dat$ex),rownames(tar_fit_desurv$W))
+    W=tar_fit_desurv$W[keep,]
+    X=dat$ex[keep,]
+    
+    XtW=t(X)%*%W
+    score = XtW[,factor]
+    med = median(score)
+    bin=(score>med)*1
+    sdf = dat$sampInfo
+    sdf$factor = bin
+    
+    
+    df[[i]]=sdf
+  }
+  df=do.call("rbind",df)
+  
+  
+  sfit = survfit(Surv(time,event)~factor,data=df)
+  ggsurvplot(sfit,data=df,risk.table = TRUE,
+             xlab = "Time (months)",
+             palette = c("violetred2","turquoise4"),
+             break.time.by = 25,
+             legend.labs=c('Low (< median)','High (≥ median)'),
+             risk.table.y.text=FALSE,
+             censor.size=2,
+             font.main=12)
 }
 

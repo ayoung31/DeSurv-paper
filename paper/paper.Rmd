@@ -1,6 +1,6 @@
 ---
 title: Survival driven deconvolution (DeSurv) reveals prognostic and interpretable cancer subtypes
-  # Use letters for affiliations, numbers to show equal authorship (if applicable) and to indicate the corresponding author
+  # Use letters for affiliations, numbers to show equal authorship (if applicable) and to indicate the corresponding authors
 author:
   - name: Amber M. Young
     affiliation: a,1,2

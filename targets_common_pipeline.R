@@ -1800,6 +1800,7 @@ FIGURE_TARGETS <- list(
   tar_target(
     fig_gene_overlap_heatmap_desurv,
     {
+      browser()
       p = make_gene_overlap_heatmap(tar_fit_desurv,tar_tops_desurv$top_genes,top_genes)
       save_plot_pdf(
         p,
@@ -1959,7 +1960,7 @@ FIGURE_TARGETS <- list(
           y = "Δ partial log-likelihood (survival)",
           shape = "Method"
         ) +
-        theme_classic(base_size = 12)
+        theme_classic(base_size = 10)
       
     }
   ),
@@ -2187,5 +2188,114 @@ FIGURE_VAL_TARGETS <- list(
       )
     ),
     format = "file"
+  ),
+  tar_target(
+    fig_hr_forest,
+    {
+      desurv_df = compute_hrs(data_val_filtered,tar_fit_desurv,"DeSurv")
+      nmf_df = compute_hrs(data_val_filtered,fit_std_desurvk,"NMF")
+      
+      nmf_var <- build_variance_survival_df(
+        X = tar_data_filtered$ex,
+        scores = fit_std_desurvk$W,
+        loadings = fit_std_desurvk$H,
+        time = tar_data_filtered$sampInfo$time,
+        event = tar_data_filtered$sampInfo$event,
+        method = "Std NMF"
+      )
+      
+      desurv_var <- build_variance_survival_df(
+        X = tar_data_filtered$ex,
+        scores = tar_fit_desurv$W,
+        loadings = tar_fit_desurv$H,
+        time = tar_data_filtered$sampInfo$time,
+        event = tar_data_filtered$sampInfo$event,
+        method = "DeSurv"
+      )
+      
+      nmf_fac = nmf_var$factor[which.max(nmf_var$delta_loglik)]
+      desurv_fac = desurv_var$factor[which.max(desurv_var$delta_loglik)]
+      
+      df = rbind(desurv_df,nmf_df)
+      df_select = df %>% filter(
+        (factor==nmf_fac & method=="NMF") | (factor==desurv_fac & method=="DeSurv"))
+      pd <- position_dodge(width = 0.6)
+      
+      df_select$label <- sprintf("%.2f (%.2f–%.2f)", df_select$HR, df_select$lower, df_select$upper)
+      
+      ggplot(df_select, aes(x = HR, y = dataset,color=method)) +
+        geom_vline(xintercept = 1, linetype = "dashed",
+                   linewidth = 0.5, color = "grey60") +
+        scale_color_manual(
+          values = c(
+            "NMF" = "red",
+            "DeSurv"  = "blue"
+          )
+        )+
+        geom_errorbarh(
+          aes(xmin = lower, xmax = upper),
+          height = 0.25,
+          linewidth = 0.8,
+          position=pd
+        ) +
+        geom_point(size = 2.8,position = pd) +
+        geom_text(
+          aes(x = max(upper) * 1.05, y=dataset,label = label,group=method),
+          inherit.aes = FALSE,
+          hjust = 0,
+          size = 3,
+          position = pd,
+          show.legend = FALSE
+        ) +
+        scale_x_log10(
+          breaks = c(0.5, 1, 2, 4),
+          labels = c("0.5", "1", "2", "4")
+        ) +
+        theme_classic(base_size = 12) +
+        theme(
+          axis.line.y = element_blank(),
+          axis.ticks.y = element_blank()
+        ) +
+        coord_cartesian(xlim = c(min(df_select$lower), max(df_select$upper) * 1.4)) +
+        labs(
+          x = "Hazard ratio (95% CI)",
+          y = NULL
+        )
+    }
+  ),
+  tar_target(
+    fig_median_survival_desurv,
+    {
+      
+      desurv_var <- build_variance_survival_df(
+        X = tar_data_filtered$ex,
+        scores = tar_fit_desurv$W,
+        loadings = tar_fit_desurv$H,
+        time = tar_data_filtered$sampInfo$time,
+        event = tar_data_filtered$sampInfo$event,
+        method = "DeSurv"
+      )
+      
+      desurv_fac = desurv_var$factor[which.max(desurv_var$delta_loglik)]
+      
+      splot_median(data_val_filtered,tar_fit_desurv,desurv_fac)
+    }
+  ),
+  tar_target(
+    fig_median_survival_std_desurvk,
+    {
+      nmf_var <- build_variance_survival_df(
+        X = tar_data_filtered$ex,
+        scores = fit_std_desurvk$W,
+        loadings = fit_std_desurvk$H,
+        time = tar_data_filtered$sampInfo$time,
+        event = tar_data_filtered$sampInfo$event,
+        method = "Std NMF"
+      )
+      
+      nmf_fac = nmf_var$factor[which.max(nmf_var$delta_loglik)]
+      
+      splot_median(data_val_filtered,fit_std_desurvk,nmf_fac)
+    }
   )
 )

@@ -57,13 +57,20 @@ knitr::include_graphics(file.path("..","figures", "model_schematic_final.pdf"))
 
 
 ## Bayesian optimisation selects the DeSurv hyperparameters ($k$, $\alpha$) {.unnumbered}
-We now tune DeSurv with Bayesian optimisation (BO) rather than enumerating a dense cross-validation grid. Each BO evaluation fits the model for a single combination of $k$, $\alpha$, and penalty weights, measuring the mean validation C-index. A Gaussian-process surrogate models this surface and proposes new evaluations that balance exploration and exploitation, allowing the search to concentrate rapidly on high-performing regions.
+\subsection{Outcome-guided model selection resolves ambiguity in NMF rank choice}
 
-Figure \ref{fig:bo} summarises the optimisation run. Panel A reports the best observed cross-validated C-index at each $k$ for the supervised and $\alpha=0$ searches, with error bars denoting the cross-validation standard error across folds. The final configuration of the supervised search converges to $k=3$ and $\alpha=0.7$, which provided the highest cross-validated C-index encountered by BO.
+We examined the problem of selecting the number of latent components ($k$) in nonnegative matrix factorization (NMF) using gene expression data from pancreatic ductal adenocarcinoma (PDAC) cohorts. These heterogeneous tumor transcriptomes provide a representative setting in which to evaluate how commonly used unsupervised rank-selection heuristics behave in practice.
 
-For reference we still report standard NMF heuristics (Panels B-D: cophenetic, residuals, and silhouette), which historically guide rank selection when a supervised criterion is unavailable. These diagnostics disagree on the optimal $k$, underscoring the benefit of the BO-guided DeSurv procedure that explicitly maximises prognostic accuracy.
+Across a range of candidate ranks, standard NMF diagnostics yielded inconsistent guidance (Fig. \ref{fig:bo}A-C). Reconstruction residuals decreased smoothly with increasing $k$ and did not exhibit a clear elbow, a pattern consistent with both relatively small solutions ($k \approx 3$-4) and substantially larger ranks ($k \approx 6$-8). The cophenetic correlation coefficient began to decline at low ranks ($k \approx 3$-4) but continued to fluctuate at higher values without a distinct transition point. In contrast, mean silhouette width, evaluated across multiple distance metrics, was highest at very small ranks ($k \approx 2$-3) and decreased monotonically thereafter, favoring low-dimensional solutions that conflicted with recommendations based on reconstruction error or cophenetic correlation. Together, these unsupervised criteria pointed to different and incompatible values of $k$, highlighting the ambiguity of rank selection in standard NMF when applied to PDAC data.
 
-```{r fig-bo, fig.width = 6, fig.height= 5.5, fig.cap = "Ambiguity of rank selection in standard NMF and principled model selection in DeSurv. (A–C) Common criteria used to select the number of components in standard NMF—reconstruction error, cophenetic correlation, and silhouette width—exhibit non-monotonic or weakly differentiated patterns across ranks, leading to ambiguous or conflicting choices of $k$ in real PDAC datasets. (D) In contrast, DeSurv enables joint selection of model complexity and supervision strength through cross-validated survival performance. Heatmap of cross-validated concordance index across the number of components ($k$) and supervision strength ($\\alpha$) reveals a well-defined performance landscape, allowing principled identification of an optimal model configuration. (E) Simulation-based comparison of selected model rank. Distributions of selected $k$ across repeated simulations show that DeSurv, using Bayesian optimization, consistently recovers the true underlying rank ($k = 3$), whereas standard NMF followed by post hoc Cox modeling exhibits greater variability and a tendency toward under-selection. \\label{fig:bo}", fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
+To resolve this ambiguity, we applied DeSurv, which incorporates survival outcomes directly into the factorization process and evaluates models using survival-based predictive performance. Using the same PDAC gene expression data, we assessed model performance across the joint space of the number of components ($k$) and supervision strength ($\alpha$) using cross-validated concordance index (C-index). The resulting C-index surface summarizes expected predictive performance across candidate models and enables direct comparison of solutions that differ in both model complexity and degree of supervision (Fig. \ref{fig:bo}D).
+
+Model selection was based on standard cross-validation principles. Rather than selecting the single parameter combination with the highest predicted C-index, we selected the smallest value of $k$ whose predicted performance lay within one standard error of the maximum. This criterion yielded a stable and parsimonious choice of model rank in the PDAC data, in contrast to the conflicting recommendations produced by unsupervised NMF heuristics.
+
+To further evaluate rank recovery under controlled conditions, we conducted simulation studies in which the true underlying rank was known ($k = 3$). Across repeated simulation replicates, DeSurv consistently selected the correct rank, producing a concentrated distribution of selected $k$ values centered at the true value. In contrast, standard NMF followed by post hoc Cox modeling ($\alpha = 0$) exhibited substantially greater variability and a systematic tendency toward under-selection. Together, these results indicate that incorporating outcome information during model fitting improves the reliability of rank selection in settings where unsupervised criteria yield conflicting conclusions.
+
+```{r fig-bo, fig.width = 6, fig.height= 5.5, fig.cap = "(A-D) Analyses based on real pancreatic ductal adenocarcinoma (PDAC) gene expression data illustrate the ambiguity of rank selection in standard nonnegative matrix factorization (NMF) and the use of outcome supervision in DeSurv. (A-C) Commonly used unsupervised heuristics for selecting the number of components (k) yield inconsistent conclusions. (A) Reconstruction residuals decrease smoothly with increasing k and do not exhibit a clear elbow; diminishing returns could be inferred at intermediate (k $\\approx$ 3-4) or larger (k $\\approx$ 6-8) ranks. (B) The cophenetic correlation coefficient, often used to select the largest k prior to a marked loss of clustering stability, begins to decline at low ranks (k $\\approx$ 3-4) but continues to fluctuate thereafter, providing no unambiguous selection criterion. (C) Mean silhouette width across multiple distance metrics is highest at small ranks (k $\\approx$ 2-3) and decreases monotonically with increasing k, favoring lower-dimensional solutions that conflict with the other criteria.
+(D) Heatmap of the Gaussian process predicted mean cross-validated concordance index (C-index) from Bayesian optimization over the joint space of the number of components (k) and supervision strength ($\\alpha$), computed on the same PDAC data. The predicted performance surface summarizes survival prediction accuracy across parameter settings and illustrates how DeSurv uses outcome information to inform model selection. (E) Results from simulation studies with a known underlying rank (k = 3) showing the distribution of selected k values across repeated replicates. DeSurv more consistently recovers the true rank, yielding a concentrated distribution centered at k = 3, whereas standard NMF with post hoc Cox modeling ($\\alpha=0$) exhibits greater variability and a tendency toward under-selection. \\label{fig:bo}", fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
 
 tar_load(fig_bo_heat_tcgacptac)
 tar_load(fig_residuals_tcgacptac)
@@ -109,12 +116,14 @@ By contrast, DeSurv produced a factorization that emphasized axes of variation m
 These differences were reflected quantitatively by contrasting the fraction of expression variance explained by each factor with its contribution to survival (Fig. \ref{fig:bio}C). In the standard NMF solution, the factor explaining the largest proportion of transcriptional variance contributed little to survival, consistent with its enrichment for exocrine and composition-driven programs. In contrast, DeSurv concentrated survival signal into a single factor that explained substantially more variation in outcome despite accounting for a smaller fraction of expression variance. The remaining DeSurv factors contributed minimal survival signal, indicating that survival-relevant information was not diffusely distributed across components.
 
 To further characterize how DeSurv reorganizes the transcriptional structure learned by standard NMF, we examined the correspondence between factors derived from the two methods (Fig. \ref{fig:bio}D). Tumor-intrinsic structure was largely preserved, with one DeSurv factor showing strong correspondence to the classical tumor–associated NMF factor. In contrast, the microenvironmental factor identified by standard NMF mapped primarily to a single DeSurv factor enriched for activated immune and stromal programs, indicating that DeSurv refines variance-driven microenvironmental structure into a survival-aligned axis. Notably, the NMF factor dominated by exocrine-associated expression did not correspond strongly to any single DeSurv factor, consistent with the suppression of differentiation- and composition-driven signals observed in survival-informed factorization. Together, these results indicate that DeSurv selectively preserves tumor and microenvironmental structure while reorganizing or deprioritizing axes of variation that contribute little to survival.
-```{r fig-bio, fig.cap="Survival-informed factorization reorganizes transcriptional structure relative to variance-driven NMF. (A) Correlation of standard NMF factor gene rankings with established pancreatic ductal adenocarcinoma (PDAC) gene programs. NMF recovers variance-dominant structure, including an exocrine-associated factor opposing immune and stromal signatures, a classical tumor factor, and a composite microenvironmental factor. (B) Corresponding correlations for DeSurv. DeSurv isolates tumor-intrinsic classical and basal-like programs and resolves an activated immune–stromal microenvironment, while exocrine-associated expression does not dominate any factor. Asterisks indicate significant correlations after multiple testing correction. (C) Fraction of expression variance explained versus survival contribution for each factor, quantified by the change in partial log-likelihood from univariate Cox models. Standard NMF factors explain substantial variance with minimal survival relevance, whereas DeSurv concentrates survival signal into a single factor despite explaining less expression variance. (D) Pairwise correspondence between NMF and DeSurv factors. Tumor-intrinsic structure is preserved across methods, while variance-driven microenvironmental structure is reorganized into a survival-aligned axis; the exocrine-dominated NMF factor shows no strong one-to-one correspondence. \\label{fig:bio}", fig.env='figure*', fig.pos='t', out.height= "4.5in", out.width='\\textwidth'}
+```{r fig-bio, fig.cap="Survival-informed factorization reorganizes transcriptional structure relative to variance-driven NMF. (A) Correlation of standard NMF factor gene rankings with established pancreatic ductal adenocarcinoma (PDAC) gene programs. NMF recovers variance-dominant structure, including an exocrine-associated factor opposing immune and stromal signatures, a classical tumor factor, and a composite microenvironmental factor. (B) Corresponding correlations for DeSurv. DeSurv isolates tumor-intrinsic classical and basal-like programs and resolves an activated immune–stromal microenvironment, while exocrine-associated expression does not dominate any factor. Asterisks indicate significant correlations after multiple testing correction. * Indicates an fdr adjusted p-value < 0.1 (C) Fraction of expression variance explained versus survival contribution for each factor, quantified by the change in partial log-likelihood from univariate Cox models. Standard NMF factors explain substantial variance with minimal survival relevance, whereas DeSurv concentrates survival signal into a single factor despite explaining less expression variance. (D) Pairwise correspondence between NMF and DeSurv factors. Tumor-intrinsic structure is preserved across methods, while variance-driven microenvironmental structure is reorganized into a survival-aligned axis; the exocrine-dominated NMF factor shows no strong one-to-one correspondence. \\label{fig:bio}", fig.env='figure*', fig.pos='t', out.height= "4.5in", out.width='\\textwidth'}
 
 tar_load(fig_gene_overlap_heatmap_desurv_tcgacptac)
 tar_load(fig_gene_overlap_heatmap_std_desurvk_tcgacptac)
 tar_load(fig_variation_explained_tcgacptac)
 tar_load(fig_desurv_std_correlation_tcgacptac)
+
+bottom_right = plot_grid(NULL,fig_desurv_std_correlation_tcgacptac,ncol=2,rel_widths = c(1,4))
 
 right = plot_grid(fig_variation_explained_tcgacptac +
                     theme(
@@ -122,20 +131,118 @@ right = plot_grid(fig_variation_explained_tcgacptac +
                       legend.justification = c(1, 0),   # anchor point of legend box
                       legend.background = element_rect(color="black")
                     ),
-          fig_desurv_std_correlation_tcgacptac,
-          nrow=2,labels=c("C","D"))
+          bottom_right,
+          nrow=2,labels=c("C","D"),
+          rel_heights = c(3,2))
 legend = get_legend(fig_gene_overlap_heatmap_desurv_tcgacptac)
-plot_grid(fig_gene_overlap_heatmap_std_desurvk_tcgacptac + theme(legend.position = "none"),fig_gene_overlap_heatmap_desurv_tcgacptac,right,ncol=3,labels=c("A","B",""))
+plot_grid(fig_gene_overlap_heatmap_std_desurvk_tcgacptac + theme(legend.position = "none"),fig_gene_overlap_heatmap_desurv_tcgacptac,right,ncol=3,labels=c("A","B",""),rel_widths = c(2.5,2.5,3))
 
 ```
 
 
-## External validation with projected DeSurv factor scores {.unnumbered}
-To evaluate the generalizability of DeSurv-derived prognostic signatures, we projected the DeSurv weights onto multiple independent PDAC cohorts (Dijk, PACA-AU RNA-seq and microarray, Moffitt, and Puleo). We selected the two most prognostic factors using \texttt{select\_desurv\_factors}, rank-transformed expression within each sample over the union of the selected factor gene lists, and computed validation scores as $Z_{val} = X_{val}^T W$ restricted to the top-gene signatures. This yields continuous factor score vectors for each cohort without clustering.
+## DeSurv-derived latent structure generalizes to independent datasets {.unnumbered}
+To assess generalization of DeSurv latent factors, the gene-level signatures learned in the training cohort were used to compute factor activity scores in independent validation datasets. For each validation sample, factor activity was quantified by applying the learned gene-factor weights to the sample’s gene expression profile ($W^TX$), yielding a continuous score for each factor.
 
-Figure \@ref(fig:fig-extval)A shows the ranked expression heatmap for the selected factor gene signatures, annotated with the continuous factor scores and the PurIST, DeCAF, and dataset labels. Figure \@ref(fig:fig-extval)B plots the top two factor scores for all samples, colored by PurIST subtype and shaped by DeCAF subtype to show how tumor- and stroma-associated programs align across cohorts. For survival assessment, we discretized each factor score within each cohort at its median and intersected the high/low calls to form four groups; Kaplan–Meier curves for these groups are shown in Figure \@ref(fig:fig-extval)C. Because DeSurv was trained only on TCGA-PAAD/CPTAC, these analyses represent an independent validation of prognostic signal transfer to external datasets.
-```{r fig-extval, fig.cap="External cohort validation. A. Heatmap of ranked expression values for genes in the selected DeSurv factor signatures with continuous factor-score annotations plus PurIST, DeCAF, and dataset labels. B. Scatter plot of the top two factor scores, colored by PurIST subtype and shaped by DeCAF subtype. C. Kaplan–Meier curves for the four groups formed by per-cohort median splits of the two factor scores.", fig.env='figure*', fig.pos='t', out.width='0.32\\textwidth'}
+For each method, we focused on the factor showing the largest increase in Cox model log partial likelihood in the training data. Across validation cohorts, this DeSurv-derived factor exhibited consistent survival effects, with hazard ratio estimates showing limited variability and predominantly protective associations (Fig. \ref{fig:extval}A). In contrast, the NMF factor identified by the same criterion showed greater heterogeneity across datasets and weaker survival associations.
 
+When validation samples were pooled and stratified into high- and low-activity groups based on the DeSurv-derived factor, clear separation of survival trajectories was observed (Fig. \ref{fig:extval}B). Applying the same procedure to NMF resulted in weaker survival stratification (Fig. \ref{fig:extval}C).
+
+Together, these results indicate that DeSurv identifies latent factors whose associations with survival are preserved across datasets.
+```{r fig-extval, fig.cap="Figure X. DeSurv learns prognostic structure that generalizes across independent cohorts. (A) Forest plot summarizing hazard ratios (HRs; 95% CIs) for the latent factor most predictive of survival in held-out validation datasets. Estimates from DeSurv (blue) are more stable across cohorts than those obtained with standard NMF (red). (B) Kaplan–Meier curves for pooled validation samples stratified into high and low groups based on values of the DeSurv-derived factor providing the strongest survival signal. Median-based stratification yields clear separation of survival trajectories, indicating robust out-of-sample prognostic performance. (C) Corresponding analysis for the NMF-derived factor selected using the same survival-based criterion, showing weaker discrimination between risk groups. \\label{fig:extval}", fig.env='figure*', fig.pos='t', out.width='\\textwidth'}
+
+tar_load(fig_hr_forest_tcgacptac)
+tar_load(fig_median_survival_desurv_tcgacptac)
+tar_load(fig_median_survival_std_desurvk_tcgacptac)
+
+library(cowplot)
+library(ggplot2)
+
+# -------------------------
+# Global styling knobs
+# -------------------------
+base_size <- 10
+
+theme_pnas <- theme_classic(base_size = base_size) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    plot.margin = margin(6, 10, 6, 6),
+    legend.box.margin = margin(0, 0, 0, 0),
+    legend.spacing.x = unit(6, "pt"),
+    legend.key.width = unit(12, "pt")
+  )
+
+# -------------------------
+# Helper: stack KM plot + risk table with better spacing
+# -------------------------
+stack_surv <- function(surv_obj, keep_legend = FALSE) {
+  p <- surv_obj$plot +
+    theme_pnas +
+    theme(
+      legend.position = if (keep_legend) "bottom" else "none",
+      axis.title.x = element_blank(),              # x-label goes on the table panel
+      plot.margin = margin(6, 10, 2, 6)
+    )
+
+  # Risk table: smaller text, more top margin so it doesn't collide with x-axis
+  t <- surv_obj$table +
+    theme_pnas +
+    theme(
+      legend.position = "none",
+      axis.title.y = element_blank(),
+      axis.text.x  = element_text(size = base_size - 1),
+      axis.text.y  = element_text(size = base_size - 1),
+      plot.margin  = margin(2, 10, 6, 6)
+    ) +
+    labs(x = "Time (months)")
+
+  plot_grid(p, t, ncol = 1, rel_heights = c(3.2, 1.3), align = "v", axis = "lr")
+}
+
+# -------------------------
+# Panels B and C (KM + risk table)
+# Keep legend only once (B), remove from C to reduce clutter
+# -------------------------
+med_desurv <- fig_median_survival_desurv_tcgacptac
+mid  <- stack_surv(med_desurv, keep_legend = TRUE)
+
+med_std <- fig_median_survival_std_desurvk_tcgacptac
+right <- stack_surv(med_std, keep_legend = FALSE)
+
+# -------------------------
+# Panel A (forest): nicer spacing + readable y labels + stable margins
+# -------------------------
+left <- fig_hr_forest_tcgacptac +
+  scale_y_discrete(
+    labels = c(
+      "Puleo_array"       = "Puleo",
+      "Dijk"              = "Dijk",
+      "PACA_AU_seq"       = "PACA seq",
+      "PACA_AU_array"     = "PACA array",
+      "Moffitt_GEO_array" = "Moffitt"
+    )
+  ) +
+  theme_pnas +
+  theme(
+    legend.position = "bottom",
+    axis.title.y = element_blank(),
+    plot.margin = margin(6, 12, 6, 6)
+  )
+
+# -------------------------
+# Build the 3-panel figure with consistent label placement
+# -------------------------
+plot_grid(
+  left, mid, right,
+  nrow = 1,
+  rel_widths = c(3.2, 2.2, 2.2),
+  labels = c("A", "B", "C"),
+  label_size = 14,
+  label_fontface = "bold",
+  label_x = 0.02,
+  label_y = 0.98,
+  hjust = 0,
+  vjust = 1
+)
 
 ```
 
