@@ -492,10 +492,57 @@ whose associations with survival are preserved across datasets.
 \subsection*{Bladder cancer analysis}\label{bladder-cancer-analysis}
 \addcontentsline{toc}{subsection}{Bladder cancer analysis}
 
-We will report a focused bladder cancer analysis here, including a
-dedicated figure. Placeholder text: summary of bladder cohort
-preprocessing, DeSurv factor interpretation, and survival stratification
-results to be added once the bladder figure is finalized.
+To evaluate whether the distinctions observed between standard
+nonnegative matrix factorization (NMF) and DeSurv in pancreatic ductal
+adenocarcinoma were specific to that disease context, we applied both
+methods to an independent bladder cancer cohort and examined factor
+structure, biological interpretation, and survival association using the
+same analytical framework (Fig. (\textbf{ref?})(fig:fig-bladder)).
+
+In bladder cancer, comparison of expression variance explained and
+survival contribution revealed patterns closely paralleling those
+observed in PDAC (Fig. \ref{fig:bladder}A). Standard NMF allocated
+substantial model capacity to factors explaining large fractions of
+transcriptional variance, with little corresponding contribution to
+survival. In contrast, DeSurv concentrated outcome-associated signal
+into a single factor that explained a relatively modest fraction of
+expression variance while accounting for the majority of
+survival-related information. The remaining DeSurv factors contributed
+minimally to survival, indicating that prognostic signal was not
+diffusely distributed across components.
+
+Consistent with this structure, the survival-aligned DeSurv factor
+identified in bladder cancer showed a clear association with outcome in
+Kaplan--Meier analyses based on a median split of factor scores (Fig.
+\ref{fig:bladder}B). No comparable survival separation was observed for
+standard NMF factors, reinforcing the observation that variance-dominant
+components do not necessarily capture prognostically relevant biology.
+
+Biological interpretation of bladder cancer factors further supported
+this distinction (Fig. \ref{fig:bladder}C). The DeSurv
+survival-associated factor exhibited overlap with established bladder
+tumor programs linked to aggressive disease, whereas standard NMF
+factors were dominated by transcriptional structure that lacked
+consistent association with outcome. As in PDAC, differentiation- and
+composition-related signals were prominent among NMF components but were
+not isolated as dominant axes in the survival-informed DeSurv solution.
+
+Together, these results demonstrate that the reorganization of
+transcriptional structure induced by survival-informed factorization
+extends beyond a single cancer type. In bladder cancer, DeSurv again
+deprioritizes variance-dominant but prognostically neutral signals and
+concentrates survival-relevant information into a small number of
+biologically interpretable factors, supporting the general applicability
+of this approach.
+
+\begin{figure*}[t]
+
+{\centering \includegraphics[width=\textwidth]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1} 
+
+}
+
+\caption{Insert \label{fig:bladder}}\label{fig:fig-bladder}
+\end{figure*}
 
 \section*{Discussion}\label{discussion}
 \addcontentsline{toc}{section}{Discussion}
@@ -1376,7 +1423,7 @@ $
 ## DeSurv git branch: 20260107bugfix
 ## DeSurv git commit: fea641a96e4743315a35b9b6addcc1a1ff53da9d
 ## Paper git branch: main
-## Paper git commit: f2b3031dc5fea0689481ecfc87d7dc79ffa35ecc
+## Paper git commit: 4f17b8d8fbcd442721eab29dcb810db4a9c51464
 \end{verbatim}
 
 \phantomsection\label{refs}

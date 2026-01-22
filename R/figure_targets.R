@@ -2263,15 +2263,43 @@ save_fig_extval <- function(data_val_filtered, fit_desurv, tops_desurv, path,
   save_plot_pdf(fig, path, width = width, height = height)
 }
 
-
-compute_variance_explained <- function(X, scores, loadings) {
-  total_var <- var(as.numeric(X))
+compute_variance_explained <- function(X, W, H, center = FALSE) {
+  # Expected shapes:
+  # X : genes x subjects
+  # W : genes x factors
+  # H : factors x subjects
+  
+  X <- as.matrix(X)
+  W <- as.matrix(W)
+  H <- as.matrix(H)
+  
+  stopifnot(nrow(X) == nrow(W))   # genes
+  stopifnot(ncol(X) == ncol(H))   # subjects
+  stopifnot(ncol(W) == nrow(H))   # factors
+  
+  X_use <- X
+  if (center) {
+    # center each gene across subjects (rows of X)
+    X_use <- t(scale(t(X_use), center = TRUE, scale = FALSE))
+  }
+  
+  total_ss <- sum(X_use^2, na.rm = TRUE)
+  if (!is.finite(total_ss) || total_ss <= 0) {
+    stop("Total sum-of-squares is not positive/finite.")
+  }
+  
+  k <- ncol(W)
   
   tibble::tibble(
-    factor = seq_len(ncol(scores)),
-    variance_explained = purrr::map_dbl(seq_len(ncol(scores)), function(k) {
-      X_hat_k <- scores[, k, drop = FALSE] %*% t(loadings[, k, drop = FALSE])
-      var(as.numeric(X_hat_k)) / total_var
+    factor = seq_len(k),
+    variance_explained = purrr::map_dbl(seq_len(k), function(j) {
+      X_hat_j <- W[, j, drop = FALSE] %*% H[j, , drop = FALSE]  # genes x subjects
+      
+      if (center) {
+        X_hat_j <- t(scale(t(X_hat_j), center = TRUE, scale = FALSE))
+      }
+      
+      sum(X_hat_j^2, na.rm = TRUE) / total_ss
     })
   )
 }
