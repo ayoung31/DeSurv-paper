@@ -184,7 +184,7 @@ SIM_ANALYSIS_SPECS <- list(
   ),
   list(
     analysis_id = "fixed_alpha0",
-    label = "Fixed with alpha = 0",
+    label = "Fixed NMF",
     mode = "fixed",
     params = modifyList(SIM_FIXED_PARAMS, list(alpha = 0))
   ),
@@ -202,7 +202,7 @@ SIM_ANALYSIS_SPECS <- list(
   ),
   list(
     analysis_id = "bo_alpha0",
-    label = "Bayesian optimization with alpha = 0",
+    label = "Bayesian optimization with NMF",
     mode = "bayesopt",
     bounds = modifyList(
       SIM_DESURV_BO_BOUNDS,
@@ -232,7 +232,7 @@ SIM_ANALYSIS_SPECS <- list(
   ),
   list(
     analysis_id = "bo_tune_ntop_alpha0",
-    label = "Bayesian optimization with alpha = 0 adding ntop for tuning",
+    label = "Bayesian optimization with NMF adding ntop for tuning",
     mode = "bayesopt",
     bounds = modifyList(
       SIM_DESURV_BO_BOUNDS,

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.1.22)  22 JAN 2026 13:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.1.22)  23 JAN 2026 17:31
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1170,312 +1170,311 @@ Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files
 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf, id=205, 469.755pt x 325.215pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf  used on input line 540.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf  used on input line 545.
 (pdftex.def)             Requested size: 505.69374pt x 350.09555pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 628--629
+Underfull \hbox (badness 10000) in paragraph at lines 633--634
 
  []
 
 [4]
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 7.59998pt on input line 717.
+(Font)              scaled to size 7.59998pt on input line 722.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 719.
+(Font)              <8> on input line 724.
 LaTeX Font Info:    Font shape `T1/phv/b/it' in size <8> not available
-(Font)              Font shape `T1/phv/b/sl' tried instead on input line 760.
+(Font)              Font shape `T1/phv/b/sl' tried instead on input line 765.
 LaTeX Font Info:    Font shape `T1/phv/b/sl' will be
-(Font)              scaled to size 7.59998pt on input line 760.
-Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 768.
+(Font)              scaled to size 7.59998pt on input line 765.
+Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 773.
 
-Underfull \hbox (badness 10000) in paragraph at lines 774--775
+Underfull \hbox (badness 10000) in paragraph at lines 779--780
 []\T1/lmr/m/n/9 (+20) Ini-tial-ize $\OML/lmm/m/it/9 W[]; H[]$ \T1/lmr/m/n/9 (+20) with pos-i-tive en-tries (e.g.,
  []
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 798.
+(hyperref)                removing `math shift' on input line 803.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 798.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 819.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 819.
+(hyperref)                removing `math shift' on input line 803.
 
 [5{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}]
-Overfull \hbox (8.5792pt too wide) in paragraph at lines 901--902
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 824.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 824.
+
+
+Overfull \hbox (8.5792pt too wide) in paragraph at lines 906--907
 []   \T1/lmr/m/n/9 (-20) Com-pute $\OML/lmm/m/it/9 D \OT1/lmr/m/n/9 (-20) = [] []\OMS/lmsy/m/n/9 k\OML/lmm/m/it/9 W[]\OMS/lmsy/m/n/9 k[]\OML/lmm/m/it/9 ; [] ; \OMS/lmsy/m/n/9 k\OML/lmm/m/it/9 W[]\OMS/lmsy/m/n/9 k[][]$ 
  []
 
 
-Underfull \hbox (badness 1215) in paragraph at lines 902--903
+Underfull \hbox (badness 1215) in paragraph at lines 907--908
 []   \T1/lmr/m/n/9 (+20) and set $\OML/lmm/m/it/9 W[] \OMS/lmsy/m/n/9   \OML/lmm/m/it/9 W[]D[]$\T1/lmr/m/n/9 (+20) , $\OML/lmm/m/it/9 H[] \OMS/lmsy/m/n/9  
  []
 
 
-Underfull \hbox (badness 2717) in paragraph at lines 903--904
+Underfull \hbox (badness 2717) in paragraph at lines 908--909
 [] \T1/lmr/bx/n/9 (+20) if $\OMS/lmsy/m/n/9 L\OT1/lmr/m/n/9 (+20) (\OML/lmm/m/it/9 W[]; H[]; ^^L[]\OT1/lmr/m/n/9 (+20) ) \OMS/lmsy/m/n/9 ^^T L\OT1/lmr/m/n/9 (+20) (\OML/lmm/m/it/9 W[]; H[]; ^^L[]\OT1/lmr/m/n/9 (+20) )$
  []
 
 
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 924.
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\beta' on input line 924.
+(hyperref)                removing `math shift' on input line 929.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 924.
+(hyperref)                removing `\beta' on input line 929.
 
 
-Overfull \hbox (30.546pt too wide) detected at line 983
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 929.
+
+
+Overfull \hbox (30.546pt too wide) detected at line 988
 []
  []
 
-
-Overfull \hbox (54.17964pt too wide) detected at line 1004
+[6]
+Overfull \hbox (54.17964pt too wide) detected at line 1009
 []
  []
 
-[6] [7]
+[7]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1260.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1260.
+(hyperref)                removing `math shift' on input line 1265.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1304.
+(hyperref)                removing `math shift' on input line 1265.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1304.
+(hyperref)                removing `math shift' on input line 1309.
 
 
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1309.
+
+[8]
 pdfTeX warning (ext4): destination with the same identifier (name{equation.18}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.1355 ...ctors \(\hat{\eta}_i\): \begin{equation}
+l.1360 ...ctors \(\hat{\eta}_i\): \begin{equation}
                                                   
 pdfTeX warning (ext4): destination with the same identifier (name{equation.18}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.1355 ...ctors \(\hat{\eta}_i\): \begin{equation}
+l.1360 ...ctors \(\hat{\eta}_i\): \begin{equation}
                                                   
 pdfTeX warning (ext4): destination with the same identifier (name{equation.18}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.1355 ...ctors \(\hat{\eta}_i\): \begin{equation}
+l.1360 ...ctors \(\hat{\eta}_i\): \begin{equation}
                                                   
 pdfTeX warning (ext4): destination with the same identifier (name{equation.18}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.1355 ...ctors \(\hat{\eta}_i\): \begin{equation}
+l.1360 ...ctors \(\hat{\eta}_i\): \begin{equation}
                                                   
-Underfull \hbox (badness 10000) in paragraph at lines 1379--1380
+Underfull \hbox (badness 10000) in paragraph at lines 1384--1385
 [] \T1/lmr/m/n/9 (+20) Split data into train-ing and val-i-da-tion
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1382--1383
+Underfull \hbox (badness 10000) in paragraph at lines 1387--1388
 [] \T1/lmr/m/n/9 (+20) Ap-ply Al-go-rithm [][]1[][] with in-puts
  []
 
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[8]
-Overfull \hbox (17.39114pt too wide) in paragraph at lines 1427--1427
+Overfull \hbox (17.39114pt too wide) in paragraph at lines 1432--1432
 []\T1/lmtt/m/n/8 ## DeSurv git commit: fea641a96e4743315a35b9b6addcc1a1ff53da9d[] 
  []
 
 
-Overfull \hbox (13.14714pt too wide) in paragraph at lines 1427--1427
-[]\T1/lmtt/m/n/8 ## Paper git commit: 4f17b8d8fbcd442721eab29dcb810db4a9c51464[] 
+Overfull \hbox (13.14714pt too wide) in paragraph at lines 1432--1432
+[]\T1/lmtt/m/n/8 ## Paper git commit: a0923dfce100c70f93f2d13a0d1d7682248f3e4f[] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1432--1436
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1438--1442
+Underfull \hbox (badness 10000) in paragraph at lines 1437--1441
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1444--1448
+Underfull \hbox (badness 10000) in paragraph at lines 1443--1447
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1450--1454
+Underfull \hbox (badness 10000) in paragraph at lines 1449--1453
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1456--1460
+Underfull \hbox (badness 10000) in paragraph at lines 1455--1459
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1462--1467
+Underfull \hbox (badness 10000) in paragraph at lines 1461--1465
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1469--1474
+Underfull \hbox (badness 10000) in paragraph at lines 1467--1472
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1476--1482
+Underfull \hbox (badness 10000) in paragraph at lines 1474--1479
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1484--1488
+Underfull \hbox (badness 10000) in paragraph at lines 1481--1487
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1490--1494
+Underfull \hbox (badness 10000) in paragraph at lines 1489--1493
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1496--1499
+Underfull \hbox (badness 10000) in paragraph at lines 1495--1499
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1501--1506
+Underfull \hbox (badness 10000) in paragraph at lines 1501--1504
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1508--1511
+Underfull \hbox (badness 10000) in paragraph at lines 1506--1511
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1513--1518
+Underfull \hbox (badness 10000) in paragraph at lines 1513--1516
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1520--1524
+Underfull \hbox (badness 10000) in paragraph at lines 1518--1523
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1526--1530
+Underfull \hbox (badness 10000) in paragraph at lines 1525--1529
+
+ []
+
+[9]
+Underfull \hbox (badness 10000) in paragraph at lines 1531--1535
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1532--1536
+Underfull \hbox (badness 10000) in paragraph at lines 1537--1541
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1538--1543
+Underfull \hbox (badness 10000) in paragraph at lines 1543--1548
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1545--1549
+Underfull \hbox (badness 10000) in paragraph at lines 1550--1554
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1551--1557
+Underfull \hbox (badness 10000) in paragraph at lines 1556--1562
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1559--1563
+Underfull \hbox (badness 10000) in paragraph at lines 1564--1568
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1565--1569
+Underfull \hbox (badness 10000) in paragraph at lines 1570--1574
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1576--1580
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1582--1586
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1588--1592
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1594--1598
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1600--1604
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1606--1611
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1613--1617
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1619--1623
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1625--1629
 
  []
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[9]
-Underfull \hbox (badness 10000) in paragraph at lines 1571--1575
+
+Underfull \hbox (badness 10000) in paragraph at lines 1631--1635
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1577--1581
+Underfull \hbox (badness 10000) in paragraph at lines 1637--1640
 
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 1583--1587
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1589--1593
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1595--1599
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1601--1606
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1608--1612
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1614--1618
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1620--1624
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1626--1630
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1632--1635
-
- []
-
-[10
-
-] [11 <../figures/model_schematic_final.pdf>] [12 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf>] [13 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf>] [14 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf>] [15 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf>] [16 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf>] 
+[10] [11 <../figures/model_schematic_final.pdf>] [12 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf>] [13 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf>] [14 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf>] [15 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf>] [16 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf>] 
 enddocument/afterlastpage (AED): lastpage setting LastPage.
 (./paper.aux)
  ***********
@@ -1483,21 +1482,21 @@ LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
 Package rerunfilecheck Info: File `paper.out' has not changed.
-(rerunfilecheck)             Checksum: 4D5B2C98BFF289A0D6D13727CEE9BFFD;7352.
+(rerunfilecheck)             Checksum: 525838BBA9DE62A93614A798730FF231;7639.
  ) 
 Here is how much of TeX's memory you used:
- 31252 strings out of 469471
- 584599 string characters out of 5467057
- 1065593 words of memory out of 5000000
+ 31259 strings out of 469471
+ 584711 string characters out of 5467057
+ 1063975 words of memory out of 5000000
  58658 multiletter control sequences out of 15000+600000
- 759070 words of font info for 401 fonts, out of 8000000 for 9000
+ 759356 words of font info for 406 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  117i,15n,121p,2048b,1115s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvbo8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on paper.pdf (16 pages, 791246 bytes).
+Output written on paper.pdf (16 pages, 791824 bytes).
 PDF statistics:
- 625 PDF objects out of 1000 (max. 8388607)
- 514 compressed objects within 6 object streams
+ 626 PDF objects out of 1000 (max. 8388607)
+ 515 compressed objects within 6 object streams
  118 named destinations out of 1000 (max. 500000)
  90955 words of extra memory for PDF output out of 106986 (max. 10000000)
 

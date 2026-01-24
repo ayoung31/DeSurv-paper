@@ -1927,7 +1927,7 @@ FIGURE_TARGETS <- list(
         loadings = fit_std_desurvk$H,
         time = tar_data_filtered$sampInfo$time,
         event = tar_data_filtered$sampInfo$event,
-        method = "Std NMF"
+        method = "NMF"
       )
       
       df_desurv <- build_variance_survival_df(
@@ -1939,13 +1939,20 @@ FIGURE_TARGETS <- list(
         method = "DeSurv"
       )
       
-      df_plot = rbind(df_nmf,df_desurv)
+      df_plot <- dplyr::bind_rows(df_nmf, df_desurv) %>%
+        dplyr::mutate(
+          factor_label = dplyr::case_when(
+            method == "NMF" ~ paste0("N", factor),
+            method == "DeSurv" ~ paste0("D", factor),
+            TRUE ~ paste0("F", factor)
+          )
+        )
       
       ggplot(df_plot,
              aes(x = variance_explained,
                  y = delta_loglik,
-                 label = paste0("F", factor),
-                 shape = method)) +
+                 label = factor_label,
+                 color = method)) +
         geom_point(size = 4) +
         geom_text_repel(
           size = 4,
@@ -1954,11 +1961,17 @@ FIGURE_TARGETS <- list(
           point.padding = 0.3,
           segment.size = 0.3
         ) +
+        scale_color_manual(
+          values = c(
+            "NMF" = "red",
+            "DeSurv" = "blue"
+          )
+        ) +
         scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
         labs(
           x = "Fraction of expression variance explained",
           y = "Δ partial log-likelihood (survival)",
-          shape = "Method"
+          color = "Method"
         ) +
         theme_classic(base_size = 10)
       

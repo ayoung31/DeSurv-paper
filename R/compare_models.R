@@ -49,13 +49,13 @@ comp_genes = function(results1,results2,pairs=NULL,type='all',save_dir){
       sets[[1]] = if(ncol(tops1)>0) tops1[,pairs$alpha.0_factor.number[i],drop=TRUE] else vector("character")
       sets[[2]] = if(ncol(tops2)>0) tops2[,pairs$alpha.best_factor.number[i],drop=TRUE] else vector("character")
       if(type=="factor"){
-        names(sets) = c(paste0("alpha=0, factor",pairs$alpha.0_factor.number[i],"\n",pairs$alpha.0_factor.name[i]),
+        names(sets) = c(paste0("NMF, factor",pairs$alpha.0_factor.number[i],"\n",pairs$alpha.0_factor.name[i]),
                         paste0("alpha=best, factor",pairs$alpha.best_factor.number[i],"\n",pairs$alpha.best_factor.name[i]))
         save_name=file.path(save_dir,
                             paste0("compare.genes_factor",
                                    pairs$alpha.0_factor.number[i],".png"))
       }else{
-        names(sets) = c(paste0("alpha=0, ",type),
+        names(sets) = c(paste0("NMF, ",type),
                         paste0("alpha=best, ",type))
         save_name=file.path(save_dir,paste0("compare.genes_",type,".png"))
       }
@@ -133,10 +133,10 @@ comp_alphas = function(results1,results2,save_dir){
   
   p1 = pheatmap(cor(W1,W2),cluster_rows = FALSE,cluster_cols = FALSE,
                 display_numbers = TRUE,number_color = 'black',fontsize_number = 10,
-                main="Correlation of gene weights between alpha=0 (rows) and best alpha (cols)")
+                main="Correlation of gene weights between NMF (rows) and best alpha (cols)")
   p2 = pheatmap(result,cluster_rows = FALSE,cluster_cols = FALSE,
                 display_numbers = TRUE,number_color = 'black',fontsize_number = 10,
-                main="Number of top genes overlap between alpha=0 (rows) and best alpha (cols)")
+                main="Number of top genes overlap between NMF (rows) and best alpha (cols)")
   
   png(file.path(save_dir,"gene.overlap.bw.alphas.png"), width = 700, height = 600)
   print(p2)

@@ -237,7 +237,7 @@ make_bo_best_observed_plot_combined <- function(best_df, cindex_label = "Best ob
     ggplot2::geom_line(linewidth = 0.7) +
     ggplot2::geom_point(size = 2) +
     ggplot2::scale_color_manual(
-      values = c("DeSurv" = "#33a02c", "alpha = 0" = "#1f78b4")
+      values = c("DeSurv" = "#33a02c", "NMF" = "#1f78b4")
     ) +
     ggplot2::scale_x_continuous(breaks = sort(unique(best_df$k))) +
     ggplot2::labs(
@@ -520,10 +520,10 @@ make_gp_curve_plot_combined <- function(curve_df) {
     ggplot2::geom_line(linewidth = 0.7) +
     ggplot2::geom_point(size = 2) +
     ggplot2::scale_color_manual(
-      values = c("DeSurv" = "#33a02c", "alpha = 0" = "#1f78b4")
+      values = c("DeSurv" = "#33a02c", "NMF" = "#1f78b4")
     ) +
     ggplot2::scale_fill_manual(
-      values = c("DeSurv" = "#b2df8a", "alpha = 0" = "#a6cee3")
+      values = c("DeSurv" = "#b2df8a", "NMF" = "#a6cee3")
     ) +
     ggplot2::scale_x_continuous(breaks = sort(unique(curve_df$k))) +
     ggplot2::labs(
@@ -570,7 +570,7 @@ build_fig_bo_panels <- function(bo_history_path, bo_history_alpha0_path, bo_resu
   best_alpha0 <- summarize_bo_best_per_k(
     bo_history_alpha0,
     eval_se_alpha0,
-    method_label = "alpha = 0"
+    method_label = "NMF"
   )
   best_all <- dplyr::bind_rows(best_supervised, best_alpha0)
 
@@ -2394,4 +2394,3 @@ splot_median = function(data_val_filtered,tar_fit_desurv,factor){
              censor.size=2,
              font.main=12)
 }
-

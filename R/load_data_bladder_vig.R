@@ -2,7 +2,7 @@ load_data_bladder_vig = function(raw_data){
 
   dat = readRDS(raw_data)
   time = dat$sampInfo$os
-  event = abs(1-dat$sampInfo$censOS)
+  event = dat$sampInfo$censOS
   
   dat$sampInfo$time = time
   dat$sampInfo$event = event

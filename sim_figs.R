@@ -98,6 +98,7 @@ build_sim_fig_data <- function(sim_results_table,
 plot_sim_k_hist <- function(k_plot_data, true_k_tbl, base_size = 12) {
   ggplot2::ggplot(k_plot_data, ggplot2::aes(x = k, fill = method)) +
     ggplot2::geom_histogram(
+      aes(y = after_stat(count / sum(count))),
       binwidth = 1,
       boundary = 0.5,
       color = "white",
