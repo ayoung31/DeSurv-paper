@@ -2230,21 +2230,15 @@ FIGURE_VAL_TARGETS <- list(
       desurv_fac = desurv_var$factor[which.max(desurv_var$delta_loglik)]
       
       df = rbind(desurv_df,nmf_df)
-      df_select = df %>% filter(
-        (factor==nmf_fac & method=="NMF") | (factor==desurv_fac & method=="DeSurv"))
+      df_select = df #%>% filter(
+        # (factor==nmf_fac & method=="NMF") | (factor==desurv_fac & method=="DeSurv"))
       pd <- position_dodge(width = 0.6)
       
       df_select$label <- sprintf("%.2f (%.2f–%.2f)", df_select$HR, df_select$lower, df_select$upper)
       
-      ggplot(df_select, aes(x = HR, y = dataset,color=method)) +
+      ggplot(df_select, aes(x = HR, y = as.factor(factor),color=dataset,group=dataset)) +
         geom_vline(xintercept = 1, linetype = "dashed",
                    linewidth = 0.5, color = "grey60") +
-        scale_color_manual(
-          values = c(
-            "NMF" = "red",
-            "DeSurv"  = "blue"
-          )
-        )+
         geom_errorbarh(
           aes(xmin = lower, xmax = upper),
           height = 0.25,
@@ -2252,14 +2246,14 @@ FIGURE_VAL_TARGETS <- list(
           position=pd
         ) +
         geom_point(size = 2.8,position = pd) +
-        geom_text(
-          aes(x = max(upper) * 1.05, y=dataset,label = label,group=method),
-          inherit.aes = FALSE,
-          hjust = 0,
-          size = 3,
-          position = pd,
-          show.legend = FALSE
-        ) +
+        # geom_text(
+        #   aes(x = max(upper) * 1.05, y=factor,label = label,group=dataset),
+        #   inherit.aes = FALSE,
+        #   hjust = 0,
+        #   size = 3,
+        #   position = pd,
+        #   show.legend = FALSE
+        # ) +
         scale_x_log10(
           breaks = c(0.5, 1, 2, 4),
           labels = c("0.5", "1", "2", "4")
@@ -2272,8 +2266,8 @@ FIGURE_VAL_TARGETS <- list(
         coord_cartesian(xlim = c(min(df_select$lower), max(df_select$upper) * 1.4)) +
         labs(
           x = "Hazard ratio (95% CI)",
-          y = NULL
-        )
+          y = "Factor label"
+        )+facet_wrap(~method)
     }
   ),
   tar_target(

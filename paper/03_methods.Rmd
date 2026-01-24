@@ -1,5 +1,5 @@
 ## Problem formulation and notation
-Let $X \in \mathbb{R}^{p \times n}_{\ge 0}$ denote the nonnegative gene expression matrix. DeSurv approximates $X \approx WH$, where $W \in \mathbb{R}^{p\times k}_{\ge0}$ contains nonnegative gene programs and $H \in \mathbb{R}^{k\times n}_{\ge0}$ contains sample-level activations. Additionally, let $y,\ \delta \in \mathbb{R}^n$ represent patient survival times and censoring indicators, respectively. Survival outcomes are modeled through a cox proportional hazards model with covariates $Z = W^\top X$.
+Let $X \in \mathbb{R}^{p \times n}_{\ge 0}$ denote the nonnegative gene expression matrix. DeSurv approximates $X \approx WH$, where $W \in \mathbb{R}^{p\times k}_{\ge0}$ contains nonnegative gene programs and $H \in \mathbb{R}^{k\times n}_{\ge0}$ contains sample-level activations. Additionally, let $y,\ \delta \in \mathbb{R}^n$ represent patient survival times and censoring indicators, respectively. Survival outcomes are modeled through a Cox proportional hazards model with covariates $Z = W^\top X$ and linear predictor $Z^\top \beta$.
 
 ## The DeSurv Model
 DeSurv integrates Nonnegative Matrix Factorization (NMF) with penalized Cox regression to identify gene programs associated with patient survival. 
@@ -20,12 +20,10 @@ Hyperparameters $(k,\alpha,\lambda_H,\lambda,\xi)$ were selected by maximizing t
 ## Simulation studies
 Simulation studies were conducted to assess recovery of prognostic latent structure and survival prediction. Gene expression data were generated from a non-negative factor model $X=WH$, where gene loadings $W$ comprised three gene classes: marker genes, background genes, and noise genes. Marker genes were simulated to load strongly on a single factor and weakly on others, background genes to load strongly across all factors, and noise genes to have uniformly low loadings; each class was generated from a distinct gamma distribution. Sample-level factor activities $H$ were generated from a gamma distribution.
 
-Survival times were generated from an exponential proportional hazards model in which risk depended on marker gene structure through $X^T\tilde{W}$, where $\tilde{W}$ retained marker gene loadings for their corresponding factors and was zero otherwise; censoring times were generated independently from an exponential distribution. Each dataset was analyzed using DeSurv, standard NMF followed by Cox regression on inferred factors, and penalized Cox regression (CoxNet), with all methods tuned using the same cross-validated concordance index. Performance was summarized across repeated simulation replicates.
-
-## Evaluation metrics
+Survival times were generated from an exponential distribution in which risk depended on marker gene structure through $X^T\tilde{W}$, where $\tilde{W}$ retained marker gene loadings for their corresponding factors and was zero otherwise; censoring times were generated independently from an exponential distribution. Each dataset was analyzed using DeSurv and standard NMF followed by Cox regression on inferred factors, both tuned using cross-validated concordance index. Performance was summarized across repeated simulation replicates.
 
 ## Real-world datasets 
 We analyzed publicly available RNA-seq and microarray cohorts of pancreatic ductal adenocarcinoma (PDAC) and bladder cancer with corresponding overall survival outcomes. Gene expression matrices were converted to TPM, log-transformed, and filtered to remove low-expression genes. Survival times and censoring indicators were taken from the associated clinical annotations. Of the seven PDAC cohorts we considered, two were used for training (TCGA and CPTAC) and the rest were used for external validation (Dijk, Moffitt, PACA, Puleo). The bladder cohort was split into training and validation cohorts via a 70/30 split. To harmonize differences in scale across cohorts, filtered gene expression data was within-subject rank transformed before model training. More details about the datasets can be found in the SI Appendix.
 
 ## Simulations, Benchmarking, and Availability  
-Code and processed data used in this study are available at [repository link].
+An R package has been developed for DeSurv at github.com/ayoung31/DeSurv. Code and processed data used in this study are available at github.com/ayoung31/DeSurv-paper.

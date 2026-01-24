@@ -1,3 +1,15 @@
+```{r, echo=FALSE}
+if (!exists("set_fig_font", inherits = TRUE)) {
+  set_fig_font <- function(plot_obj, size = 10) {
+    if (inherits(plot_obj, "ggplot")) {
+      plot_obj + ggplot2::theme(text = ggplot2::element_text(size = size))
+    } else {
+      plot_obj
+    }
+  }
+}
+```
+
 ## The NMF–Cox model shows consistent convergence and stability across restarts
 
 Across datasets and initialization schemes, the NMF–Cox algorithm consistently converged to numerically stable solutions within the designated iteration budget. Warm-start strategies, in which solutions at $\alpha=0$ initialized supervised runs, substantially reduced variability across restarts and improved reproducibility. Figure \@ref(fig:fig-converge) shows representative loss trajectories demonstrating monotone decreases until convergence across restarts. Compared with naïve random initialization, warm-starts produced tighter distributions of cross-validated C-index and partial likelihood, confirming stability of the optimization procedure.
@@ -19,7 +31,7 @@ lossit=dplyr::bind_rows(iters) %>% filter(iter<5000)
 
 ggplot(lossit,aes(y=lossit,x=iter,color=as.factor(init)))+
   geom_line(linewidth=.8)+
-  theme_minimal()+
+  theme_minimal(base_size = 10)+
   labs(x="Iteration",y="Loss",color="Initialization")
 
 ```
@@ -36,6 +48,6 @@ fig_sc_plot <- tar_read_raw(resolve_target_name(
   run_label = run_label,
   available = available_targets
 ))
+fig_sc_plot = set_fig_font(fig_sc_plot, size = 10)
 fig_sc_plot
 ```
-

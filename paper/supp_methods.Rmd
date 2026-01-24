@@ -32,8 +32,8 @@ $W$ to survival via an elastic-net–penalized Cox model.
 
 Let $y \in \mathbb{R}^n_{\ge 0}$ be the observed survival times,
 $\delta \in \{0,1\}^n$ the event indicators, and
-$Z = X^\top W \in \mathbb{R}^{n \times k}$ the sample-wise program
-loadings. We write $Z_i^\top$ for the $i$th row of $Z$, and
+$Z = W^\top X \in \mathbb{R}^{k \times n}$ the sample-wise program
+loadings. We write $Z_i$ for the $i$th column of $Z$, and
 $n_{\text{event}} = \sum_{i=1}^n \delta_i$. For convenience we recall the
 DeSurv loss from Equation~\ref{eqn:desurv} in the main text and rewrite it as
 \begin{align}
@@ -316,7 +316,7 @@ Then the gradient descent update rule at iteration $t$ is
   W^{(t)} &= W^{(t-1)} - \gamma \left( \frac{\partial L}{\partial W} \right) \nonumber \\
           &= W^{(t-1)} - \gamma \left( \frac{(1-\alpha)}{np}\left( WHH^T - XH^T \right) - \frac{2\alpha}{n_{event}} \nabla_W \ell \right)\\
 \end{align}
-Let the step size $\gamma$ be defined as in CITE:
+Let the step size $\gamma$ be defined as in [@seung2001algorithms]:
 \begin{equation}
   \gamma = \frac{np}{(1-\alpha)}\frac{W}{WHH^T}
 \end{equation}
@@ -641,7 +641,7 @@ show that the sample-loading matrix \(H\) is more sensitive to initialization
 and local minima than the program matrix \(W\)
 [@brunet2004metagenes; @kim2007sparse; @gillis2012accelerated].
 
-In DeSurv, survival supervision enters through the projection $Z = X^\top W$ in the partial log-likelihood, so that the gradient of the DeSurv loss with respect to the programs is
+In DeSurv, survival supervision enters through the projection $Z = W^\top X$ in the partial log-likelihood, so that the gradient of the DeSurv loss with respect to the programs is
 \[
 \nabla \mathcal{L} = (1-\alpha) \nabla_W \mathcal{L}_{\mathrm{Cox}}(W,H) - \alpha\nabla_W \mathcal{L}_{\mathrm{Cox}}(W,\beta),
 \]
@@ -730,10 +730,98 @@ $
 
 \subsection{Bayesian Optimization}
 
+We treat hyperparameter tuning as a black-box optimization problem over a
+bounded domain. Let $\theta$ collect the tuned parameters (at minimum
+$\theta = (k,\alpha,\lambda,\xi)$, and optionally discrete choices
+such as the signature size $n_{\text{top}}$). For a given $\theta$ we run the
+cross-validation procedure in Algorithm~S\ref{alg:cv}, averaging the c-index
+across folds and random initializations to form the objective
+\[
+\hat{c}(\theta) = \frac{1}{F} \sum_{f=1}^F \hat{c}_{(f)}(\theta).
+\]
+Because $\hat{c}(\theta)$ is expensive to evaluate and non-differentiable with
+respect to $\theta$, we use Bayesian optimization (BO) to adaptively select
+candidate configurations.
+
+We place a Gaussian-process (GP) prior on the response surface
+$f(\theta) \sim \mathcal{GP}(0, k(\theta,\theta'))$ with a Matern kernel and
+automatic relevance determination length-scales. Continuous parameters are
+rescaled to $[0,1]$ and penalties are optimized on a log scale; integer-valued
+coordinates (e.g., $k$ or $n_{\text{top}}$) are proposed in the continuous
+space and rounded inside the evaluator. After an initial batch of evaluations,
+the GP is refit after each new observation and used to guide acquisition.
+
+At iteration $t$, let $\mu_t(\theta)$ and $\sigma_t(\theta)$ denote the GP
+posterior mean and standard deviation, and let $f_\star$ be the best observed
+score. We select new candidates by maximizing expected improvement (EI),
+\[
+\operatorname{EI}(\theta) =
+\left(\mu_t(\theta) - f_\star - \kappa\right)\Phi(Z(\theta))
+  + \sigma_t(\theta)\phi(Z(\theta)),
+\quad
+Z(\theta) = \frac{\mu_t(\theta) - f_\star - \kappa}{\sigma_t(\theta)},
+\]
+where $\Phi$ and $\phi$ are the standard normal cdf/pdf and $\kappa \ge 0$
+controls the exploration margin. EI is evaluated over a candidate pool sampled
+from the bounded search region, and the maximizer is evaluated next. The loop
+continues until the iteration budget is exhausted or the improvement plateaus.
+
+For model selection, we take the highest observed $\hat{c}(\theta)$ as the
+optimal configuration. When fold-level standard errors are available, we apply
+a one-standard-error rule for $k$, selecting the smallest rank whose mean
+performance lies within one standard error of the best. The final DeSurv model
+is refit at the selected parameters using the consensus-based initialization
+described above, and the BO-chosen $n_{\text{top}}$ (when tuned) is used to
+truncate each program for downstream analysis.
+
 \subsection{PDAC Datasets}
+
+We analyzed PDAC cohorts from TCGA-PAAD and CPTAC-PDAC as training data
+[@raphael2017integrated;@ellis2013clinical]. External validation used
+independent cohorts from Dijk, Moffitt, PACA-AU (array and RNA-seq), and Puleo
+[@dijk2020unsupervised;@moffitt2015virtual;@zhao2018gene;@puleo2018stratification].
+Training models were fit on the combined TCGA and CPTAC expression matrices
+after harmonizing gene identifiers; validation datasets were processed with the
+same gene set and transformations before prediction and clustering.
+
+Dataset-specific inclusion and preprocessing steps were as follows. For
+TCGA-PAAD, we excluded samples lacking tumor grade and mapped features to gene
+symbols. For CPTAC, we retained samples annotated as PDAC by histology. For
+Moffitt, only primary tumor specimens were kept. For PACA-AU array and RNA-seq,
+we retained primary PDAC tumors and
+collapsed duplicated gene symbols by median; the RNA-seq cohort received a
+``\_seq'' suffix on sample IDs to avoid collisions with the array cohort. Puleo
+required no additional dataset-specific filtering beyond survival QC.
+
+Across cohorts, samples without valid survival outcomes (nonpositive time,
+missing time, or missing event indicator) were removed. Gene filtering and
+normalization followed the training configuration (ngene and within-sample rank
+transformation) to mitigate platform effects; validation data were restricted
+to the training gene set and transformed in the same way.
 
 \subsection{Bladder Datasets}
 
-\subsection{Consensus Clustering}
+Bladder analyses used the IMVigor210 cohort with overall survival and clinical
+annotations [@mariathasan2018tgfbeta]. We performed an internal train/validation
+split (80/20), stratified by event status, and used the held-out split for
+evaluation. Sample identifiers and gene features were aligned to the provided
+gene symbols, and consensus molecular subtype labels were used to exclude
+NE-like tumors prior to model fitting. Samples with
+invalid survival outcomes were removed. Gene filtering and normalization
+followed the training configuration, and the validation split was restricted to
+the same gene set and transformation used during training.
+
 
 \subsection{Survival Analysis}
+
+Survival analyses used overall survival time with event indicators as provided
+by each cohort. For fitted DeSurv models, sample-level program scores were
+computed as $Z = \tilde{W}^\top X$ and standardized using the training mean and
+standard deviation before constructing the linear predictor
+$\hat{\eta} = Z \hat{\beta}$. Prognostic performance was summarized using the
+concordance index as defined above. For visualization and group-level testing,
+we generated Kaplan--Meier curves and log-rank tests for risk groups defined by
+median splits of $\hat{\eta}$ within each dataset to avoid cross-cohort scaling
+differences. When multiple datasets were pooled, Cox models were stratified
+by dataset to allow cohort-specific baseline hazards. All p-values reported for
+survival differences between groups correspond to two-sided log-rank tests.

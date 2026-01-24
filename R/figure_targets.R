@@ -711,7 +711,7 @@ make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref){
   }
   
   keep <- vapply(seq_len(nrow(cor_mat)), function(j) {
-    !any(is.na(cor_mat[j, ])) #& sum(p_mat_adj[j, ] < 0.1) > 0
+    !any(is.na(cor_mat[j, ])) & sum(cor_mat[j,]>.2) > 0#& sum(p_mat_adj[j, ] < 0.1) > 0
   }, logical(1))
   mat <- cor_mat[which(keep), , drop = FALSE]
   p_mat_adj = p_mat_adj[which(keep),,drop=FALSE]
@@ -726,8 +726,8 @@ make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref){
     mat,
     cluster_cols = FALSE,
     #display_numbers = TRUE,
-    display_numbers = sig,
-    number_color = "white",
+    # display_numbers = sig,
+    # number_color = "white",
     color = my_colors,
     breaks = seq(-0.6, 0.6, length.out = 101),
     fontsize = 6,
@@ -2385,12 +2385,30 @@ splot_median = function(data_val_filtered,tar_fit_desurv,factor){
   
   
   sfit = survfit(Surv(time,event)~factor,data=df)
-  ggsurvplot(sfit,data=df,risk.table = TRUE,
-             xlab = "Time (months)",
-             palette = c("violetred2","turquoise4"),
-             break.time.by = 25,
-             legend.labs=c('Low (< median)','High (≥ median)'),
-             risk.table.y.text=FALSE,
-             censor.size=2,
-             font.main=12)
+  hr_fit = coxph(Surv(time,event)~factor,data=df)
+  hr_summary = summary(hr_fit)$conf.int
+  hr_label = sprintf(
+    "HR (High vs Low) = %.2f (95%% CI %.2f-%.2f)",
+    hr_summary[1, "exp(coef)"],
+    hr_summary[1, "lower .95"],
+    hr_summary[1, "upper .95"]
+  )
+
+  splot = ggsurvplot(sfit,data=df,risk.table = TRUE,
+                     xlab = "Time (months)",
+                     palette = c("violetred2","turquoise4"),
+                     break.time.by = 25,
+                     legend.labs=c('Low (< median)','High (≥ median)'),
+                     risk.table.y.text=FALSE,
+                     censor.size=2,
+                     font.main=12)
+  splot$plot = splot$plot +
+    geom_text(
+      x = max(splot$data.survtable$time, na.rm = TRUE) * 0.7,
+      y = 0.85,
+      size = 4,
+      label = hr_label
+    )
+
+  splot
 }
