@@ -233,3 +233,47 @@ See [CODE_REVIEW.md](CODE_REVIEW.md) for comprehensive code review findings incl
 1. **`src/functions.cpp:472`** - Beta backtracking logic inverted
 2. **`R/cv_helpers.R:231`** - Missing gene subset validation in CV
 3. **`R/predict_methods.R:71-106`** - Non-finite validation inconsistency
+
+## Narrative Arc Analysis
+
+See [NARRATIVE_ARC.md](NARRATIVE_ARC.md) for detailed analysis of the paper's storytelling structure:
+- Five-act story structure (Problem → Solution → Proof → Insight → Generalization)
+- Figure-by-figure narrative role analysis
+- The central insight: "Variance ≠ Prognosis"
+- Rhetorical strategies (problem-solution framing, escalating claims, consistent baseline)
+- Information disclosure hierarchy (main text vs supplement)
+
+## PNAS Submission Review
+
+See [PNAS_REVIEW.md](PNAS_REVIEW.md) for comprehensive publication readiness assessment including:
+- **PNAS compliance checklist** (word count, figures, references, required sections)
+- **Critical code bugs** that may affect reported results
+- **Paper-code inconsistencies** in mathematical formulations
+- **Mathematical notation issues** (symbol overloading, typos, incomplete equations)
+- **Scientific content assessment** (strengths, weaknesses, PNAS suitability)
+- **Supplement completeness** review
+- **Action checklist** organized by priority
+
+### Key PNAS Issues
+
+1. **Figures:** 6 figures (PNAS max: 4) - move 2 to supplement
+2. **References:** 71 references (PNAS max: 50) - reduce by 21+
+3. **Placeholders:** Keywords, author contributions, conflict of interest incomplete
+4. **Methods section:** Too brief (~30 lines) for PNAS
+5. **Discussion section:** Too brief (6 lines) for PNAS
+
+## Figure Analysis
+
+See [FIGURE_ANALYSIS.md](FIGURE_ANALYSIS.md) for panel-by-panel evaluation of all manuscript figures:
+- **Visualization effectiveness** - whether each panel optimally supports its narrative point
+- **Proposed improvements** - alternative plotting approaches and annotations
+- **Aesthetic assessment** - structure, proportions, color consistency, labels
+- **Narrative arc impact** - how figure improvements strengthen the paper's story
+
+### High-Impact Figure Changes (Minimal Effort)
+
+1. **Figure 2:** Reorder panels B-C-D above A (problem before solution)
+2. **Figure 4:** ADD FACTOR LABELS to heatmaps (dramatically improves interpretability)
+3. **Figures 5-6:** Add HR, CI, p-value to all KM plots (standard practice)
+4. **Figure 3:** Add "true k=3, n=100 replicates" annotation
+5. **All figures:** Standardize legend terminology ("Standard NMF" vs "DeSurv")
