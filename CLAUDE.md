@@ -293,3 +293,30 @@ See [SUGGESTED_TEXT.md](SUGGESTED_TEXT.md) for drop-in replacement language impl
 3. **Temper cross-cancer claim** - "consistent with prior reports" not novel discovery
 4. **Add W-vs-H gradient explanation** - preempts mathematical reviewers
 5. **Add explicit out-of-sample statement** - preempts double-dipping concerns
+
+## Manuscript Pipeline Analysis
+
+See [MANUSCRIPT_PIPELINE_ANALYSIS.md](MANUSCRIPT_PIPELINE_ANALYSIS.md) for comprehensive documentation of:
+- **Complete dependency chain** from paper.pdf back to raw data
+- **Figure-to-target mapping** showing which targets produce which figures
+- **Configuration system** explaining BO, Run, and Validation configs
+- **Simulation pipeline** with scenarios, analysis methods, and metrics
+- **Real data pipeline** with datasets, preprocessing, and validation
+- **Impact of configuration choices on paper claims**
+- **Quick vs Full mode differences** and their effects on results
+
+### Key Insights for Reproducibility
+
+1. **Paper claims require both DeSurv AND NMF baselines** - `bo` and `bo_alpha0` analysis methods must both run
+2. **Quick mode may produce different results** - fewer initializations, shorter BO, missing comparisons
+3. **Figure 3 boxplots need alpha=0 runs** - only shows one box if NMF baseline is missing
+4. **External validation requires all cohorts** - Dijk, Moffitt, PACA_AU_array, PACA_AU_seq, Puleo
+
+### Critical Targets for Paper
+
+| Target | Figure | Must Have |
+|--------|--------|-----------|
+| `sim_figs_by_scenario` | Fig 2E, 3 | Both bo and bo_alpha0 results |
+| `fig_bo_heat_tcgacptac` | Fig 2D | Sufficient bo_n_iter |
+| `tar_fit_desurv_tcgacptac` | Multiple | Stable factors (high ninit_full) |
+| `fig_extval_*` | Fig 6 | All validation datasets |
