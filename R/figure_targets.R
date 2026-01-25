@@ -2412,3 +2412,15 @@ splot_median = function(data_val_filtered,tar_fit_desurv,factor){
 
   splot
 }
+
+#' Set font size for ggplot objects
+#' @param plot_obj A ggplot object
+#' @param size Font size in points (default: 10)
+#' @return The ggplot object with updated font size
+set_fig_font <- function(plot_obj, size = 10) {
+  if (inherits(plot_obj, "ggplot")) {
+    plot_obj + ggplot2::theme(text = ggplot2::element_text(size = size))
+  } else {
+    plot_obj
+  }
+}

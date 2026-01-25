@@ -28,8 +28,12 @@ tar_load(sim_figs_by_scenario)
 scenario_ids = sapply(sim_figs_by_scenario,function(x) x$scenario_id)
 analysis_ids = sapply(sim_figs_by_scenario,function(x) x$analysis_id)
 
-alt = which(scenario_ids=="R0_easy" & analysis_ids == "bo_tune_ntop")
-null = which(scenario_ids=="R00_null" & analysis_ids == "bo_tune_ntop")
+# Auto-detect analysis method: prefer "bo_tune_ntop" (full pipeline), fall back to "bo" (quick mode)
+preferred_analysis <- if ("bo_tune_ntop" %in% analysis_ids) "bo_tune_ntop" else "bo"
+message("Using analysis method: ", preferred_analysis)
+
+alt = which(scenario_ids=="R0_easy" & analysis_ids == preferred_analysis)
+null = which(scenario_ids=="R00_null" & analysis_ids == preferred_analysis)
 
 alt_plots = sim_figs_by_scenario[[alt]]
 null_plots = sim_figs_by_scenario[[null]]

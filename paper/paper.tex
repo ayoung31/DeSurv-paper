@@ -14,35 +14,29 @@
 
 
 % Pandoc citation processing
-%From Pandoc 3.1.8
-% definitions for citeproc citations
-\NewDocumentCommand\citeproctext{}{}
-\NewDocumentCommand\citeproc{mm}{%
-  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
-\makeatletter
- % allow citations to break across lines
- \let\@cite@ofmt\@firstofone
- % avoid brackets around text for \cite:
- \def\@biblabel#1{}
- \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
-\makeatother
 \newlength{\cslhangindent}
 \setlength{\cslhangindent}{1.5em}
 \newlength{\csllabelwidth}
 \setlength{\csllabelwidth}{3em}
-\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
- {\begin{list}{}{%
-  \setlength{\itemindent}{0pt}
-  \setlength{\leftmargin}{0pt}
-  \setlength{\parsep}{0pt}
+\newlength{\cslentryspacingunit} % times entry-spacing
+\setlength{\cslentryspacingunit}{\parskip}
+% for Pandoc 2.8 to 2.10.1
+\newenvironment{cslreferences}%
+  {}%
+  {\par}
+% For Pandoc 2.11+
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
   % turn on hanging indent if param 1 is 1
   \ifodd #1
-   \setlength{\leftmargin}{\cslhangindent}
-   \setlength{\itemindent}{-1\cslhangindent}
+  \let\oldpar\par
+  \def\par{\hangindent=\cslhangindent\oldpar}
   \fi
   % set entry spacing
-  \setlength{\itemsep}{#2\baselineskip}}}
- {\end{list}}
+  \setlength{\parskip}{#2\cslentryspacingunit}
+ }%
+ {}
 \usepackage{calc}
 \newcommand{\CSLBlock}[1]{#1\hfill\break}
 \newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
@@ -229,10 +223,12 @@ methodological advance in translational cancer genomics and provides a
 general framework for deriving actionable insights from high-dimensional
 transcriptomic data.
 
-\section*{Results}\label{results}
+\hypertarget{results}{%
+\section*{Results}\label{results}}
 \addcontentsline{toc}{section}{Results}
 
-\subsection*{Model Overview}\label{model-overview}
+\hypertarget{model-overview}{%
+\subsection*{Model Overview}\label{model-overview}}
 \addcontentsline{toc}{subsection}{Model Overview}
 
 We have developed an integrated framework, DeSurv, that couples
@@ -280,9 +276,10 @@ analyses can therefore focus on the survival-associated gene programs
 \caption{Overview of the DeSurv framework and data-driven model selection. (A) DeSurv integrates nonnegative matrix factorization (NMF) with survival modeling to learn prognostic gene programs from a gene expression matrix $X$. NMF decomposes $X \approx WH$, where $W$ represents gene programs and $H$ sample loadings; the learned programs $W$ are shared with a Cox proportional hazards model that links factor-derived scores $Z = W^\top X$ to survival outcomes via linear predictor $Z^\top \beta$. A tuning parameter $\alpha$ controls the balance between unsupervised structure learning ($\alpha = 0$) and supervised survival association ($\alpha = 1$). (B) Model complexity ($k$), supervision strength ($\alpha$), and regularization ($\lambda$) are selected via Bayesian optimization using cross-validated concordance index. \label{fig:schema}}\label{fig:fig-schema}
 \end{figure*}
 
+\hypertarget{outcome-guided-model-selection-resolves-ambiguity-in-nmf-rank-choice}{%
 \subsection*{Outcome-guided model selection resolves ambiguity in NMF
 rank
-choice}\label{outcome-guided-model-selection-resolves-ambiguity-in-nmf-rank-choice}
+choice}\label{outcome-guided-model-selection-resolves-ambiguity-in-nmf-rank-choice}}
 \addcontentsline{toc}{subsection}{Outcome-guided model selection
 resolves ambiguity in NMF rank choice}
 
@@ -342,15 +339,16 @@ conclusions.
 
 \begin{figure*}[t]
 
-{\centering \includegraphics[width=6in,height=5.5in]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1} 
+{\centering \includegraphics[width=6in,height=5.5in]{paper_files/figure-latex/fig-bo-1} 
 
 }
 
 \caption{(A-D) Analyses based on real pancreatic ductal adenocarcinoma (PDAC) gene expression data illustrate the ambiguity of rank selection in standard nonnegative matrix factorization (NMF) and the use of outcome supervision in DeSurv. (A-C) Commonly used unsupervised heuristics for selecting the number of components (k) yield inconsistent conclusions. (A) Reconstruction residuals decrease smoothly with increasing k and do not exhibit a clear elbow; diminishing returns could be inferred at intermediate (k $\approx$ 3-4) or larger (k $\approx$ 6-8) ranks. (B) The cophenetic correlation coefficient, often used to select the largest k prior to a marked loss of clustering stability, begins to decline at low ranks (k $\approx$ 3-4) but continues to fluctuate thereafter, providing no unambiguous selection criterion. (C) Mean silhouette width across multiple distance metrics is highest at small ranks (k $\approx$ 2-3) and decreases monotonically with increasing k, favoring lower-dimensional solutions that conflict with the other criteria.(D) Heatmap of the Gaussian process predicted mean cross-validated concordance index (C-index) from Bayesian optimization over the joint space of the number of components (k) and supervision strength ($\alpha$), computed on the same PDAC data. The predicted performance surface summarizes survival prediction accuracy across parameter settings and illustrates how DeSurv uses outcome information to inform model selection. (E) Results from simulation studies with a known underlying rank (k = 3) showing the distribution of selected k values across repeated replicates. DeSurv more consistently recovers the true rank, yielding a concentrated distribution centered at k = 3, whereas standard NMF with post hoc Cox modeling ($\alpha=0$) exhibits greater variability and a tendency toward under-selection. \label{fig:bo}}\label{fig:fig-bo}
 \end{figure*}
 
+\hypertarget{desurv-improves-selection-of-prognostic-gene-signatures}{%
 \subsection*{DeSurv improves selection of prognostic gene
-signatures}\label{desurv-improves-selection-of-prognostic-gene-signatures}
+signatures}\label{desurv-improves-selection-of-prognostic-gene-signatures}}
 \addcontentsline{toc}{subsection}{DeSurv improves selection of
 prognostic gene signatures}
 
@@ -367,16 +365,17 @@ prognostic genes rather than reconstruction-only structure.
 
 \begin{figure*}[t]
 
-{\centering \includegraphics[width=\textwidth]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1} 
+{\centering \includegraphics[width=\textwidth]{paper_files/figure-latex/fig-sim-ntop-scenarios-1} 
 
 }
 
 \caption{Performance comparison between DeSurv and unsupervised NMF ($\alpha = 0$) in simulation. (A) Distribution of cross-validated concordance index shows that DeSurv achieves consistently higher survival prediction performance than the unsupervised baseline. (B) Precision for recovering true underlying gene programs is substantially higher for DeSurv, whereas the unsupervised approach exhibits near-zero precision, indicating poor alignment with the ground-truth factors. \label{fig:sim}}\label{fig:fig-sim-ntop-scenarios}
 \end{figure*}
 
+\hypertarget{survival-informed-factorization-reorganizes-transcriptional-structure-in-pancreatic-cancer}{%
 \subsection*{Survival-informed factorization reorganizes transcriptional
 structure in pancreatic
-cancer}\label{survival-informed-factorization-reorganizes-transcriptional-structure-in-pancreatic-cancer}
+cancer}\label{survival-informed-factorization-reorganizes-transcriptional-structure-in-pancreatic-cancer}}
 \addcontentsline{toc}{subsection}{Survival-informed factorization
 reorganizes transcriptional structure in pancreatic cancer}
 
@@ -441,15 +440,16 @@ axes of variation that contribute little to survival.
 
 \begin{figure*}[t]
 
-{\centering \includegraphics[width=\textwidth,height=4.5in]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1} 
+{\centering \includegraphics[width=\textwidth,height=4.5in]{paper_files/figure-latex/fig-bio-1} 
 
 }
 
 \caption{Survival-informed factorization reorganizes transcriptional structure relative to variance-driven NMF. (A) Correlation of standard NMF factor gene rankings with established pancreatic ductal adenocarcinoma (PDAC) gene programs. NMF recovers variance-dominant structure, including an exocrine-associated factor opposing immune and stromal signatures, a classical tumor factor, and a composite microenvironmental factor. (B) Corresponding correlations for DeSurv. DeSurv isolates tumor-intrinsic classical and basal-like programs and resolves an activated immune–stromal microenvironment, while exocrine-associated expression does not dominate any factor. Asterisks indicate significant correlations after multiple testing correction. Only gene lists with correlation > 0.2 included in A and B. (C) Fraction of expression variance explained versus survival contribution for each factor, quantified by the change in partial log-likelihood from univariate Cox models. Standard NMF factors explain substantial variance with minimal survival relevance, whereas DeSurv concentrates survival signal into a single factor despite explaining less expression variance. (D) Pairwise correspondence between NMF and DeSurv factors. Tumor-intrinsic structure is preserved across methods, while variance-driven microenvironmental structure is reorganized into a survival-aligned axis; the exocrine-dominated NMF factor shows no strong one-to-one correspondence. \label{fig:bio}}\label{fig:fig-bio}
 \end{figure*}
 
+\hypertarget{desurv-derived-latent-structure-generalizes-to-independent-datasets}{%
 \subsection*{DeSurv-derived latent structure generalizes to independent
-datasets}\label{desurv-derived-latent-structure-generalizes-to-independent-datasets}
+datasets}\label{desurv-derived-latent-structure-generalizes-to-independent-datasets}}
 \addcontentsline{toc}{subsection}{DeSurv-derived latent structure
 generalizes to independent datasets}
 
@@ -480,16 +480,17 @@ whose associations with survival are preserved across datasets.
 
 \begin{figure*}[t]
 
-{\centering \includegraphics[width=\textwidth]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1} 
+{\centering \includegraphics[width=\textwidth]{paper_files/figure-latex/fig-extval-1} 
 
 }
 
 \caption{DeSurv learns prognostic structure that generalizes across independent cohorts. (A) Forest plot summarizing hazard ratios (HRs; 95\% CIs) for the latent factor most predictive of survival in held-out validation datasets. Estimates from DeSurv (blue) are more stable across cohorts than those obtained with standard NMF (red). (B) Kaplan–Meier curves for pooled validation samples stratified into high and low groups based on values of the DeSurv-derived factor providing the strongest survival signal. Median-based stratification yields clear separation of survival trajectories, indicating robust out-of-sample prognostic performance. (C) Corresponding analysis for the NMF-derived factor selected using the same survival-based criterion, showing weaker discrimination between risk groups. \label{fig:extval}}\label{fig:fig-extval}
 \end{figure*}
 
+\hypertarget{survival-informed-factorization-identifies-prognostic-structure-across-cancers}{%
 \subsection*{Survival-informed factorization identifies prognostic
 structure across
-cancers}\label{survival-informed-factorization-identifies-prognostic-structure-across-cancers}
+cancers}\label{survival-informed-factorization-identifies-prognostic-structure-across-cancers}}
 \addcontentsline{toc}{subsection}{Survival-informed factorization
 identifies prognostic structure across cancers}
 
@@ -528,14 +529,15 @@ identifies latent structure that is robust across cancers.
 
 \begin{figure*}[t]
 
-{\centering \includegraphics[width=\textwidth]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1} 
+{\centering \includegraphics[width=\textwidth]{paper_files/figure-latex/fig-bladder-1} 
 
 }
 
 \caption{Survival-associated structure in bladder cancer is recovered by DeSurv and transfers across tumor types.(A) In bladder cancer, DeSurv identifies latent factors (F1, F2) with strong associations to survival, as measured by Cox partial log-likelihood, despite explaining only a small fraction of total expression variance. In contrast, factors derived from standard NMF explain substantially more variance but exhibit weak survival association. (B) Applying gene-level factor definitions learned in pancreatic ductal adenocarcinoma (PDAC) to bladder cancer samples yields clear separation of survival outcomes when patients are stratified by factor score (median split), with numbers at risk shown below. These results indicate that prognostically relevant structure may be weakly aligned with dominant transcriptional variation and can generalize across cancer types. \label{fig:bladder}}\label{fig:fig-bladder}
 \end{figure*}
 
-\section*{Discussion}\label{discussion}
+\hypertarget{discussion}{%
+\section*{Discussion}\label{discussion}}
 \addcontentsline{toc}{section}{Discussion}
 
 We present DeSurv, a survival-driven deconvolution framework that
@@ -571,11 +573,13 @@ tumors. Future work will test extensions to additional omics layers,
 alternative outcome models, and larger multi-cohort benchmarks to
 clarify when outcome supervision offers the greatest benefit.
 
-\section*{Materials and methods}\label{materials-and-methods}
+\hypertarget{materials-and-methods}{%
+\section*{Materials and methods}\label{materials-and-methods}}
 \addcontentsline{toc}{section}{Materials and methods}
 
+\hypertarget{problem-formulation-and-notation}{%
 \subsection{Problem formulation and
-notation}\label{problem-formulation-and-notation}
+notation}\label{problem-formulation-and-notation}}
 
 Let \(X \in \mathbb{R}^{p \times n}_{\ge 0}\) denote the nonnegative
 gene expression matrix. DeSurv approximates \(X \approx WH\), where
@@ -587,7 +591,8 @@ censoring indicators, respectively. Survival outcomes are modeled
 through a Cox proportional hazards model with covariates
 \(Z = W^\top X\) and linear predictor \(Z^\top \beta\).
 
-\subsection{The DeSurv Model}\label{the-desurv-model}
+\hypertarget{the-desurv-model}{%
+\subsection{The DeSurv Model}\label{the-desurv-model}}
 
 DeSurv integrates Nonnegative Matrix Factorization (NMF) with penalized
 Cox regression to identify gene programs associated with patient
@@ -609,8 +614,9 @@ shown to converge to a stationary point under mild conditions (SI
 Appendix). Complete derivations and algorithmic details are provided in
 the SI Appendix.
 
+\hypertarget{hyperparameter-selection-and-cross-validation}{%
 \subsection{Hyperparameter selection and
-cross-validation}\label{hyperparameter-selection-and-cross-validation}
+cross-validation}\label{hyperparameter-selection-and-cross-validation}}
 
 Hyperparameters \((k,\alpha,\lambda_H,\lambda,\xi)\) were selected by
 maximizing the cross-validated C-index using Bayesian optimization. Each
@@ -630,7 +636,8 @@ datasets \(X_new\) were clustered on genes in \(\tilde{W}\), and
 survival differences were analyzed for the derived clusters. Further
 training, validation, and runtime details appear in the SI Appendix.
 
-\subsection{Simulation studies}\label{simulation-studies}
+\hypertarget{simulation-studies}{%
+\subsection{Simulation studies}\label{simulation-studies}}
 
 Simulation studies were conducted to assess recovery of prognostic
 latent structure and survival prediction. Gene expression data were
@@ -651,7 +658,8 @@ analyzed using DeSurv and standard NMF followed by Cox regression on
 inferred factors, both tuned using cross-validated concordance index.
 Performance was summarized across repeated simulation replicates.
 
-\subsection{Real-world datasets}\label{real-world-datasets}
+\hypertarget{real-world-datasets}{%
+\subsection{Real-world datasets}\label{real-world-datasets}}
 
 We analyzed publicly available RNA-seq and microarray cohorts of
 pancreatic ductal adenocarcinoma (PDAC) and bladder cancer with
@@ -667,8 +675,9 @@ gene expression data was within-subject rank transformed before model
 training. More details about the datasets can be found in the SI
 Appendix.
 
+\hypertarget{simulations-benchmarking-and-availability}{%
 \subsection{Simulations, Benchmarking, and
-Availability}\label{simulations-benchmarking-and-availability}
+Availability}\label{simulations-benchmarking-and-availability}}
 
 An R package has been developed for DeSurv at
 github.com/ayoung31/DeSurv. Code and processed data used in this study
@@ -679,64 +688,65 @@ are available at github.com/ayoung31/DeSurv-paper.
 
 \pnasbreak
 
-\section*{Versioning}\label{versioning}
+\hypertarget{versioning}{%
+\section*{Versioning}\label{versioning}}
 \addcontentsline{toc}{section}{Versioning}
 
 \begin{verbatim}
 ## DeSurv package version: 1.0.1
 ## DeSurv git branch: 20260107bugfix
-## DeSurv git commit: fea641a96e4743315a35b9b6addcc1a1ff53da9d
-## Paper git branch: main
-## Paper git commit: bd20eae1f05eee1ab5d80da24f235d5a81f63c55
+## DeSurv git commit: 370c88aa9a89e0c71507fbb161d226c7e2e4c61f
+## Paper git branch: naimedits0125
+## Paper git commit: b276b92cfffcf1edbd0d4e5f9ee11180eaee8b81
 \end{verbatim}
 
-\phantomsection\label{refs}
-\begin{CSLReferences}{0}{1}
-\bibitem[\citeproctext]{ref-pareja2016triple}
+\hypertarget{refs}{}
+\begin{CSLReferences}{0}{0}
+\leavevmode\vadjust pre{\hypertarget{ref-pareja2016triple}{}}%
 \CSLLeftMargin{1. }%
 \CSLRightInline{Pareja F, et al. (2016) Triple-negative breast cancer:
 The importance of molecular and histologic subtyping, and recognition of
 low-grade variants. \emph{NPJ breast cancer} 2(1):1--11.}
 
-\bibitem[\citeproctext]{ref-dienstmann2018molecular}
+\leavevmode\vadjust pre{\hypertarget{ref-dienstmann2018molecular}{}}%
 \CSLLeftMargin{2. }%
 \CSLRightInline{Dienstmann R, Salazar R, Tabernero J (2018) Molecular
 subtypes and the evolution of treatment decisions in metastatic
 colorectal cancer. \emph{Am Soc Clin Oncol Educ Book} 38(38):231--8.}
 
-\bibitem[\citeproctext]{ref-zhou2021clinical}
+\leavevmode\vadjust pre{\hypertarget{ref-zhou2021clinical}{}}%
 \CSLLeftMargin{3. }%
 \CSLRightInline{Zhou X, et al. (2021) Clinical impact of molecular
 subtyping of pancreatic cancer. \emph{Frontiers in cell and
 developmental biology} 9:743908.}
 
-\bibitem[\citeproctext]{ref-seiler2017impact}
+\leavevmode\vadjust pre{\hypertarget{ref-seiler2017impact}{}}%
 \CSLLeftMargin{4. }%
 \CSLRightInline{Seiler R, et al. (2017) Impact of molecular subtypes in
 muscle-invasive bladder cancer on predicting response and survival after
 neoadjuvant chemotherapy. \emph{European urology} 72(4):544--554.}
 
-\bibitem[\citeproctext]{ref-prat2015clinical}
+\leavevmode\vadjust pre{\hypertarget{ref-prat2015clinical}{}}%
 \CSLLeftMargin{5. }%
 \CSLRightInline{Prat A, et al. (2015) Clinical implications of the
 intrinsic molecular subtypes of breast cancer. \emph{The Breast}
 24:S26--S35.}
 
-\bibitem[\citeproctext]{ref-Ou2021}
+\leavevmode\vadjust pre{\hypertarget{ref-Ou2021}{}}%
 \CSLLeftMargin{6. }%
 \CSLRightInline{Ou F, Michiels S, Shyr Y, Adjei AA, Oberg AL (2021)
 \href{https://doi.org/10.1016/j.jtho.2021.01.1616}{Biomarker discovery
 and validation: Statistical considerations}. \emph{Journal of Thoracic
 Oncology} 16(Suppl 15):S539--S547.}
 
-\bibitem[\citeproctext]{ref-Planey2016}
+\leavevmode\vadjust pre{\hypertarget{ref-Planey2016}{}}%
 \CSLLeftMargin{7. }%
 \CSLRightInline{Planey Catherine\,R, Gevaert O (2016)
 \href{https://doi.org/10.1186/s13073-016-0281-4}{CoINcIDE: A framework
 for discovery of patient subtypes across multiple datasets}.
 \emph{Genome Medicine} 8(1):27.}
 
-\bibitem[\citeproctext]{ref-Prat2014}
+\leavevmode\vadjust pre{\hypertarget{ref-Prat2014}{}}%
 \CSLLeftMargin{8. }%
 \CSLRightInline{Prat A, Pineda E, Adamo B, et\,al. (2014)
 \href{https://doi.org/10.1093/jnci/dju152}{Molecular features and
@@ -744,61 +754,61 @@ survival outcomes of the intrinsic subtypes in the international breast
 cancer study group trial 10‑93}.
 \emph{Journal\,of\,the\,National\,Cancer\,Institute} 106(8):dju152.}
 
-\bibitem[\citeproctext]{ref-ellrott2025classification}
+\leavevmode\vadjust pre{\hypertarget{ref-ellrott2025classification}{}}%
 \CSLLeftMargin{9. }%
 \CSLRightInline{Ellrott K, et al. (2025) Classification of non-TCGA
 cancer samples to TCGA molecular subtypes using compact feature sets.
 \emph{Cancer cell} 43(2):195--212.}
 
-\bibitem[\citeproctext]{ref-tomczak2015review}
+\leavevmode\vadjust pre{\hypertarget{ref-tomczak2015review}{}}%
 \CSLLeftMargin{10. }%
 \CSLRightInline{Tomczak K, Czerwińska P, Wiznerowicz M (2015) Review the
 cancer genome atlas (TCGA): An immeasurable source of knowledge.
 \emph{Contemporary Oncology/Wsp{ó}{ł}czesna Onkologia} 2015(1):68--77.}
 
-\bibitem[\citeproctext]{ref-zhang2019international}
+\leavevmode\vadjust pre{\hypertarget{ref-zhang2019international}{}}%
 \CSLLeftMargin{11. }%
 \CSLRightInline{Zhang J, et al. (2019) The international cancer genome
 consortium data portal. \emph{Nature biotechnology} 37(4):367--369.}
 
-\bibitem[\citeproctext]{ref-nguyen2024fourteen}
+\leavevmode\vadjust pre{\hypertarget{ref-nguyen2024fourteen}{}}%
 \CSLLeftMargin{12. }%
 \CSLRightInline{Nguyen H, Nguyen H, Tran D, Draghici S, Nguyen T (2024)
 Fourteen years of cellular deconvolution: Methodology, applications,
 technical evaluation and outstanding challenges. \emph{Nucleic Acids
 Research} 52(9):4761--4783.}
 
-\bibitem[\citeproctext]{ref-lee1999learning}
+\leavevmode\vadjust pre{\hypertarget{ref-lee1999learning}{}}%
 \CSLLeftMargin{13. }%
 \CSLRightInline{Lee DD, Seung HS (1999) Learning the parts of objects by
 non-negative matrix factorization. \emph{nature} 401(6755):788--791.}
 
-\bibitem[\citeproctext]{ref-Bailey2016}
+\leavevmode\vadjust pre{\hypertarget{ref-Bailey2016}{}}%
 \CSLLeftMargin{14. }%
 \CSLRightInline{Bailey P, Chang DK, et al. (2016)
 \href{https://doi.org/10.1038/nature16965}{Genomic analyses identify
 molecular subtypes of pancreatic cancer}. \emph{Nature}
 531(7592):47--52.}
 
-\bibitem[\citeproctext]{ref-moffitt2015virtual}
+\leavevmode\vadjust pre{\hypertarget{ref-moffitt2015virtual}{}}%
 \CSLLeftMargin{15. }%
 \CSLRightInline{Moffitt RA, et al. (2015) Virtual microdissection
 identifies distinct tumor-and stroma-specific subtypes of pancreatic
 ductal adenocarcinoma. \emph{Nature genetics} 47(10):1168--1178.}
 
-\bibitem[\citeproctext]{ref-peng2019novo}
+\leavevmode\vadjust pre{\hypertarget{ref-peng2019novo}{}}%
 \CSLLeftMargin{16. }%
 \CSLRightInline{Peng XL, Moffitt RA, Torphy RJ, Volmar KE, Yeh JJ (2019)
 De novo compartment deconvolution and weight estimation of tumor samples
 using DECODER. \emph{Nature communications} 10(1):4729.}
 
-\bibitem[\citeproctext]{ref-le2025survnmf}
+\leavevmode\vadjust pre{\hypertarget{ref-le2025survnmf}{}}%
 \CSLLeftMargin{17. }%
 \CSLRightInline{Le Goff V, et al. (2025) SurvNMF: Non-negative matrix
 factorization supervised for survival data analysis. PhD thesis
 (Institut Pasteur Paris; CEA).}
 
-\bibitem[\citeproctext]{ref-huang2020low}
+\leavevmode\vadjust pre{\hypertarget{ref-huang2020low}{}}%
 \CSLLeftMargin{18. }%
 \CSLRightInline{Huang Z, Salama P, Shao W, Zhang J, Huang K (2020)
 Low-rank reorganization via proportional hazards non-negative matrix
