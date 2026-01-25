@@ -48,7 +48,7 @@ keywords:
   - optional
 
 params:
-  tar_store: "store_PKG_VERSION=20260107bugfix_GIT_BRANCH=main"
+  tar_store: "store_PKG_VERSION=NA_GIT_BRANCH=naimedits0125"
   bo_label: ~
   run_label: ~
   val_label: ~
