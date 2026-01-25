@@ -1,12 +1,9 @@
-# targets_run_configs.R - Local desktop FULL mode
-# Full HPC-quality ninit_full for final model fitting
-#
-# Note: ninit_full = 100 means 100 random initializations for final model
-# These will be scheduled across 19 available CPUs
+# targets_run_configs.R - Local desktop version
+# Reduced ninit_full to match local CPU count (19)
 
 targets_run_config <- function(label) {
   base_full <- list(
-    ninit_full = 100,  # Full HPC value (will parallelize across 19 CPUs)
+    ninit_full = 19,  # Reduced from 100 to match local CPUs
     run_tol = 1e-5,
     run_maxit = 4000,
     std_nmf_k_grid = 2:12,

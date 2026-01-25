@@ -1,1 +1,1 @@
-/home/naimrashid/Downloads/DeSurv-paper/local_slurm/quick/targets_setup.R
+local_slurm/targets_setup.R

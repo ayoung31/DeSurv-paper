@@ -75,16 +75,18 @@ SIM_CV_NFOLDS <- 5L
 SIM_CV_NSTARTS <- 30
 SIM_TRAIN_FRACTION <- 0.7
 SIM_SPLIT_SEED_OFFSET <- 10000L
+# Local desktop configuration: 20 workers, 19 CPUs per task, no module load
+SIM_LOCAL_CPUS <- 19L  # Leave 1 CPU for OS
 SIM_ANALYSIS_CONTROLLER <- crew_controller_slurm(
   name = "sim_analysis",
-  workers = 100,
+  workers = 20,  # Local desktop limit
   options_cluster = crew_options_slurm(
-    cpus_per_task = SIM_CV_NSTARTS,
+    cpus_per_task = SIM_LOCAL_CPUS,  # Decouple from SIM_CV_NSTARTS
     memory_gigabytes_required = 8,
     time_minutes = 240,
     log_error = "logs/crew_log_%A.err",
-    log_output = "logs/crew_log_%A.out",
-    script_lines = "module load r/4.4.0"
+    log_output = "logs/crew_log_%A.out"
+    # No module load needed on local desktop
   )
 )
 default_controller = crew_controller_sequential()

@@ -1,14 +1,12 @@
-# targets_bo_configs.R - Local desktop FULL mode
-# Full HPC-quality iterations, but capped at 19 CPUs
+# targets_bo_configs.R - Local desktop version
+# Reduced iterations for quick local testing with 20 CPUs
 #
-# Parameters matching HPC quality:
-#   - ninit = 30: Full random initializations during BO CV
-#   - bo_n_init = 20: Full initial BO sample points
-#   - bo_n_iter = 50: Full BO optimization iterations
-#   - bo_max_refinements = 1: Standard refinement
-#   - desurv_ncores_grid = 4  # Reduced: 4 crew workers × 4 cores = 16 total: Capped to local CPU count
-#
-# Note: This will take significantly longer than quick mode
+# Key differences from HPC version:
+#   - ninit = 4 (vs 30): Only 4 random initializations during BO CV
+#   - bo_n_init = 4 (vs 20): Only 4 initial BO sample points
+#   - bo_n_iter = 4 (vs 50): Only 4 BO optimization iterations
+#   - bo_max_refinements = 0 (vs 1-2): No refinement rounds
+#   - desurv_ncores_grid = 19: Limited to local CPU count
 
 targets_bo_configs <- function() {
   list(
@@ -28,11 +26,11 @@ targets_bo_configs <- function() {
       ntop_config = c(100, 200),
       lambdaw_config = c(0),
       lambdah_config = c(0),
-      ninit = 30,  # Full HPC value
-      bo_n_init = 20,  # Full HPC value
-      bo_n_iter = 50,  # Full HPC value
-      bo_candidate_pool = 4000,  # Full HPC value
-      bo_max_refinements = 1,  # Standard refinement
+      ninit = 4,  # Reduced from 30
+      bo_n_init = 4,  # Reduced from 20
+      bo_n_iter = 4,  # Reduced from 50
+      bo_candidate_pool = 200,  # Reduced from 4000
+      bo_max_refinements = 0,  # Reduced from 1-2
       bo_tol_gain = 0.002,
       bo_plateau = 1,
       bo_top_k = 10,
@@ -44,7 +42,7 @@ targets_bo_configs <- function() {
       bo_maxit = 4000,
       nfold = 5,
       desurv_parallel_grid = TRUE,
-      desurv_ncores_grid = 4  # Reduced: 4 crew workers × 4 cores = 16 total  # Capped to local desktop (leave 1 CPU for OS)
+      desurv_ncores_grid = 19  # Local desktop limit (leave 1 CPU for OS)
     ),
 
     # Bladder cancer analysis
@@ -67,11 +65,11 @@ targets_bo_configs <- function() {
       ntop_config = c(100, 200),
       lambdaw_config = c(0),
       lambdah_config = c(0),
-      ninit = 30,  # Full HPC value
-      bo_n_init = 20,  # Full HPC value
-      bo_n_iter = 50,  # Full HPC value
-      bo_candidate_pool = 4000,  # Full HPC value
-      bo_max_refinements = 1,  # Standard refinement
+      ninit = 4,
+      bo_n_init = 4,
+      bo_n_iter = 4,
+      bo_candidate_pool = 200,
+      bo_max_refinements = 0,
       bo_tol_gain = 0.002,
       bo_plateau = 1,
       bo_top_k = 10,
@@ -83,7 +81,7 @@ targets_bo_configs <- function() {
       bo_maxit = 4000,
       nfold = 5,
       desurv_parallel_grid = TRUE,
-      desurv_ncores_grid = 4  # Reduced: 4 crew workers × 4 cores = 16 total  # Capped to local desktop
+      desurv_ncores_grid = 19
     )
   )
 }

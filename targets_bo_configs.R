@@ -1,1 +1,1 @@
-/home/naimrashid/Downloads/DeSurv-paper/local_slurm/quick/targets_bo_configs.R
+local_slurm/targets_bo_configs.R
