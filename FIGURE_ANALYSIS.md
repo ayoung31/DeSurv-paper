@@ -609,3 +609,4 @@ Consider combining into single "Generalization" figure:
 ---
 
 *Analysis generated: 2026-01-24*
+*Updated: 2026-01-24 with reviewer archetype framework, backfire risk analysis, and execution checklist*

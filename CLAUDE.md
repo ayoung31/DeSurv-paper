@@ -277,3 +277,19 @@ See [FIGURE_ANALYSIS.md](FIGURE_ANALYSIS.md) for panel-by-panel evaluation of al
 3. **Figures 5-6:** Add HR, CI, p-value to all KM plots (standard practice)
 4. **Figure 3:** Add "true k=3, n=100 replicates" annotation
 5. **All figures:** Standardize legend terminology ("Standard NMF" vs "DeSurv")
+
+## Suggested Replacement Text
+
+See [SUGGESTED_TEXT.md](SUGGESTED_TEXT.md) for drop-in replacement language implementing editorial recommendations:
+- **Revised Introduction** - 5-paragraph replacement with proper prior work acknowledgment
+- **Related Work paragraph** - Explicitly acknowledges DECODER and prior PDAC work
+- **6 targeted claim fixes** - Specific sentence replacements for W-vs-H, cross-cancer, overfitting claims
+- **Revised Significance Statement** - More concrete alternative
+
+### Key Text Changes
+
+1. **Acknowledge Huang et al. and Le Goff et al.** - prior survival-NMF work cited fairly
+2. **Acknowledge DECODER** - UNC prior work explicitly recognized
+3. **Temper cross-cancer claim** - "consistent with prior reports" not novel discovery
+4. **Add W-vs-H gradient explanation** - preempts mathematical reviewers
+5. **Add explicit out-of-sample statement** - preempts double-dipping concerns

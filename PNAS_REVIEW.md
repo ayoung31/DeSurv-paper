@@ -70,6 +70,7 @@ PNAS judges novelty by **conceptual reframing**, not benchmark performance table
 - [Appendix C: Figure Review Analysis](#appendix-c-figure-review-analysis)
 - [Appendix D: Recalibrated PNAS Assessment](#appendix-d-recalibrated-pnas-assessment)
 - [Appendix E: Panel-by-Panel Figure Analysis](#appendix-e-panel-by-panel-figure-analysis) *(detailed in [FIGURE_ANALYSIS.md](FIGURE_ANALYSIS.md))*
+- [Appendix F: Suggested Replacement Text](#appendix-f-suggested-replacement-text) *(detailed in [SUGGESTED_TEXT.md](SUGGESTED_TEXT.md))*
 
 ---
 
@@ -916,6 +917,7 @@ The figures tell the narrative arc correctly (method → why needed → proof it
 | GitHub repository reference | ❌ Not in supplement |
 | Consensus initialization procedure | ❌ Referenced but not described |
 | Signature truncation details | ❌ "Details in SI" but not found |
+| **Incomplete text placeholder** | ❌ `supplement.Rmd:41` ends with "Need more here..." |
 
 ---
 
@@ -944,44 +946,74 @@ The figures tell the narrative arc correctly (method → why needed → proof it
 | ☐ Complete Conflict of Interest declaration | 5 min | Incomplete submission |
 | ☐ Complete Acknowledgements section | 15 min | Incomplete submission |
 | ☐ Add complete institutional addresses | 15 min | Format violation |
+| ☐ **Complete "Need more here..." in supplement.Rmd:41** | 30 min | Incomplete text visible |
 
 ### 9.2 High Priority (Editorial Framing)
 
-These address likely reviewer concerns and should be prioritized for PNAS success:
+These address likely reviewer concerns and should be prioritized for PNAS success.
 
-- [ ] **Sharpen W vs H distinction** in Introduction first page (currently buried in para 4)
-- [ ] **Add explicit out-of-sample statement** clarifying rank selection is within-fold only
-- [ ] **Reframe around structural reorganization**, not C-index gains
-- [ ] **Move projection argument** (closed-form Z = W^⊤X) to main text
-- [ ] **Add sensitivity analysis** showing nearby k values give similar biological structure
-- [ ] Make Significance Statement more concrete (name gene programs, survival alignment, cross-cancer transfer)
-- [ ] Add Reader's Guide sentence for convergence proof relevance
-- [ ] Cite survival-supervised topic models (sLDA) and explain why they fail in genomics
+**Reviewer-facing revisions (R1/R4 focused):**
+| Task | Effort | Risk Reduced | Helps | May Annoy |
+|------|--------|--------------|-------|-----------|
+| ☐ **Sharpen W vs H distinction** in Intro first page | 1 hour | "Isn't this just supervised NMF?" | R4, R3 | Nobody |
+| ☐ **Add explicit out-of-sample statement** | 30 min | "Double-dipping" concern | R1 | Nobody |
+| ☐ **Reframe around structural reorganization** | 1–2 hours | "Modest C-index gains" dismissal | R4, R5 | R2 |
+| ☐ **Move projection argument** to main text | 30 min | "Why does it generalize?" | R1, R4 | Nobody |
+| ☐ **Add sensitivity analysis** (k ± 1 similar structure) | 2–3 hours | "Tuning to specific k" concern | R1 | R5 |
+| ☐ Make Significance Statement more concrete | 30 min | Vague impact claim | R4 | Nobody |
+| ☐ Add Reader's Guide for convergence proof | 15 min | "Why should I care?" | R4 | Nobody |
+| ☐ Cite sLDA and explain genomics failure | 30 min | "Related work incomplete" | R2 | R5 |
 
 ### 9.2.1 Figure-Specific Improvements (High Leverage)
 
-These are minimal-effort, maximum-reviewer-proofing edits:
+These are minimal-effort, maximum-reviewer-proofing edits. See [FIGURE_ANALYSIS.md](FIGURE_ANALYSIS.md) for detailed rationale.
 
-**Selection/Evaluation Protocol Transparency:**
-- [ ] **Fig 1:** Add micro-callout "Supervision acts on W (gene programs)" and label "CV C-index objective" in Panel B
-- [ ] **Fig 2D:** Add uncertainty layer (SE contours or evaluated configuration markers)
-- [ ] **Fig 2E:** Add note "selected via CV objective" in panel
-- [ ] **Fig 2D:** Annotate selected k explicitly on heatmap
-- [ ] **Fig 3:** Add in-panel microlabels (k=3, lethal factors) and note "n_top tuned via BO"
+**🔴 HIGH-PRIORITY (Reviewer-blocking):**
+| Task | Effort | Backfire Risk | Helps |
+|------|--------|---------------|-------|
+| ☐ **Fig 5B-C:** Add HR, 95% CI, log-rank p to KM plots | 1–2 hours | **None** | R1, R3, R4 |
+| ☐ **Fig 6B:** Add HR and p-value | 30 min | **None** | R1, R3, R4 |
+| ☐ **Fig 4:** Add factor labels (use conservative descriptors) | 1–2 hours | **Low** (if overclaim) | R3, R4 |
+| ☐ **Fig 3:** Add "true k=3, n=100 replicates" annotation | 1 hour | **None** | R1, R2 |
 
-**Effect Size Annotations:**
-- [ ] **Fig 5B-C:** Add log-rank p-values and HR annotations directly on KM plots
-- [ ] **Fig 5:** State factor selection rule in panel title ("Factor selected by Δ partial log-lik in training")
-- [ ] **Fig 6B:** Add HR and p-value to match Fig 5 standards
+**🟠 STRONGLY RECOMMENDED:**
+| Task | Effort | Backfire Risk | Helps |
+|------|--------|---------------|-------|
+| ☐ **Fig 2:** Restructure panels (B-C-D above A) | 2–3 hours | **None** | R4, R5 |
+| ☐ **Fig 4C:** Add "variance ≠ prognosis" annotation | 30 min | **Very low** | R4, R3 |
+| ☐ **Fig 2A:** Annotate selected k* | 30 min | **None** | R1 |
+| ☐ **Fig 1:** Add "Supervision acts on W" micro-callout | 30 min | **None** | R4, R3 |
 
-**Factor Interpretation:**
-- [ ] **Fig 4:** Add factor labels ("Exocrine/composition", "Classical tumor", "Activated TME")
-- [ ] **Fig 4C:** Add legend sentence clarifying survival contribution metric (univariate Cox Δ log-lik)
-- [ ] **Fig 4:** Provide full correlation matrix in SI (address ">0.2 threshold" selectivity concern)
-- [ ] **Fig 6:** Add note about what transferred factor biologically represents
+**🟡 OPTIONAL:**
+| Task | Effort | Backfire Risk | Notes |
+|------|--------|---------------|-------|
+| ☐ Color consistency across figures | 2–4 hours | **None** (time cost) | Skip if time-limited |
+| ☐ **Fig 5A:** Add I² heterogeneity statistic | 1 hour | **Moderate** | **Skip** - raises meta-analysis expectations |
+| ☐ **Fig 4:** Full correlation matrix in SI | 1 hour | **None** | Addresses threshold selectivity |
+
+**Factor Label Guidance (to avoid R1 pushback):**
+- ✅ "Classical tumor–associated"
+- ✅ "Basal-like–associated"
+- ✅ "Immune/stromal–enriched"
+- ❌ "Immunosuppressive CAF-mediated invasion program" (overclaims biology)
 
 **Notation Consistency:**
 - [ ] Verify Z = W^⊤X notation is consistent throughout (caption uses W^⊤X, text uses W^TX and X^⊤W)
+
+### 9.2.2 Simulation Expansion Guidance
+
+Adding harder simulation scenarios is **strongly recommended** but must be framed correctly to avoid backfire.
+
+| Scenario | Risk | Framing |
+|----------|------|---------|
+| **Null (no signal)** | Reviewer says "so it doesn't help" | Frame as expected: "Under null signal, DeSurv does not outperform unsupervised NMF, **as expected**. This confirms observed gains reflect genuine signal, not overfitting." |
+| **Signal aligned with variance** | May show smaller DeSurv advantage | Frame as diagnostic: "When lethal factors also explain variance, the distinction between DeSurv and NMF is reduced, as expected." |
+| **Weak signal** | May show modest gains | Frame as power analysis: "DeSurv maintains advantage down to SNR=X, below which neither method reliably recovers signal." |
+
+**Effort:** 3–6 hours (if code infrastructure exists)
+**Key principle:** State the **expected behavior** before showing results. Statisticians (R1) actually find this **more credible** than cherry-picking only favorable scenarios.
+
+---
 
 ### 9.3 High Priority (Technical)
 
@@ -1019,6 +1051,28 @@ These are minimal-effort, maximum-reviewer-proofing edits:
 - [ ] Add therapeutic/clinical relevance discussion
 - [ ] Add comparison with additional methods (sparse NMF, PLSR-Cox)
 - [ ] Explicitly connect PDAC → bladder transfer to closed-form projection advantage
+
+---
+
+## Strategic Takeaway: Revision Philosophy
+
+**None of the core recommended changes are dangerous if implemented with restraint.**
+
+The only ways revisions could backfire:
+1. **Over-interpreting biology** (avoid mechanistic factor labels without evidence)
+2. **Over-formalizing meta-analysis** (skip I² unless trivial)
+3. **Letting simulations look adversarial** (frame null/hard scenarios as diagnostics, not failures)
+
+**What these revisions accomplish:**
+- **Reduce reviewer degrees of freedom** - pre-empt predictable objections
+- **Control the narrative** - frame DeSurv as structural insight, not benchmark winner
+- **Demonstrate statistical maturity** - explicit out-of-sample statements, effect sizes, uncertainty
+
+**Rebuttal language if reviewers request scope creep:**
+
+> "Our goal is not to outperform all supervised predictors, but to demonstrate that survival supervision applied at the gene-program level reorganizes latent structure in a way that improves interpretability, stability, and generalization—properties not addressed by existing approaches that supervise through sample loadings."
+
+This reorients from "did you beat everything?" to "did you demonstrate the conceptual claim?"—which is what PNAS actually cares about.
 
 ---
 
@@ -1168,9 +1222,35 @@ For detailed panel-level analysis, visualization alternatives, and aesthetic rec
 
 ---
 
+## Appendix F: Suggested Replacement Text
+
+Drop-in replacement language implementing the editorial recommendations is available in **[SUGGESTED_TEXT.md](SUGGESTED_TEXT.md)**.
+
+### Contents
+
+| Section | Purpose |
+|---------|---------|
+| **A. Revised Introduction** | 5-paragraph replacement addressing prior work, discovery/validation tradeoff, and DeSurv novelty |
+| **B. Related Work paragraph** | Explicitly acknowledges DECODER and prior PDAC work; defuses rediscovery concerns |
+| **C. Targeted claim fixes** | 6 specific sentence replacements for W-vs-H, cross-cancer transfer, overfitting claims |
+| **D. Revised Significance Statement** | More concrete alternative if current version is too abstract |
+
+### Key Improvements in Suggested Text
+
+1. **Acknowledges Huang et al. and Le Goff et al.** - prior survival-NMF work cited fairly
+2. **Acknowledges DECODER** - UNC prior work explicitly recognized
+3. **Tempers cross-cancer claim** - "consistent with prior reports" not novel discovery
+4. **Adds W-vs-H gradient explanation** - preempts mathematical reviewers
+5. **Adds explicit out-of-sample statement** - preempts double-dipping concerns
+6. **Reframes around structural reorganization** - not C-index improvement
+
+---
+
 *Review generated: 2026-01-24*
 *Updated: 2026-01-24 with editorial strategy analysis*
 *Updated: 2026-01-24 with figure-by-figure stress test analysis*
 *Updated: 2026-01-24 with narrative arc analysis (Section 6)*
 *Updated: 2026-01-24 with recalibrated PNAS assessment (Appendix D)*
 *Updated: 2026-01-24 with panel-by-panel figure analysis (Appendix E)*
+*Updated: 2026-01-24 with reviewer archetype framework, backfire risk analysis, and effort estimates (Sections 7.0, 9.1-9.2)*
+*Updated: 2026-01-24 with suggested replacement text (Appendix F)*
