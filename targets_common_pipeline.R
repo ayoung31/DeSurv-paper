@@ -1688,7 +1688,6 @@ FIGURE_TARGETS <- list(
   tar_target(
     fig_bo_cvalpha,
     {
-      browser()
       p = make_bo_best_observed_alpha_plot(bo_history_path = desurv_bo_history,
                                      bo_results = desurv_bo_results,
                                      method_label = "DeSurv")
@@ -1800,7 +1799,6 @@ FIGURE_TARGETS <- list(
   tar_target(
     fig_gene_overlap_heatmap_desurv,
     {
-      browser()
       p = make_gene_overlap_heatmap(tar_fit_desurv,tar_tops_desurv$top_genes,top_genes)
       save_plot_pdf(
         p,
@@ -2072,7 +2070,6 @@ FIGURE_VAL_TARGETS <- list(
   tar_target(
     fig_validation_heatmap_desurv,
     {
-      browser()
       p = make_expression_heatmap(data_val_filtered,
                               tar_fit_desurv,
                               tar_tops_desurv,
@@ -2094,7 +2091,6 @@ FIGURE_VAL_TARGETS <- list(
   tar_target(
     fig_validation_heatmap_desurv_elbowk,
     {
-      browser()
       p = make_expression_heatmap(data_val_filtered_elbowk,
                               tar_fit_desurv_elbowk,
                               tar_tops_desurv_elbowk,
@@ -2116,7 +2112,6 @@ FIGURE_VAL_TARGETS <- list(
   tar_target(
     fig_validation_heatmap_std_elbowk,
     {
-      browser()
       p = make_expression_heatmap(data_val_filtered_elbowk,
                                   fit_std_elbowk,
                                   tar_tops_std_elbowk,
@@ -2138,7 +2133,6 @@ FIGURE_VAL_TARGETS <- list(
   tar_target(
     fig_validation_heatmap_std_desurvk,
     {
-      browser()
       p = make_expression_heatmap(data_val_filtered,
                                   fit_std_desurvk,
                                   tar_tops_std_desurvk,

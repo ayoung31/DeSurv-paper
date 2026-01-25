@@ -223,14 +223,14 @@ See [CODE_REVIEW.md](CODE_REVIEW.md) for comprehensive code review findings incl
 
 ### Critical Items to Address
 
-1. **`R/compute_metrics.R:9`** - `sdZ` incorrectly assigned from `meanZ`
-2. **`R/select_best_init.R:5`** - Filtered dataframe `keep` never used
-3. **`targets_common_pipeline.R`** - Remove `browser()` debug statements
+1. ~~**`R/compute_metrics.R:9`** - `sdZ` incorrectly assigned from `meanZ`~~ **RESOLVED**: Bug fixed and file removed (was dead code - see BUG1_IMPACT_ANALYSIS.md)
+2. ~~**`R/select_best_init.R:5`** - Filtered dataframe `keep` never used~~ **RESOLVED**: File removed (was dead code - never called in pipeline)
+3. ~~**`targets_common_pipeline.R`** - Remove `browser()` debug statements~~ **RESOLVED**: All 6 browser() statements removed
 4. **`targets_setup.R:110`** - `DEFAULT_NINIT` referenced before definition
 
 ### DeSurv Package Critical Items
 
-1. **`src/functions.cpp:472`** - Beta backtracking logic inverted
+1. ~~**`src/functions.cpp:472`** - Beta backtracking logic inverted~~ **NOT A BUG**: Analysis confirmed the logic is correct for maximization (see BUG4_ANALYSIS.md)
 2. **`R/cv_helpers.R:231`** - Missing gene subset validation in CV
 3. **`R/predict_methods.R:71-106`** - Non-finite validation inconsistency
 
