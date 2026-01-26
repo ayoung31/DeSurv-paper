@@ -10,7 +10,6 @@ PKG_VERSION <- "HEAD" # utils::packageDescription("DeSurv", fields = "RemoteRef"
 
 # Get git branch with fallback if gert is not installed
 GIT_BRANCH <- tryCatch(
-
   gert::git_branch(),
   error = function(e) {
     # Fallback: try git command directly, or use "unknown"
@@ -23,67 +22,80 @@ GIT_BRANCH <- tryCatch(
   }
 )
 
+# Get git commit for paper repo
+GIT_COMMIT <- tryCatch(
+  gert::git_info()$commit,
+  error = function(e) {
+    commit <- tryCatch(
+      trimws(system("git rev-parse HEAD", intern = TRUE, ignore.stderr = TRUE)),
+      error = function(e2) "unknown"
+    )
+    if (length(commit) == 0 || !nzchar(commit)) commit <- "unknown"
+    commit
+  }
+)
+
+# Get DeSurv package git info (from installed package location)
+DESURV_GIT_BRANCH <- tryCatch({
+  pkg_path <- system.file(package = "DeSurv")
+  if (nzchar(pkg_path) && dir.exists(file.path(pkg_path, ".git"))) {
+    trimws(system(paste("git -C", shQuote(pkg_path), "rev-parse --abbrev-ref HEAD"),
+                  intern = TRUE, ignore.stderr = TRUE))
+  } else {
+    # Package installed from git but no .git dir - use description
+    desc <- utils::packageDescription("DeSurv")
+    if (!is.null(desc$RemoteSha)) substr(desc$RemoteSha, 1, 7) else "installed"
+  }
+}, error = function(e) "unknown")
+
+DESURV_GIT_COMMIT <- tryCatch({
+  pkg_path <- system.file(package = "DeSurv")
+  if (nzchar(pkg_path) && dir.exists(file.path(pkg_path, ".git"))) {
+    trimws(system(paste("git -C", shQuote(pkg_path), "rev-parse HEAD"),
+                  intern = TRUE, ignore.stderr = TRUE))
+  } else {
+    desc <- utils::packageDescription("DeSurv")
+    if (!is.null(desc$RemoteSha)) desc$RemoteSha else "unknown"
+  }
+}, error = function(e) "unknown")
+
 # Local desktop: reduced from 50/100 to 19 to fit within 20 CPU limit
 DEFAULT_NINIT <- if (exists("DEFAULT_NINIT", inherits = TRUE)) DEFAULT_NINIT else 19
 DEFAULT_NINIT_FULL <- if (exists("DEFAULT_NINIT_FULL", inherits = TRUE)) DEFAULT_NINIT_FULL else 19
 
-# ------ Slurm controllers (local desktop version) ------
+# ------ Local multicore controllers (bypassing Slurm due to accounting issues) ------
+# Using crew_controller_local instead of crew_controller_slurm
+# This runs tasks locally with multiple processes
+
 default_controller = crew_controller_sequential()
 
-low_mem_controller = crew_controller_slurm(
+# Local multicore controller for low memory tasks
+low_mem_controller = crew_controller_local(
   name = "low_mem",
-  workers = 20,
-
-  seconds_idle = 120,
-  seconds_interval = 0.25,
-  options_cluster = crew_options_slurm(
-    memory_gigabytes_per_cpu = 1,
-    time_minutes = 120,
-    log_error = "logs/crew_log_%A.err",
-    log_output = "logs/crew_log_%A.out"
-  )
+  workers = 4,
+  seconds_idle = 120
 )
 
-cv_comp_controller = crew_controller_slurm(
+# Local multicore controller for CV tasks (main BO computation)
+# Limited workers to avoid memory exhaustion (BO tasks are memory-intensive)
+cv_comp_controller = crew_controller_local(
   name = "cv",
-  workers = 20,
-  seconds_idle = 120,
-  seconds_interval = 0.25,
-  options_cluster = crew_options_slurm(
-    memory_gigabytes_per_cpu = 1,
-    cpus_per_task = DEFAULT_NINIT,
-    time_minutes = 1440,
-    log_error = "logs/crew_log_%A.err",
-    log_output = "logs/crew_log_%A.out"
-  )
+  workers = 2,  # Run 2 BO tasks concurrently (each is memory intensive)
+  seconds_idle = 300  # Longer idle time for long-running tasks
 )
 
-full_run_controller = crew_controller_slurm(
+# Local multicore controller for full model runs
+full_run_controller = crew_controller_local(
   name = "full",
-  workers = 20,
-  seconds_idle = 120,
-  seconds_interval = 0.25,
-  options_cluster = crew_options_slurm(
-    memory_gigabytes_required = 16,
-    cpus_per_task = DEFAULT_NINIT_FULL,
-    time_minutes = 600,
-    log_error = "logs/crew_log_%A.err",
-    log_output = "logs/crew_log_%A.out"
-  )
+  workers = 4,  # Multiple seed fits can run in parallel
+  seconds_idle = 300
 )
 
-med_mem_controller = crew_controller_slurm(
+# Local multicore controller for medium memory tasks
+med_mem_controller = crew_controller_local(
   name = "med_mem",
-  workers = 20,
-  seconds_idle = 120,
-  seconds_interval = 0.25,
-  options_cluster = crew_options_slurm(
-    memory_gigabytes_required = 8,
-    cpus_per_task = 1,
-    time_minutes = 200,
-    log_error = "logs/crew_log_%A.err",
-    log_output = "logs/crew_log_%A.out"
-  )
+  workers = 4,
+  seconds_idle = 120
 )
 
 active_controller <- crew_controller_group(default_controller,

@@ -43,8 +43,8 @@ targets_bo_configs <- function() {
       bo_tol = 1e-5,
       bo_maxit = 4000,
       nfold = 5,
-      desurv_parallel_grid = TRUE,
-      desurv_ncores_grid = 4  # Reduced: 4 crew workers × 4 cores = 16 total  # Capped to local desktop (leave 1 CPU for OS)
+      desurv_parallel_grid = FALSE,  # Disabled: nested parallelism conflicts with crew/Slurm
+      desurv_ncores_grid = 1  # Single-threaded inside worker; crew provides parallelism
     ),
 
     # Bladder cancer analysis
@@ -82,8 +82,8 @@ targets_bo_configs <- function() {
       bo_tol = 1e-5,
       bo_maxit = 4000,
       nfold = 5,
-      desurv_parallel_grid = TRUE,
-      desurv_ncores_grid = 4  # Reduced: 4 crew workers × 4 cores = 16 total  # Capped to local desktop
+      desurv_parallel_grid = FALSE,  # Disabled: nested parallelism conflicts with crew/Slurm
+      desurv_ncores_grid = 1  # Single-threaded inside worker; crew provides parallelism
     )
   )
 }

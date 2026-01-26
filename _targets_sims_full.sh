@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=desurv_sims_full
-#SBATCH --mem=16g
+#SBATCH --mem=8g
 #SBATCH -t 3-00:00:00
 #SBATCH --output=logs/_targets_sims_full.out
 #SBATCH --error=logs/_targets_sims_full.err

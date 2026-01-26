@@ -11,20 +11,23 @@ if (is.null(BO_LABELS_RAW) || any(!nzchar(BO_LABELS_RAW))) {
 }
 RUN_CONFIGS_RAW <- targets_run_configs(BO_LABELS_RAW)
 
+# Calculate ninit from configs, but cap at local CPU limit (19 = 20 CPUs - 1 for OS)
+LOCAL_CPU_LIMIT <- 19L
 DEFAULT_NINIT <- if (length(BO_CONFIGS_RAW)) {
-  max(vapply(BO_CONFIGS_RAW, function(cfg) if (is.null(cfg$ninit)) 50 else cfg$ninit, numeric(1)))
+  min(LOCAL_CPU_LIMIT, max(vapply(BO_CONFIGS_RAW, function(cfg) if (is.null(cfg$ninit)) 50 else cfg$ninit, numeric(1))))
 } else {
-  50
+  min(LOCAL_CPU_LIMIT, 50)
 }
 DEFAULT_NINIT_FULL <- if (length(RUN_CONFIGS_RAW)) {
-  max(vapply(
+  min(LOCAL_CPU_LIMIT, max(vapply(
     RUN_CONFIGS_RAW,
     function(cfg) if (is.null(cfg$ninit_full)) 100 else cfg$ninit_full,
     numeric(1)
-  ))
+  )))
 } else {
-  100
+  min(LOCAL_CPU_LIMIT, 100)
 }
+message("Local desktop mode: DEFAULT_NINIT=", DEFAULT_NINIT, ", DEFAULT_NINIT_FULL=", DEFAULT_NINIT_FULL)
 
 source("targets_setup.R")
 source("targets_common_pipeline.R")
