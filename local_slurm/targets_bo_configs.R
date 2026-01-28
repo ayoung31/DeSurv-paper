@@ -43,8 +43,8 @@ targets_bo_configs <- function() {
       bo_tol = 1e-5,
       bo_maxit = 4000,
       nfold = 5,
-      desurv_parallel_grid = FALSE,  # Disabled: nested parallelism conflicts with crew/Slurm
-      desurv_ncores_grid = 1  # Single-threaded inside worker; crew provides parallelism
+      desurv_parallel_grid = TRUE,  # Safe with crew_controller_local (mirai-based, not forked)
+      desurv_ncores_grid = 5  # One core per CV fold (nfold=5); 2 workers × 5 = 10 CPUs max
     ),
 
     # Bladder cancer analysis
