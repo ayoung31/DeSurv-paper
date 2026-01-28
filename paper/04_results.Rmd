@@ -16,6 +16,10 @@ library(viridis)
 library(ggplotify)
 library(NMF)
 
+# Load helper functions for validation data preprocessing and figure generation
+source("R/targets_config.R")
+source("R/figure_targets.R")
+
 
 tar_load(sim_figs_by_scenario)
 

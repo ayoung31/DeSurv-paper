@@ -5,7 +5,7 @@
 #   - ninit = 30: Full random initializations during BO CV
 #   - bo_n_init = 20: Full initial BO sample points
 #   - bo_n_iter = 50: Full BO optimization iterations
-#   - bo_max_refinements = 1: Standard refinement
+#   - bo_max_refinements = 0: No early stopping (matches original)
 #   - desurv_ncores_grid = 4  # Reduced: 4 crew workers × 4 cores = 16 total: Capped to local CPU count
 #
 # Note: This will take significantly longer than quick mode
@@ -17,7 +17,7 @@ targets_bo_configs <- function() {
       data_mode = "external",
       data_loader = "load_data",
       train_datasets = c("TCGA_PAAD", "CPTAC"),
-      method_trans_train = "none",
+      method_trans_train = "rank",
       desurv_bo_bounds = list(
         k_grid = list(lower = 2L, upper = 15L, type = "integer"),
         alpha_grid = list(lower = 0, upper = 0.95, type = "continuous"),
@@ -32,7 +32,7 @@ targets_bo_configs <- function() {
       bo_n_init = 20,  # Full HPC value
       bo_n_iter = 50,  # Full HPC value
       bo_candidate_pool = 4000,  # Full HPC value
-      bo_max_refinements = 1,  # Standard refinement
+      bo_max_refinements = 0,  # No early stopping (matches original)
       bo_tol_gain = 0.002,
       bo_plateau = 1,
       bo_top_k = 10,

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.11.7)  25 JAN 2026 16:13
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.11.7)  28 JAN 2026 09:17
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1351,8 +1351,8 @@ Overfull \hbox (17.39314pt too wide) in paragraph at lines 701--701
  []
 
 
-Overfull \hbox (13.14714pt too wide) in paragraph at lines 701--701
-[]\T1/lmtt/m/n/8 ## Paper git commit: b276b92cfffcf1edbd0d4e5f9ee11180eaee8b81[
+Overfull \hbox (13.13914pt too wide) in paragraph at lines 701--701
+[]\T1/lmtt/m/n/8 ## Paper git commit: b0596b5a9ce9ff8bc7f02646735faf6b73ad30df[
 ] 
  []
 
@@ -1482,7 +1482,7 @@ b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb
 ></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/share
 /texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/tex
 mf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on paper.pdf (11 pages, 594292 bytes).
+Output written on paper.pdf (11 pages, 594314 bytes).
 PDF statistics:
  412 PDF objects out of 1000 (max. 8388607)
  324 compressed objects within 4 object streams
