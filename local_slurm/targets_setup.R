@@ -67,7 +67,11 @@ DEFAULT_NINIT_FULL <- if (exists("DEFAULT_NINIT_FULL", inherits = TRUE)) DEFAULT
 # Using crew_controller_local instead of crew_controller_slurm
 # This runs tasks locally with multiple processes
 
-default_controller = crew_controller_sequential()
+default_controller = crew_controller_local(
+  name = "default",
+  workers = 8,  # Parallel workers for general targets
+  seconds_idle = 120
+)
 
 # Local multicore controller for low memory tasks
 low_mem_controller = crew_controller_local(
@@ -107,7 +111,7 @@ active_controller <- crew_controller_group(default_controller,
 # ---- Global options ----
 TARGET_PACKAGES = c(
   "clusterProfiler","org.Hs.eg.db","DeSurv","pheatmap","NMF","tidyverse","tidyselect","survival","cvwrapr","rmarkdown","dplyr","digest",
-  "parallel","foreach","doParallel","doMC","pec","glmnet","webshot2","caret"
+  "parallel","foreach","doParallel","doMC","pec","glmnet","webshot2","caret","ggrepel"
 )
 
 tar_option_set(
