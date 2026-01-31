@@ -13,24 +13,25 @@
 targets_bo_configs <- function() {
   list(
     # TCGA+CPTAC combined training (main analysis)
+    # Config matched to student's original (main branch) settings
     tcgacptac = list(
       data_mode = "external",
       data_loader = "load_data",
       train_datasets = c("TCGA_PAAD", "CPTAC"),
       method_trans_train = "rank",
       desurv_bo_bounds = list(
-        k_grid = list(lower = 2L, upper = 15L, type = "integer"),
-        alpha_grid = list(lower = 0, upper = 0.95, type = "continuous"),
+        k_grid = list(lower = 2L, upper = 12L, type = "integer"),  # Student: 12
+        alpha_grid = list(lower = 0, upper = 1, type = "continuous"),  # Student: 1.0
         lambda_grid = list(lower = 1e-3, upper = 1e3, scale = "log10"),
         nu_grid = list(lower = 0, upper = 1, type = "continuous")
       ),
-      ngene_config = c(2000),
-      ntop_config = c(100, 200),
+      ngene_config = c(3000),  # Student: 3000
+      ntop_config = c(50, 300),  # Student: c(50, 300)
       lambdaw_config = c(0),
       lambdah_config = c(0),
       ninit = 30,  # Full HPC value
-      bo_n_init = 20,  # Full HPC value
-      bo_n_iter = 50,  # Full HPC value
+      bo_n_init = 50,  # Student: 50
+      bo_n_iter = 100,  # Student: 100
       bo_candidate_pool = 4000,  # Full HPC value
       bo_max_refinements = 0,  # No early stopping (matches original)
       bo_tol_gain = 0.002,
