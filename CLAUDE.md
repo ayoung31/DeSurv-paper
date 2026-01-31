@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Reproducible research repository for **DeSurv**: a survival-driven deconvolution tool for discovering prognostic cancer subtypes. Contains targets pipelines to reproduce all analyses, simulations, and manuscript figures from raw data.
 
+**See [CHANGELOG.md](CHANGELOG.md) for recent changes and development history.**
+
 ## Essential Commands
 
 ```bash
@@ -18,7 +20,8 @@ Rscript -e 'testthat::test_dir("tests/testthat")'
 # Submit pipelines to Slurm
 sbatch _targets.sh              # Main TCGA/CPTAC analysis
 sbatch _targets_bladder.sh      # Bladder cancer analysis
-sbatch _targets_sims.sh         # Simulation studies
+sbatch _targets_sims.sh         # Simulation studies (HPC mode)
+sbatch _targets_sims_local.sh   # Simulation studies (local desktop mode)
 
 # Run specific pipeline directly
 Rscript -e 'targets::tar_make(script = "_targets.R")'
@@ -182,7 +185,7 @@ Rscript -e 'rmarkdown::render("paper/paper.Rmd")'
 Rscript -e 'rmarkdown::render("paper/supp_methods.Rmd")'
 
 # The paper uses this targets store (set in paper/_targets.yaml):
-# store: store_PKG_VERSION=20260107bugfix_GIT_BRANCH=main
+# store: store_PKG_VERSION=NA_GIT_BRANCH=naimedits0125_full
 ```
 
 ### Targets Store for Paper
