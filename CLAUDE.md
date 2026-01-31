@@ -8,6 +8,8 @@ Reproducible research repository for **DeSurv**: a survival-driven deconvolution
 
 **See [CHANGELOG.md](CHANGELOG.md) for recent changes and development history.**
 
+**See [CONSISTENCY_STANDARDS.md](CONSISTENCY_STANDARDS.md) for code-documentation-paper alignment guidelines.**
+
 ## Essential Commands
 
 ```bash
@@ -41,10 +43,11 @@ Uses `targets` R package for declarative workflow management with Slurm distribu
 - `_targets_bladder.R` - Bladder cancer analysis
 - `_targets_sims.R` - Method validation simulations
 
-**Configuration system:** All hyperparameters flow through `targets_configs.R`:
-- `targets_bo_configs()` - Bayesian optimization bounds and settings
-- `targets_run_configs()` - Full-model run parameters (references BO via `bo_key`)
-- `targets_val_configs()` - External validation datasets and modes
+**Configuration system:** All hyperparameters flow through separate config files:
+- `targets_bo_configs.R` → `targets_bo_configs()` - Bayesian optimization bounds and settings
+- `targets_run_configs.R` → `targets_run_configs()` - Full-model run parameters (references BO via `bo_key`)
+- `targets_val_configs.R` → `targets_val_configs()` - External validation datasets and modes
+- `targets_figure_configs.R` - Figure generation settings
 
 Each config gets a hash-based `config_id` and readable `path_tag`. Validation runs at pipeline startup via `validate_desurv_configs()`.
 
@@ -68,10 +71,12 @@ Each config gets a hash-based `config_id` and readable `path_tag`. Validation ru
 
 ### Slurm Resource Controllers
 
-Defined in `targets_setup.R`:
+Defined in `targets_setup.R` (HPC mode - not used in local desktop mode):
 - `cv_comp_controller` - BO phase (202 workers, 2GB/CPU)
 - `full_run_controller` - Full runs (202 workers, 32GB total)
 - `low_mem_controller` - Light tasks (1GB/CPU)
+
+**Note:** Local desktop mode uses `crew_controller_local` instead. See "Current Branch Configuration" section.
 
 ### Data Modes
 
@@ -200,9 +205,29 @@ rmarkdown::render("paper/paper.Rmd",
 ## Code Style
 
 - 2-space indentation, snake_case for functions/files
-- Configuration edits go in `targets_configs.R`, not hardcoded
+- Configuration edits go in `targets_*_configs.R` files, not hardcoded
 - Keep helpers small and composable
 - Commit messages: short, imperative, lowercase
+
+## Consistency Checking
+
+Before committing changes, run:
+```bash
+Rscript scripts/verify_consistency.R
+```
+
+This checks:
+- Store path consistency across config files
+- Config file validation
+- Pipeline validation
+- Debug statement detection
+- Figure target status
+- Documentation completeness
+
+**Key documents for consistency:**
+- [CONSISTENCY_STANDARDS.md](CONSISTENCY_STANDARDS.md) - Full guidelines
+- [DEFAULTS.md](DEFAULTS.md) - Parameter defaults registry
+- [CHANGELOG.md](CHANGELOG.md) - Change history
 
 ## Optional Dependencies
 
@@ -216,15 +241,44 @@ cp local_slurm/targets_configs.R targets_configs.R
 sbatch local_slurm/_targets.sh
 ```
 
+## Current Branch Configuration
+
+**Branch:** `naimedits0125`
+**Store:** `store_PKG_VERSION=NA_GIT_BRANCH=naimedits0125_full`
+
+### Local Desktop Mode
+
+The pipeline is configured for local desktop execution (bypassing HPC Slurm issues):
+- Main pipeline uses `crew_controller_local` with 2 workers
+- Simulation pipeline uses `crew_controller_local` with 2 workers
+- Resource limits: 19 CPUs, ~30GB RAM available
+
+### Key Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `targets_bo_configs.R` | BO hyperparameter bounds (k, alpha, lambda, nu, ngene, ntop) |
+| `targets_setup.R` | Controller definitions, package loading |
+| `paper/_targets.yaml` | Store path for paper rendering |
+| `paper/paper.Rmd` | Paper params including `tar_store` |
+
+### Monitoring Jobs
+
+```bash
+squeue -u $USER                    # View job queue
+tail -f logs/slurm-<JOBID>.out     # Monitor job output
+sacct -j <JOBID>                   # Job accounting info
+```
+
 ## Known Issues & Code Review
 
 See [CODE_REVIEW.md](CODE_REVIEW.md) for comprehensive code review findings including:
-- **Critical bugs** requiring immediate attention (e.g., `compute_metrics.R:9` variable assignment)
+- **Critical bugs** - mostly resolved (see status below)
 - **Architectural issues** in pipeline configuration and resource management
 - **DeSurv package issues** in C++ numerical stability and validation
 - **Test coverage gaps** for critical functions
 
-### Critical Items to Address
+### Critical Items (Status)
 
 1. ~~**`R/compute_metrics.R:9`** - `sdZ` incorrectly assigned from `meanZ`~~ **RESOLVED**: Bug fixed and file removed (was dead code - see BUG1_IMPACT_ANALYSIS.md)
 2. ~~**`R/select_best_init.R:5`** - Filtered dataframe `keep` never used~~ **RESOLVED**: File removed (was dead code - never called in pipeline)

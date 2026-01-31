@@ -4,6 +4,12 @@ All notable changes to the DeSurv paper pipeline on the `naimedits0125` branch.
 
 ## [2026-01-31] - Today
 
+### Consistency Framework (NEW)
+- **Created `CONSISTENCY_STANDARDS.md`**: Guidelines for code-documentation-paper alignment
+- **Created `DEFAULTS.md`**: Parameter defaults registry (single source of truth)
+- **Created `scripts/verify_consistency.R`**: Automated consistency verification script
+- **Updated `CLAUDE.md`**: Added references to new consistency documents
+
 ### Pipeline Configuration
 - **Updated tcgacptac BO config to match student's original settings:**
   - `k_grid`: 2-15 → 2-12 (matching student's upper bound)
