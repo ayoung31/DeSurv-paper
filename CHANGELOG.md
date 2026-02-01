@@ -10,6 +10,56 @@ All notable changes to the DeSurv paper pipeline on the `naimedits0125` branch.
 - **Created `scripts/verify_consistency.R`**: Automated consistency verification script
 - **Updated `CLAUDE.md`**: Added references to new consistency documents
 
+### Consistency Fixes
+- **Fixed `DEFAULTS.md:89`**: Updated `ninit_full` from 19 → 100 to match `targets_run_configs.R`
+- **Fixed `scripts/verify_consistency.R:66-77`**: Added warning when `_targets_sims_local.sh` is missing or has no store line (prevents false positive "All stores match" messages)
+
+### New Tools
+- **Created `scripts/preflight_check.sh`**: Pre-submission hook checking for:
+  - Orphaned R/crew processes in project directory
+  - Stale/failed Slurm jobs
+  - Crew backend lock files and socket states
+  - Targets store locks and errored targets
+  - System resource availability (load, memory, disk)
+  - Slurm cluster status
+  - Can be used standalone or as wrapper: `./scripts/preflight_check.sh sbatch _targets.sh`
+
+- **Created `scripts/watchdog.sh`**: Post-submission progress monitor checking for:
+  - Jobs running but not producing output (hung)
+  - Orphaned workers without controller
+  - Log files not updating (30+ min stale threshold)
+  - Store not receiving new results (60+ min stale threshold)
+  - Jobs running > 24 hours
+  - NEW job failures (compared to previous check)
+  - System resource usage (CPU, memory)
+  - Adaptive interval: 5 min when issues detected, 15 min when stable
+  - Logs to `logs/watchdog.log`
+  - Usage: `./scripts/watchdog.sh` (once) or `./scripts/watchdog.sh --watch` (continuous)
+
+### Portability Fixes
+- **Fixed `_targets_sims_local.sh:12`**: Replaced hardcoded path with `${SLURM_SUBMIT_DIR:-$(dirname "$(readlink -f "$0")")}`
+- **Fixed `_targets_wait.sh:16`**: Same portability fix for script directory detection
+
+### Robustness Fixes
+- **Fixed `scripts/preflight_check.sh`**:
+  - Added `sacct` availability guard (prevents failures on clusters without Slurm accounting)
+  - Improved orphan detection to use elapsed time (`etime`) and flag long-running (12h+) processes
+  - Fixed `local` keyword used outside function (caused abort with `set -e`)
+- **Fixed `scripts/watchdog.sh`**:
+  - Added `sacct` availability guard with graceful fallback
+  - Fixed `|| true` masking sacct exit status (now captures status before filtering)
+
+### Documentation Accuracy Fixes
+- **Fixed `_targets.yaml` (root)**: Changed store from `naimedits0125` to `naimedits0125_full` to match paper
+- **Fixed `scripts/verify_consistency.R`**: Now checks root `_targets.yaml` in addition to `paper/_targets.yaml`
+- **Updated `CLAUDE.md`**:
+  - Removed references to non-existent `_targets_bladder.R` (bladder runs via config, not separate file)
+  - Clarified config symlink architecture (`local_slurm/` structure)
+  - Fixed DeSurv loading docs: uses `library(DeSurv)` not `pkgload::load_all()`
+  - Added warning about `targets_configs.R` being obsolete (split into modular files)
+  - Documented store path consistency requirements (4 files must match)
+  - Added obsolete files table to prevent confusion
+
 ### Pipeline Configuration
 - **Updated tcgacptac BO config to match student's original settings:**
   - `k_grid`: 2-15 → 2-12 (matching student's upper bound)

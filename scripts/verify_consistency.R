@@ -45,11 +45,20 @@ cat("   ─────────────────────\n")
 
 store_refs <- list()
 
+# Check root _targets.yaml
+tryCatch({
+  root_yaml <- yaml::read_yaml("_targets.yaml")
+  store_refs$root_yaml <- root_yaml$main$store
+  check_result(TRUE, sprintf("_targets.yaml (root): %s", store_refs$root_yaml))
+}, error = function(e) {
+  check_result(FALSE, sprintf("_targets.yaml (root): %s", e$message), is_warning = TRUE)
+})
+
 # Check paper/_targets.yaml
 tryCatch({
   yaml_content <- yaml::read_yaml("paper/_targets.yaml")
-  store_refs$yaml <- yaml_content$main$store
-  check_result(TRUE, sprintf("paper/_targets.yaml: %s", store_refs$yaml))
+  store_refs$paper_yaml <- yaml_content$main$store
+  check_result(TRUE, sprintf("paper/_targets.yaml: %s", store_refs$paper_yaml))
 }, error = function(e) {
   check_result(FALSE, sprintf("paper/_targets.yaml: %s", e$message))
 })
@@ -65,12 +74,18 @@ tryCatch({
 
 # Check _targets_sims_local.sh
 tryCatch({
-  sims_content <- readLines("_targets_sims_local.sh", warn = FALSE)
-  store_line <- grep("tar_config_set.*store", sims_content, value = TRUE)
-  if (length(store_line) > 0) {
-    store_match <- regmatches(store_line, regexpr("store_[^\"']+", store_line))
-    store_refs$sims <- store_match
-    check_result(TRUE, sprintf("_targets_sims_local.sh: %s", store_refs$sims))
+  if (!file.exists("_targets_sims_local.sh")) {
+    check_result(FALSE, "_targets_sims_local.sh: file not found", is_warning = TRUE)
+  } else {
+    sims_content <- readLines("_targets_sims_local.sh", warn = FALSE)
+    store_line <- grep("tar_config_set.*store", sims_content, value = TRUE)
+    if (length(store_line) > 0) {
+      store_match <- regmatches(store_line, regexpr("store_[^\"']+", store_line))
+      store_refs$sims <- store_match
+      check_result(TRUE, sprintf("_targets_sims_local.sh: %s", store_refs$sims))
+    } else {
+      check_result(FALSE, "_targets_sims_local.sh: no tar_config_set(store=...) found", is_warning = TRUE)
+    }
   }
 }, error = function(e) {
   check_result(FALSE, sprintf("_targets_sims_local.sh: %s", e$message), is_warning = TRUE)

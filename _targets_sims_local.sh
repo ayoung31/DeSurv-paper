@@ -9,7 +9,8 @@
 # Full simulation reproduction: 6 specs × 4 scenarios × 100 replicates = 2,400 runs
 # Estimated time: ~60-80 hours with 2 concurrent workers
 
-cd /home/naimrashid/Downloads/DeSurv-paper
+# Use SLURM_SUBMIT_DIR if available, otherwise script directory
+cd "${SLURM_SUBMIT_DIR:-$(dirname "$(readlink -f "$0")")}"
 
 # Wait for system load to drop if needed
 echo "Starting simulation pipeline at $(date)"

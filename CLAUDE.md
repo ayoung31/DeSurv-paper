@@ -19,11 +19,12 @@ Rscript -e 'devtools::install_local("../DeSurv", upgrade = "never", force = TRUE
 # Run tests
 Rscript -e 'testthat::test_dir("tests/testthat")'
 
+# Pre-submission check (REQUIRED before sbatch)
+./scripts/preflight_check.sh
+
 # Submit pipelines to Slurm
-sbatch _targets.sh              # Main TCGA/CPTAC analysis
-sbatch _targets_bladder.sh      # Bladder cancer analysis
-sbatch _targets_sims.sh         # Simulation studies (HPC mode)
-sbatch _targets_sims_local.sh   # Simulation studies (local desktop mode)
+sbatch _targets_wait.sh         # Main analysis (tcgacptac + bladder via config)
+sbatch _targets_sims_local.sh   # Simulation studies
 
 # Run specific pipeline directly
 Rscript -e 'targets::tar_make(script = "_targets.R")'
@@ -31,6 +32,8 @@ Rscript -e 'targets::tar_make(script = "_targets.R")'
 # Render manuscript
 Rscript -e 'rmarkdown::render("paper/paper.Rmd")'
 ```
+
+**Note:** Bladder analysis runs via the same `_targets.R` pipeline with bladder configs in `targets_bo_configs.R`. There is no separate `_targets_bladder.R` file.
 
 ## Architecture
 
@@ -43,13 +46,15 @@ Uses `targets` R package for declarative workflow management with Slurm distribu
 - `_targets_bladder.R` - Bladder cancer analysis
 - `_targets_sims.R` - Method validation simulations
 
-**Configuration system:** All hyperparameters flow through separate config files:
+**Configuration system:** All hyperparameters flow through separate config files (symlinks to `local_slurm/`):
 - `targets_bo_configs.R` → `targets_bo_configs()` - Bayesian optimization bounds and settings
 - `targets_run_configs.R` → `targets_run_configs()` - Full-model run parameters (references BO via `bo_key`)
 - `targets_val_configs.R` → `targets_val_configs()` - External validation datasets and modes
 - `targets_figure_configs.R` - Figure generation settings
 
 Each config gets a hash-based `config_id` and readable `path_tag`. Validation runs at pipeline startup via `validate_desurv_configs()`.
+
+**IMPORTANT:** There is NO `targets_configs.R` (monolithic file). The config files are split into separate modules. Old scripts referencing `targets_configs.R` are obsolete.
 
 ### Three-Phase Optimization Flow
 
@@ -86,7 +91,14 @@ Defined in `targets_setup.R` (HPC mode - not used in local desktop mode):
 
 ## DeSurv Package Dependency
 
-The pipeline requires a local checkout of `../DeSurv`. Each `_targets*.R` script auto-loads it via `pkgload::load_all("../DeSurv")`.
+The pipeline requires the DeSurv package to be **installed** (not just checked out). The pipeline uses `library(DeSurv)`, not `pkgload::load_all()`.
+
+```bash
+# Install before running pipelines
+Rscript -e 'devtools::install_local("../DeSurv", upgrade = "never", force = TRUE)'
+```
+
+**Note:** If you modify the DeSurv package, you must reinstall it for changes to take effect in the pipeline.
 
 **Core DeSurv functions used:**
 - `desurv_data()` - Validate/encapsulate expression matrix + survival
@@ -195,12 +207,25 @@ Rscript -e 'rmarkdown::render("paper/supp_methods.Rmd")'
 
 ### Targets Store for Paper
 
-The paper reads from a specific targets store defined in `paper/_targets.yaml`. To render with a different store:
+The paper reads from a specific targets store. **All four store references must match:**
+
+| File | Setting |
+|------|---------|
+| `_targets.yaml` (root) | `main: store:` |
+| `paper/_targets.yaml` | `main: store:` |
+| `paper/paper.Rmd` | `params: tar_store:` |
+| `_targets_sims_local.sh` | `tar_config_set(store = ...)` |
+
+**Current store:** `store_PKG_VERSION=NA_GIT_BRANCH=naimedits0125_full`
+
+To render with a different store:
 ```r
 # In paper.Rmd, the store is set via params$tar_store
 rmarkdown::render("paper/paper.Rmd",
   params = list(tar_store = "your_store_name"))
 ```
+
+**Run `scripts/verify_consistency.R` to check all store paths match.**
 
 ## Code Style
 
@@ -208,6 +233,119 @@ rmarkdown::render("paper/paper.Rmd",
 - Configuration edits go in `targets_*_configs.R` files, not hardcoded
 - Keep helpers small and composable
 - Commit messages: short, imperative, lowercase
+
+### Shell Script Best Practices
+
+**Directory handling (NEVER hardcode paths):**
+```bash
+# WRONG - breaks on other machines
+cd /home/naimrashid/Downloads/DeSurv-paper
+
+# RIGHT - portable
+cd "${SLURM_SUBMIT_DIR:-$(dirname "$(readlink -f "$0")")}"
+```
+
+**External command guards (prevent `set -e` crashes):**
+```bash
+# WRONG - crashes if sacct unavailable
+failed=$(sacct -u $USER ...)
+
+# RIGHT - graceful fallback
+if command -v sacct &> /dev/null; then
+    failed=$(sacct -u $USER ... || true)
+else
+    echo "sacct not available"
+fi
+```
+
+**Multi-line command output (prevent arithmetic errors):**
+```bash
+# WRONG - sinfo may return multiple lines
+CPUS=$(sinfo -h -o "%C")
+
+# RIGHT - take first line
+CPUS=$(sinfo -h -o "%C" | head -1)
+```
+
+**Process elapsed time (use etime, not CPU time):**
+```bash
+# WRONG - $10 in ps aux is CPU time
+ps aux | awk '{print $10}'
+
+# RIGHT - etime shows wall-clock elapsed
+ps -eo pid,etime,args
+```
+
+**Fallible commands with `set -e` (grep exits 1 on no match):**
+```bash
+# WRONG - script exits if no matches
+set -e
+matches=$(grep "pattern" file)
+
+# RIGHT - suppress exit code with || true
+matches=$(grep "pattern" file || true)
+
+# Also RIGHT - use if statement
+if grep -q "pattern" file; then
+    # handle match
+fi
+```
+
+**Environment differences (local vs HPC):**
+```bash
+# WRONG - assumes module system exists
+module load r/4.4.0
+
+# RIGHT - graceful fallback
+module load r/4.4.0 2>/dev/null || true
+
+# For critical dependencies, check explicitly
+if ! command -v Rscript &> /dev/null; then
+    echo "ERROR: Rscript not found in PATH"
+    exit 1
+fi
+```
+
+**Parsing multi-value output (avoid word splitting issues):**
+```bash
+# WRONG - breaks on spaces in values
+for val in $(sinfo -h -o "%P %a"); do ...
+
+# RIGHT - use read with IFS
+sinfo -h -o "%P|%a" | while IFS='|' read partition avail; do
+    echo "Partition: $partition, Available: $avail"
+done
+```
+
+**`local` keyword only works inside functions:**
+```bash
+# WRONG - 'local' at top level or in while loop causes error with set -e
+while read line; do
+    local var=0    # ERROR: local only valid in function
+done
+
+# RIGHT - use plain variables outside functions
+while read line; do
+    var=0          # OK at any scope
+done
+```
+
+**Capturing exit status with `|| true` (masks failures):**
+```bash
+# WRONG - || true makes $? always 0
+output=$(some_command || true)
+if [ $? -ne 0 ]; then  # Never triggers!
+    echo "Failed"
+fi
+
+# RIGHT - capture status before || true
+output=$(some_command 2>&1)
+status=$?
+if [ $status -ne 0 ]; then
+    echo "Failed with exit $status"
+fi
+# Now safe to continue even if failed
+```
 
 ## Consistency Checking
 
@@ -233,12 +371,44 @@ This checks:
 
 ORA/KEGG enrichment requires `clusterProfiler` and `org.Hs.eg.db`.
 
-## Local Development
+## Local Development & Config Architecture
 
-For quick testing on reduced resources, use configs from `local_slurm/`:
+### Config Symlink System
+
+The root config files are **symlinks** to files in `local_slurm/`:
+```
+targets_bo_configs.R     → local_slurm/targets_bo_configs.R
+targets_run_configs.R    → local_slurm/targets_run_configs.R
+targets_val_configs.R    → local_slurm/targets_val_configs.R
+targets_figure_configs.R → local_slurm/targets_figure_configs.R
+```
+
+The `local_slurm/` directory contains:
+- Root level: Current active configs (symlink targets)
+- `quick/`: Reduced iteration configs for testing
+- `full/`: Publication-quality configs
+
+**WARNING:** The `local_slurm/full/` configs may diverge from root configs. Always verify which config is active before running pipelines.
+
+### Obsolete Files (Do Not Use)
+
+| File | Status |
+|------|--------|
+| `local_slurm/targets_configs.R` | Obsolete monolithic file, never sourced |
+| `local_slurm/submit_targets_quick.R` | References old file structure |
+| `local_slurm/_targets_sims.R` | Incomplete stub, needs main file |
+
+### Switching Configs
+
 ```bash
-cp local_slurm/targets_configs.R targets_configs.R
-sbatch local_slurm/_targets.sh
+# Check current mode
+cat local_slurm/.current_mode
+
+# To use quick mode (for testing only):
+# 1. Backup current symlinks
+# 2. Point symlinks to local_slurm/quick/
+# 3. Run pipeline
+# 4. Restore symlinks
 ```
 
 ## Current Branch Configuration
@@ -262,12 +432,132 @@ The pipeline is configured for local desktop execution (bypassing HPC Slurm issu
 | `paper/_targets.yaml` | Store path for paper rendering |
 | `paper/paper.Rmd` | Paper params including `tar_store` |
 
-### Monitoring Jobs
+### Job Monitoring Tools
+
+**IMPORTANT:** Always use these tools to prevent orphaned processes, stale jobs, and silent failures.
+
+#### Pre-Submission Check (REQUIRED before sbatch)
+
+```bash
+# Run before submitting any job
+./scripts/preflight_check.sh
+
+# Or use as wrapper (runs command if checks pass)
+./scripts/preflight_check.sh sbatch _targets_wait.sh
+```
+
+Checks for:
+- Orphaned R/crew processes in project directory
+- Stale/failed Slurm jobs from this project
+- Crew backend lock files and socket states
+- Targets store locks and errored targets
+- System resources (CPU, memory, disk)
+- Slurm cluster availability
+
+#### Post-Submission Watchdog (for long-running jobs)
+
+```bash
+# One-time status check
+./scripts/watchdog.sh
+
+# Continuous monitoring (adaptive 5-15 min interval)
+./scripts/watchdog.sh --watch
+
+# With email alerts on issues
+./scripts/watchdog.sh --watch --alert
+```
+
+Monitors for:
+- Jobs running but not producing output (hung)
+- Orphaned workers without controller (controller died)
+- Log files not updating (30+ min stale)
+- Store not receiving new results (60+ min stale)
+- Jobs running > 24 hours
+- NEW job failures (compared to previous check)
+- System resource exhaustion
+
+Logs to: `logs/watchdog.log`
+
+#### Quick Status Commands
 
 ```bash
 squeue -u $USER                    # View job queue
 tail -f logs/slurm-<JOBID>.out     # Monitor job output
 sacct -j <JOBID>                   # Job accounting info
+```
+
+### Common Pitfalls to Avoid
+
+| Pitfall | Symptom | Prevention |
+|---------|---------|------------|
+| **Orphaned crew workers** | Workers running after controller dies | Run `./scripts/preflight_check.sh` before new submissions |
+| **Stale store locks** | "Store is locked" errors | Check for `.lock` files in store directory |
+| **SIGTERM without cleanup** | Job killed, workers keep running | Use `./scripts/watchdog.sh --watch` to detect early |
+| **Hardcoded paths** | Scripts fail on other machines | Use `${SLURM_SUBMIT_DIR:-$(dirname "$(readlink -f "$0")")}` |
+| **sacct unavailable** | Scripts crash on `set -e` | Always guard with `command -v sacct` |
+| **Multi-line sinfo output** | Arithmetic errors in bash | Use `head -1` when parsing sinfo |
+| **CPU time vs elapsed time** | Miss long-running orphans | Use `ps -eo pid,etime,args` not `ps aux` |
+| **grep with set -e** | Script exits on no match (exit 1) | Use `grep ... \|\| true` or `if grep -q` |
+| **Local vs HPC environment** | Works locally, fails on cluster | Guard `module load` with `2>/dev/null \|\| true` |
+| **Word splitting in loops** | Breaks on spaces in values | Use `IFS='|'` delimiter with `read` |
+| **`local` outside function** | `set -e` aborts script | Only use `local` inside functions |
+| **`|| true` masks exit status** | `$?` always 0, error check never triggers | Capture `$?` before `\|\| true` |
+
+### Slurm Job Lifecycle
+
+```
+1. PRE-SUBMISSION
+   └── Run ./scripts/preflight_check.sh
+       ├── Fix any errors before proceeding
+       └── Review warnings
+
+2. SUBMISSION
+   └── sbatch _targets_wait.sh (or wrapper mode)
+       └── Job waits for system load < threshold
+
+3. RUNNING
+   └── Controller dispatches to crew workers
+       ├── Monitor with: tail -f logs/slurm-<JOB>.out
+       └── Or run: ./scripts/watchdog.sh --watch
+
+4. IF PROBLEMS
+   ├── Controller dies → Workers become orphaned
+   │   └── Detection: watchdog shows "ORPHANED WORKERS"
+   │   └── Fix: scancel <worker_job_ids>
+   │
+   ├── Workers die → Controller hangs
+   │   └── Detection: Log stale for 30+ min
+   │   └── Fix: scancel <controller_job_id>
+   │
+   └── Job killed externally → Partial state
+       └── Detection: sacct shows FAILED/CANCELLED
+       └── Fix: Run preflight, resubmit
+
+5. COMPLETION
+   └── Check store for results
+       └── tar_meta() shows completed targets
+```
+
+### Recovery from Failed Jobs
+
+```bash
+# 1. Check what happened
+sacct -j <JOBID> --format=JobID,JobName,State,ExitCode,MaxRSS,Elapsed
+
+# 2. Clean up orphaned processes
+./scripts/preflight_check.sh
+# If orphans found:
+kill <PIDs shown>
+scancel <job_ids shown>
+
+# 3. Check store state
+Rscript -e 'targets::tar_meta()' | grep error
+
+# 4. Remove stale locks if needed
+rm store_*/.lock
+
+# 5. Resubmit
+./scripts/preflight_check.sh sbatch _targets_wait.sh
 ```
 
 ## Known Issues & Code Review

@@ -86,7 +86,7 @@ Source: `targets_run_configs.R`
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
-| `ninit_full` | 19 | Full model initializations |
+| `ninit_full` | 100 | Full model initializations (parallelized across CPUs) |
 | References | `bo_key` | Links to BO config |
 
 ---

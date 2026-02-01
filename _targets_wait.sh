@@ -13,5 +13,6 @@ while [ $(awk '{print int($1)}' /proc/loadavg) -ge 4 ]; do
 done
 
 echo "$(date): Load dropped, starting pipeline..."
-cd /home/naimrashid/Downloads/DeSurv-paper
+# Use SLURM_SUBMIT_DIR if available, otherwise script directory
+cd "${SLURM_SUBMIT_DIR:-$(dirname "$(readlink -f "$0")")}"
 Rscript -e 'targets::tar_make()'
