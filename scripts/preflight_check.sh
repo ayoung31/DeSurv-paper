@@ -122,6 +122,59 @@ else
 fi
 
 # =============================================================================
+# 2b. Cross-Project Crew Workers (Resource Contention)
+# =============================================================================
+echo ""
+echo "2b. Checking for cross-project crew workers..."
+echo "    ──────────────────────────────────────────"
+
+# Find ALL crew workers regardless of project
+cross_project_pids=""
+cross_project_info=""
+cross_project_jobs=""
+
+if [ -n "$crew_workers" ]; then
+    for pid in $crew_workers; do
+        cwd=$(readlink /proc/$pid/cwd 2>/dev/null || echo "")
+        if [[ -n "$cwd" && "$cwd" != "$PROJECT_DIR"* ]]; then
+            # Get elapsed time
+            etime=$(ps -o etime= -p $pid 2>/dev/null | tr -d ' ' || echo "unknown")
+            proj_name=$(basename "$cwd")
+            cross_project_pids="$cross_project_pids $pid"
+            cross_project_info="$cross_project_info\n         PID $pid ($etime): $proj_name"
+        fi
+    done
+fi
+
+# Also check for Slurm crew-worker jobs from other projects
+if command -v squeue &> /dev/null; then
+    while IFS='|' read jobid name workdir; do
+        [ -z "$jobid" ] && continue
+        if [[ "$name" == crew-worker* && "$workdir" != "$PROJECT_DIR"* ]]; then
+            proj_name=$(basename "$workdir")
+            cross_project_jobs="$cross_project_jobs $jobid"
+            cross_project_info="$cross_project_info\n         Job $jobid: $proj_name ($name)"
+        fi
+    done < <(squeue -u $USER -h -o "%i|%j|%Z" 2>/dev/null | grep -i "crew-worker" || true)
+fi
+
+if [ -n "$cross_project_pids" ] || [ -n "$cross_project_jobs" ]; then
+    check_warn "Found crew workers from OTHER projects (may cause resource contention):"
+    echo -e "$cross_project_info"
+    echo ""
+    if [ -n "$cross_project_pids" ]; then
+        pids_trimmed=$(echo $cross_project_pids | xargs)
+        echo "         To kill processes: kill $pids_trimmed"
+    fi
+    if [ -n "$cross_project_jobs" ]; then
+        jobs_trimmed=$(echo $cross_project_jobs | xargs)
+        echo "         To cancel Slurm jobs: scancel $jobs_trimmed"
+    fi
+else
+    check_pass "No cross-project crew workers detected"
+fi
+
+# =============================================================================
 # 3. Stale Slurm Jobs
 # =============================================================================
 echo ""
