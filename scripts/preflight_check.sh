@@ -316,8 +316,10 @@ mem_available=$(grep MemAvailable /proc/meminfo | awk '{print $2}')
 mem_total=$(grep MemTotal /proc/meminfo | awk '{print $2}')
 mem_pct=$(echo "$mem_available $mem_total" | awk '{printf "%.0f", ($1/$2)*100}')
 
-if [ "$mem_pct" -lt 20 ]; then
-    check_warn "Low available memory: ${mem_pct}% free"
+if [ "$mem_pct" -lt 25 ]; then
+    check_fail "CRITICAL: Very low memory: ${mem_pct}% free (need 25%+)"
+elif [ "$mem_pct" -lt 40 ]; then
+    check_warn "Low available memory: ${mem_pct}% free (recommend 40%+ for BO)"
 else
     check_pass "Memory OK: ${mem_pct}% available"
 fi
@@ -331,6 +333,38 @@ elif [ "$disk_pct" -gt 80 ]; then
     check_warn "Disk space warning: ${disk_pct}% used"
 else
     check_pass "Disk space OK: ${disk_pct}% used"
+fi
+
+# Check combined crew worker resource usage (all projects)
+echo ""
+echo "   Combined crew worker analysis:"
+total_crew_count=0
+total_crew_mem_kb=0
+for pid in $(pgrep -f "crew::crew_worker" 2>/dev/null); do
+    mem=$(ps -o rss= -p $pid 2>/dev/null || echo 0)
+    total_crew_mem_kb=$((total_crew_mem_kb + mem))
+    total_crew_count=$((total_crew_count + 1))
+done
+
+if [ "$total_crew_count" -gt 0 ]; then
+    total_crew_mem_gb=$(echo "scale=1; $total_crew_mem_kb / 1048576" | bc 2>/dev/null || echo "?")
+    mem_total_gb=$(echo "scale=1; $mem_total / 1048576" | bc 2>/dev/null || echo "?")
+
+    # Estimate if adding DeSurv would exceed threshold (assume ~15GB for BO)
+    expected_new_gb=15
+    combined_gb=$(echo "scale=1; $total_crew_mem_kb / 1048576 + $expected_new_gb" | bc 2>/dev/null || echo "999")
+    threshold_gb=$(echo "scale=1; $mem_total / 1048576 * 0.75" | bc 2>/dev/null || echo "0")
+
+    if (( $(echo "$combined_gb > $threshold_gb" | bc -l 2>/dev/null || echo 1) )); then
+        check_fail "CRITICAL: System-wide crew workers: $total_crew_count using ${total_crew_mem_gb}GB"
+        echo "         Combined with new pipeline (~${expected_new_gb}GB) would be ~${combined_gb}GB"
+        echo "         This EXCEEDS 75% threshold (${threshold_gb}GB)"
+        echo "         BLOCKING: Wait for other pipelines to complete or use --force"
+    else
+        check_pass "System-wide crew workers: $total_crew_count using ${total_crew_mem_gb}GB (headroom OK)"
+    fi
+else
+    check_pass "No crew workers running system-wide"
 fi
 
 # =============================================================================

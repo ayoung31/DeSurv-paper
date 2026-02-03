@@ -74,14 +74,28 @@ Each config gets a hash-based `config_id` and readable `path_tag`. Validation ru
 | `targets_setup.R` | Library loading, Slurm controller definitions |
 | `targets_common_pipeline.R` | Shared target definitions |
 
-### Slurm Resource Controllers
+### Crew Resource Controllers (Local Desktop)
 
-Defined in `targets_setup.R` (HPC mode - not used in local desktop mode):
-- `cv_comp_controller` - BO phase (202 workers, 2GB/CPU)
-- `full_run_controller` - Full runs (202 workers, 32GB total)
-- `low_mem_controller` - Light tasks (1GB/CPU)
+Defined in `targets_setup.R`. Tuned for 20 CPUs / 30GB RAM:
 
-**Note:** Local desktop mode uses `crew_controller_local` instead. See "Current Branch Configuration" section.
+| Controller | Workers | Peak Memory | CPUs | Used By |
+|-----------|---------|-------------|------|---------|
+| `cv` | 2 | ~3 GB (+ mclapply forks) | 12 | BO, NMF, elbowk BO |
+| `default` | 4 | ~2 GB | 4 | Figures, clustering, validation |
+| `med_mem` | 2 | ~2 GB | 2 | Seed fits, consensus init |
+| `full` | 2 | ~1 GB | 2 | Full model runs |
+| `low_mem` | 2 | ~0.6 GB | spare | Light tasks |
+
+**Memory budget:** ~12 GB peak (24 GB with 2× safety), leaving headroom on 30 GB system.
+
+**CPU constraint:** Each cv worker forks `ncores_grid` sub-processes via `parallel::mclapply` inside DeSurv (one per CV fold). With `ncores_grid=5` and 2 cv workers, BO alone uses 12 CPUs. Do NOT increase cv workers without reducing `ncores_grid` in `targets_bo_configs.R`.
+
+**IMPORTANT — avoid OOM crashes:**
+- Changing `desurv_parallel_grid` or `desurv_ncores_grid` in `targets_bo_configs.R` **invalidates all BO targets** (they are inside `bo_config`, which is hashed). Only change these if you're willing to rerun BO from scratch.
+- Worker counts in `targets_setup.R` do NOT invalidate targets — safe to adjust anytime.
+- If the pipeline crashes with crew worker crashes (6 consecutive), reduce non-cv workers first.
+
+**HPC mode (Longleaf):** Uses `crew_controller_slurm` with 202 workers and higher memory. See Slurm section below.
 
 ### Data Modes
 
@@ -502,6 +516,51 @@ sacct -j <JOBID>                   # Job accounting info
 | **Word splitting in loops** | Breaks on spaces in values | Use `IFS='|'` delimiter with `read` |
 | **`local` outside function** | `set -e` aborts script | Only use `local` inside functions |
 | **`|| true` masks exit status** | `$?` always 0, error check never triggers | Capture `$?` before `\|\| true` |
+| **Cross-project resource contention** | Controller OOM crash, orphaned workers | Run `preflight_check.sh` - check section 2b warnings |
+| **No monitoring during long runs** | Silent failures, hours of lost work | Always run `watchdog.sh --watch` or use `start_pipeline.sh` |
+| **Skipping preflight** | Resource conflicts, stale locks | Use `./scripts/start_pipeline.sh` wrapper (enforces preflight) |
+| **Piping pipeline to `head`/`tail`** | SIGPIPE kills controller, orphans workers | NEVER pipe `start_pipeline.sh` through `head`. Run in background with `nohup` |
+| **Too many crew workers** | OOM crash kills pipeline mid-run, losing in-flight BO results | Keep total workers under memory budget (see `targets_setup.R` comments). Peak = sum of all controller workers × per-worker memory |
+| **Changing `desurv_parallel_grid`/`ncores_grid`** | Invalidates ALL BO targets (multi-hour reruns) | These are inside `bo_config` which is hashed. Change worker counts in `targets_setup.R` instead (safe, no invalidation) |
+
+### Multi-Project Coordination
+
+When running pipelines concurrently across projects (e.g., DeSurv + baton):
+
+**Check total resource usage FIRST:**
+```bash
+# See all crew workers system-wide
+ps aux | grep "crew::crew_worker" | grep -v grep
+
+# Estimate total memory used
+ps aux | grep "crew::crew_worker" | awk '{sum+=$6} END {print sum/1024/1024 "GB"}'
+
+# Check which projects they belong to
+for pid in $(pgrep -f "crew::crew_worker"); do
+    echo "PID $pid: $(readlink -f /proc/$pid/cwd)"
+done
+```
+
+**Resource guidelines for 30GB system:**
+- Max ~22 crew workers total across all projects
+- Each DeSurv BO task needs ~4GB (2 workers × nested parallelism)
+- Leave 8GB headroom for system + non-crew tasks
+
+**RECOMMENDED: Use the safe launcher:**
+```bash
+# Run in background - NEVER pipe through head/tail/less (SIGPIPE kills controller)
+nohup ./scripts/start_pipeline.sh > logs/pipeline.log 2>&1 &
+tail -f logs/pipeline.log             # Monitor separately
+
+# Or for simulations:
+nohup ./scripts/start_pipeline.sh --sims > logs/sims.log 2>&1 &
+```
+
+This wrapper:
+1. Runs mandatory preflight checks
+2. Checks cross-project resource contention
+3. Auto-starts watchdog monitoring
+4. Cleans up on completion
 
 ### Slurm Job Lifecycle
 

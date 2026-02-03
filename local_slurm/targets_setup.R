@@ -66,39 +66,53 @@ DEFAULT_NINIT_FULL <- if (exists("DEFAULT_NINIT_FULL", inherits = TRUE)) DEFAULT
 # ------ Local multicore controllers (bypassing Slurm due to accounting issues) ------
 # Using crew_controller_local instead of crew_controller_slurm
 # This runs tasks locally with multiple processes
+#
+# Memory budget (20 CPUs, 30GB RAM):
+#   OS/system:  ~3 GB reserved
+#   cv:         2 workers × ~1.5 GB (parent + 5 mclapply forks via ncores_grid) = 3 GB, 12 CPUs
+#   default:    4 workers × ~0.5 GB (figures, clustering, validation) = 2 GB, 4 CPUs
+#   med_mem:    2 workers × ~1.0 GB (seed fits, full model runs) = 2 GB, 2 CPUs
+#   full:       2 workers × ~0.5 GB = 1 GB, 2 CPUs
+#   low_mem:    2 workers × ~0.3 GB = 0.6 GB
+#   Peak estimate: ~12 GB (2× safety = 24 GB, under 30 GB limit)
+#
+# CPU constraint: each cv worker forks ncores_grid=5 sub-processes via
+# parallel::mclapply inside DeSurv. 2 cv workers = 12 CPUs for BO alone.
+# 3 cv workers would use 18/20 CPUs, starving the system.
 
 default_controller = crew_controller_local(
   name = "default",
-  workers = 8,  # Parallel workers for general targets
+  workers = 4,  # Figures, clustering, validation (light memory)
   seconds_idle = 120
 )
 
 # Local multicore controller for low memory tasks
 low_mem_controller = crew_controller_local(
   name = "low_mem",
-  workers = 4,
+  workers = 2,
   seconds_idle = 120
 )
 
 # Local multicore controller for CV tasks (main BO computation)
-# Limited workers to avoid memory exhaustion (BO tasks are memory-intensive)
+# Each worker forks ncores_grid=5 sub-processes (parallel::mclapply),
+# so 2 workers = 12 CPUs. Do not increase without reducing ncores_grid.
 cv_comp_controller = crew_controller_local(
   name = "cv",
-  workers = 2,  # Run 2 BO tasks concurrently (each is memory intensive)
+  workers = 2,  # 2 concurrent BO tasks; each uses ~1.5 GB + 12 CPUs total
   seconds_idle = 300  # Longer idle time for long-running tasks
 )
 
 # Local multicore controller for full model runs
 full_run_controller = crew_controller_local(
   name = "full",
-  workers = 4,  # Multiple seed fits can run in parallel
+  workers = 2,  # Seed fits are memory-heavy (~1 GB each)
   seconds_idle = 300
 )
 
-# Local multicore controller for medium memory tasks
+# Local multicore controller for medium memory tasks (seed fits, consensus)
 med_mem_controller = crew_controller_local(
   name = "med_mem",
-  workers = 4,
+  workers = 2,  # Each seed fit loads full expression matrix (~1 GB)
   seconds_idle = 120
 )
 
