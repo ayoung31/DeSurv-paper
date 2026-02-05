@@ -286,6 +286,20 @@ if [ -n "$stores" ]; then
                 check_warn "$store_name: $errored errored target(s)"
             fi
         fi
+
+        # Check for stale dispatched/started targets (from crashed runs)
+        stale_dispatched=$(Rscript --vanilla -e "
+            suppressMessages(library(targets))
+            tar_config_set(store = '$store')
+            prog <- tar_progress()
+            cat(sum(prog\$progress %in% c('dispatched', 'started')))
+        " 2>/dev/null || echo "0")
+
+        if [ "$stale_dispatched" -gt 0 ] 2>/dev/null; then
+            check_warn "$store_name: $stale_dispatched target(s) stuck in dispatched/started state"
+            echo "         These will block re-dispatch on restart."
+            echo "         Fix: Rscript -e \"targets::tar_destroy(destroy='progress')\""
+        fi
     done
 else
     check_pass "No store directories found (will be created)"

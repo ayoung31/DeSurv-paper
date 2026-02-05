@@ -78,10 +78,11 @@ SIM_SPLIT_SEED_OFFSET <- 10000L
 # Local desktop configuration: Use local multicore controller (bypassing Slurm)
 # Slurm has InvalidAccount issues, so use crew_controller_local instead
 SIM_LOCAL_CPUS <- 19L  # Leave 1 CPU for OS
+SIM_MAX_CORES <- 2L  # Max mclapply cores per worker. 9 workers × 2 = 18 CPUs.
 SIM_ANALYSIS_CONTROLLER <- crew_controller_local(
   name = "sim_analysis",
-  workers = 2,  # Run 2 simulation tasks concurrently (memory intensive)
-  seconds_idle = 300
+  workers = 9,  # 9 concurrent tasks × 2 cores each = 18 CPUs
+  seconds_idle = Inf  # Workers stay alive for entire sims run
 )
 default_controller = crew_controller_sequential()
 
@@ -1375,7 +1376,7 @@ run_fixed_analysis <- function(dataset_entry, analysis_spec) {
     imaxit = SIM_DESURV_MAXIT,
     ninit = SIM_CV_NSTARTS,
     parallel_init = TRUE,
-    ncores_init = SIM_CV_NSTARTS,
+    ncores_init = SIM_MAX_CORES,
     verbose = TRUE
   )
   fit$data <- list(X = processed_train$ex, sampInfo = processed_train$sampInfo)
@@ -1433,7 +1434,7 @@ run_bayesopt_analysis <- function(dataset_entry, analysis_spec) {
     seed = dataset_entry$metadata$seed,
     parallel_grid = TRUE,
     n_starts = SIM_CV_NSTARTS,
-    ncores_grid = SIM_CV_NSTARTS,
+    ncores_grid = SIM_MAX_CORES,
     cv_verbose = analysis_spec$cv_verbose %||% FALSE,
     verbose = TRUE
   )
@@ -1495,7 +1496,7 @@ run_bayesopt_analysis <- function(dataset_entry, analysis_spec) {
       imaxit = SIM_DESURV_MAXIT,
       ninit = SIM_CV_NSTARTS,
       parallel_init = TRUE,
-      ncores_init = SIM_CV_NSTARTS,
+      ncores_init = SIM_MAX_CORES,
       verbose = FALSE
     )
     fit_obj$data <- list(X = processed_train$ex, sampInfo = processed_train$sampInfo)

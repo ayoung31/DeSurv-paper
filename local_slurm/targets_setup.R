@@ -82,15 +82,16 @@ DEFAULT_NINIT_FULL <- if (exists("DEFAULT_NINIT_FULL", inherits = TRUE)) DEFAULT
 
 default_controller = crew_controller_local(
   name = "default",
-  workers = 4,  # Figures, clustering, validation (light memory)
-  seconds_idle = 120
+  workers = 2,  # Reduced from 4 to prevent OOM crashes (val_cindex_desurv_bladder)
+  seconds_idle = Inf  # Never timeout: workers stay alive for entire pipeline run.
+                      # Idle workers use no CPU and minimal RSS. tar_make() kills all on exit.
 )
 
 # Local multicore controller for low memory tasks
 low_mem_controller = crew_controller_local(
   name = "low_mem",
   workers = 2,
-  seconds_idle = 120
+  seconds_idle = Inf  # Never timeout (see default_controller comment)
 )
 
 # Local multicore controller for CV tasks (main BO computation)
@@ -98,22 +99,23 @@ low_mem_controller = crew_controller_local(
 # so 2 workers = 12 CPUs. Do not increase without reducing ncores_grid.
 cv_comp_controller = crew_controller_local(
   name = "cv",
-  workers = 2,  # 2 concurrent BO tasks; each uses ~1.5 GB + 12 CPUs total
-  seconds_idle = 300  # Longer idle time for long-running tasks
+  workers = 1,  # Reduced from 2: each worker forks 5 mclapply children (6 procs total).
+                # 2 workers = 12 procs, exhausts inotify max_user_instances (128) with system.
+  seconds_idle = Inf  # Never timeout (see default_controller comment)
 )
 
 # Local multicore controller for full model runs
 full_run_controller = crew_controller_local(
   name = "full",
   workers = 2,  # Seed fits are memory-heavy (~1 GB each)
-  seconds_idle = 300
+  seconds_idle = Inf  # Never timeout (see default_controller comment)
 )
 
 # Local multicore controller for medium memory tasks (seed fits, consensus)
 med_mem_controller = crew_controller_local(
   name = "med_mem",
   workers = 2,  # Each seed fit loads full expression matrix (~1 GB)
-  seconds_idle = 120
+  seconds_idle = Inf  # Never timeout (see default_controller comment)
 )
 
 active_controller <- crew_controller_group(default_controller,

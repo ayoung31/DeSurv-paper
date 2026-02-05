@@ -21,13 +21,12 @@ source("R/targets_config.R")
 source("R/figure_targets.R")
 
 
-tar_load(sim_figs_by_scenario)
+# Sim results from student's HPC store (too large to rebuild locally)
+sim_figs_by_scenario <- readRDS(file.path(params$tar_store, "objects", "sim_figs_by_scenario"))
 
 tar_load(fig_extval_panel_a_tcgacptac)
 tar_load(fig_extval_panel_b_tcgacptac)
 tar_load(fig_extval_panel_c_tcgacptac)
-
-tar_load(sim_figs_by_scenario)
 
 scenario_ids = sapply(sim_figs_by_scenario,function(x) x$scenario_id)
 analysis_ids = sapply(sim_figs_by_scenario,function(x) x$analysis_id)
@@ -276,7 +275,7 @@ Together, these results show that survival-informed factorization separates vari
 
 ```{r fig-bladder, fig.cap="Survival-associated structure in bladder cancer is recovered by DeSurv and transfers across tumor types.(A) In bladder cancer, DeSurv identifies latent factors (F1, F2) with strong associations to survival, as measured by Cox partial log-likelihood, despite explaining only a small fraction of total expression variance. In contrast, factors derived from standard NMF explain substantially more variance but exhibit weak survival association. (B) Applying gene-level factor definitions learned in pancreatic ductal adenocarcinoma (PDAC) to bladder cancer samples yields clear separation of survival outcomes when patients are stratified by factor score (median split), with numbers at risk shown below. These results indicate that prognostically relevant structure may be weakly aligned with dominant transcriptional variation and can generalize across cancer types. \\label{fig:bladder}", fig.env='figure*', fig.pos='t', out.width='\\textwidth'}
 tar_load(fig_variation_explained_bladder)
-tar_load(raw_data_bladder)
+raw_data_bladder <- "data/original/IMVigor210_sampInfo_ex_clinical.rds"
 tar_load(tar_data_filtered_tcgacptac)
 data_bladder = readRDS(raw_data_bladder)
 tar_load(tar_fit_desurv_tcgacptac)

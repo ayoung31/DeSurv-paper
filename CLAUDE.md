@@ -29,6 +29,9 @@ sbatch _targets_sims_local.sh   # Simulation studies
 # Run specific pipeline directly
 Rscript -e 'targets::tar_make(script = "_targets.R")'
 
+# Rebuild simulation figures from pre-computed results (see below)
+Rscript -e 'source("sim_figs.R"); sim_results_table <- readRDS("store_PKG_VERSION=NA_GIT_BRANCH=naimedits0125_full/objects/sim_results_table"); save_sim_figs_by_scenario(build_sim_figs_by_scenario(sim_results_table), sim_dir="figures/sim", figure_configs=list())'
+
 # Render manuscript
 Rscript -e 'rmarkdown::render("paper/paper.Rmd")'
 ```
@@ -80,8 +83,8 @@ Defined in `targets_setup.R`. Tuned for 20 CPUs / 30GB RAM:
 
 | Controller | Workers | Peak Memory | CPUs | Used By |
 |-----------|---------|-------------|------|---------|
-| `cv` | 2 | ~3 GB (+ mclapply forks) | 12 | BO, NMF, elbowk BO |
-| `default` | 4 | ~2 GB | 4 | Figures, clustering, validation |
+| `cv` | 1 | ~1.5 GB (+ 5 mclapply forks) | 6 | BO, NMF (`fit_std`), elbowk BO |
+| `default` | 2 | ~1 GB | 2 | Figures, clustering, validation, ORA |
 | `med_mem` | 2 | ~2 GB | 2 | Seed fits, consensus init |
 | `full` | 2 | ~1 GB | 2 | Full model runs |
 | `low_mem` | 2 | ~0.6 GB | spare | Light tasks |
@@ -92,7 +95,8 @@ Defined in `targets_setup.R`. Tuned for 20 CPUs / 30GB RAM:
 
 **IMPORTANT — avoid OOM crashes:**
 - Changing `desurv_parallel_grid` or `desurv_ncores_grid` in `targets_bo_configs.R` **invalidates all BO targets** (they are inside `bo_config`, which is hashed). Only change these if you're willing to rerun BO from scratch.
-- Worker counts in `targets_setup.R` do NOT invalidate targets — safe to adjust anytime.
+- Worker counts and `seconds_idle` in `targets_setup.R` do NOT invalidate targets — safe to adjust anytime.
+- All controllers use `seconds_idle = Inf` — workers stay alive for the entire pipeline run to prevent starvation during long BO tasks. Idle workers use no CPU and minimal RSS; `tar_make()` kills all on exit.
 - If the pipeline crashes with crew worker crashes (6 consecutive), reduce non-cv workers first.
 
 **HPC mode (Longleaf):** Uses `crew_controller_slurm` with 202 workers and higher memory. See Slurm section below.
@@ -184,11 +188,11 @@ paper/supp_methods.pdf                             │
 
 ### Key Targets Loaded in Results
 
-The results section (`04_results.Rmd`) loads these targets via `tar_load()`:
+The results section (`04_results.Rmd`) loads these targets. Most use `tar_load()`, but `sim_figs_by_scenario` uses `readRDS()` directly (see "Simulation Figures" below).
 
 | Target | Figure | Content |
 |--------|--------|---------|
-| `sim_figs_by_scenario` | Fig 2E, 3 | Simulation results |
+| `sim_figs_by_scenario` | Fig 2E, 3 | Simulation results (loaded via `readRDS`, not `tar_load`) |
 | `fig_bo_heat_tcgacptac` | Fig 2D | BO heatmap |
 | `fig_residuals_tcgacptac` | Fig 2A | NMF residuals |
 | `fig_cophenetic_tcgacptac` | Fig 2B | Cophenetic correlation |
@@ -205,6 +209,31 @@ Figure targets are defined in `R/figure_targets.R` with this pattern:
 - `build_fig_*_panels()` - Creates individual panel plots
 - `combine_fig_*_panels()` - Arranges panels into composite figure
 - `save_fig_*()` - Saves to `figures/` and `figures/panels/`
+
+### Simulation Figures (HPC Store Workaround)
+
+Simulation analyses (`sim_analysis_result`, 2400 branches) are run on HPC by the student. The aggregated `sim_results_table` and `sim_figs_by_scenario` objects are downloaded into the local store's `objects/` directory. However, the store **metadata** (`meta/`) is not transferred, so `targets` does not recognize these objects as up-to-date.
+
+**DO NOT run `tar_make(names = "sim_figs_by_scenario", script = "_targets_sims.R")` locally** — it will attempt to recompute all 2,400 analysis branches from scratch and appear to freeze.
+
+Instead, rebuild simulation figures directly from the pre-computed results table:
+
+```r
+source("sim_figs.R")
+store <- "store_PKG_VERSION=NA_GIT_BRANCH=naimedits0125_full"
+sim_results_table <- readRDS(file.path(store, "objects", "sim_results_table"))
+sim_figs_by_scenario <- build_sim_figs_by_scenario(sim_results_table)
+
+# Save rebuilt object back to store (REQUIRED for paper rendering)
+saveRDS(sim_figs_by_scenario, file.path(store, "objects", "sim_figs_by_scenario"))
+
+# Also save standalone PDFs
+save_sim_figs_by_scenario(sim_figs_by_scenario,
+                          sim_dir = "figures/sim",
+                          figure_configs = list())
+```
+
+**IMPORTANT:** You must save the rebuilt object back to the store. The paper (`04_results.Rmd:25`) loads `sim_figs_by_scenario` via `readRDS()` from the store. The HPC-built ggplot objects are **not renderable locally** due to ggplot2 version mismatch (`ggplot_build` fails on deserialized objects from different versions). Always rebuild from `sim_results_table` (raw data, version-agnostic) rather than reusing serialized ggplot objects.
 
 ### Rendering Commands
 
@@ -500,6 +529,65 @@ tail -f logs/slurm-<JOBID>.out     # Monitor job output
 sacct -j <JOBID>                   # Job accounting info
 ```
 
+#### Pipeline Runtime Diagnostics
+
+**IMPORTANT:** When asked "what's running?" or "when will it finish?", **always run `tar_progress()` first**. Do NOT rely on the pipeline log, process trees, or store timestamps — these are unreliable for in-flight status.
+
+**1. What is actually running right now?**
+```r
+# THE authoritative source — shows dispatched/completed/errored targets
+p <- targets::tar_progress()
+print(p[p$progress != "skipped", ])
+```
+
+**2. Estimate remaining runtime:**
+```r
+# Get historical runtimes for all outdated targets
+m <- targets::tar_meta()
+od <- targets::tar_outdated()
+od_meta <- m[m$name %in% od, c("name", "seconds")]
+od_meta <- od_meta[order(-od_meta$seconds), ]
+print(od_meta)
+cat("Total sequential runtime:", sum(od_meta$seconds, na.rm=TRUE)/3600, "hours\n")
+```
+
+**3. Identify the critical path (longest sequential chain):**
+
+The cv worker is almost always the bottleneck. These targets run **sequentially** on cv:
+
+```
+fit_std → std_nmf_selected_k → desurv_bo_results_elbowk (~60 min)
+                              → fit_std_desurvk (~4s)
+                              → fit_std_elbowk (~3s)
+```
+
+Everything else (seed fits on med_mem, clustering/figures on default) runs in parallel and is rarely the bottleneck.
+
+**4. Controller-to-target mapping (which worker runs what):**
+
+| Controller | Key Targets | Typical Runtime |
+|-----------|-------------|-----------------|
+| `cv` | `desurv_bo_results_*`, `fit_std_*` | 1-60 min each |
+| `med_mem` | `desurv_seed_fits_*`, `desurv_consensus_init_*`, `tar_fit_desurv_*` | 1-12 min each |
+| `default` | clusters, validation, figures, ORA | 1-2 min each |
+
+**5. Process-level confirmation (only if tar_progress is ambiguous):**
+```bash
+# Which controllers have active workers?
+ps -eo pid,ppid,etime,rss,args | grep "crew_worker" | grep -v grep
+# Look for controller="cv" vs controller="med_mem" in the command line
+
+# Check mclapply children of a specific worker
+ps --ppid <WORKER_PID> -o pid,etime,%cpu
+```
+
+**Known observability gaps in targets + crew:**
+- The pipeline log only writes lines on dispatch/complete/error — long-running targets produce zero output for hours
+- Crew worker stdout goes to `/dev/null` — `verbose=TRUE` output from BO/NMF is invisible
+- The log "dispatched" event fires when a target is sent to the controller queue, NOT when a worker starts executing it — a dispatched target may be blocked on unsatisfied dependencies
+- `tar_meta()` only has data for previously completed targets — there is no "elapsed time so far" for in-flight targets
+- mclapply forks from different target types (BO CV folds vs NMF parallel runs) look identical in `ps` output
+
 ### Common Pitfalls to Avoid
 
 | Pitfall | Symptom | Prevention |
@@ -522,6 +610,13 @@ sacct -j <JOBID>                   # Job accounting info
 | **Piping pipeline to `head`/`tail`** | SIGPIPE kills controller, orphans workers | NEVER pipe `start_pipeline.sh` through `head`. Run in background with `nohup` |
 | **Too many crew workers** | OOM crash kills pipeline mid-run, losing in-flight BO results | Keep total workers under memory budget (see `targets_setup.R` comments). Peak = sum of all controller workers × per-worker memory |
 | **Changing `desurv_parallel_grid`/`ncores_grid`** | Invalidates ALL BO targets (multi-hour reruns) | These are inside `bo_config` which is hashed. Change worker counts in `targets_setup.R` instead (safe, no invalidation) |
+| **Using pipeline log to diagnose status** | Log only updates on dispatch/complete events — silent for hours during long targets | Use `tar_progress()` as first diagnostic, not the log file |
+| **Trusting "dispatched" in log** | "Dispatched" means queued, not executing — target may be blocked on dependencies | Cross-reference with `tar_progress()` and `tar_network()` dependency graph |
+| **Using `ps` to identify running target** | mclapply forks from BO and NMF look identical (5 R processes at 100% CPU) | Use `tar_progress()` to identify the target; only use `ps` to confirm worker health |
+| **Stale dispatched progress on restart** | Crashed pipeline leaves targets in "dispatched" state; `tar_make()` skips them | Use `start_pipeline.sh` (auto-clears) or `Rscript -e "targets::tar_destroy(destroy='progress')"` |
+| **Paper target kills pipeline early** | Paper rendering error before crew initializes; `error="continue"` doesn't help | Use `start_pipeline.sh` (excludes paper by default); add `--with-paper` only when ready |
+| **Worker idle timeout starvation** | med_mem/default workers die during long BO; downstream targets never run | All controllers now use `seconds_idle = Inf` — workers stay alive for entire run |
+| **Running `tar_make` for sim figures locally** | Appears frozen — tries to recompute 2,400 analysis branches because store metadata is missing (objects were downloaded from HPC without meta) | Use `readRDS()` to load `sim_results_table` directly and call `build_sim_figs_by_scenario()`. See "Simulation Figures" section |
 
 ### Multi-Project Coordination
 
@@ -552,6 +647,9 @@ done
 nohup ./scripts/start_pipeline.sh > logs/pipeline.log 2>&1 &
 tail -f logs/pipeline.log             # Monitor separately
 
+# Include paper rendering (excluded by default to prevent early errors killing the pipeline):
+nohup ./scripts/start_pipeline.sh --with-paper > logs/pipeline.log 2>&1 &
+
 # Or for simulations:
 nohup ./scripts/start_pipeline.sh --sims > logs/sims.log 2>&1 &
 ```
@@ -559,8 +657,10 @@ nohup ./scripts/start_pipeline.sh --sims > logs/sims.log 2>&1 &
 This wrapper:
 1. Runs mandatory preflight checks
 2. Checks cross-project resource contention
-3. Auto-starts watchdog monitoring
-4. Cleans up on completion
+3. Auto-clears stale "dispatched"/"started" progress from crashed runs
+4. Excludes paper target by default (use `--with-paper` to include)
+5. Auto-starts watchdog monitoring
+6. Cleans up on completion
 
 ### Slurm Job Lifecycle
 
@@ -609,13 +709,17 @@ sacct -j <JOBID> --format=JobID,JobName,State,ExitCode,MaxRSS,Elapsed
 kill <PIDs shown>
 scancel <job_ids shown>
 
-# 3. Check store state
+# 3. Clear stale progress (targets stuck in dispatched/started state)
+Rscript -e 'targets::tar_destroy(destroy = "progress")'
+# NOTE: start_pipeline.sh does this automatically
+
+# 4. Check store state
 Rscript -e 'targets::tar_meta()' | grep error
 
-# 4. Remove stale locks if needed
+# 5. Remove stale locks if needed
 rm store_*/.lock
 
-# 5. Resubmit
+# 6. Resubmit (start_pipeline.sh handles steps 3-5 automatically)
 ./scripts/preflight_check.sh sbatch _targets_wait.sh
 ```
 

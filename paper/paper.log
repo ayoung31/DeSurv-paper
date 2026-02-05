@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.11.7)  30 JAN 2026 18:34
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.11.7)  4 FEB 2026 23:19
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1321,13 +1321,12 @@ File: paper_files/figure-latex/fig-extval-1.pdf Graphic file (type pdf)
 Package pdftex.def Info: paper_files/figure-latex/fig-extval-1.pdf  used on inp
 ut line 483.
 (pdftex.def)             Requested size: 505.69374pt x 344.09169pt.
-<paper_files/figure-latex/fig-bladder-1.pdf, id=126, 468.75125pt x 316.18124pt>
-
+<paper_files/figure-latex/fig-bladder-1.pdf, id=126, 465.74pt x 316.18124pt>
 File: paper_files/figure-latex/fig-bladder-1.pdf Graphic file (type pdf)
 <use paper_files/figure-latex/fig-bladder-1.pdf>
 Package pdftex.def Info: paper_files/figure-latex/fig-bladder-1.pdf  used on in
 put line 532.
-(pdftex.def)             Requested size: 505.69374pt x 341.09917pt.
+(pdftex.def)             Requested size: 505.69374pt x 343.31845pt.
 [3]
 Underfull \hbox (badness 10000) in paragraph at lines 601--602
 
@@ -1345,14 +1344,8 @@ Underfull \hbox (badness 10000) in paragraph at lines 682--685
  []
 
 [4]
-Overfull \hbox (17.39314pt too wide) in paragraph at lines 701--701
-[]\T1/lmtt/m/n/8 ## DeSurv git commit: 370c88aa9a89e0c71507fbb161d226c7e2e4c61f
-[] 
- []
-
-
 Overfull \hbox (13.14714pt too wide) in paragraph at lines 701--701
-[]\T1/lmtt/m/n/8 ## Paper git commit: d2128a19fa51cfc859b558808acede177641525e[
+[]\T1/lmtt/m/n/8 ## Paper git commit: 0c5c01ec10c42c170c996ddb357de71cca733e12[
 ] 
  []
 
@@ -1482,7 +1475,7 @@ b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb
 ></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/share
 /texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/tex
 mf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on paper.pdf (11 pages, 594177 bytes).
+Output written on paper.pdf (11 pages, 609391 bytes).
 PDF statistics:
  412 PDF objects out of 1000 (max. 8388607)
  324 compressed objects within 4 object streams

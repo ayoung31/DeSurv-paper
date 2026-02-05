@@ -6,7 +6,8 @@
 # Use this instead of directly running tar_make() for long-running pipelines.
 #
 # Usage:
-#   ./scripts/start_pipeline.sh                    # Run main pipeline
+#   ./scripts/start_pipeline.sh                    # Run main pipeline (excludes paper)
+#   ./scripts/start_pipeline.sh --with-paper       # Run pipeline including paper rendering
 #   ./scripts/start_pipeline.sh --sims             # Run simulation pipeline
 #   ./scripts/start_pipeline.sh --script FILE.R   # Run custom script
 #   ./scripts/start_pipeline.sh --no-watchdog     # Skip watchdog (not recommended)
@@ -33,6 +34,7 @@ SCRIPT="_targets.R"
 RUN_WATCHDOG=true
 FORCE_MODE=false
 ALERT_MODE=false
+INCLUDE_PAPER=false
 
 # Colors
 RED='\033[0;31m'
@@ -60,6 +62,10 @@ while [[ $# -gt 0 ]]; do
             FORCE_MODE=true
             shift
             ;;
+        --with-paper)
+            INCLUDE_PAPER=true
+            shift
+            ;;
         --alert)
             ALERT_MODE=true
             shift
@@ -70,6 +76,7 @@ while [[ $# -gt 0 ]]; do
             echo "Options:"
             echo "  --sims          Run simulation pipeline"
             echo "  --script FILE   Run custom targets script"
+            echo "  --with-paper    Include paper rendering target (excluded by default)"
             echo "  --no-watchdog   Skip watchdog monitoring (not recommended)"
             echo "  --force         Skip preflight checks (DANGEROUS)"
             echo "  --alert         Enable email alerts on issues"
@@ -161,12 +168,36 @@ else
 fi
 
 # =============================================================================
+# Step 3.5: Clear stale progress from crashed runs
+# =============================================================================
+echo ""
+echo -e "${YELLOW}Step 3.5: Checking for stale progress entries...${NC}"
+
+Rscript --vanilla -e "
+  suppressMessages(library(targets))
+  prog <- targets::tar_progress()
+  stuck <- sum(prog\$progress %in% c('dispatched', 'started'))
+  if (stuck > 0) {
+    cat('Found', stuck, 'targets stuck in dispatched/started state. Clearing progress...\n')
+    targets::tar_destroy(destroy = 'progress')
+    cat('Progress cleared. These targets will be re-dispatched.\n')
+  } else {
+    cat('No stale progress entries.\n')
+  }
+" 2>&1
+
+# =============================================================================
 # Step 4: Start Pipeline
 # =============================================================================
 echo ""
 echo -e "${YELLOW}Step 4: Starting pipeline...${NC}"
 echo ""
 echo "   Script: $SCRIPT"
+if [ "$INCLUDE_PAPER" = true ]; then
+    echo "   Paper:  included (--with-paper)"
+else
+    echo "   Paper:  excluded (use --with-paper to include)"
+fi
 echo "   Log: $PIPELINE_LOG"
 echo ""
 echo -e "${BLUE}════════════════════════════════════════════════════════════════${NC}"
@@ -181,7 +212,11 @@ echo "---" >> "$PIPELINE_LOG"
 
 # Run the pipeline
 set +e  # Don't exit on error - we need to cleanup
-Rscript -e "targets::tar_make(script = '$SCRIPT')" 2>&1 | tee -a "$PIPELINE_LOG"
+if [ "$INCLUDE_PAPER" = true ]; then
+    Rscript -e "targets::tar_make(script = '$SCRIPT')" 2>&1 | tee -a "$PIPELINE_LOG"
+else
+    Rscript -e "targets::tar_make(names = !tidyselect::any_of('paper'), script = '$SCRIPT')" 2>&1 | tee -a "$PIPELINE_LOG"
+fi
 EXIT_CODE=${PIPESTATUS[0]}
 set -e
 
