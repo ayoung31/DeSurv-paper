@@ -30,7 +30,7 @@ sbatch _targets_sims_local.sh   # Simulation studies
 Rscript -e 'targets::tar_make(script = "_targets.R")'
 
 # Rebuild simulation figures from pre-computed results (see below)
-Rscript -e 'source("sim_figs.R"); sim_results_table <- readRDS("store_PKG_VERSION=NA_GIT_BRANCH=naimedits0125_full/objects/sim_results_table"); save_sim_figs_by_scenario(build_sim_figs_by_scenario(sim_results_table), sim_dir="figures/sim", figure_configs=list())'
+Rscript -e 'source("sim_figs.R"); sim_results_table <- readRDS("store_PKG_VERSION=NA_GIT_BRANCH=20260107bugfix_full/objects/sim_results_table"); save_sim_figs_by_scenario(build_sim_figs_by_scenario(sim_results_table), sim_dir="figures/sim", figure_configs=list())'
 
 # Render manuscript
 Rscript -e 'rmarkdown::render("paper/paper.Rmd")'
@@ -183,7 +183,7 @@ Instead, rebuild simulation figures directly from the pre-computed results table
 
 ```r
 source("sim_figs.R")
-store <- "store_PKG_VERSION=NA_GIT_BRANCH=naimedits0125_full"
+store <- "store_PKG_VERSION=NA_GIT_BRANCH=20260107bugfix_full"
 sim_results_table <- readRDS(file.path(store, "objects", "sim_results_table"))
 sim_figs_by_scenario <- build_sim_figs_by_scenario(sim_results_table)
 
@@ -208,7 +208,7 @@ Rscript -e 'rmarkdown::render("paper/paper.Rmd")'
 Rscript -e 'rmarkdown::render("paper/supp_methods.Rmd")'
 
 # The paper uses this targets store (set in paper/_targets.yaml):
-# store: store_PKG_VERSION=NA_GIT_BRANCH=naimedits0125_full
+# store: store_PKG_VERSION=NA_GIT_BRANCH=20260107bugfix_full
 ```
 
 ### Targets Store for Paper
@@ -222,7 +222,7 @@ The paper reads from a specific targets store. **All four store references must 
 | `paper/paper.Rmd` | `params: tar_store:` |
 | `_targets_sims_local.sh` | `tar_config_set(store = ...)` |
 
-**Current store:** `store_PKG_VERSION=NA_GIT_BRANCH=naimedits0125_full`
+**Current store:** `store_PKG_VERSION=NA_GIT_BRANCH=20260107bugfix_full`
 
 To render with a different store:
 ```r
@@ -291,8 +291,8 @@ cat local_slurm/.current_mode
 
 ## Current Branch Configuration
 
-**Branch:** `naimedits0125`
-**Store:** `store_PKG_VERSION=NA_GIT_BRANCH=naimedits0125_full`
+**Branch:** `20260107bugfix`
+**Store:** `store_PKG_VERSION=NA_GIT_BRANCH=20260107bugfix_full`
 
 ### Local Desktop Mode
 

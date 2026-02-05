@@ -783,10 +783,10 @@ COMMON_DESURV_RUN_TARGETS <- list(
       .options = paste0("p", bo_bundle_selected$config$ninit)
     ),
     resources = tar_resources(
-      crew = tar_resources_crew(controller = "cv")
+      crew = tar_resources_crew(controller = "nmf")
     )
   ),
-  
+
   tar_target(
     std_nmf_k_selection_plots,
     {

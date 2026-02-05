@@ -63,66 +63,80 @@ DESURV_GIT_COMMIT <- tryCatch({
 DEFAULT_NINIT <- if (exists("DEFAULT_NINIT", inherits = TRUE)) DEFAULT_NINIT else 19
 DEFAULT_NINIT_FULL <- if (exists("DEFAULT_NINIT_FULL", inherits = TRUE)) DEFAULT_NINIT_FULL else 19
 
-# ------ Local multicore controllers (bypassing Slurm due to accounting issues) ------
-# Using crew_controller_local instead of crew_controller_slurm
-# This runs tasks locally with multiple processes
+# ------ Slurm controllers (resource-profiled for 20 CPU / 31 GB desktop) ------
+# Slurm + cgroups enforces CPU/memory limits per worker.
+# Workers queue until resources are available, preventing OOM crashes.
+# seconds_idle = 300 for all: workers release Slurm resources after 5 min idle,
+# freeing CPUs/RAM between pipeline phases (BO -> seed_fits -> downstream).
 #
-# Memory budget (20 CPUs, 30GB RAM):
-#   OS/system:  ~3 GB reserved
-#   cv:         2 workers × ~1.5 GB (parent + 5 mclapply forks via ncores_grid) = 3 GB, 12 CPUs
-#   default:    4 workers × ~0.5 GB (figures, clustering, validation) = 2 GB, 4 CPUs
-#   med_mem:    2 workers × ~1.0 GB (seed fits, full model runs) = 2 GB, 2 CPUs
-#   full:       2 workers × ~0.5 GB = 1 GB, 2 CPUs
-#   low_mem:    2 workers × ~0.3 GB = 0.6 GB
-#   Peak estimate: ~12 GB (2× safety = 24 GB, under 30 GB limit)
-#
-# CPU constraint: each cv worker forks ncores_grid=5 sub-processes via
-# parallel::mclapply inside DeSurv. 2 cv workers = 12 CPUs for BO alone.
-# 3 cv workers would use 18/20 CPUs, starving the system.
+# Resource budget (from tar_meta() profiling of previous full run):
+#   cv (BO):      6 CPUs × 6 GB = fits 3 concurrent (18 CPUs, 18 GB)
+#   nmf:         10 CPUs × 10 GB = fits 2 concurrent (20 CPUs, 20 GB)
+#   med_mem:      1 CPU  × 4 GB = fits 4 concurrent (4 CPUs, 16 GB)
+#   default:      1 CPU  × 2 GB = fits 10 concurrent (10 CPUs, 20 GB)
+# Slurm schedules dynamically — these are per-worker requests, not fixed reservations.
 
-default_controller = crew_controller_local(
+default_controller <- crew_controller_slurm(
   name = "default",
-  workers = 2,  # Reduced from 4 to prevent OOM crashes (val_cindex_desurv_bladder)
-  seconds_idle = Inf  # Never timeout: workers stay alive for entire pipeline run.
-                      # Idle workers use no CPU and minimal RSS. tar_make() kills all on exit.
+  workers = 10,
+  seconds_idle = 300,
+  options_cluster = crew_options_slurm(
+    cpus_per_task = 1,
+    memory_gigabytes_per_cpu = 2,
+    log_error = "logs/crew_%A.err",
+    log_output = "logs/crew_%A.out"
+  )
 )
 
-# Local multicore controller for low memory tasks
-low_mem_controller = crew_controller_local(
-  name = "low_mem",
-  workers = 2,
-  seconds_idle = Inf  # Never timeout (see default_controller comment)
-)
-
-# Local multicore controller for CV tasks (main BO computation)
-# Each worker forks ncores_grid=5 sub-processes (parallel::mclapply),
-# so 2 workers = 12 CPUs. Do not increase without reducing ncores_grid.
-cv_comp_controller = crew_controller_local(
+# BO targets: desurv_cv_bayesopt uses mclapply(ncores_grid=5) internally.
+# Each worker needs 6 CPUs (1 parent + 5 forks). Longest BO run: 4.2 hrs.
+cv_comp_controller <- crew_controller_slurm(
   name = "cv",
-  workers = 1,  # Reduced from 2: each worker forks 5 mclapply children (6 procs total).
-                # 2 workers = 12 procs, exhausts inotify max_user_instances (128) with system.
-  seconds_idle = Inf  # Never timeout (see default_controller comment)
+  workers = 3,
+  seconds_idle = 300,
+  options_cluster = crew_options_slurm(
+    cpus_per_task = 6,
+    memory_gigabytes_per_cpu = 1,
+    log_error = "logs/crew_%A.err",
+    log_output = "logs/crew_%A.out"
+  )
 )
 
-# Local multicore controller for full model runs
-full_run_controller = crew_controller_local(
-  name = "full",
-  workers = 2,  # Seed fits are memory-heavy (~1 GB each)
-  seconds_idle = Inf  # Never timeout (see default_controller comment)
+# NMF k-selection: NMF::nmf(.options="p30") forks up to 30 processes.
+# With 10 CPUs allocated, NMF parallelism is capped by cgroups.
+# Only 2 of 6 fit_std targets are slow (20 min); rest are <6 sec.
+nmf_controller <- crew_controller_slurm(
+  name = "nmf",
+  workers = 2,
+  seconds_idle = 300,
+  options_cluster = crew_options_slurm(
+    cpus_per_task = 10,
+    memory_gigabytes_per_cpu = 1,
+    log_error = "logs/crew_%A.err",
+    log_output = "logs/crew_%A.out"
+  )
 )
 
-# Local multicore controller for medium memory tasks (seed fits, consensus)
-med_mem_controller = crew_controller_local(
+# Seed fits: sequential for-loop (ninit_full=100, parallel_init=FALSE).
+# Single-threaded but memory-heavy (up to 350 MB output). Longest: 29 min.
+med_mem_controller <- crew_controller_slurm(
   name = "med_mem",
-  workers = 2,  # Each seed fit loads full expression matrix (~1 GB)
-  seconds_idle = Inf  # Never timeout (see default_controller comment)
+  workers = 4,
+  seconds_idle = 300,
+  options_cluster = crew_options_slurm(
+    cpus_per_task = 1,
+    memory_gigabytes_required = 4,
+    log_error = "logs/crew_%A.err",
+    log_output = "logs/crew_%A.out"
+  )
 )
 
-active_controller <- crew_controller_group(default_controller,
-                                           low_mem_controller,
-                                           cv_comp_controller,
-                                           full_run_controller,
-                                           med_mem_controller)
+active_controller <- crew_controller_group(
+  default_controller,
+  cv_comp_controller,
+  nmf_controller,
+  med_mem_controller
+)
 
 # ---- Global options ----
 TARGET_PACKAGES = c(

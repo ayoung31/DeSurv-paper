@@ -123,7 +123,7 @@ Run this audit:
 ```r
 # Verify all figure targets are up-to-date
 library(targets)
-tar_config_set(store = "store_PKG_VERSION=NA_GIT_BRANCH=naimedits0125_full")
+tar_config_set(store = "store_PKG_VERSION=NA_GIT_BRANCH=20260107bugfix_full")
 
 # Check target status
 meta <- tar_meta()
@@ -138,7 +138,7 @@ if (nrow(outdated) > 0) {
 
 ## 4. Store Consistency
 
-### Current Store: `store_PKG_VERSION=NA_GIT_BRANCH=naimedits0125_full`
+### Current Store: `store_PKG_VERSION=NA_GIT_BRANCH=20260107bugfix_full`
 
 All components must reference the same store:
 

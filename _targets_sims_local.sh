@@ -25,7 +25,7 @@ Rscript --max-connections=1024 -e '
 library(targets)
 
 # Use the same store as the main pipeline
-tar_config_set(store = "store_PKG_VERSION=NA_GIT_BRANCH=naimedits0125_full")
+tar_config_set(store = "store_PKG_VERSION=NA_GIT_BRANCH=20260107bugfix_full")
 
 cat("Starting full simulation pipeline\n")
 cat("Store:", tar_config_get("store"), "\n")
