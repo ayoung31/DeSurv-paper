@@ -6,17 +6,17 @@ bo_bundle_target <- tar_target(
     data = tar_data,
     data_split = tar_data_split,
     data_filtered = tar_data_filtered,
-    data_filtered_alpha0 = tar_data_filtered_alpha0,
+    # data_filtered_alpha0 = tar_data_filtered_alpha0,
     params_best = tar_params_best,
-    params_best_alpha0 = tar_params_best_alpha0,
+    # params_best_alpha0 = tar_params_best_alpha0,
     ngene_value = tar_ngene_value,
-    ngene_value_alpha0 = tar_ngene_value_alpha0,
+    # ngene_value_alpha0 = tar_ngene_value_alpha0,
     ntop_value = tar_ntop_value,
-    ntop_value_alpha0 = tar_ntop_value_alpha0,
+    # ntop_value_alpha0 = tar_ntop_value_alpha0,
     lambdaW_value = tar_lambdaW_value,
-    lambdaH_value = tar_lambdaH_value,
-    lambdaW_value_alpha0 = tar_lambdaW_value_alpha0,
-    lambdaH_value_alpha0 = tar_lambdaH_value_alpha0
+    lambdaH_value = tar_lambdaH_value
+    # lambdaW_value_alpha0 = tar_lambdaW_value_alpha0,
+    # lambdaH_value_alpha0 = tar_lambdaH_value_alpha0
   )
 )
 
@@ -77,19 +77,25 @@ COMMON_DESURV_BO_TARGETS <- list(
   ),
   
   tar_target(
-    tar_k_selection,
-    select_bo_k_by_cv_se(desurv_bo_results)
+    gp_curve,
+    {
+      bounds = desurv_bo_results$bounds[[1]]
+      k_lower = bounds$k_grid$lower
+      k_upper = bounds$k_grid$upper
+      
+      ntop_lower = bounds$ntop$lower
+      ntop_upper = bounds$ntop$upper
+      
+      grid = expand.grid(k_grid=seq(k_lower,k_upper),alpha_grid=seq(0,1,.05),
+                         lambda_grid=seq(.05,1,by=.05),nu_grid=seq(0,.1,.05),
+                         ntop = ntop_upper)
+      extract_gp_curve_grid(desurv_bo_results,grid)
+    }
   ),
-
+  
   tar_target(
     tar_params_best,
-    {
-      params <- standardize_bo_params(desurv_bo_results$overall_best$params)
-      if (!is.null(tar_k_selection$k_selected)) {
-        params$k <- tar_k_selection$k_selected
-      }
-      params
-    }
+    gp_curve %>% slice_max(mean,n=1)
   ),
   
   tar_target(
@@ -170,213 +176,162 @@ COMMON_DESURV_BO_TARGETS <- list(
     )
   ),
 
-  tar_target(
-    desurv_bo_results_alpha0,
-    {
-      bounds <- bo_config$desurv_bo_bounds
-      bounds$alpha_grid <- NULL
-      bounds <- maybe_add_numeric_bound(bounds, bo_config$ngene_config, "ngene", type = "integer")
-      bounds <- maybe_add_numeric_bound(bounds, bo_config$ntop_config, "ntop", type = "integer")
-      bounds <- maybe_add_numeric_bound(bounds, bo_config$lambdaw_config, "lambdaW_grid", log_scale = TRUE)
-      bounds <- maybe_add_numeric_bound(bounds, bo_config$lambdah_config, "lambdaH_grid", log_scale = TRUE)
+  # tar_target(
+  #   desurv_bo_results_alpha0,
+  #   {
+  #     bounds <- bo_config$desurv_bo_bounds
+  #     bounds$alpha_grid <- NULL
+  #     bounds <- maybe_add_numeric_bound(bounds, bo_config$ngene_config, "ngene", type = "integer")
+  #     bounds <- maybe_add_numeric_bound(bounds, bo_config$ntop_config, "ntop", type = "integer")
+  #     bounds <- maybe_add_numeric_bound(bounds, bo_config$lambdaw_config, "lambdaW_grid", log_scale = TRUE)
+  #     bounds <- maybe_add_numeric_bound(bounds, bo_config$lambdah_config, "lambdaH_grid", log_scale = TRUE)
+  # 
+  #     bo_fixed <- list(
+  #       n_starts = bo_config$ninit,
+  #       alpha_grid = 0
+  #     )
+  #     if (!bo_config$tune_ngene) {
+  #       bo_fixed$ngene <- bo_config$ngene_default
+  #     }
+  #     if (!bo_config$tune_ntop) {
+  #       bo_fixed$ntop <- bo_config$ntop_default
+  #     }
+  #     if (!bo_config$tune_lambdaw) {
+  #       bo_fixed$lambdaW_grid <- bo_config$lambdaw_default
+  #     }
+  #     if (!bo_config$tune_lambdah) {
+  #       bo_fixed$lambdaH_grid <- bo_config$lambdah_default
+  #     }
+  # 
+  #     DeSurv::desurv_cv_bayesopt_refine(
+  #       X = tar_data$ex,
+  #       y = tar_data$sampInfo$time,
+  #       d = tar_data$sampInfo$event,
+  #       dataset = tar_data$sampInfo$dataset,
+  #       samp_keeps = tar_data$samp_keeps,
+  #       preprocess = TRUE,
+  #       method_trans_train = bo_config$method_trans_train,
+  #       engine = "warmstart",
+  #       nfolds = bo_config$nfold,
+  #       tol = bo_config$bo_tol,
+  #       maxit = bo_config$bo_maxit,
+  #       coarse_bounds = bounds,
+  #       bo_fixed = bo_fixed,
+  #       max_refinements = bo_config$bo_max_refinements,
+  #       tol_gain = bo_config$bo_tol_gain,
+  #       plateau = bo_config$bo_plateau,
+  #       top_k = bo_config$bo_top_k,
+  #       shrink_base = bo_config$bo_shrink_base,
+  #       importance_gain = bo_config$bo_importance_gain,
+  #       coarse_control = bo_config$bo_coarse_control,
+  #       refine_control = bo_config$bo_refine_control,
+  #       verbose = TRUE,
+  #       parallel_grid = bo_config$desurv_parallel_grid,
+  #       ncores_grid = bo_config$desurv_ncores_grid
+  #     )
+  #   },
+  #   resources = tar_resources(
+  #     crew = tar_resources_crew(controller = "cv")
+  #   )
+  # ),
 
-      bo_fixed <- list(
-        n_starts = bo_config$ninit,
-        alpha_grid = 0
-      )
-      if (!bo_config$tune_ngene) {
-        bo_fixed$ngene <- bo_config$ngene_default
-      }
-      if (!bo_config$tune_ntop) {
-        bo_fixed$ntop <- bo_config$ntop_default
-      }
-      if (!bo_config$tune_lambdaw) {
-        bo_fixed$lambdaW_grid <- bo_config$lambdaw_default
-      }
-      if (!bo_config$tune_lambdah) {
-        bo_fixed$lambdaH_grid <- bo_config$lambdah_default
-      }
-
-      DeSurv::desurv_cv_bayesopt_refine(
-        X = tar_data$ex,
-        y = tar_data$sampInfo$time,
-        d = tar_data$sampInfo$event,
-        dataset = tar_data$sampInfo$dataset,
-        samp_keeps = tar_data$samp_keeps,
-        preprocess = TRUE,
-        method_trans_train = bo_config$method_trans_train,
-        engine = "warmstart",
-        nfolds = bo_config$nfold,
-        tol = bo_config$bo_tol,
-        maxit = bo_config$bo_maxit,
-        coarse_bounds = bounds,
-        bo_fixed = bo_fixed,
-        max_refinements = bo_config$bo_max_refinements,
-        tol_gain = bo_config$bo_tol_gain,
-        plateau = bo_config$bo_plateau,
-        top_k = bo_config$bo_top_k,
-        shrink_base = bo_config$bo_shrink_base,
-        importance_gain = bo_config$bo_importance_gain,
-        coarse_control = bo_config$bo_coarse_control,
-        refine_control = bo_config$bo_refine_control,
-        verbose = TRUE,
-        parallel_grid = bo_config$desurv_parallel_grid,
-        ncores_grid = bo_config$desurv_ncores_grid
-      )
-    },
-    resources = tar_resources(
-      crew = tar_resources_crew(controller = "cv")
-    )
-  ),
-
-  tar_target(
-    tar_k_selection_alpha0,
-    select_bo_k_by_cv_se(desurv_bo_results_alpha0)
-  ),
-
-  tar_target(
-    tar_params_best_alpha0,
-    {
-      params <- standardize_bo_params(desurv_bo_results_alpha0$overall_best$params)
-      if (!is.null(tar_k_selection_alpha0$k_selected)) {
-        params$k <- tar_k_selection_alpha0$k_selected
-      }
-      params$alpha <- 0
-      params
-    }
-  ),
-
-  tar_target(
-    tar_ngene_value_alpha0,
-    {
-      value <- tar_params_best_alpha0$ngene
-      if (is.null(value) || is.na(value)) {
-        as.integer(bo_config$ngene_default)
-      } else {
-        as.integer(round(value))
-      }
-    }
-  ),
-  tar_target(
-    tar_ntop_value_alpha0,
-    {
-      value <- tar_params_best_alpha0$ntop
-      if (is.null(value) || is.na(value)) {
-        as.integer(bo_config$ntop_default)
-      } else {
-        as.integer(round(value))
-      }
-    }
-  ),
-
-  tar_target(
-    tar_lambdaW_value_alpha0,
-    {
-      value <- tar_params_best_alpha0$lambdaW
-      if (is.null(value) || is.na(value)) {
-        as.numeric(bo_config$lambdaw_default)
-      } else {
-        as.numeric(value)
-      }
-    }
-  ),
-
-  tar_target(
-    tar_lambdaH_value_alpha0,
-    {
-      value <- tar_params_best_alpha0$lambdaH
-      if (is.null(value) || is.na(value)) {
-        as.numeric(bo_config$lambdah_default)
-      } else {
-        as.numeric(value)
-      }
-    }
-  ),
-
-  tar_target(
-    desurv_bo_history_alpha0,
-    {
-      path <- file.path(bo_results_dir, "desurv_bo_history_alpha0.csv")
-      utils::write.csv(desurv_bo_results_alpha0$history, path, row.names = FALSE)
-      path
-    },
-    format = "file"
-  ),
-
-  tar_target(
-    tar_data_filtered_alpha0,
-    {
-      preprocess_training_data(
-        data = tar_data,
-        ngene = tar_ngene_value_alpha0,
-        method_trans_train = bo_config$method_trans_train
-      )
-    }
-    
-  ),
+  # tar_target(
+  #   tar_k_selection_alpha0,
+  #   select_bo_k_by_cv_se(desurv_bo_results_alpha0)
+  # ),
+  # 
+  # tar_target(
+  #   tar_params_best_alpha0,
+  #   {
+  #     params <- standardize_bo_params(desurv_bo_results_alpha0$overall_best$params)
+  #     if (!is.null(tar_k_selection_alpha0$k_selected)) {
+  #       params$k <- tar_k_selection_alpha0$k_selected
+  #     }
+  #     params$alpha <- 0
+  #     params
+  #   }
+  # ),
+  # 
+  # tar_target(
+  #   tar_ngene_value_alpha0,
+  #   {
+  #     value <- tar_params_best_alpha0$ngene
+  #     if (is.null(value) || is.na(value)) {
+  #       as.integer(bo_config$ngene_default)
+  #     } else {
+  #       as.integer(round(value))
+  #     }
+  #   }
+  # ),
+  # tar_target(
+  #   tar_ntop_value_alpha0,
+  #   {
+  #     value <- tar_params_best_alpha0$ntop
+  #     if (is.null(value) || is.na(value)) {
+  #       as.integer(bo_config$ntop_default)
+  #     } else {
+  #       as.integer(round(value))
+  #     }
+  #   }
+  # ),
+  # 
+  # tar_target(
+  #   tar_lambdaW_value_alpha0,
+  #   {
+  #     value <- tar_params_best_alpha0$lambdaW
+  #     if (is.null(value) || is.na(value)) {
+  #       as.numeric(bo_config$lambdaw_default)
+  #     } else {
+  #       as.numeric(value)
+  #     }
+  #   }
+  # ),
+  # 
+  # tar_target(
+  #   tar_lambdaH_value_alpha0,
+  #   {
+  #     value <- tar_params_best_alpha0$lambdaH
+  #     if (is.null(value) || is.na(value)) {
+  #       as.numeric(bo_config$lambdah_default)
+  #     } else {
+  #       as.numeric(value)
+  #     }
+  #   }
+  # ),
+  # 
+  # tar_target(
+  #   desurv_bo_history_alpha0,
+  #   {
+  #     path <- file.path(bo_results_dir, "desurv_bo_history_alpha0.csv")
+  #     utils::write.csv(desurv_bo_results_alpha0$history, path, row.names = FALSE)
+  #     path
+  #   },
+  #   format = "file"
+  # ),
+  # 
+  # tar_target(
+  #   tar_data_filtered_alpha0,
+  #   {
+  #     preprocess_training_data(
+  #       data = tar_data,
+  #       ngene = tar_ngene_value_alpha0,
+  #       method_trans_train = bo_config$method_trans_train
+  #     )
+  #   }
+  #   
+  # ),
   
   tar_target(
     desurv_bo_results_elbowk,
     {
-      bounds <- bo_config$desurv_bo_bounds
-      bounds <- maybe_add_numeric_bound(bounds, bo_config$ngene_config, "ngene", type = "integer")
-      bounds <- maybe_add_numeric_bound(bounds, bo_config$ntop_config, "ntop", type = "integer")
-      bounds <- maybe_add_numeric_bound(bounds, bo_config$lambdaw_config, "lambdaW_grid", log_scale = TRUE)
-      bounds <- maybe_add_numeric_bound(bounds, bo_config$lambdah_config, "lambdaH_grid", log_scale = TRUE)
-      bounds$k_grid=NULL
-      bo_fixed <- listbo_fixed <- listbo_fixed <- list(n_starts = bo_config$ninit)
-      if (!bo_config$tune_ngene) {
-        bo_fixed$ngene <- bo_config$ngene_default
-      }
-      if (!bo_config$tune_ntop) {
-        bo_fixed$ntop <- bo_config$ntop_default
-      }
-      if (!bo_config$tune_lambdaw) {
-        bo_fixed$lambdaW_grid <- bo_config$lambdaw_default
-      }
-      if (!bo_config$tune_lambdah) {
-        bo_fixed$lambdaH_grid <- bo_config$lambdah_default
-      }
-      
-      bo_fixed$k_grid = std_nmf_selected_k
-
-      DeSurv::desurv_cv_bayesopt_refine(
-        X = tar_data$ex,
-        y = tar_data$sampInfo$time,
-        d = tar_data$sampInfo$event,
-        dataset = tar_data$sampInfo$dataset,
-        samp_keeps = tar_data$samp_keeps,
-        preprocess = TRUE,
-        method_trans_train = bo_config$method_trans_train,
-        engine = "warmstart",
-        nfolds = bo_config$nfold,
-        tol = bo_config$bo_tol,
-        maxit = bo_config$bo_maxit,
-        coarse_bounds = bounds,
-        bo_fixed = bo_fixed,
-        max_refinements = bo_config$bo_max_refinements,
-        tol_gain = bo_config$bo_tol_gain,
-        plateau = bo_config$bo_plateau,
-        top_k = bo_config$bo_top_k,
-        shrink_base = bo_config$bo_shrink_base,
-        importance_gain = bo_config$bo_importance_gain,
-        coarse_control = bo_config$bo_coarse_control,
-        refine_control = bo_config$bo_refine_control,
-        verbose = TRUE,
-        parallel_grid = bo_config$desurv_parallel_grid,
-        ncores_grid = bo_config$desurv_ncores_grid
-      )
-    },
-    resources = tar_resources(
-      crew = tar_resources_crew(controller = "cv")
-    )
+      gp_curve %>% filter(k==std_nmf_selected_k)
+    }
   ),
 
   tar_target(
     tar_params_best_elbowk,
     {
-      params <- standardize_bo_params(desurv_bo_results_elbowk$overall_best$params)
-      params
+      desurv_bo_results_elbowk %>% slice_max(mean,n=1)
     }
   ),
   
@@ -451,13 +406,13 @@ run_bundle_target <- tar_target(
     config = run_config,
     bo_bundle = bo_bundle_selected,
     ntop_value = tar_ntop_value,
-    ntop_value_alpha0 = tar_ntop_value_alpha0,
+    # ntop_value_alpha0 = tar_ntop_value_alpha0,
     training_results_dir = tar_training_results_dir,
-    training_results_dir_alpha0 = tar_training_results_dir_alpha0,
+    # training_results_dir_alpha0 = tar_training_results_dir_alpha0,
     fit_desurv = tar_fit_desurv,
-    fit_desurv_alpha0 = tar_fit_desurv_alpha0,
-    tops_desurv = tar_tops_desurv,
-    tops_desurv_alpha0 = tar_tops_desurv_alpha0
+    # fit_desurv_alpha0 = tar_fit_desurv_alpha0,
+    tops_desurv = tar_tops_desurv
+    # tops_desurv_alpha0 = tar_tops_desurv_alpha0
   )
 )
 
@@ -484,19 +439,19 @@ COMMON_DESURV_RUN_TARGETS <- list(
       config_tag = run_config$path_tag
     )
   ),
-  tar_target(
-    tar_training_results_dir_alpha0,
-    results_root_dir(
-      ngene = bo_bundle_selected$ngene_value_alpha0,
-      tol = run_config$run_tol,
-      maxit = run_config$run_maxit,
-      pkg_version = PKG_VERSION,
-      git_branch = GIT_BRANCH,
-      train_prefix = paste0(bo_bundle_selected$config$train_prefix, "_alpha0"),
-      method_trans_train = bo_bundle_selected$config$method_trans_train,
-      config_tag = run_config$path_tag
-    )
-  ),
+  # tar_target(
+  #   tar_training_results_dir_alpha0,
+  #   results_root_dir(
+  #     ngene = bo_bundle_selected$ngene_value_alpha0,
+  #     tol = run_config$run_tol,
+  #     maxit = run_config$run_maxit,
+  #     pkg_version = PKG_VERSION,
+  #     git_branch = GIT_BRANCH,
+  #     train_prefix = paste0(bo_bundle_selected$config$train_prefix, "_alpha0"),
+  #     method_trans_train = bo_bundle_selected$config$method_trans_train,
+  #     config_tag = run_config$path_tag
+  #   )
+  # ),
   tar_target(
     desurv_seed_fits,
     {
@@ -587,99 +542,99 @@ COMMON_DESURV_RUN_TARGETS <- list(
       crew = tar_resources_crew(controller = "med_mem")
     )
   ),
-
-  tar_target(
-    desurv_seed_fits_alpha0,
-    {
-      seeds <- seq_len(run_config$ninit_full)
-      fits <- vector("list", length(seeds))
-      scores <- rep(NA_real_, length(seeds))
-      for (i in seq_along(seeds)) {
-        fit_i <- try(
-          desurv_fit(
-            X = bo_bundle_selected$data_filtered_alpha0$ex,
-            y = bo_bundle_selected$data_filtered_alpha0$sampInfo$time,
-            d = bo_bundle_selected$data_filtered_alpha0$sampInfo$event,
-            k = bo_bundle_selected$params_best_alpha0$k,
-            alpha = bo_bundle_selected$params_best_alpha0$alpha,
-            lambda = bo_bundle_selected$params_best_alpha0$lambda,
-            nu = bo_bundle_selected$params_best_alpha0$nu,
-            lambdaW = bo_bundle_selected$lambdaW_value_alpha0,
-            lambdaH = bo_bundle_selected$lambdaH_value_alpha0,
-            seed = seeds[i],
-            tol = run_config$run_tol / 100,
-            tol_init = run_config$run_tol,
-            maxit = run_config$run_maxit,
-            imaxit = run_config$run_maxit,
-            ninit = 1,
-            parallel_init = FALSE,
-            verbose = FALSE
-          ),
-          silent = TRUE
-        )
-        if (!inherits(fit_i, "try-error") && inherits(fit_i, "desurv_fit")) {
-          fits[[i]] <- fit_i
-          scores[i] <- if (!is.null(fit_i$cindex)) fit_i$cindex else NA_real_
-        }
-      }
-      keep <- !vapply(fits, is.null, logical(1))
-      if (!any(keep)) {
-        stop("No successful full-model fits were obtained for alpha=0.")
-      }
-      list(
-        fits = fits[keep],
-        seeds = seeds[keep],
-        cindex = scores[keep]
-      )
-    },
-    resources = tar_resources(
-      crew = tar_resources_crew(controller = "med_mem")
-    )
-  ),
-
-  tar_target(
-    desurv_consensus_init_alpha0,
-    {
-      if (is.null(desurv_seed_fits_alpha0$fits) || !length(desurv_seed_fits_alpha0$fits)) {
-        stop("Consensus initialization requires at least one successful alpha=0 seed fit.")
-      }
-      DeSurv::desurv_consensus_seed(
-        fits = desurv_seed_fits_alpha0$fits,
-        X = bo_bundle_selected$data_filtered_alpha0$ex,
-        ntop = tar_ntop_value_alpha0,
-        k = bo_bundle_selected$params_best_alpha0$k,
-        min_frequency = 0.3 * run_config$ninit_full
-      )
-    }
-  ),
-
-  tar_target(
-    tar_fit_desurv_alpha0,
-    {
-      init_vals <- desurv_consensus_init_alpha0
-      desurv_fit(
-        X = bo_bundle_selected$data_filtered_alpha0$ex,
-        y = bo_bundle_selected$data_filtered_alpha0$sampInfo$time,
-        d = bo_bundle_selected$data_filtered_alpha0$sampInfo$event,
-        k = bo_bundle_selected$params_best_alpha0$k,
-        alpha = bo_bundle_selected$params_best_alpha0$alpha,
-        lambda = bo_bundle_selected$params_best_alpha0$lambda,
-        nu = bo_bundle_selected$params_best_alpha0$nu,
-        lambdaW = bo_bundle_selected$lambdaW_value_alpha0,
-        lambdaH = bo_bundle_selected$lambdaH_value_alpha0,
-        W0 = init_vals$W0,
-        H0 = init_vals$H0,
-        beta0 = init_vals$beta0,
-        seed = NULL,
-        tol = run_config$run_tol / 100,
-        maxit = run_config$run_maxit,
-        verbose = FALSE
-      )
-    },
-    resources = tar_resources(
-      crew = tar_resources_crew(controller = "med_mem")
-    )
-  ),
+# 
+#   tar_target(
+#     desurv_seed_fits_alpha0,
+#     {
+#       seeds <- seq_len(run_config$ninit_full)
+#       fits <- vector("list", length(seeds))
+#       scores <- rep(NA_real_, length(seeds))
+#       for (i in seq_along(seeds)) {
+#         fit_i <- try(
+#           desurv_fit(
+#             X = bo_bundle_selected$data_filtered_alpha0$ex,
+#             y = bo_bundle_selected$data_filtered_alpha0$sampInfo$time,
+#             d = bo_bundle_selected$data_filtered_alpha0$sampInfo$event,
+#             k = bo_bundle_selected$params_best_alpha0$k,
+#             alpha = bo_bundle_selected$params_best_alpha0$alpha,
+#             lambda = bo_bundle_selected$params_best_alpha0$lambda,
+#             nu = bo_bundle_selected$params_best_alpha0$nu,
+#             lambdaW = bo_bundle_selected$lambdaW_value_alpha0,
+#             lambdaH = bo_bundle_selected$lambdaH_value_alpha0,
+#             seed = seeds[i],
+#             tol = run_config$run_tol / 100,
+#             tol_init = run_config$run_tol,
+#             maxit = run_config$run_maxit,
+#             imaxit = run_config$run_maxit,
+#             ninit = 1,
+#             parallel_init = FALSE,
+#             verbose = FALSE
+#           ),
+#           silent = TRUE
+#         )
+#         if (!inherits(fit_i, "try-error") && inherits(fit_i, "desurv_fit")) {
+#           fits[[i]] <- fit_i
+#           scores[i] <- if (!is.null(fit_i$cindex)) fit_i$cindex else NA_real_
+#         }
+#       }
+#       keep <- !vapply(fits, is.null, logical(1))
+#       if (!any(keep)) {
+#         stop("No successful full-model fits were obtained for alpha=0.")
+#       }
+#       list(
+#         fits = fits[keep],
+#         seeds = seeds[keep],
+#         cindex = scores[keep]
+#       )
+#     },
+#     resources = tar_resources(
+#       crew = tar_resources_crew(controller = "med_mem")
+#     )
+#   ),
+# 
+#   tar_target(
+#     desurv_consensus_init_alpha0,
+#     {
+#       if (is.null(desurv_seed_fits_alpha0$fits) || !length(desurv_seed_fits_alpha0$fits)) {
+#         stop("Consensus initialization requires at least one successful alpha=0 seed fit.")
+#       }
+#       DeSurv::desurv_consensus_seed(
+#         fits = desurv_seed_fits_alpha0$fits,
+#         X = bo_bundle_selected$data_filtered_alpha0$ex,
+#         ntop = tar_ntop_value_alpha0,
+#         k = bo_bundle_selected$params_best_alpha0$k,
+#         min_frequency = 0.3 * run_config$ninit_full
+#       )
+#     }
+#   ),
+# 
+#   tar_target(
+#     tar_fit_desurv_alpha0,
+#     {
+#       init_vals <- desurv_consensus_init_alpha0
+#       desurv_fit(
+#         X = bo_bundle_selected$data_filtered_alpha0$ex,
+#         y = bo_bundle_selected$data_filtered_alpha0$sampInfo$time,
+#         d = bo_bundle_selected$data_filtered_alpha0$sampInfo$event,
+#         k = bo_bundle_selected$params_best_alpha0$k,
+#         alpha = bo_bundle_selected$params_best_alpha0$alpha,
+#         lambda = bo_bundle_selected$params_best_alpha0$lambda,
+#         nu = bo_bundle_selected$params_best_alpha0$nu,
+#         lambdaW = bo_bundle_selected$lambdaW_value_alpha0,
+#         lambdaH = bo_bundle_selected$lambdaH_value_alpha0,
+#         W0 = init_vals$W0,
+#         H0 = init_vals$H0,
+#         beta0 = init_vals$beta0,
+#         seed = NULL,
+#         tol = run_config$run_tol / 100,
+#         maxit = run_config$run_maxit,
+#         verbose = FALSE
+#       )
+#     },
+#     resources = tar_resources(
+#       crew = tar_resources_crew(controller = "med_mem")
+#     )
+#   ),
   
   tar_target(
     desurv_seed_fits_elbowk,
@@ -898,18 +853,18 @@ COMMON_DESURV_RUN_TARGETS <- list(
                    which.lists = "DECODER", color.lists = colors)
     }
   ),
-
-  tar_target(
-    tar_tops_desurv_alpha0,
-    get_top_genes(W = tar_fit_desurv_alpha0$W, ntop = tar_ntop_value_alpha0)
-  ),
-  tar_target(
-    gene_overlap_desurv_alpha0,
-    {
-      create_table(tops = tar_tops_desurv_alpha0$top_genes, gene_lists = top_genes,
-                   which.lists = "DECODER", color.lists = colors)
-    }
-  ),
+# 
+#   tar_target(
+#     tar_tops_desurv_alpha0,
+#     get_top_genes(W = tar_fit_desurv_alpha0$W, ntop = tar_ntop_value_alpha0)
+#   ),
+#   tar_target(
+#     gene_overlap_desurv_alpha0,
+#     {
+#       create_table(tops = tar_tops_desurv_alpha0$top_genes, gene_lists = top_genes,
+#                    which.lists = "DECODER", color.lists = colors)
+#     }
+#   ),
   tar_target(
     tar_tops_std_elbowk,
     {
@@ -977,16 +932,16 @@ COMMON_DESURV_RUN_TARGETS <- list(
       ora(tar_tops_desurv$top_genes,universe,organism)
     }
   ),
-
-  tar_target(
-    ora_analysis_desurv_alpha0,
-    {
-      universe = rownames(bo_bundle_selected$data_filtered_alpha0$ex)
-      organism <- org.Hs.eg.db
-      ora(tar_tops_desurv_alpha0$top_genes,universe,organism)
-    }
-  ),
-  
+# 
+#   tar_target(
+#     ora_analysis_desurv_alpha0,
+#     {
+#       universe = rownames(bo_bundle_selected$data_filtered_alpha0$ex)
+#       organism <- org.Hs.eg.db
+#       ora(tar_tops_desurv_alpha0$top_genes,universe,organism)
+#     }
+#   ),
+#   
   tar_target(
     ora_analysis_desurv_elbowk,
     {
@@ -1082,14 +1037,14 @@ COMMON_DESURV_VAL_TARGETS <- list(
       top_genes = val_run_bundle$tops_desurv$top_genes
     )
   ),
-  tar_target(
-    val_predictions_desurv_alpha0,
-    desurv_predict_validation(
-      fit = val_run_bundle$fit_desurv_alpha0,
-      data_list = data_val_filtered,
-      top_genes = val_run_bundle$tops_desurv_alpha0$top_genes
-    )
-  ),
+  # tar_target(
+  #   val_predictions_desurv_alpha0,
+  #   desurv_predict_validation(
+  #     fit = val_run_bundle$fit_desurv_alpha0,
+  #     data_list = data_val_filtered,
+  #     top_genes = val_run_bundle$tops_desurv_alpha0$top_genes
+  #   )
+  # ),
   tar_target(
     val_predictions_desurv_elbowk,
     desurv_predict_validation(
@@ -1136,26 +1091,26 @@ COMMON_DESURV_VAL_TARGETS <- list(
     },
     iteration = "list"
   ),
-  tar_target(
-    val_latent_desurv_alpha0,
-    {
-      latent <- desurv_collect_validation_latent(
-        fit = val_run_bundle$fit_desurv_alpha0,
-        data_list = data_val_filtered,
-        top_genes = val_run_bundle$tops_desurv_alpha0$top_genes
-      )
-      write_validation_latent_outputs(
-        latent_list = latent,
-        base_dir = file.path(
-          val_run_bundle$training_results_dir_alpha0,
-          "validation",
-          val_config_effective$config_id,
-          "desurv_alpha0"
-        )
-      )
-      latent
-    }
-  ),
+  # tar_target(
+  #   val_latent_desurv_alpha0,
+  #   {
+  #     latent <- desurv_collect_validation_latent(
+  #       fit = val_run_bundle$fit_desurv_alpha0,
+  #       data_list = data_val_filtered,
+  #       top_genes = val_run_bundle$tops_desurv_alpha0$top_genes
+  #     )
+  #     write_validation_latent_outputs(
+  #       latent_list = latent,
+  #       base_dir = file.path(
+  #         val_run_bundle$training_results_dir_alpha0,
+  #         "validation",
+  #         val_config_effective$config_id,
+  #         "desurv_alpha0"
+  #       )
+  #     )
+  #     latent
+  #   }
+  # ),
   tar_target(
     val_latent_desurv_elbowk,
     {
@@ -1220,30 +1175,30 @@ COMMON_DESURV_VAL_TARGETS <- list(
       summary_tbl
     }
   ),
-  tar_target(
-    val_cindex_desurv_alpha0,
-    {
-      summary_tbl <- summarize_validation_cindex(val_latent_desurv_alpha0)
-      if (nrow(summary_tbl)) {
-        dir.create(
-          file.path(val_run_bundle$training_results_dir_alpha0, "validation", val_config_effective$config_id),
-          recursive = TRUE,
-          showWarnings = FALSE
-        )
-        utils::write.csv(
-          summary_tbl,
-          file = file.path(
-            val_run_bundle$training_results_dir_alpha0,
-            "validation",
-            val_config_effective$config_id,
-            "val_cindex_desurv_alpha0.csv"
-          ),
-          row.names = FALSE
-        )
-      }
-      summary_tbl
-    }
-  ),
+  # tar_target(
+  #   val_cindex_desurv_alpha0,
+  #   {
+  #     summary_tbl <- summarize_validation_cindex(val_latent_desurv_alpha0)
+  #     if (nrow(summary_tbl)) {
+  #       dir.create(
+  #         file.path(val_run_bundle$training_results_dir_alpha0, "validation", val_config_effective$config_id),
+  #         recursive = TRUE,
+  #         showWarnings = FALSE
+  #       )
+  #       utils::write.csv(
+  #         summary_tbl,
+  #         file = file.path(
+  #           val_run_bundle$training_results_dir_alpha0,
+  #           "validation",
+  #           val_config_effective$config_id,
+  #           "val_cindex_desurv_alpha0.csv"
+  #         ),
+  #         row.names = FALSE
+  #       )
+  #     }
+  #     summary_tbl
+  #   }
+  # ),
   tar_target(
     val_cindex_desurv_elbowk,
     {
@@ -1264,403 +1219,403 @@ COMMON_DESURV_VAL_TARGETS <- list(
       summary_tbl <- summarize_validation_cindex(val_latent_std_desurvk)
       summary_tbl
     }
-  ),
+  )
   
   #clustering
-  tar_target(
-    clusters_desurv_X,
-    {
-      beta = tar_fit_desurv$beta
-      facs = which(beta != 0)
-      base_dir = file.path(
-        val_run_bundle$training_results_dir,
-        "validation",
-        val_config_effective$config_id,
-        "desurv"
-      )
-      run_clustering(tops = tar_tops_desurv$top_genes,
-                     data = data_val_filtered,
-                     gene_lists = top_genes,
-                     color.lists = colors,
-                     facs = facs,
-                     base_dir = base_dir,
-                     WtX = FALSE)
-    },
-    pattern = map(data_val_filtered),
-    iteration = "list"
-  ),
-  tar_target(
-    nclusters_desurv_X,
-    {
-      sel = select_nclusters(clusters_desurv_X$clus,k_max=length(clusters_desurv_X$clus))
-      sel$k
-    },
-    iteration = "vector",
-    pattern = map(clusters_desurv_X)
-  ),
-  tar_target(
-    clusters_desurv_X_aligned,
-    {
-      cluster_list = lapply(1:length(clusters_desurv_X),function(i){
-        clusters_desurv_X[[i]]$clus[[nclusters_desurv_X[i]]]$consensusClass
-      })
-      scores_list = lapply(1:length(clusters_desurv_X),function(i){
-        t(clusters_desurv_X[[i]]$Xtemp)
-      })
-
-      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
-                         linkage = "average",
-                         similarity_threshold = .5,
-                         zscore_within_dataset = TRUE)
-      temp
-    }
-  ),
-  
-  tar_target(
-    clusters_desurv_WtX,
-    {
-      beta = tar_fit_desurv$beta
-      facs = which(beta != 0)
-      base_dir = file.path(
-        val_run_bundle$training_results_dir,
-        "validation",
-        val_config_effective$config_id,
-        "desurv"
-      )
-      run_clustering(tops = tar_tops_desurv$top_genes,
-                     data = val_latent_desurv,
-                     gene_lists = top_genes,
-                     color.lists = colors,
-                     facs = facs,
-                     base_dir = base_dir,
-                     WtX = TRUE)
-    },
-    pattern = map(val_latent_desurv),
-    iteration = "list"
-  ),
-  tar_target(
-    nclusters_desurv_WtX,
-    {
-      sel = select_nclusters(clusters_desurv_WtX$clus,k_max=length(clusters_desurv_WtX$clus))
-      sel$k
-    },
-    iteration = "vector",
-    pattern = map(clusters_desurv_WtX)
-  ),
-  tar_target(
-    clusters_desurv_WtX_aligned,
-    {
-      cluster_list = lapply(1:length(clusters_desurv_WtX),function(i){
-        clusters_desurv_WtX[[i]]$clus[[nclusters_desurv_WtX[i]]]$consensusClass
-      })
-      scores_list = lapply(1:length(val_latent_desurv),function(i){
-        val_latent_desurv[[i]]$Z_scaled
-      })
-      
-      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
-                              linkage = "average",
-                              similarity_threshold = .5,
-                              zscore_within_dataset = TRUE)
-      temp
-    }
-  ),
-  
-  tar_target(
-    clusters_desurv_elbowk_X,
-    {
-      beta = tar_fit_desurv_elbowk$beta
-      facs = which(beta != 0)
-      base_dir = file.path(
-        val_run_bundle$training_results_dir,
-        "validation",
-        val_config_effective$config_id,
-        "desurv_elbowk"
-      )
-      run_clustering(tops = tar_tops_desurv_elbowk$top_genes,
-                     data = data_val_filtered_elbowk,
-                     gene_lists = top_genes,
-                     color.lists = colors,
-                     facs = facs,
-                     base_dir = base_dir,
-                     WtX = FALSE)
-    },
-    pattern = map(data_val_filtered_elbowk),
-    iteration = "list"
-  ),
-  tar_target(
-    nclusters_desurv_elbowk_X,
-    {
-      sel = select_nclusters(clusters_desurv_elbowk_X$clus,k_max=length(clusters_desurv_elbowk_X$clus))
-      sel$k
-    },
-    iteration = "vector",
-    pattern = map(clusters_desurv_elbowk_X)
-  ),
-  tar_target(
-    clusters_desurv_elbowk_X_aligned,
-    {
-      cluster_list = lapply(1:length(clusters_desurv_elbowk_X),function(i){
-        clusters_desurv_elbowk_X[[i]]$clus[[nclusters_desurv_elbowk_X[i]]]$consensusClass
-      })
-      scores_list = lapply(1:length(clusters_desurv_elbowk_X),function(i){
-        t(clusters_desurv_elbowk_X[[i]]$Xtemp)
-      })
-      
-      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
-                              linkage = "average",
-                              similarity_threshold = .5,
-                              zscore_within_dataset = TRUE)
-      temp
-    }
-  ),
-  
-  tar_target(
-    clusters_desurv_elbowk_WtX,
-    {
-      beta = tar_fit_desurv_elbowk$beta
-      facs = which(beta != 0)
-      base_dir = file.path(
-        val_run_bundle$training_results_dir,
-        "validation",
-        val_config_effective$config_id,
-        "desurv_elbowk"
-      )
-      run_clustering(tops = tar_tops_desurv_elbowk$top_genes,
-                     data = val_latent_desurv_elbowk,
-                     gene_lists = top_genes,
-                     color.lists = colors,
-                     facs = facs,
-                     base_dir = base_dir,
-                     WtX = TRUE)
-    },
-    pattern = map(val_latent_desurv_elbowk),
-    iteration = "list"
-  ),
-  tar_target(
-    nclusters_desurv_elbowk_WtX,
-    {
-      sel = select_nclusters(clusters_desurv_elbowk_WtX$clus,
-                             k_max=length(clusters_desurv_elbowk_WtX$clus))
-      sel$k
-    },
-    iteration = "vector",
-    pattern = map(clusters_desurv_elbowk_WtX)
-  ),
-  tar_target(
-    clusters_desurv_elbowk_WtX_aligned,
-    {
-      cluster_list = lapply(1:length(clusters_desurv_elbowk_WtX),function(i){
-        clusters_desurv_elbowk_WtX[[i]]$clus[[nclusters_desurv_elbowk_WtX[i]]]$consensusClass
-      })
-      scores_list = lapply(1:length(val_latent_desurv_elbowk),function(i){
-        val_latent_desurv_elbowk[[i]]$Z_scaled
-      })
-      
-      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
-                              linkage = "average",
-                              similarity_threshold = .5,
-                              zscore_within_dataset = TRUE)
-      temp
-    }
-  ),
-  
-  tar_target(
-    clusters_std_elbowk_X,
-    {
-      beta = fit_std_elbowk$beta
-      facs = which(beta != 0)
-      base_dir = file.path(
-        val_run_bundle$training_results_dir,
-        "validation",
-        val_config_effective$config_id,
-        "std_elbowk"
-      )
-      run_clustering(tops = tar_tops_std_elbowk$top_genes,
-                     data = data_val_filtered_elbowk,
-                     gene_lists = top_genes,
-                     color.lists = colors,
-                     facs = facs,
-                     base_dir = base_dir,
-                     WtX = FALSE)
-    },
-    pattern = map(data_val_filtered_elbowk),
-    iteration = "list"
-  ),
-  tar_target(
-    nclusters_std_elbowk_X,
-    {
-      sel = select_nclusters(clusters_std_elbowk_X$clus,k_max=length(clusters_std_elbowk_X$clus))
-      sel$k
-    },
-    iteration = "vector",
-    pattern = map(clusters_std_elbowk_X)
-  ),
-  tar_target(
-    clusters_std_elbowk_X_aligned,
-    {
-      cluster_list = lapply(1:length(clusters_std_elbowk_X),function(i){
-        clusters_std_elbowk_X[[i]]$clus[[nclusters_std_elbowk_X[i]]]$consensusClass
-      })
-      scores_list = lapply(1:length(clusters_std_elbowk_X),function(i){
-        t(clusters_std_elbowk_X[[i]]$Xtemp)
-      })
-      
-      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
-                              linkage = "average",
-                              similarity_threshold = .5,
-                              zscore_within_dataset = TRUE)
-      temp
-    }
-  ),
-  
-  tar_target(
-    clusters_std_elbowk_WtX,
-    {
-      beta = fit_std_elbowk$beta
-      facs = which(beta != 0)
-      base_dir = file.path(
-        val_run_bundle$training_results_dir,
-        "validation",
-        val_config_effective$config_id,
-        "std_elbowk"
-      )
-      run_clustering(tops = tar_tops_std_elbowk$top_genes,
-                     data = val_latent_std_elbowk,
-                     gene_lists = top_genes,
-                     color.lists = colors,
-                     facs = facs,
-                     base_dir = base_dir,
-                     WtX = TRUE)
-    },
-    pattern = map(val_latent_std_elbowk),
-    iteration = "list"
-  ),
-  tar_target(
-    nclusters_std_elbowk_WtX,
-    {
-      sel = select_nclusters(clusters_std_elbowk_WtX$clus,
-                             k_max=length(clusters_std_elbowk_WtX$clus))
-      sel$k
-    },
-    iteration = "vector",
-    pattern = map(clusters_std_elbowk_WtX)
-  ),
-  tar_target(
-    clusters_std_elbowk_WtX_aligned,
-    {
-      cluster_list = lapply(1:length(clusters_std_elbowk_WtX),function(i){
-        clusters_std_elbowk_WtX[[i]]$clus[[nclusters_std_elbowk_WtX[i]]]$consensusClass
-      })
-      scores_list = lapply(1:length(val_latent_std_elbowk),function(i){
-        val_latent_std_elbowk[[i]]$Z_scaled
-      })
-      
-      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
-                              linkage = "average",
-                              similarity_threshold = .5,
-                              zscore_within_dataset = TRUE)
-      temp
-    }
-  ),
-  
-  tar_target(
-    clusters_std_desurvk_X,
-    {
-      beta = fit_std_desurvk$beta
-      facs = which(beta != 0)
-      base_dir = file.path(
-        val_run_bundle$training_results_dir,
-        "validation",
-        val_config_effective$config_id,
-        "std_desurvk"
-      )
-      run_clustering(tops = tar_tops_std_desurvk$top_genes,
-                     data = data_val_filtered,
-                     gene_lists = top_genes,
-                     color.lists = colors,
-                     facs = facs,
-                     base_dir = base_dir,
-                     WtX = FALSE)
-    },
-    pattern = map(data_val_filtered),
-    iteration = "list"
-  ),
-  tar_target(
-    nclusters_std_desurvk_X,
-    {
-      sel = select_nclusters(clusters_std_desurvk_X$clus,k_max=length(clusters_std_desurvk_X$clus))
-      sel$k
-    },
-    iteration = "vector",
-    pattern = map(clusters_std_desurvk_X)
-  ),
-  tar_target(
-    clusters_std_desurvk_X_aligned,
-    {
-      cluster_list = lapply(1:length(clusters_std_desurvk_X),function(i){
-        clusters_std_desurvk_X[[i]]$clus[[nclusters_std_desurvk_X[i]]]$consensusClass
-      })
-      scores_list = lapply(1:length(clusters_std_desurvk_X),function(i){
-        t(clusters_std_desurvk_X[[i]]$Xtemp)
-      })
-      
-      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
-                              linkage = "average",
-                              similarity_threshold = .5,
-                              zscore_within_dataset = TRUE)
-      temp
-    }
-  ),
-  
-  tar_target(
-    clusters_std_desurvk_WtX,
-    {
-      beta = fit_std_desurvk$beta
-      facs = which(beta != 0)
-      base_dir = file.path(
-        val_run_bundle$training_results_dir,
-        "validation",
-        val_config_effective$config_id,
-        "std_desurvk"
-      )
-      run_clustering(tops = tar_tops_std_desurvk$top_genes,
-                     data = val_latent_std_desurvk,
-                     gene_lists = top_genes,
-                     color.lists = colors,
-                     facs = facs,
-                     base_dir = base_dir,
-                     WtX = TRUE)
-    },
-    pattern = map(val_latent_std_desurvk),
-    iteration = "list"
-  ),
-  tar_target(
-    nclusters_std_desurvk_WtX,
-    {
-      sel = select_nclusters(clusters_std_desurvk_WtX$clus,
-                             k_max=length(clusters_std_desurvk_WtX$clus))
-      sel$k
-    },
-    iteration = "vector",
-    pattern = map(clusters_std_desurvk_WtX)
-  ),
-  tar_target(
-    clusters_std_desurvk_WtX_aligned,
-    {
-      cluster_list = lapply(1:length(clusters_std_desurvk_WtX),function(i){
-        clusters_std_desurvk_WtX[[i]]$clus[[nclusters_std_desurvk_WtX[i]]]$consensusClass
-      })
-      scores_list = lapply(1:length(val_latent_std_desurvk),function(i){
-        val_latent_std_desurvk[[i]]$Z_scaled
-      })
-      
-      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
-                              linkage = "average",
-                              similarity_threshold = .5,
-                              zscore_within_dataset = TRUE)
-      temp
-    }
-  )
+  # tar_target(
+  #   clusters_desurv_X,
+  #   {
+  #     beta = tar_fit_desurv$beta
+  #     facs = which(beta != 0)
+  #     base_dir = file.path(
+  #       val_run_bundle$training_results_dir,
+  #       "validation",
+  #       val_config_effective$config_id,
+  #       "desurv"
+  #     )
+  #     run_clustering(tops = tar_tops_desurv$top_genes,
+  #                    data = data_val_filtered,
+  #                    gene_lists = top_genes,
+  #                    color.lists = colors,
+  #                    facs = facs,
+  #                    base_dir = base_dir,
+  #                    WtX = FALSE)
+  #   },
+  #   pattern = map(data_val_filtered),
+  #   iteration = "list"
+  # ),
+  # tar_target(
+  #   nclusters_desurv_X,
+  #   {
+  #     sel = select_nclusters(clusters_desurv_X$clus,k_max=length(clusters_desurv_X$clus))
+  #     sel$k
+  #   },
+  #   iteration = "vector",
+  #   pattern = map(clusters_desurv_X)
+  # ),
+  # tar_target(
+  #   clusters_desurv_X_aligned,
+  #   {
+  #     cluster_list = lapply(1:length(clusters_desurv_X),function(i){
+  #       clusters_desurv_X[[i]]$clus[[nclusters_desurv_X[i]]]$consensusClass
+  #     })
+  #     scores_list = lapply(1:length(clusters_desurv_X),function(i){
+  #       t(clusters_desurv_X[[i]]$Xtemp)
+  #     })
+  # 
+  #     temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
+  #                        linkage = "average",
+  #                        similarity_threshold = .5,
+  #                        zscore_within_dataset = TRUE)
+  #     temp
+  #   }
+  # ),
+  # 
+  # tar_target(
+  #   clusters_desurv_WtX,
+  #   {
+  #     beta = tar_fit_desurv$beta
+  #     facs = which(beta != 0)
+  #     base_dir = file.path(
+  #       val_run_bundle$training_results_dir,
+  #       "validation",
+  #       val_config_effective$config_id,
+  #       "desurv"
+  #     )
+  #     run_clustering(tops = tar_tops_desurv$top_genes,
+  #                    data = val_latent_desurv,
+  #                    gene_lists = top_genes,
+  #                    color.lists = colors,
+  #                    facs = facs,
+  #                    base_dir = base_dir,
+  #                    WtX = TRUE)
+  #   },
+  #   pattern = map(val_latent_desurv),
+  #   iteration = "list"
+  # ),
+  # tar_target(
+  #   nclusters_desurv_WtX,
+  #   {
+  #     sel = select_nclusters(clusters_desurv_WtX$clus,k_max=length(clusters_desurv_WtX$clus))
+  #     sel$k
+  #   },
+  #   iteration = "vector",
+  #   pattern = map(clusters_desurv_WtX)
+  # ),
+  # tar_target(
+  #   clusters_desurv_WtX_aligned,
+  #   {
+  #     cluster_list = lapply(1:length(clusters_desurv_WtX),function(i){
+  #       clusters_desurv_WtX[[i]]$clus[[nclusters_desurv_WtX[i]]]$consensusClass
+  #     })
+  #     scores_list = lapply(1:length(val_latent_desurv),function(i){
+  #       val_latent_desurv[[i]]$Z_scaled
+  #     })
+  #     
+  #     temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
+  #                             linkage = "average",
+  #                             similarity_threshold = .5,
+  #                             zscore_within_dataset = TRUE)
+  #     temp
+  #   }
+  # ),
+  # 
+  # tar_target(
+  #   clusters_desurv_elbowk_X,
+  #   {
+  #     beta = tar_fit_desurv_elbowk$beta
+  #     facs = which(beta != 0)
+  #     base_dir = file.path(
+  #       val_run_bundle$training_results_dir,
+  #       "validation",
+  #       val_config_effective$config_id,
+  #       "desurv_elbowk"
+  #     )
+  #     run_clustering(tops = tar_tops_desurv_elbowk$top_genes,
+  #                    data = data_val_filtered_elbowk,
+  #                    gene_lists = top_genes,
+  #                    color.lists = colors,
+  #                    facs = facs,
+  #                    base_dir = base_dir,
+  #                    WtX = FALSE)
+  #   },
+  #   pattern = map(data_val_filtered_elbowk),
+  #   iteration = "list"
+  # ),
+  # tar_target(
+  #   nclusters_desurv_elbowk_X,
+  #   {
+  #     sel = select_nclusters(clusters_desurv_elbowk_X$clus,k_max=length(clusters_desurv_elbowk_X$clus))
+  #     sel$k
+  #   },
+  #   iteration = "vector",
+  #   pattern = map(clusters_desurv_elbowk_X)
+  # ),
+  # tar_target(
+  #   clusters_desurv_elbowk_X_aligned,
+  #   {
+  #     cluster_list = lapply(1:length(clusters_desurv_elbowk_X),function(i){
+  #       clusters_desurv_elbowk_X[[i]]$clus[[nclusters_desurv_elbowk_X[i]]]$consensusClass
+  #     })
+  #     scores_list = lapply(1:length(clusters_desurv_elbowk_X),function(i){
+  #       t(clusters_desurv_elbowk_X[[i]]$Xtemp)
+  #     })
+  #     
+  #     temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
+  #                             linkage = "average",
+  #                             similarity_threshold = .5,
+  #                             zscore_within_dataset = TRUE)
+  #     temp
+  #   }
+  # ),
+  # 
+  # tar_target(
+  #   clusters_desurv_elbowk_WtX,
+  #   {
+  #     beta = tar_fit_desurv_elbowk$beta
+  #     facs = which(beta != 0)
+  #     base_dir = file.path(
+  #       val_run_bundle$training_results_dir,
+  #       "validation",
+  #       val_config_effective$config_id,
+  #       "desurv_elbowk"
+  #     )
+  #     run_clustering(tops = tar_tops_desurv_elbowk$top_genes,
+  #                    data = val_latent_desurv_elbowk,
+  #                    gene_lists = top_genes,
+  #                    color.lists = colors,
+  #                    facs = facs,
+  #                    base_dir = base_dir,
+  #                    WtX = TRUE)
+  #   },
+  #   pattern = map(val_latent_desurv_elbowk),
+  #   iteration = "list"
+  # ),
+  # tar_target(
+  #   nclusters_desurv_elbowk_WtX,
+  #   {
+  #     sel = select_nclusters(clusters_desurv_elbowk_WtX$clus,
+  #                            k_max=length(clusters_desurv_elbowk_WtX$clus))
+  #     sel$k
+  #   },
+  #   iteration = "vector",
+  #   pattern = map(clusters_desurv_elbowk_WtX)
+  # ),
+  # tar_target(
+  #   clusters_desurv_elbowk_WtX_aligned,
+  #   {
+  #     cluster_list = lapply(1:length(clusters_desurv_elbowk_WtX),function(i){
+  #       clusters_desurv_elbowk_WtX[[i]]$clus[[nclusters_desurv_elbowk_WtX[i]]]$consensusClass
+  #     })
+  #     scores_list = lapply(1:length(val_latent_desurv_elbowk),function(i){
+  #       val_latent_desurv_elbowk[[i]]$Z_scaled
+  #     })
+  #     
+  #     temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
+  #                             linkage = "average",
+  #                             similarity_threshold = .5,
+  #                             zscore_within_dataset = TRUE)
+  #     temp
+  #   }
+  # ),
+  # 
+  # tar_target(
+  #   clusters_std_elbowk_X,
+  #   {
+  #     beta = fit_std_elbowk$beta
+  #     facs = which(beta != 0)
+  #     base_dir = file.path(
+  #       val_run_bundle$training_results_dir,
+  #       "validation",
+  #       val_config_effective$config_id,
+  #       "std_elbowk"
+  #     )
+  #     run_clustering(tops = tar_tops_std_elbowk$top_genes,
+  #                    data = data_val_filtered_elbowk,
+  #                    gene_lists = top_genes,
+  #                    color.lists = colors,
+  #                    facs = facs,
+  #                    base_dir = base_dir,
+  #                    WtX = FALSE)
+  #   },
+  #   pattern = map(data_val_filtered_elbowk),
+  #   iteration = "list"
+  # ),
+  # tar_target(
+  #   nclusters_std_elbowk_X,
+  #   {
+  #     sel = select_nclusters(clusters_std_elbowk_X$clus,k_max=length(clusters_std_elbowk_X$clus))
+  #     sel$k
+  #   },
+  #   iteration = "vector",
+  #   pattern = map(clusters_std_elbowk_X)
+  # ),
+  # tar_target(
+  #   clusters_std_elbowk_X_aligned,
+  #   {
+  #     cluster_list = lapply(1:length(clusters_std_elbowk_X),function(i){
+  #       clusters_std_elbowk_X[[i]]$clus[[nclusters_std_elbowk_X[i]]]$consensusClass
+  #     })
+  #     scores_list = lapply(1:length(clusters_std_elbowk_X),function(i){
+  #       t(clusters_std_elbowk_X[[i]]$Xtemp)
+  #     })
+  #     
+  #     temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
+  #                             linkage = "average",
+  #                             similarity_threshold = .5,
+  #                             zscore_within_dataset = TRUE)
+  #     temp
+  #   }
+  # ),
+  # 
+  # tar_target(
+  #   clusters_std_elbowk_WtX,
+  #   {
+  #     beta = fit_std_elbowk$beta
+  #     facs = which(beta != 0)
+  #     base_dir = file.path(
+  #       val_run_bundle$training_results_dir,
+  #       "validation",
+  #       val_config_effective$config_id,
+  #       "std_elbowk"
+  #     )
+  #     run_clustering(tops = tar_tops_std_elbowk$top_genes,
+  #                    data = val_latent_std_elbowk,
+  #                    gene_lists = top_genes,
+  #                    color.lists = colors,
+  #                    facs = facs,
+  #                    base_dir = base_dir,
+  #                    WtX = TRUE)
+  #   },
+  #   pattern = map(val_latent_std_elbowk),
+  #   iteration = "list"
+  # ),
+  # tar_target(
+  #   nclusters_std_elbowk_WtX,
+  #   {
+  #     sel = select_nclusters(clusters_std_elbowk_WtX$clus,
+  #                            k_max=length(clusters_std_elbowk_WtX$clus))
+  #     sel$k
+  #   },
+  #   iteration = "vector",
+  #   pattern = map(clusters_std_elbowk_WtX)
+  # ),
+  # tar_target(
+  #   clusters_std_elbowk_WtX_aligned,
+  #   {
+  #     cluster_list = lapply(1:length(clusters_std_elbowk_WtX),function(i){
+  #       clusters_std_elbowk_WtX[[i]]$clus[[nclusters_std_elbowk_WtX[i]]]$consensusClass
+  #     })
+  #     scores_list = lapply(1:length(val_latent_std_elbowk),function(i){
+  #       val_latent_std_elbowk[[i]]$Z_scaled
+  #     })
+  #     
+  #     temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
+  #                             linkage = "average",
+  #                             similarity_threshold = .5,
+  #                             zscore_within_dataset = TRUE)
+  #     temp
+  #   }
+  # ),
+  # 
+  # tar_target(
+  #   clusters_std_desurvk_X,
+  #   {
+  #     beta = fit_std_desurvk$beta
+  #     facs = which(beta != 0)
+  #     base_dir = file.path(
+  #       val_run_bundle$training_results_dir,
+  #       "validation",
+  #       val_config_effective$config_id,
+  #       "std_desurvk"
+  #     )
+  #     run_clustering(tops = tar_tops_std_desurvk$top_genes,
+  #                    data = data_val_filtered,
+  #                    gene_lists = top_genes,
+  #                    color.lists = colors,
+  #                    facs = facs,
+  #                    base_dir = base_dir,
+  #                    WtX = FALSE)
+  #   },
+  #   pattern = map(data_val_filtered),
+  #   iteration = "list"
+  # ),
+  # tar_target(
+  #   nclusters_std_desurvk_X,
+  #   {
+  #     sel = select_nclusters(clusters_std_desurvk_X$clus,k_max=length(clusters_std_desurvk_X$clus))
+  #     sel$k
+  #   },
+  #   iteration = "vector",
+  #   pattern = map(clusters_std_desurvk_X)
+  # ),
+  # tar_target(
+  #   clusters_std_desurvk_X_aligned,
+  #   {
+  #     cluster_list = lapply(1:length(clusters_std_desurvk_X),function(i){
+  #       clusters_std_desurvk_X[[i]]$clus[[nclusters_std_desurvk_X[i]]]$consensusClass
+  #     })
+  #     scores_list = lapply(1:length(clusters_std_desurvk_X),function(i){
+  #       t(clusters_std_desurvk_X[[i]]$Xtemp)
+  #     })
+  #     
+  #     temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
+  #                             linkage = "average",
+  #                             similarity_threshold = .5,
+  #                             zscore_within_dataset = TRUE)
+  #     temp
+  #   }
+  # ),
+  # 
+  # tar_target(
+  #   clusters_std_desurvk_WtX,
+  #   {
+  #     beta = fit_std_desurvk$beta
+  #     facs = which(beta != 0)
+  #     base_dir = file.path(
+  #       val_run_bundle$training_results_dir,
+  #       "validation",
+  #       val_config_effective$config_id,
+  #       "std_desurvk"
+  #     )
+  #     run_clustering(tops = tar_tops_std_desurvk$top_genes,
+  #                    data = val_latent_std_desurvk,
+  #                    gene_lists = top_genes,
+  #                    color.lists = colors,
+  #                    facs = facs,
+  #                    base_dir = base_dir,
+  #                    WtX = TRUE)
+  #   },
+  #   pattern = map(val_latent_std_desurvk),
+  #   iteration = "list"
+  # ),
+  # tar_target(
+  #   nclusters_std_desurvk_WtX,
+  #   {
+  #     sel = select_nclusters(clusters_std_desurvk_WtX$clus,
+  #                            k_max=length(clusters_std_desurvk_WtX$clus))
+  #     sel$k
+  #   },
+  #   iteration = "vector",
+  #   pattern = map(clusters_std_desurvk_WtX)
+  # ),
+  # tar_target(
+  #   clusters_std_desurvk_WtX_aligned,
+  #   {
+  #     cluster_list = lapply(1:length(clusters_std_desurvk_WtX),function(i){
+  #       clusters_std_desurvk_WtX[[i]]$clus[[nclusters_std_desurvk_WtX[i]]]$consensusClass
+  #     })
+  #     scores_list = lapply(1:length(val_latent_std_desurvk),function(i){
+  #       val_latent_std_desurvk[[i]]$Z_scaled
+  #     })
+  #     
+  #     temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
+  #                             linkage = "average",
+  #                             similarity_threshold = .5,
+  #                             zscore_within_dataset = TRUE)
+  #     temp
+  #   }
+  # )
   
   
 )
@@ -1707,7 +1662,7 @@ FIGURE_TARGETS <- list(
   tar_target(
     fig_bo_heat,
     {
-      curve = extract_gp_curve(desurv_bo_results,tar_params_best)
+
       ggplot(curve, aes(x = k, y = alpha, fill = mean)) +
         geom_tile(color = NA) +
         scale_x_continuous(
@@ -1716,6 +1671,7 @@ FIGURE_TARGETS <- list(
         scale_fill_viridis_c(
           name = "CV C-index",
           option = "D",
+          breaks = seq(.5,.68,.02),
           guide = guide_colorbar(
             barheight = unit(3, "cm"),
             barwidth  = unit(0.4, "cm")

@@ -470,6 +470,45 @@ extract_gp_curve <- function(bo_results,params, ci_level = 0.95) {
   )
 }
 
+extract_gp_curve_grid <- function(bo_results,grid, ci_level = 0.95) {
+  if (!is.numeric(ci_level) || length(ci_level) != 1 || ci_level <= 0 || ci_level >= 1) {
+    stop("ci_level must be a single numeric value between 0 and 1.")
+  }
+  runs <- bo_results[["runs"]]
+  last_run <- runs[[length(runs)]]
+  km_fit <- last_run[["km_fit"]]
+  bounds <- last_run[["bounds"]]
+  param_names <- colnames(km_fit@X)
+  if (is.null(param_names)) {
+    stop("GP design matrix has no column names.")
+  }
+  best_per_k = grid
+  
+  newdata_actual <- best_per_k[, param_names, drop = FALSE]
+  newdata_scaled <- normalize_gp_params(newdata_actual, bounds)
+  
+  preds <- DiceKriging::predict(
+    km_fit,
+    newdata = newdata_scaled,
+    type = "UK",
+    se.compute = TRUE,
+    cov.compute = FALSE
+  )
+  
+  z_value <- stats::qnorm((1 + ci_level) / 2)
+  tibble::tibble(
+    k = best_per_k$k_grid,
+    alpha = best_per_k$alpha_grid,
+    lambda = best_per_k$lambda_grid,
+    nu = best_per_k$nu_grid,
+    ntop = best_per_k$ntop,
+    mean = preds$mean,
+    lower = preds$mean - z_value * preds$sd,
+    upper = preds$mean + z_value * preds$sd
+  )
+}
+
+
 make_gp_curve_plot_k <- function(curve_df, label) {
   ggplot2::ggplot(curve_df, ggplot2::aes(x = k, y = mean, group = 1)) +
     ggplot2::geom_ribbon(
