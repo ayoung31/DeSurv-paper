@@ -11,8 +11,9 @@ if (is.null(BO_LABELS_RAW) || any(!nzchar(BO_LABELS_RAW))) {
 }
 RUN_CONFIGS_RAW <- targets_run_configs(BO_LABELS_RAW)
 
-# Calculate ninit from configs, but cap at local CPU limit (19 = 20 CPUs - 1 for OS)
-LOCAL_CPU_LIMIT <- 19L
+# Cap ninit at CPU limit. Default 19 for local desktop (20 CPUs - 1 for OS).
+# On Longleaf HPC, set DESURV_CPU_LIMIT=200 in the sbatch script.
+LOCAL_CPU_LIMIT <- as.integer(Sys.getenv("DESURV_CPU_LIMIT", "19"))
 DEFAULT_NINIT <- if (length(BO_CONFIGS_RAW)) {
   min(LOCAL_CPU_LIMIT, max(vapply(BO_CONFIGS_RAW, function(cfg) if (is.null(cfg$ninit)) 50 else cfg$ninit, numeric(1))))
 } else {

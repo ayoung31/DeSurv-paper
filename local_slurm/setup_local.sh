@@ -4,14 +4,16 @@
 # This script creates symlinks from local_slurm configs to the main directory,
 # allowing you to run the pipeline locally without modifying the student's files.
 #
-# Supports two modes:
+# Supports three modes:
 #   --quick (default): Fast testing with reduced iterations
 #   --full: HPC-quality iterations, capped at 19 CPUs
+#   --longleaf: UNC Longleaf HPC with large worker pools
 #
 # Usage:
 #   ./local_slurm/setup_local.sh              # Quick mode (default)
 #   ./local_slurm/setup_local.sh --quick      # Quick mode (explicit)
 #   ./local_slurm/setup_local.sh --full       # Full quality mode
+#   ./local_slurm/setup_local.sh --longleaf   # Longleaf HPC mode
 #   ./local_slurm/setup_local.sh --restore    # Restore original configs
 #   ./local_slurm/setup_local.sh --status     # Show current config status
 
@@ -42,11 +44,15 @@ setup_local() {
     # Validate mode
     if [[ ! -d "$mode_dir" ]]; then
         echo "Error: Mode '$mode' not found. Expected directory: $mode_dir"
-        echo "Available modes: quick, full"
+        echo "Available modes: quick, full, longleaf"
         exit 1
     fi
 
-    echo "Setting up LOCAL configuration for 20-CPU desktop..."
+    if [[ "$mode" == "longleaf" ]]; then
+        echo "Setting up LONGLEAF HPC configuration..."
+    else
+        echo "Setting up LOCAL configuration for 20-CPU desktop..."
+    fi
     echo "Mode: $mode"
     echo ""
 
@@ -93,26 +99,43 @@ setup_local() {
         echo "ninit:         4   (vs 30 in full)"
         echo "bo_n_iter:     4   (vs 50 in full)"
         echo "ninit_full:    19  (vs 100 in full)"
+        echo "CPUs per task: 19  (local desktop limit)"
+    elif [[ "$mode" == "longleaf" ]]; then
+        echo "Mode:          LONGLEAF (UNC HPC)"
+        echo "ninit:         50  (50 CPUs per BO worker)"
+        echo "bo_n_iter:     100 (tcgacptac) / 50 (bladder)"
+        echo "ninit_full:    100"
+        echo "ncores_grid:   50  (matches CPUs per BO worker)"
+        echo "CPU limit:     200 (via DESURV_CPU_LIMIT env var)"
     else
         echo "Mode:          FULL (HPC-quality)"
         echo "ninit:         30"
         echo "bo_n_iter:     50"
         echo "ninit_full:    100"
+        echo "CPUs per task: 19  (local desktop limit)"
     fi
-    echo "CPUs per task: 19  (local desktop limit)"
     echo ""
-    echo "To run the pipeline:"
-    echo "  sbatch local_slurm/_targets.sh"
-    echo ""
-    echo "Or for simulations:"
-    echo "  sbatch local_slurm/_targets_sims.sh"
-    echo ""
-    echo "Or for bladder cancer:"
-    echo "  sbatch local_slurm/_targets_bladder.sh"
+    if [[ "$mode" == "longleaf" ]]; then
+        echo "To run the pipeline on Longleaf:"
+        echo "  sbatch local_slurm/longleaf/_targets.sh"
+        echo ""
+        echo "Or for simulations:"
+        echo "  sbatch local_slurm/longleaf/_targets_sims.sh"
+    else
+        echo "To run the pipeline:"
+        echo "  sbatch local_slurm/_targets.sh"
+        echo ""
+        echo "Or for simulations:"
+        echo "  sbatch local_slurm/_targets_sims.sh"
+        echo ""
+        echo "Or for bladder cancer:"
+        echo "  sbatch local_slurm/_targets_bladder.sh"
+    fi
     echo ""
     echo "To switch modes:"
-    echo "  ./local_slurm/setup_local.sh --quick    # Fast testing"
-    echo "  ./local_slurm/setup_local.sh --full     # Full quality"
+    echo "  ./local_slurm/setup_local.sh --quick      # Fast testing"
+    echo "  ./local_slurm/setup_local.sh --full       # Full quality"
+    echo "  ./local_slurm/setup_local.sh --longleaf   # Longleaf HPC"
     echo ""
     echo "To restore original configs:"
     echo "  ./local_slurm/setup_local.sh --restore"
@@ -169,6 +192,8 @@ check_status() {
                 echo "  $config -> QUICK"
             elif [[ "$target" == *"/full/"* ]]; then
                 echo "  $config -> FULL"
+            elif [[ "$target" == *"/longleaf/"* ]]; then
+                echo "  $config -> LONGLEAF"
             else
                 echo "  $config -> $target"
             fi
@@ -181,18 +206,19 @@ check_status() {
 
     echo ""
     echo "Mode comparison:"
-    echo "  Parameter       QUICK    FULL"
-    echo "  ----------      -----    ----"
-    echo "  ninit             4       30"
-    echo "  bo_n_init         4       20"
-    echo "  bo_n_iter         4       50"
-    echo "  bo_candidate    200     4000"
-    echo "  ninit_full       19      100"
-    echo "  CPUs/task        19       19"
+    echo "  Parameter       QUICK    FULL     LONGLEAF"
+    echo "  ----------      -----    ----     --------"
+    echo "  ninit             4       30         50"
+    echo "  bo_n_init         4       20         50"
+    echo "  bo_n_iter         4       50        100"
+    echo "  bo_candidate    200     4000       4000"
+    echo "  ninit_full       19      100        100"
+    echo "  ncores_grid       5        5         50"
+    echo "  CPUs/task        19       19        200"
 }
 
 show_help() {
-    echo "Usage: $0 [--quick|--full|--restore|--status|--help]"
+    echo "Usage: $0 [--quick|--full|--longleaf|--restore|--status|--help]"
     echo ""
     echo "Modes:"
     echo "  --quick     Quick testing mode (default)"
@@ -204,6 +230,12 @@ show_help() {
     echo "              - Matches HPC quality, but takes much longer"
     echo "              - CPUs still capped at 19 for local desktop"
     echo ""
+    echo "  --longleaf  UNC Longleaf HPC mode"
+    echo "              - ninit=50, bo_n_iter=100, ninit_full=100"
+    echo "              - ncores_grid=50 (50 CPUs per BO worker)"
+    echo "              - 202 CV workers, 120 med_mem workers"
+    echo "              - Submit via: sbatch local_slurm/longleaf/_targets.sh"
+    echo ""
     echo "Options:"
     echo "  --restore   Restore original HPC configuration"
     echo "  --status    Show current configuration status"
@@ -212,6 +244,7 @@ show_help() {
     echo "Examples:"
     echo "  $0                  # Set up quick mode (default)"
     echo "  $0 --full           # Set up full quality mode"
+    echo "  $0 --longleaf       # Set up Longleaf HPC mode"
     echo "  $0 --status         # Check current configuration"
     echo "  $0 --restore        # Restore student's original configs"
 }
@@ -229,6 +262,9 @@ case "${1:-}" in
         ;;
     --full|-f)
         setup_local "full"
+        ;;
+    --longleaf|-l)
+        setup_local "longleaf"
         ;;
     --quick|-q|"")
         setup_local "quick"
