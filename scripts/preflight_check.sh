@@ -277,8 +277,7 @@ if [ -n "$stores" ]; then
             # Quick check via R (extract just the number, removing R's "[1] " prefix)
             errored=$(Rscript --vanilla -e "
                 suppressMessages(library(targets))
-                tar_config_set(store = '$store')
-                meta <- tar_meta()
+                meta <- tar_meta(store = '$store')
                 cat(sum(!is.na(meta\$error) & nzchar(meta\$error)))
             " 2>/dev/null || echo "0")
 
@@ -290,8 +289,7 @@ if [ -n "$stores" ]; then
         # Check for stale dispatched/started targets (from crashed runs)
         stale_dispatched=$(Rscript --vanilla -e "
             suppressMessages(library(targets))
-            tar_config_set(store = '$store')
-            prog <- tar_progress()
+            prog <- tar_progress(store = '$store')
             cat(sum(prog\$progress %in% c('dispatched', 'started')))
         " 2>/dev/null || echo "0")
 
