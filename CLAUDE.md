@@ -16,8 +16,11 @@ Reproducible research repository for **DeSurv**: a survival-driven deconvolution
 # Install DeSurv package (required before running pipelines)
 Rscript -e 'devtools::install_local("../DeSurv", upgrade = "never", force = TRUE)'
 
-# Run tests
+# Run all tests
 Rscript -e 'testthat::test_dir("tests/testthat")'
+
+# Run a single test file
+Rscript -e 'testthat::test_file("tests/testthat/test_bo_helpers.R")'
 
 # Pre-submission check (REQUIRED before sbatch)
 ./scripts/preflight_check.sh
@@ -45,8 +48,7 @@ Rscript -e 'rmarkdown::render("paper/paper.Rmd")'
 Uses `targets` R package for declarative workflow management with Slurm distribution via `crew.cluster`.
 
 **Pipeline files:**
-- `_targets.R` - Main TCGA/CPTAC pancreatic cancer analysis
-- `_targets_bladder.R` - Bladder cancer analysis
+- `_targets.R` - Main TCGA/CPTAC pancreatic cancer analysis (bladder also runs via config here)
 - `_targets_sims.R` - Method validation simulations
 
 **Configuration system:** All hyperparameters flow through separate config files (symlinks to `local_slurm/`):
@@ -291,7 +293,7 @@ cat local_slurm/.current_mode
 
 ## Current Branch Configuration
 
-**Branch:** `20260107bugfix`
+**Branch:** `naimedits0125` (or check with `git branch --show-current`)
 **Store:** `store_PKG_VERSION=NA_GIT_BRANCH=20260107bugfix_full`
 
 ### Local Desktop Mode

@@ -1,1 +1,1 @@
-local_slurm/targets_val_configs.R
+/proj/rashidlab/nur2/DeSurv-paper/local_slurm/longleaf/targets_val_configs.R
