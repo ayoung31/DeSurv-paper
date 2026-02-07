@@ -1,11 +1,10 @@
 # targets_val_configs.R - UNC Longleaf HPC mode
-# Same validation datasets as local version
+# Matched to student's master branch for exact reproduction.
 
 targets_val_config <- function(label) {
   list(
     mode = "external",
     val_datasets = c(
-      "CPTAC",
       "Dijk",
       "Moffitt_GEO_array",
       "PACA_AU_array",
