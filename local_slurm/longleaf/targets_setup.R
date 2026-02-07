@@ -40,12 +40,53 @@ GIT_BRANCH <- tryCatch(
   }
 )
 
+# Get git commit for paper repo
+GIT_COMMIT <- tryCatch(
+  gert::git_info()$commit,
+  error = function(e) {
+    commit <- tryCatch(
+      trimws(system("git rev-parse HEAD", intern = TRUE, ignore.stderr = TRUE)),
+      error = function(e2) "unknown"
+    )
+    if (length(commit) == 0 || !nzchar(commit)) commit <- "unknown"
+    commit
+  }
+)
+
+# Get DeSurv package git info (from installed package location)
+DESURV_GIT_BRANCH <- tryCatch({
+  pkg_path <- system.file(package = "DeSurv")
+  if (nzchar(pkg_path) && dir.exists(file.path(pkg_path, ".git"))) {
+    trimws(system(paste("git -C", shQuote(pkg_path), "rev-parse --abbrev-ref HEAD"),
+                  intern = TRUE, ignore.stderr = TRUE))
+  } else {
+    # Package installed from git but no .git dir - use description
+    desc <- utils::packageDescription("DeSurv")
+    if (!is.null(desc$RemoteSha)) substr(desc$RemoteSha, 1, 7) else "installed"
+  }
+}, error = function(e) "unknown")
+
+DESURV_GIT_COMMIT <- tryCatch({
+  pkg_path <- system.file(package = "DeSurv")
+  if (nzchar(pkg_path) && dir.exists(file.path(pkg_path, ".git"))) {
+    trimws(system(paste("git -C", shQuote(pkg_path), "rev-parse HEAD"),
+                  intern = TRUE, ignore.stderr = TRUE))
+  } else {
+    desc <- utils::packageDescription("DeSurv")
+    if (!is.null(desc$RemoteSha)) desc$RemoteSha else "unknown"
+  }
+}, error = function(e) "unknown")
+
 DEFAULT_NINIT <- 50
 DEFAULT_NINIT_FULL <- 100
 
 # ------ Slurm controllers (Longleaf HPC) ------
 # Longleaf uses module system for R; script_lines ensures each worker loads R.
-SLURM_SCRIPT_LINES <- c("module load r/4.4.0")
+# Also set user library path so workers can find installed packages.
+SLURM_SCRIPT_LINES <- c(
+  "module load r/4.5.0",
+  "export R_LIBS_USER=/proj/rashidlab/nur2/R_libs/4.5"
+)
 
 default_controller <- crew_controller_sequential()
 
@@ -139,8 +180,10 @@ if (LOCAL_RENDER) {
 }
 
 # ---- Global options ----
+# Note: clusterProfiler and org.Hs.eg.db removed - optional for ORA enrichment only
+# See CLAUDE.md "Optional Dependencies" section
 TARGET_PACKAGES <- c(
-  "clusterProfiler","org.Hs.eg.db","DeSurv","pheatmap","NMF","tidyverse","tidyselect","survival","cvwrapr","rmarkdown","dplyr",
+  "DeSurv","pheatmap","NMF","tidyverse","tidyselect","survival","cvwrapr","rmarkdown","dplyr",
   "parallel","foreach","doParallel","doMC","pec","glmnet","webshot2"
 )
 
