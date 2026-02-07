@@ -1,1 +1,1 @@
-/proj/rashidlab/nur2/DeSurv-paper/local_slurm/longleaf/targets_setup.R
+/home/naimrashid/Downloads/DeSurv-paper/local_slurm/full/targets_setup.R

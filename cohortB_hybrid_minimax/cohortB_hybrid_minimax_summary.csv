@@ -1,0 +1,5 @@
+"stage","evaluations","runtime_min","feasible_pct","best_weighted_EN_N"
+"Stage 1: Coarse",244,115.3,"0.0%",NA
+"Stage 2: Medium",200,392.6,"0.0%",NA
+"Stage 3: Tight",150,846.2,"0.0%",NA
+"TOTAL",594,1354.1,"0.0%",NA
