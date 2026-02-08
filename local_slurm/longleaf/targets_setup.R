@@ -180,11 +180,11 @@ if (LOCAL_RENDER) {
 }
 
 # ---- Global options ----
-# Note: clusterProfiler and org.Hs.eg.db removed - optional for ORA enrichment only
-# See CLAUDE.md "Optional Dependencies" section
 TARGET_PACKAGES <- c(
   "DeSurv","pheatmap","NMF","tidyverse","tidyselect","survival","cvwrapr","rmarkdown","dplyr",
-  "parallel","foreach","doParallel","doMC","pec","glmnet","webshot2"
+  "parallel","foreach","doParallel","doMC","pec","glmnet","webshot2",
+  "survminer","cowplot","ggpubr","gt",
+  "ConsensusClusterPlus","clusterProfiler","org.Hs.eg.db"
 )
 
 tar_option_set(

@@ -90,10 +90,10 @@ fi
 pass "module command available"
 
 # Load R module
-if module load r/4.4.0 2>/dev/null; then
-    pass "module load r/4.4.0 succeeded"
+if module load r/4.5.0 2>/dev/null; then
+    pass "module load r/4.5.0 succeeded"
 else
-    fail "could not load r/4.4.0 module"
+    fail "could not load r/4.5.0 module"
     echo "       Available R modules:"
     module avail r/ 2>&1 | head -5
     exit 1
@@ -136,7 +136,7 @@ cran_pkgs <- c(
   # ML / statistics
   "survival", "glmnet", "caret", "pec", "cvwrapr",
   # NMF / visualization
-  "NMF", "pheatmap", "ggrepel", "survminer",
+  "NMF", "pheatmap", "ggrepel", "survminer", "cowplot", "ggpubr", "viridis", "gt",
   # Parallel
   "parallel", "foreach", "doParallel", "doMC",
   # Other
@@ -144,7 +144,7 @@ cran_pkgs <- c(
 )
 
 # Bioconductor packages
-bioc_pkgs <- c("clusterProfiler", "org.Hs.eg.db")
+bioc_pkgs <- c("clusterProfiler", "org.Hs.eg.db", "ConsensusClusterPlus")
 
 # Install missing CRAN packages
 missing_cran <- cran_pkgs[!vapply(cran_pkgs, requireNamespace, logical(1), quietly = TRUE)]

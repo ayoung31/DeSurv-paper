@@ -407,10 +407,19 @@ extract_gp_curve_k <- function(bo_results, ci_level = 0.95) {
   if (is.null(param_names)) {
     stop("GP design matrix has no column names.")
   }
-  selected = bo_results$overall_best$params
-  best_per_k = data.frame(k_grid = 2:12,alpha_grid = selected['alpha_grid'],
-             lambda_grid = selected['lambda_grid'],nu_grid = selected['nu_grid'],
-             ntop = selected['ntop'])
+  selected <- bo_results$overall_best$params
+  # Build grid dynamically: vary k_grid, fix everything else at best values
+  grid_args <- list(k_grid = 2:12)
+  for (nm in param_names) {
+    if (nm == "k_grid") next
+    bare <- sub("_grid$", "", nm)
+    if (!is.null(selected[[nm]])) {
+      grid_args[[nm]] <- selected[[nm]]
+    } else if (!is.null(selected[[bare]])) {
+      grid_args[[nm]] <- selected[[bare]]
+    }
+  }
+  best_per_k <- do.call(expand.grid, grid_args)
 
   newdata_actual <- best_per_k[, param_names, drop = FALSE]
   newdata_scaled <- normalize_gp_params(newdata_actual, bounds)
@@ -444,11 +453,20 @@ extract_gp_curve <- function(bo_results,params, ci_level = 0.95) {
   if (is.null(param_names)) {
     stop("GP design matrix has no column names.")
   }
-  selected = params
-  best_per_k = expand.grid(k_grid = 2:12,alpha_grid = seq(0,1,.1),
-                          lambda_grid = selected$lambda,nu_grid = selected$nu,
-                          ntop = selected$ntop)
-  
+  selected <- params
+  # Build grid dynamically: vary k_grid and alpha_grid, fix everything else
+  grid_args <- list(k_grid = 2:12, alpha_grid = seq(0, 1, 0.1))
+  for (nm in param_names) {
+    if (nm %in% c("k_grid", "alpha_grid")) next
+    bare <- sub("_grid$", "", nm)
+    if (!is.null(selected[[nm]])) {
+      grid_args[[nm]] <- selected[[nm]]
+    } else if (!is.null(selected[[bare]])) {
+      grid_args[[nm]] <- selected[[bare]]
+    }
+  }
+  best_per_k <- do.call(expand.grid, grid_args)
+
   newdata_actual <- best_per_k[, param_names, drop = FALSE]
   newdata_scaled <- normalize_gp_params(newdata_actual, bounds)
   

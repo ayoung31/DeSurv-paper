@@ -18,7 +18,8 @@ echo "Full reproduction: 2,400 simulation runs"
 echo ""
 
 # Load R
-module load r/4.4.0 2>/dev/null || true
+module load r/4.5.0 2>/dev/null || true
+export R_LIBS_USER=/proj/rashidlab/nur2/R_libs/4.5
 
 # Run the simulation pipeline
 Rscript --max-connections=1024 -e '
