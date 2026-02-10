@@ -1,1 +1,1 @@
-/home/naimrashid/Downloads/DeSurv-paper/local_slurm/full/targets_figure_configs.R
+local_slurm/targets_figure_configs.R

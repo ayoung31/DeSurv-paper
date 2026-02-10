@@ -1,1 +1,1 @@
-/home/naimrashid/Downloads/DeSurv-paper/local_slurm/longleaf/targets_run_configs.R
+local_slurm/targets_run_configs.R
