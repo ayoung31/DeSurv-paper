@@ -161,8 +161,8 @@ if (LOCAL_RENDER) {
     seconds_interval = 0.25,
     options_cluster = crew_options_slurm(
       cpus_per_task = 10,
-      memory_gigabytes_per_cpu = 1,
-      time_minutes = 60,
+      memory_gigabytes_per_cpu = 2,
+      time_minutes = 720,
       log_error = "logs/crew_log_%A.err",
       log_output = "logs/crew_log_%A.out",
       script_lines = SLURM_SCRIPT_LINES
@@ -183,7 +183,7 @@ if (LOCAL_RENDER) {
 TARGET_PACKAGES <- c(
   "DeSurv","pheatmap","NMF","tidyverse","tidyselect","survival","cvwrapr","rmarkdown","dplyr",
   "parallel","foreach","doParallel","doMC","pec","glmnet","webshot2",
-  "survminer","cowplot","ggpubr","gt",
+  "survminer","cowplot","ggpubr","ggrepel","gt",
   "ConsensusClusterPlus","clusterProfiler","org.Hs.eg.db"
 )
 
