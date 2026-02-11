@@ -10,6 +10,13 @@ sim_method_colors <- c(
   "NMF" = "#e31a1c"
 )
 
+sim_scenario_labels <- c(
+  "R0_easy" = "Primary",
+  "R0k6"    = "Primary (k=6)",
+  "R00_null" = "Null",
+  "R_mixed"  = "Mixed"
+)
+
 sim_pub_theme <- function(base_size = 12) {
   ggplot2::theme_classic(base_size = base_size) +
     ggplot2::theme(
@@ -75,6 +82,11 @@ build_sim_fig_data <- function(sim_results_table,
       scenario_panel = .data[[scenario_col]]
     ) %>%
     dplyr::mutate(
+      scenario_panel = dplyr::if_else(
+        scenario_panel %in% names(sim_scenario_labels),
+        sim_scenario_labels[scenario_panel],
+        scenario_panel
+      ),
       scenario_panel = factor(scenario_panel, levels = unique(scenario_panel))
     )
 
