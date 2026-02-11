@@ -115,25 +115,25 @@ if (!is.null(tar_store) && nzchar(tar_store)) {
 
 
 
-```{r child="02_introduction_REVISED.Rmd"}
+```{r child="paper/02_introduction_REVISED.Rmd"}
 
 ```
 
 # Results {.unnumbered}
 
-```{r child="04_results_REVISED.Rmd"}
+```{r child="paper/04_results_REVISED.Rmd"}
 
 ```
 
 # Discussion {.unnumbered}
 
-```{r child="05_discussion_REVISED.Rmd"}
+```{r child="paper/05_discussion_REVISED.Rmd"}
 
 ```
 
 # Materials and methods {.unnumbered}
 
-```{r child="03_methods_REVISED.Rmd"}
+```{r child="paper/03_methods_REVISED.Rmd"}
 
 ```
 
