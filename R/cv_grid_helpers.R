@@ -1,26 +1,34 @@
-# Helper functions for CV grid search over k x alpha
+# Helper functions for CV grid search over k x alpha x ntop
 #
 # This module supports _targets_cv_grid.R for exhaustive cross-validation
-# over a grid of k (2-12) and alpha (0 to 0.95 by 0.05) with fixed
-# lambda=0.3, nu=0.05, lambdaW=0, lambdaH=0.
+# over a grid of k (2-12), alpha (0 to 0.95 by 0.05), and ntop (NULL, 300)
+# with fixed lambda=0.3, nu=0.05, lambdaW=0, lambdaH=0.
 
-#' Create a grid of (k, alpha) parameter combinations
+#' Create a grid of (k, alpha, ntop) parameter combinations
 #'
 #' @param k_values Integer vector of k values to test
 #' @param alpha_values Numeric vector of alpha values to test
-#' @return List of lists, each with $k and $alpha elements
+#' @param ntop_values List of ntop values to test (NULL means all genes)
+#' @return List of lists, each with $k, $alpha, and $ntop elements
 create_cv_grid <- function(k_values = 2:12,
-                           alpha_values = seq(0, 0.95, by = 0.05)) {
-  grid <- expand.grid(
+                           alpha_values = seq(0, 0.95, by = 0.05),
+                           ntop_values = list(NULL)) {
+  # Build base grid of k x alpha
+  base_grid <- expand.grid(
     k = as.integer(k_values),
     alpha = alpha_values,
+    ntop_idx = seq_along(ntop_values),
     KEEP.OUT.ATTRS = FALSE,
     stringsAsFactors = FALSE
   )
 
   # Convert to list of lists for targets branching
-  lapply(seq_len(nrow(grid)), function(i) {
-    list(k = grid$k[i], alpha = grid$alpha[i])
+  lapply(seq_len(nrow(base_grid)), function(i) {
+    list(
+      k = base_grid$k[i],
+      alpha = base_grid$alpha[i],
+      ntop = ntop_values[[base_grid$ntop_idx[i]]]
+    )
   })
 }
 
@@ -52,7 +60,8 @@ run_cv_grid_point <- function(data,
                               verbose = TRUE) {
 
   if (verbose) {
-    message(sprintf("Running CV for k=%d, alpha=%.2f", k, alpha))
+    ntop_str <- if (is.null(fixed_params$ntop)) "ALL" else as.character(fixed_params$ntop)
+    message(sprintf("Running CV for k=%d, alpha=%.2f, ntop=%s", k, alpha, ntop_str))
   }
 
   # Extract fixed parameters with defaults
@@ -103,6 +112,7 @@ run_cv_grid_point <- function(data,
     return(list(
       k = k,
       alpha = alpha,
+      ntop = ntop,
       mean_cindex = NA_real_,
       se_cindex = NA_real_,
       cv_results = NULL
@@ -115,6 +125,7 @@ run_cv_grid_point <- function(data,
   list(
     k = k,
     alpha = alpha,
+    ntop = ntop,
     mean_cindex = summ$mean_cindex[1],
     se_cindex = summ$se_cindex[1],
     cv_results = cv_result$cv_results
@@ -134,6 +145,7 @@ aggregate_cv_grid_results <- function(result_list) {
     return(tibble::tibble(
       k = integer(),
       alpha = numeric(),
+      ntop = numeric(),
       mean_cindex = numeric(),
       se_cindex = numeric()
     ))
@@ -142,6 +154,7 @@ aggregate_cv_grid_results <- function(result_list) {
   tibble::tibble(
     k = purrr::map_int(valid_results, ~ as.integer(.x$k)),
     alpha = purrr::map_dbl(valid_results, ~ as.numeric(.x$alpha)),
+    ntop = purrr::map_dbl(valid_results, ~ if (is.null(.x$ntop)) NA_real_ else as.numeric(.x$ntop)),
     mean_cindex = purrr::map_dbl(valid_results, ~ .x$mean_cindex %||% NA_real_),
     se_cindex = purrr::map_dbl(valid_results, ~ .x$se_cindex %||% NA_real_)
   )

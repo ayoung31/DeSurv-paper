@@ -79,14 +79,15 @@ tar_option_set(
 
 # ------ Target definitions ------
 list(
-  # Target 1: Generate the 220 (k, alpha) parameter combinations
+  # Target 1: Generate the 440 (k, alpha, ntop) parameter combinations
   tar_target(
     cv_grid_params,
     create_cv_grid(
       k_values = CV_GRID_K_VALUES,
-      alpha_values = CV_GRID_ALPHA_VALUES
+      alpha_values = CV_GRID_ALPHA_VALUES,
+      ntop_values = CV_GRID_NTOP_VALUES
     ),
-    iteration="list"
+    iteration = "list"
   ),
 
   # Target 2: Load and preprocess TCGA+CPTAC training data with ngene=3000
@@ -118,16 +119,18 @@ list(
     }
   ),
 
-  # Target 3: Run CV for each (k, alpha) combination (220 parallel jobs)
+  # Target 3: Run CV for each (k, alpha, ntop) combination (440 parallel jobs)
   tar_target(
     cv_grid_result,
     {
       params <- cv_grid_params
+      fixed <- CV_GRID_FIXED_PARAMS
+      fixed$ntop <- params$ntop
       run_cv_grid_point(
         data = cv_grid_data,
         k = params$k,
         alpha = params$alpha,
-        fixed_params = CV_GRID_FIXED_PARAMS,
+        fixed_params = fixed,
         nfolds = CV_GRID_NFOLDS,
         n_starts = CV_GRID_NSTARTS,
         seed = CV_GRID_SEED,
