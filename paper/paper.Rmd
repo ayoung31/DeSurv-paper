@@ -32,7 +32,7 @@ conflict_of_interest: |
   Please declare any conflict of interest here.
 
 abstract: |
-  Molecular subtyping in cancer is an ongoing problem that relies on the identification of robust and replicable gene signatures. While transcriptomic profiling has revealed recurrent gene expression patterns in various types of cancer, the prognostic value of these signatures is typically evaluated in retrospect. This is due to the reliance on unsupervised learning methods for identifying cell-type-specific signals and clustering patients into molecular subtypes. Here we present a Survival-driven Deconvolution tool (deSurv) that integrates bulk RNA-sequencing data with patient survival information to identify cell-type-enriched gene signatures associated with prognosis. Applying deSurv to various cohorts in pancreatic cancer, we uncover prognostic and biologically interpretable subtypes that reflect the complex interactions between stroma, tumor, and immune cells in the tumor microenvironment. Our approach highlights the value of using patient outcomes during gene signature discovery.
+  Molecular subtyping in cancer is an ongoing problem that relies on the identification of robust and replicable gene signatures. While transcriptomic profiling has revealed recurrent gene expression patterns in various types of cancer, the prognostic value of these signatures is typically evaluated in retrospect. This is due to the reliance on unsupervised learning methods for identifying cell-type-specific signals and clustering patients into molecular subtypes. Here we present a Survival-driven Deconvolution tool (DeSurv) that integrates bulk RNA-sequencing data with patient survival information to identify cell-type-enriched gene signatures associated with prognosis. Applying DeSurv to various cohorts in pancreatic cancer, we uncover prognostic and biologically interpretable subtypes that reflect the complex interactions between stroma, tumor, and immune cells in the tumor microenvironment. Our approach highlights the value of using patient outcomes during gene signature discovery.
 
 significance: |
   Tumor transcriptomes mix malignant and microenvironmental signals, making it difficult to identify programs that drive clinical outcomes. Existing deconvolution and matrix factorization methods discover latent programs but do not ensure prognostic relevance, while supervised predictors often sacrifice biological interpretability. We present DeSurv, a survival-supervised deconvolution framework that integrates nonnegative matrix factorization with Cox modeling to learn gene programs and their survival associations jointly. By embedding outcome information into discovery and using automatic model selection, DeSurv yields clinically relevant, reproducible programs across cohorts. This advances tumor deconvolution and provides a general tool for identifying actionable drivers of disease progression.
@@ -41,11 +41,11 @@ acknowledgements: |
   Please include your acknowledgments here, set in a single paragraph. Please do not include any acknowledgments in the Supporting Information, or anywhere else in the manuscript.
 
 keywords:
-  - one
-  - two
-  - optional
-  - optional
-  - optional
+  - nonnegative matrix factorization
+  - survival analysis
+  - semi-supervised learning
+  - tumor deconvolution
+  - pancreatic cancer
 
 params:
   tar_store: "store_PKG_VERSION=20260107bugfix_GIT_BRANCH=main"
@@ -115,25 +115,25 @@ if (!is.null(tar_store) && nzchar(tar_store)) {
 
 
 
-```{r child="paper/02_introduction_30102025.Rmd"}
+```{r child="02_introduction_REVISED.Rmd"}
 
 ```
 
 # Results {.unnumbered}
 
-```{r child="paper/04_results.Rmd"}
+```{r child="04_results_REVISED.Rmd"}
 
 ```
 
 # Discussion {.unnumbered}
 
-```{r child="paper/05_discussion.Rmd"}
+```{r child="05_discussion_REVISED.Rmd"}
 
 ```
 
 # Materials and methods {.unnumbered}
 
-```{r child="paper/03_methods.Rmd"}
+```{r child="03_methods_REVISED.Rmd"}
 
 ```
 

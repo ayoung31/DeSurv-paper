@@ -1728,8 +1728,12 @@ FIGURE_TARGETS <- list(
             barwidth  = unit(0.4, "cm")
           )
         ) +
+        scale_y_continuous(
+          breaks = seq(0, 1, by = 0.2),
+          labels = function(x) ifelse(x == 0, "0 (NMF)", as.character(x))
+        ) +
         labs(
-          x = "Number of components (k)",
+          x = "Factorization rank (k)",
           y = "Supervision strength"
         ) +
         theme_minimal(base_size = 12) +
