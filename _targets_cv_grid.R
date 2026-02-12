@@ -39,12 +39,18 @@ CV_GRID_NGENE <- 3000
 CV_GRID_NFOLDS <- 5
 CV_GRID_NSTARTS <- 30
 CV_GRID_SEED <- 123
+CV_GRID_NSTARTS_FULL <- 100
 CV_GRID_METHOD_TRANSFORM <- "rank"
 
 # ------ Source helpers ------
 source("R/cv_grid_helpers.R")
 source("R/load_data.R")
 source("R/load_data_internal.R")
+source("R/targets_config.R")
+
+# ------ Validation datasets ------
+CV_GRID_VAL_DATASETS <- c("Dijk", "Moffitt_GEO_array",
+                           "PACA_AU_array", "PACA_AU_seq", "Puleo_array")
 
 # ------ Slurm controllers ------
 default_controller <- crew_controller_sequential()
@@ -64,9 +70,41 @@ cv_grid_controller <- crew_controller_slurm(
   )
 )
 
+cv_grid_full_controller <- crew_controller_slurm(
+  name = "cv_grid_full",
+  workers = 440,
+  seconds_idle = 300,
+  seconds_interval = 0.25,
+  options_cluster = crew_options_slurm(
+    cpus_per_task = CV_GRID_NSTARTS_FULL,
+    memory_gigabytes_required = 32,
+    time_minutes = 480,
+    log_error = "logs/cv_grid_full_%A.err",
+    log_output = "logs/cv_grid_full_%A.out",
+    script_lines = "module load r/4.4.0"
+  )
+)
+
+cv_grid_val_controller <- crew_controller_slurm(
+  name = "cv_grid_val",
+  workers = 440,
+  seconds_idle = 300,
+  seconds_interval = 0.25,
+  options_cluster = crew_options_slurm(
+    cpus_per_task = 1,
+    memory_gigabytes_required = 4,
+    time_minutes = 30,
+    log_error = "logs/cv_grid_val_%A.err",
+    log_output = "logs/cv_grid_val_%A.out",
+    script_lines = "module load r/4.4.0"
+  )
+)
+
 active_controller <- crew_controller_group(
   default_controller,
-  cv_grid_controller
+  cv_grid_controller,
+  cv_grid_full_controller,
+  cv_grid_val_controller
 )
 
 # ------ Global options ------
@@ -157,6 +195,99 @@ list(
       path <- "results/cv_grid/cv_grid_summary.csv"
       dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
       write.csv(cv_grid_summary, path, row.names = FALSE)
+      path
+    },
+    format = "file"
+  ),
+
+  # Target 6: Full model fit per grid point (440 parallel jobs, 100 inits each)
+  tar_target(
+    cv_grid_fit,
+    {
+      params <- cv_grid_params
+      fixed <- CV_GRID_FIXED_PARAMS
+      fixed$ntop <- params$ntop
+      fit_grid_point(
+        data = cv_grid_data,
+        k = params$k,
+        alpha = params$alpha,
+        fixed_params = fixed,
+        n_starts = CV_GRID_NSTARTS_FULL,
+        seed = CV_GRID_SEED,
+        verbose = TRUE
+      )
+    },
+    pattern = map(cv_grid_params),
+    iteration = "list",
+    resources = tar_resources(
+      crew = tar_resources_crew(controller = "cv_grid_full")
+    )
+  ),
+
+  # Target 7: Aggregate fit metadata into summary table
+  tar_target(
+    cv_grid_fit_summary,
+    aggregate_cv_grid_fit_results(cv_grid_fit)
+  ),
+
+  # Target 8: Save fit summary to CSV
+  tar_target(
+    cv_grid_fit_summary_file,
+    {
+      path <- "results/cv_grid/cv_grid_fit_summary.csv"
+      dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
+      write.csv(cv_grid_fit_summary, path, row.names = FALSE)
+      path
+    },
+    format = "file"
+  ),
+
+  # Target 9: Load and preprocess external validation datasets
+  tar_target(
+    cv_grid_val_data,
+    {
+      train_genes <- rownames(cv_grid_data$ex)
+      transform_target <- cv_grid_data$transform_target
+
+      val_list <- lapply(CV_GRID_VAL_DATASETS, function(ds_name) {
+        raw <- load_data(ds_name)
+        preprocess_validation_data(
+          dataset = raw,
+          genes = train_genes,
+          method_trans_train = CV_GRID_METHOD_TRANSFORM,
+          dataname = ds_name,
+          transform_target = transform_target
+        )
+      })
+      names(val_list) <- CV_GRID_VAL_DATASETS
+      val_list
+    }
+  ),
+
+  # Target 10: Validate each grid fit against external datasets (440 parallel jobs)
+  tar_target(
+    cv_grid_val_result,
+    validate_grid_point(cv_grid_fit, cv_grid_val_data),
+    pattern = map(cv_grid_fit),
+    iteration = "list",
+    resources = tar_resources(
+      crew = tar_resources_crew(controller = "cv_grid_val")
+    )
+  ),
+
+  # Target 11: Aggregate all validation results
+  tar_target(
+    cv_grid_val_summary,
+    aggregate_cv_grid_val_results(cv_grid_val_result)
+  ),
+
+  # Target 12: Save validation summary to CSV
+  tar_target(
+    cv_grid_val_summary_file,
+    {
+      path <- "results/cv_grid/cv_grid_val_summary.csv"
+      dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
+      write.csv(cv_grid_val_summary, path, row.names = FALSE)
       path
     },
     format = "file"
