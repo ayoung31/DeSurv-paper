@@ -599,7 +599,8 @@ validate_grid_point <- function(grid_fit, val_datasets) {
             pooled_row$cindex[3] <- cc$concordance
             pooled_row$cindex_se[3] <- sqrt(cc$var)
             pooled_row$logrank_z[3] <- compute_logrank_z(
-              pooled_time, pooled_event, group
+              pooled_time, pooled_event, group,
+              strata = pooled_ds_label
             )
           }
         }
@@ -623,12 +624,19 @@ aggregate_cv_grid_val_results <- function(result_list) {
 #' @param time Survival times
 #' @param event Event indicators (0/1)
 #' @param group Binary group indicator (0/1)
+#' @param strata Optional stratification variable (e.g., dataset of origin)
 #' @return Numeric scalar: sign(obs - exp in high group) * sqrt(chisq), or NA
-compute_logrank_z <- function(time, event, group) {
+compute_logrank_z <- function(time, event, group, strata = NULL) {
   tryCatch({
-    sd_obj <- survival::survdiff(
-      survival::Surv(time, event) ~ group
-    )
+    if (is.null(strata)) {
+      sd_obj <- survival::survdiff(
+        survival::Surv(time, event) ~ group
+      )
+    } else {
+      sd_obj <- survival::survdiff(
+        survival::Surv(time, event) ~ group + strata(strata)
+      )
+    }
     chisq <- sd_obj$chisq
     high_idx <- which(names(sd_obj$n) == "group=1")
     if (length(high_idx) == 0) high_idx <- 2L
