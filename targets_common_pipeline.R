@@ -592,6 +592,81 @@ COMMON_DESURV_RUN_TARGETS <- list(
     )
   ),
 
+  # --- CV-based cutpoint selection for DeSurv model ---
+  tar_target(
+    desurv_cv_cutpoint_result,
+    run_cv_grid_point(
+      data = bo_bundle_selected$data_filtered,
+      k = bo_bundle_selected$params_best$k,
+      alpha = bo_bundle_selected$params_best$alpha,
+      fixed_params = list(
+        lambda = bo_bundle_selected$params_best$lambda,
+        nu = bo_bundle_selected$params_best$nu,
+        lambdaW = bo_bundle_selected$lambdaW_value,
+        lambdaH = bo_bundle_selected$lambdaH_value,
+        ntop = tar_ntop_value
+      ),
+      nfolds = 5,
+      n_starts = 30,
+      seed = 123
+    ),
+    resources = tar_resources(
+      crew = tar_resources_crew(controller = "med_mem")
+    )
+  ),
+
+  tar_target(
+    desurv_cutpoint_eval,
+    evaluate_cutpoint_zscores(
+      desurv_cv_cutpoint_result,
+      z_grid = seq(-2.0, 2.0, by = 0.2)
+    )
+  ),
+
+  tar_target(
+    desurv_cutpoint_summary,
+    {
+      desurv_cutpoint_eval |>
+        dplyr::group_by(z_cutpoint) |>
+        dplyr::summarise(
+          mean_cindex_dichot = mean(cindex_dichot, na.rm = TRUE),
+          se_cindex_dichot = sd(cindex_dichot, na.rm = TRUE) / sqrt(sum(!is.na(cindex_dichot))),
+          mean_abs_logrank_z = mean(abs(logrank_z), na.rm = TRUE),
+          se_abs_logrank_z = sd(abs(logrank_z), na.rm = TRUE) / sqrt(sum(!is.na(logrank_z))),
+          .groups = "drop"
+        )
+    }
+  ),
+
+  tar_target(
+    desurv_optimal_z_cutpoint,
+    {
+      desurv_cutpoint_summary |>
+        dplyr::slice_max(mean_abs_logrank_z, n = 1, with_ties = FALSE) |>
+        dplyr::pull(z_cutpoint)
+    }
+  ),
+
+  tar_target(
+    desurv_lp_stats,
+    {
+      lp <- compute_lp(
+        tar_fit_desurv$W,
+        tar_fit_desurv$beta,
+        bo_bundle_selected$data_filtered$ex,
+        tar_ntop_value
+      )
+      lp_mean <- mean(lp, na.rm = TRUE)
+      lp_sd <- sd(lp, na.rm = TRUE)
+      list(
+        lp_mean = lp_mean,
+        lp_sd = lp_sd,
+        optimal_z_cutpoint = desurv_optimal_z_cutpoint,
+        cutpoint_abs = desurv_optimal_z_cutpoint * lp_sd + lp_mean
+      )
+    }
+  ),
+
   tar_target(
     desurv_seed_fits_alpha0,
     {
@@ -1229,6 +1304,90 @@ COMMON_DESURV_VAL_TARGETS <- list(
       summary_tbl
     }
   ),
+
+  # --- Dichotomized risk group evaluation on validation datasets ---
+  tar_target(
+    val_dichot_desurv,
+    {
+      W <- val_run_bundle$fit_desurv$W
+      beta <- val_run_bundle$fit_desurv$beta
+      ntop <- val_run_bundle$ntop_value
+      z_cut <- desurv_optimal_z_cutpoint
+      train_lp_mean <- desurv_lp_stats$lp_mean
+      train_lp_sd <- desurv_lp_stats$lp_sd
+
+      ds_names <- names(data_val_filtered)
+      rows <- lapply(ds_names, function(ds_name) {
+        val_ds <- data_val_filtered[[ds_name]]
+        val_genes <- rownames(val_ds$ex)
+        common_genes <- intersect(rownames(W), val_genes)
+        if (length(common_genes) < 2) {
+          return(tibble::tibble(
+            dataset = ds_name, n_samples = 0L, n_events = 0L,
+            cindex_dichot = NA_real_, logrank_z = NA_real_,
+            z_cutpoint = z_cut
+          ))
+        }
+
+        W_common <- W[common_genes, , drop = FALSE]
+        X_val <- val_ds$ex[common_genes, , drop = FALSE]
+        lp <- compute_lp(W_common, beta, X_val, ntop)
+
+        time_val <- val_ds$sampInfo$time
+        event_val <- as.integer(val_ds$sampInfo$event)
+        valid_idx <- which(is.finite(time_val) & !is.na(event_val) & time_val > 0)
+        if (length(valid_idx) < 2) {
+          return(tibble::tibble(
+            dataset = ds_name, n_samples = length(valid_idx),
+            n_events = sum(event_val[valid_idx]),
+            cindex_dichot = NA_real_, logrank_z = NA_real_,
+            z_cutpoint = z_cut
+          ))
+        }
+
+        lp <- lp[valid_idx]
+        time_val <- time_val[valid_idx]
+        event_val <- event_val[valid_idx]
+
+        if (!is.finite(train_lp_sd) || train_lp_sd <= 0) {
+          return(tibble::tibble(
+            dataset = ds_name, n_samples = length(valid_idx),
+            n_events = sum(event_val),
+            cindex_dichot = NA_real_, logrank_z = NA_real_,
+            z_cutpoint = z_cut
+          ))
+        }
+
+        z_val <- (lp - train_lp_mean) / train_lp_sd
+        group <- as.integer(z_val > z_cut)
+
+        ci <- NA_real_
+        lr_z <- NA_real_
+        if (length(unique(group)) == 2 && sum(event_val) > 0) {
+          ci <- tryCatch({
+            cc <- survival::concordance(
+              survival::Surv(time_val, event_val) ~ group,
+              reverse = TRUE
+            )
+            cc$concordance
+          }, error = function(e) NA_real_)
+          lr_z <- compute_logrank_z(time_val, event_val, group)
+        }
+
+        tibble::tibble(
+          dataset = ds_name,
+          n_samples = length(valid_idx),
+          n_events = sum(event_val),
+          cindex_dichot = ci,
+          logrank_z = lr_z,
+          z_cutpoint = z_cut
+        )
+      })
+
+      dplyr::bind_rows(rows)
+    }
+  ),
+
   tar_target(
     val_cindex_desurv_alpha0,
     {
@@ -1273,415 +1432,7 @@ COMMON_DESURV_VAL_TARGETS <- list(
       summary_tbl <- summarize_validation_cindex(val_latent_std_desurvk)
       summary_tbl
     }
-  ),
-  
-  #clustering
-  tar_target(
-    clusters_desurv_X,
-    {
-      beta = tar_fit_desurv$beta
-      facs = which(beta != 0)
-      base_dir = file.path(
-        val_run_bundle$training_results_dir,
-        "validation",
-        val_config_effective$config_id,
-        "desurv"
-      )
-      run_clustering(tops = tar_tops_desurv$top_genes,
-                     data = data_val_filtered,
-                     gene_lists = top_genes,
-                     color.lists = colors,
-                     facs = facs,
-                     base_dir = base_dir,
-                     WtX = FALSE)
-    },
-    pattern = map(data_val_filtered),
-    iteration = "list",
-    cue = tar_cue(mode = "never")
-  ),
-  tar_target(
-    nclusters_desurv_X,
-    {
-      sel = select_nclusters(clusters_desurv_X$clus,k_max=length(clusters_desurv_X$clus))
-      sel$k
-    },
-    iteration = "vector",
-    pattern = map(clusters_desurv_X)
-  ),
-  tar_target(
-    clusters_desurv_X_aligned,
-    {
-      cluster_list = lapply(1:length(clusters_desurv_X),function(i){
-        clusters_desurv_X[[i]]$clus[[nclusters_desurv_X[i]]]$consensusClass
-      })
-      scores_list = lapply(1:length(clusters_desurv_X),function(i){
-        t(clusters_desurv_X[[i]]$Xtemp)
-      })
-
-      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
-                         linkage = "average",
-                         similarity_threshold = .5,
-                         zscore_within_dataset = TRUE)
-      temp
-    },
-    cue = tar_cue(mode = "never")
-  ),
-  
-  tar_target(
-    clusters_desurv_WtX,
-    {
-      beta = tar_fit_desurv$beta
-      facs = which(beta != 0)
-      base_dir = file.path(
-        val_run_bundle$training_results_dir,
-        "validation",
-        val_config_effective$config_id,
-        "desurv"
-      )
-      run_clustering(tops = tar_tops_desurv$top_genes,
-                     data = val_latent_desurv,
-                     gene_lists = top_genes,
-                     color.lists = colors,
-                     facs = facs,
-                     base_dir = base_dir,
-                     WtX = TRUE)
-    },
-    pattern = map(val_latent_desurv),
-    iteration = "list",
-    cue = tar_cue(mode = "never")
-  ),
-  tar_target(
-    nclusters_desurv_WtX,
-    {
-      sel = select_nclusters(clusters_desurv_WtX$clus,k_max=length(clusters_desurv_WtX$clus))
-      sel$k
-    },
-    iteration = "vector",
-    pattern = map(clusters_desurv_WtX)
-  ),
-  tar_target(
-    clusters_desurv_WtX_aligned,
-    {
-      cluster_list = lapply(1:length(clusters_desurv_WtX),function(i){
-        clusters_desurv_WtX[[i]]$clus[[nclusters_desurv_WtX[i]]]$consensusClass
-      })
-      scores_list = lapply(1:length(val_latent_desurv),function(i){
-        val_latent_desurv[[i]]$Z_scaled
-      })
-      
-      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
-                              linkage = "average",
-                              similarity_threshold = .5,
-                              zscore_within_dataset = TRUE)
-      temp
-    },
-    cue = tar_cue(mode = "never")
-  ),
-  
-  tar_target(
-    clusters_desurv_elbowk_X,
-    {
-      beta = tar_fit_desurv_elbowk$beta
-      facs = which(beta != 0)
-      base_dir = file.path(
-        val_run_bundle$training_results_dir,
-        "validation",
-        val_config_effective$config_id,
-        "desurv_elbowk"
-      )
-      run_clustering(tops = tar_tops_desurv_elbowk$top_genes,
-                     data = data_val_filtered_elbowk,
-                     gene_lists = top_genes,
-                     color.lists = colors,
-                     facs = facs,
-                     base_dir = base_dir,
-                     WtX = FALSE)
-    },
-    pattern = map(data_val_filtered_elbowk),
-    iteration = "list",
-    cue = tar_cue(mode = "never")
-  ),
-  tar_target(
-    nclusters_desurv_elbowk_X,
-    {
-      sel = select_nclusters(clusters_desurv_elbowk_X$clus,k_max=length(clusters_desurv_elbowk_X$clus))
-      sel$k
-    },
-    iteration = "vector",
-    pattern = map(clusters_desurv_elbowk_X)
-  ),
-  tar_target(
-    clusters_desurv_elbowk_X_aligned,
-    {
-      cluster_list = lapply(1:length(clusters_desurv_elbowk_X),function(i){
-        clusters_desurv_elbowk_X[[i]]$clus[[nclusters_desurv_elbowk_X[i]]]$consensusClass
-      })
-      scores_list = lapply(1:length(clusters_desurv_elbowk_X),function(i){
-        t(clusters_desurv_elbowk_X[[i]]$Xtemp)
-      })
-      
-      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
-                              linkage = "average",
-                              similarity_threshold = .5,
-                              zscore_within_dataset = TRUE)
-      temp
-    }
-  ),
-  
-  tar_target(
-    clusters_desurv_elbowk_WtX,
-    {
-      beta = tar_fit_desurv_elbowk$beta
-      facs = which(beta != 0)
-      base_dir = file.path(
-        val_run_bundle$training_results_dir,
-        "validation",
-        val_config_effective$config_id,
-        "desurv_elbowk"
-      )
-      run_clustering(tops = tar_tops_desurv_elbowk$top_genes,
-                     data = val_latent_desurv_elbowk,
-                     gene_lists = top_genes,
-                     color.lists = colors,
-                     facs = facs,
-                     base_dir = base_dir,
-                     WtX = TRUE)
-    },
-    pattern = map(val_latent_desurv_elbowk),
-    iteration = "list",
-    cue = tar_cue(mode = "never")
-  ),
-  tar_target(
-    nclusters_desurv_elbowk_WtX,
-    {
-      sel = select_nclusters(clusters_desurv_elbowk_WtX$clus,
-                             k_max=length(clusters_desurv_elbowk_WtX$clus))
-      sel$k
-    },
-    iteration = "vector",
-    pattern = map(clusters_desurv_elbowk_WtX)
-  ),
-  tar_target(
-    clusters_desurv_elbowk_WtX_aligned,
-    {
-      cluster_list = lapply(1:length(clusters_desurv_elbowk_WtX),function(i){
-        clusters_desurv_elbowk_WtX[[i]]$clus[[nclusters_desurv_elbowk_WtX[i]]]$consensusClass
-      })
-      scores_list = lapply(1:length(val_latent_desurv_elbowk),function(i){
-        val_latent_desurv_elbowk[[i]]$Z_scaled
-      })
-      
-      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
-                              linkage = "average",
-                              similarity_threshold = .5,
-                              zscore_within_dataset = TRUE)
-      temp
-    }
-  ),
-  
-  tar_target(
-    clusters_std_elbowk_X,
-    {
-      beta = fit_std_elbowk$beta
-      facs = which(beta != 0)
-      base_dir = file.path(
-        val_run_bundle$training_results_dir,
-        "validation",
-        val_config_effective$config_id,
-        "std_elbowk"
-      )
-      run_clustering(tops = tar_tops_std_elbowk$top_genes,
-                     data = data_val_filtered_elbowk,
-                     gene_lists = top_genes,
-                     color.lists = colors,
-                     facs = facs,
-                     base_dir = base_dir,
-                     WtX = FALSE)
-    },
-    pattern = map(data_val_filtered_elbowk),
-    iteration = "list",
-    cue = tar_cue(mode = "never")
-  ),
-  tar_target(
-    nclusters_std_elbowk_X,
-    {
-      sel = select_nclusters(clusters_std_elbowk_X$clus,k_max=length(clusters_std_elbowk_X$clus))
-      sel$k
-    },
-    iteration = "vector",
-    pattern = map(clusters_std_elbowk_X)
-  ),
-  tar_target(
-    clusters_std_elbowk_X_aligned,
-    {
-      cluster_list = lapply(1:length(clusters_std_elbowk_X),function(i){
-        clusters_std_elbowk_X[[i]]$clus[[nclusters_std_elbowk_X[i]]]$consensusClass
-      })
-      scores_list = lapply(1:length(clusters_std_elbowk_X),function(i){
-        t(clusters_std_elbowk_X[[i]]$Xtemp)
-      })
-      
-      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
-                              linkage = "average",
-                              similarity_threshold = .5,
-                              zscore_within_dataset = TRUE)
-      temp
-    }
-  ),
-  
-  tar_target(
-    clusters_std_elbowk_WtX,
-    {
-      beta = fit_std_elbowk$beta
-      facs = which(beta != 0)
-      base_dir = file.path(
-        val_run_bundle$training_results_dir,
-        "validation",
-        val_config_effective$config_id,
-        "std_elbowk"
-      )
-      run_clustering(tops = tar_tops_std_elbowk$top_genes,
-                     data = val_latent_std_elbowk,
-                     gene_lists = top_genes,
-                     color.lists = colors,
-                     facs = facs,
-                     base_dir = base_dir,
-                     WtX = TRUE)
-    },
-    pattern = map(val_latent_std_elbowk),
-    iteration = "list",
-    cue = tar_cue(mode = "never")
-  ),
-  tar_target(
-    nclusters_std_elbowk_WtX,
-    {
-      sel = select_nclusters(clusters_std_elbowk_WtX$clus,
-                             k_max=length(clusters_std_elbowk_WtX$clus))
-      sel$k
-    },
-    iteration = "vector",
-    pattern = map(clusters_std_elbowk_WtX)
-  ),
-  tar_target(
-    clusters_std_elbowk_WtX_aligned,
-    {
-      cluster_list = lapply(1:length(clusters_std_elbowk_WtX),function(i){
-        clusters_std_elbowk_WtX[[i]]$clus[[nclusters_std_elbowk_WtX[i]]]$consensusClass
-      })
-      scores_list = lapply(1:length(val_latent_std_elbowk),function(i){
-        val_latent_std_elbowk[[i]]$Z_scaled
-      })
-      
-      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
-                              linkage = "average",
-                              similarity_threshold = .5,
-                              zscore_within_dataset = TRUE)
-      temp
-    }
-  ),
-  
-  tar_target(
-    clusters_std_desurvk_X,
-    {
-      beta = fit_std_desurvk$beta
-      facs = which(beta != 0)
-      base_dir = file.path(
-        val_run_bundle$training_results_dir,
-        "validation",
-        val_config_effective$config_id,
-        "std_desurvk"
-      )
-      run_clustering(tops = tar_tops_std_desurvk$top_genes,
-                     data = data_val_filtered,
-                     gene_lists = top_genes,
-                     color.lists = colors,
-                     facs = facs,
-                     base_dir = base_dir,
-                     WtX = FALSE)
-    },
-    pattern = map(data_val_filtered),
-    iteration = "list",
-    cue = tar_cue(mode = "never")
-  ),
-  tar_target(
-    nclusters_std_desurvk_X,
-    {
-      sel = select_nclusters(clusters_std_desurvk_X$clus,k_max=length(clusters_std_desurvk_X$clus))
-      sel$k
-    },
-    iteration = "vector",
-    pattern = map(clusters_std_desurvk_X)
-  ),
-  tar_target(
-    clusters_std_desurvk_X_aligned,
-    {
-      cluster_list = lapply(1:length(clusters_std_desurvk_X),function(i){
-        clusters_std_desurvk_X[[i]]$clus[[nclusters_std_desurvk_X[i]]]$consensusClass
-      })
-      scores_list = lapply(1:length(clusters_std_desurvk_X),function(i){
-        t(clusters_std_desurvk_X[[i]]$Xtemp)
-      })
-      
-      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
-                              linkage = "average",
-                              similarity_threshold = .5,
-                              zscore_within_dataset = TRUE)
-      temp
-    }
-  ),
-  
-  tar_target(
-    clusters_std_desurvk_WtX,
-    {
-      beta = fit_std_desurvk$beta
-      facs = which(beta != 0)
-      base_dir = file.path(
-        val_run_bundle$training_results_dir,
-        "validation",
-        val_config_effective$config_id,
-        "std_desurvk"
-      )
-      run_clustering(tops = tar_tops_std_desurvk$top_genes,
-                     data = val_latent_std_desurvk,
-                     gene_lists = top_genes,
-                     color.lists = colors,
-                     facs = facs,
-                     base_dir = base_dir,
-                     WtX = TRUE)
-    },
-    pattern = map(val_latent_std_desurvk),
-    iteration = "list",
-    cue = tar_cue(mode = "never")
-  ),
-  tar_target(
-    nclusters_std_desurvk_WtX,
-    {
-      sel = select_nclusters(clusters_std_desurvk_WtX$clus,
-                             k_max=length(clusters_std_desurvk_WtX$clus))
-      sel$k
-    },
-    iteration = "vector",
-    pattern = map(clusters_std_desurvk_WtX)
-  ),
-  tar_target(
-    clusters_std_desurvk_WtX_aligned,
-    {
-      cluster_list = lapply(1:length(clusters_std_desurvk_WtX),function(i){
-        clusters_std_desurvk_WtX[[i]]$clus[[nclusters_std_desurvk_WtX[i]]]$consensusClass
-      })
-      scores_list = lapply(1:length(val_latent_std_desurvk),function(i){
-        val_latent_std_desurvk[[i]]$Z_scaled
-      })
-      
-      temp=meta_cluster_align(scores_list,cluster_list,similarity = 'cosine',
-                              linkage = "average",
-                              similarity_threshold = .5,
-                              zscore_within_dataset = TRUE)
-      temp
-    }
   )
-  
-  
 )
 
 FIGURE_TARGETS <- list(
@@ -2092,94 +1843,6 @@ FIGURE_TARGETS <- list(
 )
 
 FIGURE_VAL_TARGETS <- list(
-  tar_target(
-    fig_validation_heatmap_desurv,
-    {
-      browser()
-      p = make_expression_heatmap(data_val_filtered,
-                              tar_fit_desurv,
-                              tar_tops_desurv,
-                              clusters_desurv_X_aligned,
-                              clusters_desurv_X,
-                              nclusters_desurv_X)
-      save_plot_pdf(
-        p,
-        file.path(
-          FIGURE_CONFIGS$panel_dir,
-          sprintf("fig_val_heatmap_desurv_%s.pdf", bo_label)
-        )
-      )
-      p
-    }
-
-  ),
-  
-  tar_target(
-    fig_validation_heatmap_desurv_elbowk,
-    {
-      browser()
-      p = make_expression_heatmap(data_val_filtered_elbowk,
-                              tar_fit_desurv_elbowk,
-                              tar_tops_desurv_elbowk,
-                              clusters_desurv_elbowk_X_aligned,
-                              clusters_desurv_elbowk_X,
-                              nclusters_desurv_elbowk_X)
-      save_plot_pdf(
-        p,
-        file.path(
-          FIGURE_CONFIGS$panel_dir,
-          sprintf("fig_val_heatmap_desurv_elbowk_%s.pdf", bo_label)
-        )
-      )
-      p
-    }
-    
-  ),
-  
-  tar_target(
-    fig_validation_heatmap_std_elbowk,
-    {
-      browser()
-      p = make_expression_heatmap(data_val_filtered_elbowk,
-                                  fit_std_elbowk,
-                                  tar_tops_std_elbowk,
-                                  clusters_std_elbowk_X_aligned,
-                                  clusters_std_elbowk_X,
-                                  nclusters_std_elbowk_X)
-      save_plot_pdf(
-        p,
-        file.path(
-          FIGURE_CONFIGS$panel_dir,
-          sprintf("fig_val_heatmap_std_elbowk_%s.pdf", bo_label)
-        )
-      )
-      p
-    }
-    
-  ),
-  
-  tar_target(
-    fig_validation_heatmap_std_desurvk,
-    {
-      browser()
-      p = make_expression_heatmap(data_val_filtered,
-                                  fit_std_desurvk,
-                                  tar_tops_std_desurvk,
-                                  clusters_std_desurvk_X_aligned,
-                                  clusters_std_desurvk_X,
-                                  nclusters_std_desurvk_X)
-      save_plot_pdf(
-        p,
-        file.path(
-          FIGURE_CONFIGS$panel_dir,
-          sprintf("fig_val_heatmap_std_desurvk_%s.pdf", bo_label)
-        )
-      )
-      p
-    }
-    
-  ),
-  
   tar_target(
     fig_extval_panels,
     build_fig_extval_panels(

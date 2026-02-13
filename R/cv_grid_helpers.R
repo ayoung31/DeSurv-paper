@@ -398,6 +398,8 @@ validate_grid_point <- function(grid_fit, val_datasets) {
   ntop_val <- if (is.null(grid_fit$ntop)) NA_real_ else as.numeric(grid_fit$ntop)
   ntop_raw <- grid_fit$ntop
   z_cutpoint <- grid_fit$z_cutpoint %||% NA_real_
+  train_lp_mean <- grid_fit$lp_mean %||% NA_real_
+  train_lp_sd <- grid_fit$lp_sd %||% NA_real_
 
   W <- fit$W
   beta <- fit$beta
@@ -495,27 +497,24 @@ validate_grid_point <- function(grid_fit, val_datasets) {
       }
     }, error = function(e) NULL)
 
-    # Method 3: transfer_beta_dichot (z-score standardized)
+    # Method 3: transfer_beta_dichot (z-score standardized using training mean/sd)
     m3_cindex <- NA_real_
     m3_se <- NA_real_
     m3_logrank_z <- NA_real_
     tryCatch({
       if (!is.na(z_cutpoint) && !anyNA(lp_val) &&
-          !any(is.infinite(lp_val)) && n_evt > 0) {
-        lp_mu <- mean(lp_val)
-        lp_sd <- sd(lp_val)
-        if (is.finite(lp_sd) && lp_sd > 0) {
-          z_val <- (lp_val - lp_mu) / lp_sd
-          group <- as.integer(z_val > z_cutpoint)
-          if (length(unique(group)) == 2) {
-            cc <- survival::concordance(
-              survival::Surv(time_val, event_val) ~ group,
-              reverse = TRUE
-            )
-            m3_cindex <- cc$concordance
-            m3_se <- sqrt(cc$var)
-            m3_logrank_z <- compute_logrank_z(time_val, event_val, group)
-          }
+          !any(is.infinite(lp_val)) && n_evt > 0 &&
+          is.finite(train_lp_sd) && train_lp_sd > 0) {
+        z_val <- (lp_val - train_lp_mean) / train_lp_sd
+        group <- as.integer(z_val > z_cutpoint)
+        if (length(unique(group)) == 2) {
+          cc <- survival::concordance(
+            survival::Surv(time_val, event_val) ~ group,
+            reverse = TRUE
+          )
+          m3_cindex <- cc$concordance
+          m3_se <- sqrt(cc$var)
+          m3_logrank_z <- compute_logrank_z(time_val, event_val, group)
         }
       }
     }, error = function(e) NULL)
@@ -582,27 +581,24 @@ validate_grid_point <- function(grid_fit, val_datasets) {
       pooled_row$cindex_se[2] <- cox_fit$concordance[7]
     }, error = function(e) NULL)
 
-    # Pooled Method 3: transfer_beta_dichot (z-score standardized)
+    # Pooled Method 3: transfer_beta_dichot (z-score using training mean/sd)
     tryCatch({
       if (!is.na(z_cutpoint) && !anyNA(pooled_lp) &&
-          !any(is.infinite(pooled_lp))) {
-        lp_mu <- mean(pooled_lp)
-        lp_sd <- sd(pooled_lp)
-        if (is.finite(lp_sd) && lp_sd > 0) {
-          z_val <- (pooled_lp - lp_mu) / lp_sd
-          group <- as.integer(z_val > z_cutpoint)
-          if (length(unique(group)) == 2) {
-            cc <- survival::concordance(
-              survival::Surv(pooled_time, pooled_event) ~ group,
-              reverse = TRUE
-            )
-            pooled_row$cindex[3] <- cc$concordance
-            pooled_row$cindex_se[3] <- sqrt(cc$var)
-            pooled_row$logrank_z[3] <- compute_logrank_z(
-              pooled_time, pooled_event, group,
-              strata = pooled_ds_label
-            )
-          }
+          !any(is.infinite(pooled_lp)) &&
+          is.finite(train_lp_sd) && train_lp_sd > 0) {
+        z_val <- (pooled_lp - train_lp_mean) / train_lp_sd
+        group <- as.integer(z_val > z_cutpoint)
+        if (length(unique(group)) == 2) {
+          cc <- survival::concordance(
+            survival::Surv(pooled_time, pooled_event) ~ group,
+            reverse = TRUE
+          )
+          pooled_row$cindex[3] <- cc$concordance
+          pooled_row$cindex_se[3] <- sqrt(cc$var)
+          pooled_row$logrank_z[3] <- compute_logrank_z(
+            pooled_time, pooled_event, group,
+            strata = pooled_ds_label
+          )
         }
       }
     }, error = function(e) NULL)
@@ -979,9 +975,10 @@ plot_km_training <- function(grid_fit_entry, cv_grid_data) {
 #' Plot validation Kaplan-Meier curves for a single dataset
 #'
 #' Intersects genes between W and validation data, computes LP, standardizes
-#' on validation data, dichotomizes at z_cutpoint, and produces a KM plot.
+#' using training mean/sd, dichotomizes at z_cutpoint, and produces a KM plot.
 #'
-#' @param grid_fit_entry Single element from cv_grid_fit list
+#' @param grid_fit_entry Single element from cv_grid_fit list (must have
+#'   $lp_mean and $lp_sd from training)
 #' @param val_ds Single validation dataset with $ex, $sampInfo
 #' @param ds_name Character dataset name for title
 #' @return ggplot object (KM plot with annotations)
@@ -992,6 +989,10 @@ plot_km_validation <- function(grid_fit_entry, val_ds, ds_name) {
   ntop <- grid_fit_entry$ntop
   z_cut <- grid_fit_entry$z_cutpoint
   if (is.na(z_cut)) return(NULL)
+
+  lp_mu <- grid_fit_entry$lp_mean
+  lp_sd <- grid_fit_entry$lp_sd
+  if (!is.finite(lp_sd) || lp_sd <= 0) return(NULL)
 
   W <- fit$W
   beta <- fit$beta
@@ -1004,9 +1005,6 @@ plot_km_validation <- function(grid_fit_entry, val_ds, ds_name) {
   X_val <- val_ds$ex[common_genes, , drop = FALSE]
 
   lp <- compute_lp(W_common, beta, X_val, ntop)
-  lp_mu <- mean(lp, na.rm = TRUE)
-  lp_sd <- sd(lp, na.rm = TRUE)
-  if (!is.finite(lp_sd) || lp_sd <= 0) return(NULL)
 
   z <- (lp - lp_mu) / lp_sd
   group <- factor(
@@ -1068,10 +1066,11 @@ plot_km_validation <- function(grid_fit_entry, val_ds, ds_name) {
 #' Plot pooled validation Kaplan-Meier curves across all datasets
 #'
 #' Pools all validation datasets, computes LP with gene intersection,
-#' standardizes on pooled data, dichotomizes, and produces KM with
+#' standardizes using training mean/sd, dichotomizes, and produces KM with
 #' stratified log-rank test.
 #'
-#' @param grid_fit_entry Single element from cv_grid_fit list
+#' @param grid_fit_entry Single element from cv_grid_fit list (must have
+#'   $lp_mean and $lp_sd from training)
 #' @param val_datasets Named list of validation datasets
 #' @return ggplot object (KM plot with annotations)
 plot_km_validation_pooled <- function(grid_fit_entry, val_datasets) {
@@ -1081,6 +1080,10 @@ plot_km_validation_pooled <- function(grid_fit_entry, val_datasets) {
   ntop <- grid_fit_entry$ntop
   z_cut <- grid_fit_entry$z_cutpoint
   if (is.na(z_cut)) return(NULL)
+
+  lp_mu <- grid_fit_entry$lp_mean
+  lp_sd <- grid_fit_entry$lp_sd
+  if (!is.finite(lp_sd) || lp_sd <= 0) return(NULL)
 
   W <- fit$W
   beta <- fit$beta
@@ -1109,10 +1112,6 @@ plot_km_validation_pooled <- function(grid_fit_entry, val_datasets) {
   }
 
   if (length(pooled_lp) < 2) return(NULL)
-
-  lp_mu <- mean(pooled_lp, na.rm = TRUE)
-  lp_sd <- sd(pooled_lp, na.rm = TRUE)
-  if (!is.finite(lp_sd) || lp_sd <= 0) return(NULL)
 
   z <- (pooled_lp - lp_mu) / lp_sd
   group <- factor(
