@@ -1,97 +1,118 @@
-# DeSurv Manuscript: Narrative Arc Analysis
+# DeSurv Manuscript: Narrative Arc Analysis (Revised)
 
-**Document Purpose:** Detailed analysis of the paper's storytelling structure and how figures/tables support the narrative arc.
+**Document Purpose:** Detailed analysis of the paper's storytelling structure and how figures/tables support the narrative arc. Revised to reflect the prediction-validation framing proposed for PNAS submission.
+
+**Companion documents:** SUGGESTED_TEXT.md (drop-in language), PNAS_SENIOR_EDITOR_REVIEW.md (review findings), FIGURE_ANALYSIS.md (panel-by-panel review).
 
 ---
 
 ## Executive Summary
 
-The DeSurv manuscript employs a **problem-solution-validation** narrative structure with escalating generalization claims. The story progresses from controlled validation (simulation) through single-cancer analysis (PDAC) to cross-cancer transfer (bladder), building credibility at each step. Six main-text figures are strategically positioned to provide evidence at each narrative beat.
+The DeSurv manuscript employs a **prediction-validation** narrative structure. The Introduction establishes a biological problem (variance != prognosis), provides statistical and biological reasons why survival supervision should help, and makes five specific testable predictions. The Results section validates each prediction in order, with escalating generalization: simulation --> single-cancer (PDAC) --> cross-cancer (bladder). Six main-text figures are positioned as evidence for specific introduction claims.
+
+**Core narrative shift (vs. previous arc):** The paper is no longer framed as "here is a method and what it finds" but as "here is why supervision should help, and here is the evidence that it does." This is the hypothesis-driven framing that PNAS expects.
 
 ---
 
-## The Five-Act Story Structure
+## The Prediction-Validation Structure
 
-### Act 1: The Problem (Introduction)
-**Narrative Question:** Why do current methods fail to identify clinically relevant gene programs?
+### Predictions Made in the Introduction
 
-### Act 2: The Solution (Methods + Fig 1)
-**Narrative Question:** How does DeSurv address this problem?
+| # | Prediction | Statistical/Biological Basis | Validation Figure |
+|---|-----------|------------------------------|-------------------|
+| P1 | Variance-dominant factors need not be prognostically relevant | Aran et al. 2015: ~47% of subtyping genes correlate with purity; Bair & Tibshirani 2006: "no guarantee principal components will be associated with survival" | Fig 4C |
+| P2 | Supervision should concentrate survival signal into fewer factors | Cook & Forzani 2008: response-guided subspaces target outcome-relevant directions; information bottleneck (Tishby et al. 1999) | Fig 4A-B |
+| P3 | Supervision should improve cross-cohort generalization | Sufficient dimension reduction theory: outcome-aligned subspaces are more portable; survClust (Arora et al.): 97% vs 68% accuracy | Fig 5 |
+| P4 | Supervision should resolve rank selection ambiguity | Frigyesi & Hoglund 2008: cophenetic correlation can overfit; outcome-driven criterion replaces heuristic disagreement | Fig 2D |
+| P5 | Survival-aligned programs may transfer across cancers | Damrauer et al. 2014; Hoadley et al. 2018: basal-like programs are shared across epithelial cancers | Fig 6B |
 
-### Act 3: The Proof of Concept (Simulation + Figs 2-3)
-**Narrative Question:** Does the method work under controlled conditions?
+### Results Validate Each Prediction
 
-### Act 4: The Biological Insight (PDAC + Figs 4-5)
-**Narrative Question:** What does DeSurv reveal about real tumor biology?
-
-### Act 5: The Generalization (Cross-cancer + Fig 6)
-**Narrative Question:** Is this a general principle or a PDAC-specific finding?
+Each results subsection opens by referencing the corresponding introduction prediction and closes by stating whether the finding confirms, refines, or qualifies it.
 
 ---
 
-## Detailed Narrative Beat Analysis
+## The Three-Act Story
 
-### Introduction: Setting the Stakes
+### Act I: The Case for Supervision (Introduction)
 
-The introduction follows a classical five-paragraph problem-solution structure:
+**Five paragraphs, each with a specific narrative function:**
 
-| Paragraph | Narrative Function | Key Tension |
+| Paragraph | Narrative Function | Key Content |
 |-----------|-------------------|-------------|
-| 1 | Establish importance | Molecular subtyping matters for precision oncology |
-| 2 | Identify the gap | Discovery/validation separation risks overfitting |
-| 3 | Explain why it's hard | Technical barriers (cohort size, reference limitations) |
-| 4 | Critique prior art | Existing survival-NMF supervises H, not W |
-| 5-6 | Present solution | DeSurv supervises W directly |
+| 1 | The biological problem | Tumor transcriptomes are mixtures; variance != prognosis (cite Aran, Bair, Moffitt). Lead with biology, not methods. |
+| 2 | Why the two-step approach creates misalignment | Standard paradigm (unsupervised NMF + post-hoc evaluation) has produced foundational insights (acknowledge Collisson, Moffitt, Bailey, DECODER) but optimizes a different objective (reconstruction) than the evaluation criterion (survival). Frame as tradeoff, not failure. |
+| 3 | The case for supervision | Statistical grounding (Cook & Forzani sufficient dimension reduction; Bair & Tibshirani supervised PCA; Arora et al. survClust). Biological argument: supervision concentrates capacity on outcome-relevant programs. Second benefit: simplifies rank selection by providing a clinically meaningful criterion. **This paragraph generates all five predictions.** |
+| 4 | What DeSurv does | W-level supervision (Z = W^T X); semi-supervised design (alpha controls balance); Bayesian optimization for model selection. Technical innovation in one paragraph. |
+| 5 | What we will show | Explicit statement of the five predictions and the three evaluation settings (simulation, PDAC, cross-cancer). Readers know exactly what to expect from Results. |
 
-**The Core Innovation Claim (Paragraph 4-5):**
-> "Existing survival-aware NMF methods integrate the survival objective through the sample-specific loadings (H) rather than the gene-level programs (W). DeSurv integrates survival information directly into the gene signature matrix."
+**Critical tone notes:**
+- Paragraph 1 leads with biology (variance != prognosis), not methodology (NMF limitations)
+- Paragraph 2 acknowledges the successes of the two-step approach before identifying its structural limitation
+- Paragraph 3 grounds the case for supervision in established theory (Cook, Bair, Tishby), not hand-waving
+- Paragraph 4 describes DeSurv as a semi-supervised method: both the reconstruction and survival terms are needed (see SUGGESTED_TEXT.md Section H for the argument)
+- Paragraph 5 makes predictions explicit, so Results read as confirmation rather than exploration
 
-This is the **conceptual hook** that the entire paper builds around.
-
----
-
-### Results Section: The Evidence Cascade
-
-The results section follows a strict logical progression:
+### Act II: The Evidence Cascade (Results)
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│  MODEL OVERVIEW (Fig 1)                                             │
-│  "Here's what DeSurv is"                                            │
-└──────────────────────────────┬──────────────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  RANK SELECTION PROBLEM (Fig 2)                                     │
-│  "Standard methods can't pick k; DeSurv can"                        │
-└──────────────────────────────┬──────────────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  SIGNATURE QUALITY (Fig 3)                                          │
-│  "Supervision identifies correct genes"                             │
-└──────────────────────────────┬──────────────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  BIOLOGICAL STRUCTURE (Fig 4)                                       │
-│  "DeSurv reorganizes programs toward prognosis"                     │
-│  *** THE TURNING POINT - This is why you should care ***            │
-└──────────────────────────────┬──────────────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  EXTERNAL VALIDATION (Fig 5)                                        │
-│  "Structure generalizes across PDAC cohorts"                        │
-└──────────────────────────────┬──────────────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  CROSS-CANCER TRANSFER (Fig 6)                                      │
-│  "Programs transfer to bladder cancer"                              │
-│  *** THE PNAS-LEVEL CLAIM - General principle, not just PDAC ***    │
-└─────────────────────────────────────────────────────────────────────┘
++-----------------------------------------------------------------------+
+|  MODEL OVERVIEW (Fig 1)                                                |
+|  "Here is the DeSurv framework"                                        |
+|  Narrative function: Technical foundation for all subsequent claims     |
++-------------------------------+---------------------------------------+
+                                |
+                                v
++-----------------------------------------------------------------------+
+|  RANK SELECTION (Fig 2) -- validates P4                                |
+|  "Standard heuristics disagree; survival-driven optimization resolves  |
+|   this by providing a principled, outcome-meaningful criterion"         |
++-------------------------------+---------------------------------------+
+                                |
+                                v
++-----------------------------------------------------------------------+
+|  SIMULATION (Fig 3) -- validates P1, P2 under controlled conditions    |
+|  "Under known ground truth, DeSurv recovers the true rank and lethal  |
+|   programs more reliably. Null scenario: no advantage when no signal." |
++-------------------------------+---------------------------------------+
+                                |
+                                v
++-----------------------------------------------------------------------+
+|  BIOLOGICAL STRUCTURE (Fig 4) -- validates P1, P2 in real data         |
+|  *** THE TURNING POINT ***                                             |
+|  "Variance != prognosis: exocrine factor dominates variance but not    |
+|   survival. DeSurv reorganizes programs toward outcome-relevant axes." |
++-------------------------------+---------------------------------------+
+                                |
+                                v
++-----------------------------------------------------------------------+
+|  EXTERNAL VALIDATION (Fig 5) -- validates P3                           |
+|  "Survival-aligned programs generalize across independent PDAC         |
+|   cohorts with consistent HRs; NMF factors do not."                    |
++-------------------------------+---------------------------------------+
+                                |
+                                v
++-----------------------------------------------------------------------+
+|  CROSS-CANCER TRANSFER (Fig 6) -- validates P5                         |
+|  *** THE PNAS-LEVEL CLAIM ***                                          |
+|  "PDAC-trained DeSurv factor retains prognostic signal in bladder      |
+|   cancer, consistent with shared basal-like biology."                  |
++-----------------------------------------------------------------------+
 ```
+
+**Evidence escalation:** Simulation (controlled) --> PDAC training (real, single cancer) --> PDAC validation (real, independent cohorts) --> Bladder (real, different cancer type).
+
+### Act III: Synthesis and Implications (Discussion)
+
+**Five paragraphs:**
+
+| Paragraph | Narrative Function | Key Content |
+|-----------|-------------------|-------------|
+| 1 | Summarize contributions | Survival supervision reorganizes the latent landscape --- this is structural reallocation, not just better C-index |
+| 2 | PDAC biological context | DeSurv recapitulates known programs (basal/classical, CAF subtypes) --- the contribution is how they are recovered (de novo, without pre-specified signatures), not their identity |
+| 3 | Semi-supervised tradeoff | Why DeSurv needs BOTH terms: reconstruction preserves biological interpretability; survival steers toward outcome-relevant decomposition. Alpha controls the balance. When supervision helps vs. when it doesn't (null scenario guidance). |
+| 4 | Limitations | Cox PH assumption; computational cost of BO; single transfer pair (PDAC-->bladder); theory-practice gap in convergence (Theorem 1 vs. implementation); dependence on outcome data quality |
+| 5 | Broader implications | The principle (outcome-guided dimension reduction targets different subspaces than variance-driven reduction) extends beyond cancer. Cook & Forzani, information bottleneck. Natural extensions: multi-omics, spatial transcriptomics, EHR data. |
 
 ---
 
@@ -99,41 +120,42 @@ The results section follows a strict logical progression:
 
 ### Figure 1: The Method Schematic
 **Narrative Position:** Opening
-**Story Function:** "Here's what I'm proposing"
+**Story Function:** "Here is what DeSurv is"
+**Prediction Connection:** Sets up the technical basis for all five predictions
 
 | Panel | Content | Narrative Role |
 |-------|---------|----------------|
-| A | NMF + Cox architecture | Shows W is shared between reconstruction and survival |
-| B | Bayesian optimization | Shows principled hyperparameter selection |
+| A | NMF + Cox architecture | Shows W is shared between reconstruction and survival; Z = W^T X |
+| B | Bayesian optimization | Shows principled hyperparameter selection (connects to P4) |
 | C-E | Model outputs | Shows interpretable outputs (gene programs, factors, coefficients) |
 
-**What reader should take away:** DeSurv is a principled framework that couples NMF with Cox by sharing the gene program matrix W.
+**What reader should take away:** DeSurv couples NMF with Cox by sharing W. Survival gradients act on W (gene programs), not H (sample loadings).
 
-**Connection to story arc:** Sets up the technical foundation for all subsequent claims.
+**Accessibility annotation to add:** Callout on panel A: "Survival gradients act on W (gene programs), not H (sample loadings)."
 
 ---
 
 ### Figure 2: The Rank Selection Problem
-**Narrative Position:** Problem establishment + first solution
-**Story Function:** "Standard methods fail; DeSurv succeeds"
+**Narrative Position:** First validation (P4)
+**Story Function:** "Standard methods fail to agree on rank; survival-driven optimization provides a clear criterion"
 
 | Panel | Content | Narrative Role |
 |-------|---------|----------------|
-| A | Reconstruction residuals | No clear elbow → ambiguous |
-| B | Cophenetic correlation | Fluctuates → ambiguous |
-| C | Silhouette width | Conflicts with A-B → ambiguous |
-| D | DeSurv C-index heatmap | Clear surface → unambiguous selection |
-| E | Simulation k recovery | Ground-truth validation |
+| A | Reconstruction residuals | No clear elbow --> ambiguous |
+| B | Cophenetic correlation | Fluctuates --> ambiguous |
+| C | Silhouette width | Conflicts with A-B --> ambiguous |
+| D | DeSurv C-index heatmap | Clear surface --> unambiguous selection |
+| E | Simulation k recovery | Ground-truth validation of rank recovery |
 
-**What reader should take away:** Unsupervised heuristics disagree; survival-guided selection resolves ambiguity.
+**What reader should take away:** Unsupervised heuristics disagree; outcome-driven selection resolves ambiguity.
 
-**Connection to story arc:** Establishes that DeSurv can be trusted to select appropriate models before showing what those models reveal.
+**Prediction-validation link:** P4 predicted that incorporating outcomes would simplify rank selection. Panels A-C show the problem; Panel D shows the resolution.
 
 ---
 
 ### Figure 3: Simulation Validation
-**Narrative Position:** Controlled proof
-**Story Function:** "Under known ground truth, DeSurv works better"
+**Narrative Position:** Controlled proof (P1, P2)
+**Story Function:** "Under known ground truth, DeSurv recovers programs more reliably"
 
 | Panel | Content | Narrative Role |
 |-------|---------|----------------|
@@ -142,30 +164,35 @@ The results section follows a strict logical progression:
 
 **What reader should take away:** Survival supervision improves both prediction AND program recovery.
 
-**Connection to story arc:** Validates the method before applying to real (uncontrolled) data.
+**Critical framing:** The null and mixed scenarios must be reported:
+- **Null (no survival signal):** DeSurv does not outperform NMF --- confirms the method doesn't overfit when there's nothing to find
+- **Mixed (partial overlap between variance and prognosis):** Advantage attenuated --- supervision helps most when variance and prognosis diverge
+- **Easy (low-variance lethal programs):** DeSurv advantage is greatest --- the regime where the problem is hardest for unsupervised methods
 
 ---
 
 ### Figure 4: PDAC Biological Reorganization (THE KEY FIGURE)
-**Narrative Position:** Turning point
-**Story Function:** "Here's the insight that makes this matter"
+**Narrative Position:** The turning point (P1, P2 in real data)
+**Story Function:** "Here is the insight --- variance != prognosis, and DeSurv resolves this"
 
 | Panel | Content | Narrative Role |
 |-------|---------|----------------|
 | A | NMF factor-program correlations | Shows variance-dominant structure (exocrine axis) |
-| B | DeSurv factor-program correlations | Shows survival-aligned structure (immune-stromal) |
-| C | Variance vs survival contribution | THE PUNCHLINE: variance ≠ prognosis |
+| B | DeSurv factor-program correlations | Shows survival-aligned structure (immune-stromal, basal-like) |
+| C | Variance vs survival contribution | **THE PUNCHLINE:** programs explaining the most variance explain the least survival |
 | D | NMF-DeSurv correspondence | Shows reorganization, not replacement |
 
-**What reader should take away:** DeSurv doesn't just predict better; it **restructures latent programs** to isolate survival-relevant biology from variance-dominant noise.
+**What reader should take away:** DeSurv doesn't just predict better --- it **restructures latent programs** to isolate survival-relevant biology from variance-dominant noise. The exocrine factor dominates variance but contributes nothing to survival.
 
-**Connection to story arc:** This is the "aha moment" that transforms the paper from a methods contribution to a biological insight.
+**Prediction-validation link:** P1 predicted this disconnect; P2 predicted that supervision would concentrate survival signal. Panel C confirms P1; panels A-B confirm P2.
+
+**Accessibility annotation to add:** Label axes on Panel C as "Expression variance explained (%)" vs. "Survival association (concordance index)." Add factor annotations directly on the plot ("Exocrine," "Basal-like," "Activated TME").
 
 ---
 
 ### Figure 5: External PDAC Validation
-**Narrative Position:** Reproducibility checkpoint
-**Story Function:** "This isn't overfitting; it generalizes"
+**Narrative Position:** Reproducibility checkpoint (P3)
+**Story Function:** "Survival-aligned programs generalize; variance-driven programs do not"
 
 | Panel | Content | Narrative Role |
 |-------|---------|----------------|
@@ -173,115 +200,170 @@ The results section follows a strict logical progression:
 | B | DeSurv KM curves | Clear survival separation |
 | C | NMF KM curves | Weaker separation |
 
-**What reader should take away:** The survival-aligned programs identified in training generalize to independent datasets.
+**What reader should take away:** Outcome-aligned programs are more portable across datasets.
 
-**Connection to story arc:** Addresses the "overfitting" concern raised in the introduction by showing real external validation.
+**Prediction-validation link:** P3 predicted this, grounded in sufficient dimension reduction theory (Cook & Forzani 2008). The forest plot provides the quantitative evidence.
+
+**Accessibility annotation to add:** Add HR, 95% CI, and p-values directly on each KM panel.
 
 ---
 
 ### Figure 6: Cross-Cancer Transfer (THE PNAS CLAIM)
-**Narrative Position:** Culmination
-**Story Function:** "This is a general principle, not just PDAC"
+**Narrative Position:** Culmination (P5)
+**Story Function:** "This is a general principle, not just PDAC-specific"
 
 | Panel | Content | Narrative Role |
 |-------|---------|----------------|
-| A | Bladder variance vs survival | Same pattern as PDAC (variance ≠ prognosis) |
-| B | PDAC→Bladder transfer KM | Programs learned in PDAC work in bladder |
+| A | Bladder variance vs survival | Same pattern as PDAC (variance != prognosis) |
+| B | PDAC-->Bladder transfer KM | Programs learned in PDAC work in bladder |
 
 **What reader should take away:** Survival-relevant transcriptional structure is shared across cancer types; DeSurv captures it.
 
-**Connection to story arc:** Elevates the paper from "a better method for PDAC" to "a general framework for cancer transcriptomics."
+**Prediction-validation link:** P5 predicted this, citing Damrauer et al. 2014 and Hoadley et al. 2018.
+
+**Qualification:** This is a single transfer pair (PDAC --> bladder). The Discussion should acknowledge this limitation and call for broader benchmarking.
 
 ---
 
-## The Information Disclosure Strategy
-
-The paper employs **hierarchical information disclosure**:
-
-| Document | Role | Audience |
-|----------|------|----------|
-| Main Methods | Framework + key choices | Everyone |
-| Results | Empirical validation | Everyone |
-| Supplement | Complete derivations | Methods experts |
-| Discussion | Synthesis + implications | Everyone |
-
-This allows the main text to remain accessible while providing full rigor in the supplement.
-
----
-
-## Rhetorical Strategies
-
-### 1. Problem-Solution Framing
-Every results section begins by identifying a limitation of standard NMF, then shows DeSurv addresses it:
-- "Standard heuristics yield inconsistent guidance... To resolve this ambiguity, we applied DeSurv"
-- "In the standard NMF solution, factors largely reflected dominant sources of variance... By contrast, DeSurv produced..."
-
-### 2. Escalating Generalization Claims
-The evidence builds in scope:
-```
-Simulation (controlled) → PDAC training → PDAC validation → Bladder (different cancer)
-```
-
-### 3. Consistent Baseline Comparison
-DeSurv vs α=0 (standard NMF) runs throughout, providing a consistent ablation.
-
-### 4. Biological Grounding
-Every claim is tied to known biology (classical/basal-like, CAF subtypes, immune infiltration) to establish plausibility.
-
----
-
-## The Central Insight: "Variance ≠ Prognosis"
+## The Central Insight: "Variance != Prognosis"
 
 The entire paper builds toward one core insight, visualized in **Figure 4C** and echoed in **Figure 6A**:
 
 > **High-variance transcriptional axes are not necessarily prognostically relevant.** Standard NMF allocates model capacity to variance-dominant signals (like exocrine expression in PDAC) that contribute little to survival. DeSurv redirects this capacity toward survival-aligned programs.
 
-This insight is what makes the paper PNAS-worthy rather than just "slightly better C-index."
+In the prediction-validation structure, this insight is **stated as a prediction in the Introduction** (grounded in Aran et al. 2015, Bair & Tibshirani 2006), not revealed as a surprise in the Results. This makes the paper read as hypothesis-driven science rather than exploratory data analysis.
 
 ---
 
-## Narrative Gaps and Opportunities
+## The Semi-Supervised Framing
+
+DeSurv is a **semi-supervised** method. The alpha parameter controls the balance between unsupervised reconstruction (alpha=0) and supervised Cox association (alpha=1). This framing is essential and should be made explicit in the paper.
+
+### Why both terms are needed
+
+| Term | What it ensures | What breaks without it |
+|------|----------------|----------------------|
+| Reconstruction (1-alpha) | Programs correspond to real expression patterns | Model degenerates into penalized Cox regression on arbitrary projections; no biological interpretability |
+| Survival (alpha) | Programs are outcome-aligned | Programs follow variance, not prognosis; the rank selection problem is unsolvable by heuristics |
+| Joint optimization | Selects from among comparably reconstructive solutions the one most aligned with outcomes | Neither biological completeness nor clinical relevance is guaranteed |
+
+### When supervision helps vs. doesn't
+
+| Setting | DeSurv advantage | Reason |
+|---------|-----------------|--------|
+| Variance and prognosis diverge (Fig 3 "easy" scenario) | Large | Unsupervised methods allocate capacity to wrong directions |
+| Partial overlap (Fig 3 "mixed" scenario) | Moderate | Some prognostic signal captured by variance-dominant factors |
+| No survival signal (Fig 3 "null" scenario) | None | No outcome-relevant subspace to target; DeSurv reduces to NMF |
+
+This simulation-derived guidance should be discussed in both Results (as evidence) and Discussion (as guidance for practitioners).
+
+---
+
+## Rhetorical Strategies
+
+### 1. Prediction-Validation Framing (NEW)
+The Introduction makes five specific predictions; each Results subsection opens by referencing the prediction and closes by stating the finding. This creates a hypothesis-driven narrative.
+
+### 2. Tradeoff Framing for Prior Art (NEW)
+The two-step approach is acknowledged for its successes (Moffitt, Bailey, DECODER) before identifying the structural misalignment. The tone is "this approach has been foundational, but the objective mismatch creates a specific limitation that can be addressed."
+
+### 3. Escalating Generalization Claims (RETAINED)
+Evidence builds in scope:
+```
+Simulation (controlled) --> PDAC training --> PDAC validation --> Bladder (different cancer)
+```
+
+### 4. Consistent Baseline Comparison (RETAINED)
+DeSurv vs alpha=0 (standard NMF) runs throughout, providing a consistent ablation.
+
+### 5. Biological Grounding (RETAINED + ENHANCED)
+Every claim tied to known biology. New: the PDAC subtyping timeline (Collisson 2011 --> consensus 2025) motivates why supervision is needed --- the field took ~14 years of retrospective evaluation to converge.
+
+### 6. Semi-Supervised Argument (NEW)
+Explicit framing: DeSurv needs BOTH terms. This prevents the objection "why not just do supervised regression?" and grounds the method in established semi-supervised learning theory (Chapelle et al. 2006).
+
+### 7. Theoretical Grounding (NEW)
+Claims grounded in sufficient dimension reduction (Cook & Forzani 2008), supervised PCA (Bair & Tibshirani 2006), and information bottleneck (Tishby et al. 1999). These references give the case for supervision analytical teeth beyond empirical demonstration.
+
+---
+
+## Information Disclosure Strategy
+
+| Document | Role | Audience | New additions |
+|----------|------|----------|---------------|
+| Main Introduction | Predictions + accessible biological argument | Everyone | Theoretical grounding (Cook, Bair, Tishby); semi-supervised framing |
+| Main Methods | Framework + key choices | Everyone | W-vs-H supervision distinction made explicit |
+| Main Results | Prediction validation | Everyone | Transitional language linking each finding to its prediction |
+| Main Discussion | Synthesis + implications + limitations | Everyone | Semi-supervised tradeoff paragraph; 5 explicit limitations; broader implications |
+| Supplement | Complete derivations | Methods experts | Unchanged |
+
+---
+
+## Accessibility for PNAS Readership
+
+PNAS readership spans all scientific disciplines. Key strategies:
+
+1. **Lead every section with intuition, not formalism.** "Tumor transcriptomes are mixtures" before any equation.
+2. **Minimize jargon in key paragraphs.** See SUGGESTED_TEXT.md Section K for jargon translation table.
+3. **Frame the contribution as a general principle:** "In high-dimensional data where outcome-relevant features explain modest variance, incorporating outcome information during dimensionality reduction yields more portable, more interpretable representations."
+4. **Make figures self-explanatory.** Add annotations, label axes in plain language, include HR/CI/p-values directly on KM panels.
+5. **Use one-sentence summaries** at the start of each results subsection (bolded).
+6. **The Significance Statement is the primary hook.** It must be understandable by an educated scientist outside computational genomics.
+
+---
+
+## Narrative Gaps Still to Address
 
 ### Currently Underemphasized
-1. **The W vs H distinction** - buried in Introduction paragraph 4
-2. **The projection advantage** - closed-form Z = W^⊤X is mentioned but not highlighted
-3. **Why cross-cancer transfer works** - biological mechanism is implicit
+1. **The semi-supervised argument** --- needs explicit treatment (proposed language in SUGGESTED_TEXT.md Section H)
+2. **The projection advantage** --- closed-form Z = W^T X enables scoring new samples without their survival data; not shared by H-supervised methods
+3. **Why cross-cancer transfer works** --- biological mechanism (shared basal-like programs) should be stated explicitly
 
 ### Currently Missing
-1. **Explicit out-of-sample statement** - nested CV is used but not clearly stated
-2. **Factor biological labels** - Figure 4 describes but doesn't label
-3. **Effect sizes on KM plots** - Forest plot has HRs but KM plots lack p-values
+1. **Explicit out-of-sample statement** --- nested CV is used but should be stated clearly and early
+2. **Factor biological labels on Figure 4** --- annotations would help general readers
+3. **Effect sizes on KM plots** --- HR, 95% CI, and p-values directly on panels
+4. **Null scenario discussion** --- the null result is a strength, not a weakness; it validates that DeSurv doesn't overfit when there's no signal
 
 ---
 
 ## Summary: The Story DeSurv Tells
 
-**Opening Hook:** Current molecular subtyping separates discovery from validation, missing clinically relevant programs.
+**Opening Hook (Biology-first):** The programs that explain the most transcriptomic variance are not the programs that drive clinical outcomes. Standard deconvolution methods optimize variance, not prognosis, creating a structural misalignment.
 
-**Innovation:** DeSurv supervises through gene programs (W), not sample loadings (H), ensuring discovered programs are intrinsically prognostic.
+**The Case for Supervision (Theory-grounded):** Sufficient dimension reduction theory and empirical precedent (supervised PCA, survival-weighted clustering) predict that outcome-guided learning should concentrate prognostic signal, improve portability, and simplify model selection.
+
+**Innovation (Technical):** DeSurv supervises through gene programs (W), not sample loadings (H), and uses Bayesian optimization for model selection. The semi-supervised design (alpha parameter) balances biological interpretability with clinical relevance.
+
+**Five Predictions:** (1) variance != prognosis, (2) supervision concentrates survival signal, (3) supervision improves generalization, (4) supervision resolves rank selection, (5) survival-aligned programs transfer across cancers.
 
 **Evidence Chain:**
-1. Standard rank selection fails; DeSurv's BO-guided selection works (Fig 2)
-2. Under controlled conditions, supervision improves gene recovery (Fig 3)
-3. In PDAC, supervision reorganizes programs toward prognosis (Fig 4)
-4. This structure generalizes across PDAC cohorts (Fig 5)
-5. This structure even transfers to bladder cancer (Fig 6)
+1. Standard rank selection fails; survival-driven BO resolves it (Fig 2) --- validates P4
+2. Under controlled conditions, supervision improves gene recovery, especially when prognosis diverges from variance (Fig 3) --- validates P1, P2
+3. In PDAC, supervision reorganizes the latent landscape: exocrine variance is suppressed, survival signal is concentrated (Fig 4) --- validates P1, P2 in real data
+4. Survival-aligned programs generalize across PDAC cohorts with consistent HRs (Fig 5) --- validates P3
+5. PDAC-trained factor retains prognostic signal in bladder cancer (Fig 6) --- validates P5
 
-**Closing:** DeSurv provides a general framework for deriving actionable, survival-aligned insights from heterogeneous tumor transcriptomes.
+**Closing (Broader principle):** Outcome-guided dimension reduction targets different subspaces than variance-driven reduction. This principle extends beyond cancer genomics.
 
 ---
 
 ## Appendix: Figure-Narrative Mapping Table
 
-| Figure | Section | Narrative Beat | Key Claim | Evidence Type |
-|--------|---------|----------------|-----------|---------------|
-| 1 | Model Overview | Method introduction | W is shared, BO for selection | Schematic |
-| 2 | Rank Selection | Problem + solution | Standard fails, DeSurv works | Real data + simulation |
-| 3 | Simulation | Controlled validation | Supervision improves recovery | Simulation |
-| 4 | Biological Structure | **Turning point** | Variance ≠ prognosis | Real data comparison |
-| 5 | External Validation | Reproducibility | Generalizes within-cancer | Independent cohorts |
-| 6 | Cross-cancer | **PNAS claim** | Generalizes across-cancer | Transfer experiment |
+| Figure | Section | Prediction Validated | Key Claim | Evidence Type |
+|--------|---------|---------------------|-----------|---------------|
+| 1 | Model Overview | (Setup) | W is shared; BO for selection | Schematic |
+| 2 | Rank Selection | P4 | Standard fails, DeSurv works | Real data + simulation |
+| 3 | Simulation | P1, P2 | Supervision improves recovery | Controlled simulation |
+| 4 | Biological Structure | P1, P2 | **Variance != prognosis** | Real data comparison |
+| 5 | External Validation | P3 | Generalizes within-cancer | Independent cohorts |
+| 6 | Cross-cancer | P5 | Generalizes across-cancer | Transfer experiment |
 
 ---
 
-*Analysis generated: 2026-01-24*
+## Change Log
+
+| Date | Change |
+|------|--------|
+| 2026-01-24 | Initial narrative arc analysis (problem-solution-validation structure) |
+| 2026-02-10 | Revised to prediction-validation structure for PNAS. Added: semi-supervised framing, theoretical grounding, accessibility strategies, prediction-figure mapping, Discussion structure, limitation enumeration. Informed by PNAS_SENIOR_EDITOR_REVIEW.md and SUGGESTED_TEXT.md. |

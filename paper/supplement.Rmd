@@ -37,6 +37,70 @@ ggplot(lossit,aes(y=lossit,x=iter,color=as.factor(init)))+
 ```
 
 
+## Simulation results under null and mixed scenarios {.unnumbered}
+
+To characterize the operating characteristics of DeSurv across different signal regimes, we evaluated performance under three simulation scenarios. In the primary scenario (R0_easy; main text Fig. 3), prognostic programs explained low variance relative to outcome-neutral background signals, and survival depended on 150 factor-specific marker genes ($\beta_1 = 2$, $\beta_2 = \beta_3 = 0$). In the null scenario (R00_null), survival times were generated independently of gene expression ($\beta = 0$), so no prognostic structure existed. In the mixed scenario (R_mixed), survival depended on 300 genes per lethal factor, of which 50% were factor-specific markers and 50% were background genes with loadings shared across all factors. All scenarios used $G = 3{,}000$ genes, $N = 200$ samples, $K = 3$ true factors, and identical gamma distribution parameters for the gene loading matrix $W$ (see Materials and Methods). Performance was evaluated using cross-validated concordance index (C-index), precision of recovered prognostic gene sets, and the distribution of selected ranks across simulation replicates.
+
+Under the null scenario (Fig. S\ref{fig:sim-null-mixed}A--B), DeSurv showed no advantage over unsupervised NMF ($\alpha = 0$). Both methods yielded C-index values near 0.5, consistent with the absence of survival signal. The distribution of selected ranks showed similar variability across methods. These results confirm that DeSurv does not hallucinate prognostic structure when none exists: Bayesian optimization selected low values of the supervision parameter $\alpha$, effectively recovering standard NMF as a special case. This specificity control is important because it establishes that the advantages observed in the primary scenario reflect genuine signal recovery rather than overfitting to noise in the survival labels.
+
+Under the mixed scenario (Fig. S\ref{fig:sim-null-mixed}C--E), DeSurv's advantage over unsupervised NMF was present but attenuated relative to the primary scenario. C-index values were modestly higher for DeSurv, and precision for recovering the true survival gene set---which now included both marker and background genes---showed a smaller improvement compared to the primary scenario. This attenuation is expected: when survival-relevant genes partially overlap with variance-dominant background programs, unsupervised NMF captures some of the prognostic structure incidentally, reducing the marginal benefit of supervision. The mixed scenario thus identifies the intermediate regime where DeSurv offers a moderate but not dramatic improvement over unsupervised approaches.
+
+Together, the three scenarios provide a dose-response relationship: DeSurv's advantage is greatest when variance and prognosis diverge (primary), moderate when they partially overlap (mixed), and absent when no survival signal exists (null). This gradient is consistent with the predictions of sufficient dimension reduction theory and offers practical guidance for users: DeSurv is most beneficial in settings where the dominant transcriptional axes are expected to be prognostically neutral, as is common in cancers with high tumor purity variation or dominant tissue-composition signals.
+
+```{r fig-sim-null-mixed, fig.width = 6.5, fig.height = 6, fig.cap = "DeSurv performance under null and mixed simulation scenarios. (A--B) Null scenario: survival times are independent of gene expression ($\\beta = 0$). DeSurv shows no advantage over unsupervised NMF ($\\alpha = 0$), confirming that the method does not hallucinate prognostic structure when none exists. (A) C-index distributions are comparable and centered near 0.5. (B) Distribution of selected ranks shows comparable variability; both methods favor parsimonious solutions. Precision is not shown because no true survival genes exist under the null ($\\beta = 0$). (C--E) Mixed scenario: survival depends on a mixture of factor-specific marker genes (50\\%) and shared background genes (50\\%), creating partial overlap between variance-dominant and prognostically relevant structure. DeSurv's advantage is present but attenuated relative to the primary scenario (main text Fig. 3). (C) C-index is modestly higher for DeSurv. (D) Precision for recovering the true survival gene set (now including both marker and background genes) remains substantially higher for DeSurv. (E) Selected-rank distributions. In all panels, DeSurv (blue) denotes the supervised model and NMF (red) denotes the unsupervised baseline ($\\alpha = 0$), both tuned via Bayesian optimization. \\label{fig:sim-null-mixed}", fig.env='figure*', fig.pos='t', out.height = "6in", out.width='\\textwidth'}
+library(targets)
+library(cowplot)
+library(ggplot2)
+
+tar_load(sim_figs_by_scenario)
+
+scenario_ids <- sapply(sim_figs_by_scenario, function(x) x$scenario_id)
+analysis_ids <- sapply(sim_figs_by_scenario, function(x) x$analysis_id)
+
+null_idx <- which(scenario_ids == "R00_null" & analysis_ids == "bo_tune_ntop")
+mixed_idx <- which(scenario_ids == "R_mixed" & analysis_ids == "bo_tune_ntop")
+
+null_plots <- sim_figs_by_scenario[[null_idx]]
+mixed_plots <- sim_figs_by_scenario[[mixed_idx]]
+
+null_plots <- lapply(null_plots, set_fig_font, size = 10)
+mixed_plots <- lapply(mixed_plots, set_fig_font, size = 10)
+
+# Null row: C-index and k-hist only (precision undefined when beta = 0)
+null_cindex <- null_plots$cindex_box +
+  labs(title = NULL) +
+  scale_y_continuous(limits = c(0.3, 1))
+null_cindex$data$scenario_id <- "Null scenario (\u03b2 = 0)"
+
+null_khist <- null_plots$k_hist + labs(title = NULL)
+null_khist$data$scenario_id <- "Null scenario (\u03b2 = 0)"
+
+null_row <- plot_grid(
+  null_cindex, null_khist,
+  ncol = 2, labels = c("A", "B"), rel_widths = c(1, 1.2)
+)
+
+# Mixed row: C-index, precision, and k-hist
+mixed_cindex <- mixed_plots$cindex_box +
+  labs(title = NULL) +
+  scale_y_continuous(limits = c(0.3, 1))
+mixed_cindex$data$scenario_id <- "Mixed scenario"
+
+mixed_prec <- mixed_plots$precision_box + labs(title = NULL)
+mixed_prec$data$scenario_id <- "Mixed scenario"
+
+mixed_khist <- mixed_plots$k_hist + labs(title = NULL)
+mixed_khist$data$scenario_id <- "Mixed scenario"
+
+mixed_row <- plot_grid(
+  mixed_cindex, mixed_prec, mixed_khist,
+  ncol = 3, labels = c("C", "D", "E")
+)
+
+plot_grid(null_row, mixed_row, nrow = 2, rel_heights = c(1, 1))
+```
+
+
 ## Analysis of scRNA-seq {.unnumbered}
 Next, we verify our findings at the cellular level using the Elyada scRNA-seq data [@elyada2019cross]. We found that our DeSurv factor 1 signature was expressed primarily in iCAF and B cells, factor 2 was expressed in Acinar and Classical PDAC 2, and factor 3 was expressed primarily in Basal-like PDAC cells (Figure \@ref(fig:fig-sc)B-E). This is consistent with our ORA analysis which found that factor 1 was mostly immune and factor 3 was basal-like, and with the overlap we saw with published gene lists that identified factor 1 as iCAF/classical/immune and factor 3 as basal-like. Interestingly, we do not see a large overlap of factor 1 with the classical PDAC cell types despite some overlap with classical gene lists. Need more here...
 
