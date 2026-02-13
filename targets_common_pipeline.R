@@ -1130,6 +1130,12 @@ COMMON_DESURV_VAL_TARGETS <- list(
     iteration="list"
   ),
 
+  # Merged PACA_AU for survival validation (deduplicates overlapping subjects)
+  tar_target(
+    data_val_filtered_surv,
+    merge_paca_au_datasets(data_val_filtered)
+  ),
+
   tar_target(
     data_val_filtered_elbowk,
     {
@@ -1316,9 +1322,9 @@ COMMON_DESURV_VAL_TARGETS <- list(
       train_lp_mean <- desurv_lp_stats$lp_mean
       train_lp_sd <- desurv_lp_stats$lp_sd
 
-      ds_names <- names(data_val_filtered)
+      ds_names <- names(data_val_filtered_surv)
       rows <- lapply(ds_names, function(ds_name) {
-        val_ds <- data_val_filtered[[ds_name]]
+        val_ds <- data_val_filtered_surv[[ds_name]]
         val_genes <- rownames(val_ds$ex)
         common_genes <- intersect(rownames(W), val_genes)
         if (length(common_genes) < 2) {
@@ -1371,7 +1377,13 @@ COMMON_DESURV_VAL_TARGETS <- list(
             )
             cc$concordance
           }, error = function(e) NA_real_)
-          lr_z <- compute_logrank_z(time_val, event_val, group)
+          # Detect multi-platform merged dataset (e.g., merged PACA_AU)
+          ds_col <- val_ds$sampInfo$dataset[valid_idx]
+          has_strata <- !is.null(ds_col) && length(unique(ds_col)) > 1
+          lr_z <- compute_logrank_z(
+            time_val, event_val, group,
+            strata = if (has_strata) ds_col else NULL
+          )
         }
 
         tibble::tibble(
@@ -1386,6 +1398,55 @@ COMMON_DESURV_VAL_TARGETS <- list(
 
       dplyr::bind_rows(rows)
     }
+  ),
+
+  # --- Validation KM plots for dichotomized risk groups ---
+  tar_target(
+    fig_val_km_dichot,
+    {
+      W <- val_run_bundle$fit_desurv$W
+      beta <- val_run_bundle$fit_desurv$beta
+      ntop <- val_run_bundle$ntop_value
+      z_cut <- desurv_optimal_z_cutpoint
+      lp_mean <- desurv_lp_stats$lp_mean
+      lp_sd <- desurv_lp_stats$lp_sd
+
+      # Build a grid_fit_entry-like list for the plot helpers
+      fit_entry <- list(
+        fit = list(W = W, beta = beta),
+        ntop = ntop,
+        z_cutpoint = z_cut,
+        lp_mean = lp_mean,
+        lp_sd = lp_sd,
+        k = ncol(W),
+        alpha = val_run_bundle$bo_bundle$params_best$alpha %||% NA_real_
+      )
+
+      out_dir <- file.path("figures", "km_dichot")
+      dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+      paths <- character(0)
+
+      # Per-dataset KM plots (uses merged PACA_AU for survival)
+      for (ds_name in names(data_val_filtered_surv)) {
+        p <- plot_km_validation(fit_entry, data_val_filtered_surv[[ds_name]],
+                                 ds_name)
+        if (is.null(p)) next
+        fpath <- file.path(out_dir, paste0("km_val_", ds_name, ".pdf"))
+        ggplot2::ggsave(fpath, p, width = 7, height = 5)
+        paths <- c(paths, fpath)
+      }
+
+      # Pooled KM plot
+      p_pooled <- plot_km_validation_pooled(fit_entry, data_val_filtered_surv)
+      if (!is.null(p_pooled)) {
+        fpath <- file.path(out_dir, "km_val_pooled.pdf")
+        ggplot2::ggsave(fpath, p_pooled, width = 7, height = 5)
+        paths <- c(paths, fpath)
+      }
+
+      paths
+    },
+    format = "file"
   ),
 
   tar_target(

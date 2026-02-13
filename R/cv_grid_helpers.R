@@ -508,13 +508,19 @@ validate_grid_point <- function(grid_fit, val_datasets) {
         z_val <- (lp_val - train_lp_mean) / train_lp_sd
         group <- as.integer(z_val > z_cutpoint)
         if (length(unique(group)) == 2) {
+          # Detect multi-platform merged dataset (e.g., merged PACA_AU)
+          ds_col <- si$dataset[valid_idx]
+          has_strata <- !is.null(ds_col) && length(unique(ds_col)) > 1
           cc <- survival::concordance(
             survival::Surv(time_val, event_val) ~ group,
             reverse = TRUE
           )
           m3_cindex <- cc$concordance
           m3_se <- sqrt(cc$var)
-          m3_logrank_z <- compute_logrank_z(time_val, event_val, group)
+          m3_logrank_z <- compute_logrank_z(
+            time_val, event_val, group,
+            strata = if (has_strata) ds_col else NULL
+          )
         }
       }
     }, error = function(e) NULL)
@@ -535,7 +541,11 @@ validate_grid_point <- function(grid_fit, val_datasets) {
     pooled_Z[[ds_name]] <- Z_val
     pooled_time <- c(pooled_time, time_val)
     pooled_event <- c(pooled_event, event_val)
-    pooled_ds_label <- c(pooled_ds_label, rep(ds_name, n_samp))
+    # Use sampInfo$dataset for strata labels so merged datasets
+    # (e.g., PACA_AU) retain original platform labels
+    ds_labels <- si$dataset[valid_idx]
+    if (is.null(ds_labels)) ds_labels <- rep(ds_name, n_samp)
+    pooled_ds_label <- c(pooled_ds_label, ds_labels)
   }
 
   # Pooled results
@@ -1020,15 +1030,27 @@ plot_km_validation <- function(grid_fit_entry, val_ds, ds_name) {
   )
   # Remove rows with invalid survival data
   valid <- is.finite(df$time) & !is.na(df$event) & df$time > 0
+
+  # Detect multi-platform merged dataset (e.g., merged PACA_AU)
+  ds_col <- val_ds$sampInfo$dataset
+  has_strata <- !is.null(ds_col) && length(unique(ds_col[valid])) > 1
+  if (has_strata) {
+    df$strata_var <- ds_col
+  }
+
   df <- df[valid, ]
   if (nrow(df) < 2 || length(unique(df$group)) < 2) return(NULL)
 
   sfit <- survival::survfit(survival::Surv(time, event) ~ group, data = df)
 
-  cox_fit <- tryCatch(
-    survival::coxph(survival::Surv(time, event) ~ group, data = df),
-    error = function(e) NULL
-  )
+  cox_fit <- tryCatch({
+    if (has_strata) {
+      survival::coxph(survival::Surv(time, event) ~ group + strata(strata_var),
+                      data = df)
+    } else {
+      survival::coxph(survival::Surv(time, event) ~ group, data = df)
+    }
+  }, error = function(e) NULL)
   hr_text <- ""
   if (!is.null(cox_fit)) {
     hr <- exp(coef(cox_fit))
@@ -1036,13 +1058,17 @@ plot_km_validation <- function(grid_fit_entry, val_ds, ds_name) {
     hr_text <- sprintf("HR=%.2f (%.2f-%.2f)", hr, ci[1], ci[2])
   }
 
-  lr_z <- compute_logrank_z(df$time, df$event, as.integer(df$group == "High"))
+  lr_z <- compute_logrank_z(
+    df$time, df$event, as.integer(df$group == "High"),
+    strata = if (has_strata) df$strata_var else NULL
+  )
   lr_p <- if (is.finite(lr_z)) 2 * pnorm(-abs(lr_z)) else NA_real_
 
   ntop_label <- if (is.null(ntop)) "ALL" else as.character(ntop)
+  lr_label <- if (has_strata) "Stratified log-rank" else "Log-rank"
   annot <- paste0(
     hr_text,
-    sprintf("\nLog-rank z=%.2f, p=%.1e", lr_z, lr_p),
+    sprintf("\n%s z=%.2f, p=%.1e", lr_label, lr_z, lr_p),
     sprintf("\nz-cutpoint=%.2f, n=%d", z_cut, nrow(df))
   )
 
@@ -1108,7 +1134,11 @@ plot_km_validation_pooled <- function(grid_fit_entry, val_datasets) {
     pooled_lp <- c(pooled_lp, lp[valid])
     pooled_time <- c(pooled_time, si$time[valid])
     pooled_event <- c(pooled_event, as.integer(si$event[valid]))
-    pooled_ds <- c(pooled_ds, rep(ds_name, sum(valid)))
+    # Use sampInfo$dataset for strata labels so merged datasets
+    # (e.g., PACA_AU) retain original platform labels
+    ds_labels <- si$dataset[valid]
+    if (is.null(ds_labels)) ds_labels <- rep(ds_name, sum(valid))
+    pooled_ds <- c(pooled_ds, ds_labels)
   }
 
   if (length(pooled_lp) < 2) return(NULL)
@@ -1169,6 +1199,70 @@ plot_km_validation_pooled <- function(grid_fit_entry, val_datasets) {
   )$plot +
     ggplot2::annotate("text", x = Inf, y = 0.95, label = annot,
                       hjust = 1.1, vjust = 1, size = 3)
+}
+
+#' Merge PACA_AU_array and PACA_AU_seq into a single PACA_AU dataset
+#'
+#' For survival validation, overlapping subjects between the array and seq
+#' platforms should not be double-counted. This function deduplicates by
+#' keeping seq samples for overlapping subjects and array-only samples for
+#' the rest, producing a single "PACA_AU" entry.
+#'
+#' @param val_list Named list of preprocessed validation datasets (each with
+#'   $ex, $sampInfo)
+#' @return Named list with PACA_AU_array and PACA_AU_seq replaced by single
+#'   "PACA_AU" if both exist; otherwise val_list unchanged
+merge_paca_au_datasets <- function(val_list) {
+  if (!all(c("PACA_AU_array", "PACA_AU_seq") %in% names(val_list))) {
+    return(val_list)
+  }
+
+  arr <- val_list[["PACA_AU_array"]]
+  seq_ds <- val_list[["PACA_AU_seq"]]
+
+  # Extract base IDs from seq samples (strip _seq suffix)
+  seq_ids <- colnames(seq_ds$ex)
+  base_seq_ids <- sub("_seq$", "", seq_ids)
+
+  # Find overlapping subjects
+  arr_ids <- colnames(arr$ex)
+  overlap_ids <- intersect(base_seq_ids, arr_ids)
+
+  # Keep array-only subjects (remove overlapping from array)
+  arr_keep <- !(arr_ids %in% overlap_ids)
+
+  if (sum(arr_keep) == 0L) {
+    # All array subjects overlap with seq — just use seq
+    merged_ex <- seq_ds$ex
+    merged_si <- seq_ds$sampInfo
+  } else {
+    # Combine array-only + all seq
+    merged_ex <- cbind(arr$ex[, arr_keep, drop = FALSE], seq_ds$ex)
+    merged_si <- rbind(
+      arr$sampInfo[arr_keep, , drop = FALSE],
+      seq_ds$sampInfo
+    )
+  }
+
+  merged <- list(ex = merged_ex, sampInfo = merged_si)
+  # Carry forward any extra fields (e.g., dataname, transform_target)
+  extra_fields <- setdiff(names(seq_ds), c("ex", "sampInfo"))
+  for (fld in extra_fields) {
+    merged[[fld]] <- seq_ds[[fld]]
+  }
+  merged$dataname <- "PACA_AU"
+
+  # Replace the two entries with the merged one
+  val_list[["PACA_AU_array"]] <- NULL
+  val_list[["PACA_AU_seq"]] <- NULL
+  val_list[["PACA_AU"]] <- merged
+
+  message(sprintf(
+    "Merged PACA_AU: %d seq + %d array-only = %d total (%d overlapping removed from array)",
+    ncol(seq_ds$ex), sum(arr_keep), ncol(merged_ex), sum(!arr_keep)
+  ))
+
+  val_list
 }
 
 # Null-coalescing operator if not already defined

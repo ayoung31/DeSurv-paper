@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.1.28)  13 FEB 2026 14:01
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.1.28)  13 FEB 2026 14:29
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -931,8 +931,7 @@ Package: setspace 2022/12/04 v6.7b set line spacing
 Package: pnasresearcharticle 2018/05/06 v1.3 PNAS two column research article style
 \@float@every@sigstatement=\toks54
 \c@sigstatement=\count393
-)
-No file paper.aux.
+) (./paper.aux)
 \openout1 = `paper.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 139.
@@ -960,6 +959,7 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 48
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
 Package hyperref Info: Link coloring ON on input line 139.
+(./paper.out) (./paper.out)
 \@outlinefile=\write4
 \openout4 = `paper.out'.
 
@@ -1111,16 +1111,10 @@ Package mdframed Info: mdframed inside float
  mdframed uses option nobreak mdframed on input line 195.
 Package mdframed Info: mdframed inside a box 
  mdframed uses option nobreak mdframed on input line 195.
-
-LaTeX Warning: Reference `mdf@pagelabel-1' on page 1 undefined on input line 195.
-
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
 (Font)              scaled to size 5.69998pt on input line 195.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
 (Font)              scaled to size 6.64998pt on input line 236.
-
-LaTeX Warning: Reference `LastPage' on page 1 undefined on input line 236.
-
 LaTeX Font Info:    Trying to load font information for T1+bch on input line 236.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/psnfss/t1bch.fd
 File: t1bch.fd 2004/10/18 font definitions for T1/bch.
@@ -1134,32 +1128,223 @@ File: mt-bch.cfg 2007/03/03 v1.5 microtype config. file: Bitstream Charter (RS)
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
 (hyperref)                be the same. Added a new anchor on input line 260.
 
-
-LaTeX Warning: Reference `fig:schema' on page 2 undefined on input line 264.
-
-<../figures/model_schematic_final.pdf, id=23, 578.16pt x 505.89pt>
+<../figures/model_schematic_final.pdf, id=86, 578.16pt x 505.89pt>
 File: ../figures/model_schematic_final.pdf Graphic file (type pdf)
 <use ../figures/model_schematic_final.pdf>
 Package pdftex.def Info: ../figures/model_schematic_final.pdf  used on input line 274.
 (pdftex.def)             Requested size: 505.69467pt x 433.62885pt.
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf, id=90, 433.62pt x 397.485pt>
+File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf Graphic file (type pdf)
+<use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf>
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf  used on input line 334.
+(pdftex.def)             Requested size: 433.63878pt x 397.49614pt.
+LaTeX Font Info:    Font shape `T1/phv/m/it' in size <7> not available
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 374.
+LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
+(Font)              scaled to size 6.64998pt on input line 374.
+[2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf, id=102, 469.755pt x 216.81pt>
+File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf Graphic file (type pdf)
+<use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf>
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf  used on input line 395.
+(pdftex.def)             Requested size: 505.69374pt x 233.39702pt.
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf, id=108, 469.755pt x 325.215pt>
+File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf Graphic file (type pdf)
+<use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf>
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf  used on input line 492.
+(pdftex.def)             Requested size: 505.69357pt x 325.23901pt.
+[3]
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf, id=116, 469.755pt x 325.215pt>
+File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf Graphic file (type pdf)
+<use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf>
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf  used on input line 540.
+(pdftex.def)             Requested size: 505.69374pt x 350.09555pt.
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf, id=121, 469.755pt x 325.215pt>
+File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf Graphic file (type pdf)
+<use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf>
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf  used on input line 593.
+(pdftex.def)             Requested size: 505.69374pt x 350.09555pt.
 
-LaTeX Warning: Reference `fig:bo' on page 2 undefined on input line 296.
+Underfull \vbox (badness 1082) has occurred while \output is active []
+
+[4]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[5]
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 879.
+(/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+Package microtype Info: Loading generic protrusion settings for font family
+(microtype)             `lmtt' (encoding: T1).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
+
+Overfull \hbox (17.39314pt too wide) in paragraph at lines 885--885
+[]\T1/lmtt/m/n/8 ## DeSurv git commit: 370c88aa9a89e0c71507fbb161d226c7e2e4c61f[] 
+ []
 
 
-LaTeX Warning: Reference `fig:bo' on page 2 undefined on input line 315.
+Overfull \hbox (13.14514pt too wide) in paragraph at lines 885--885
+[]\T1/lmtt/m/n/8 ## Paper git commit: 21b323b4685ef3b4443e34b7e4f106dc7e8096b4[] 
+ []
 
-! Double subscript.
-l.319 \(k = [[PNAS_TODO:k_selected from tar_k_
-                                              selection_tcgacptac]]\) and
-I treat `x_1_2' essentially like `x_1{}_2'.
 
- 
+Underfull \hbox (badness 10000) in paragraph at lines 890--894
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 896--901
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 903--906
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 908--912
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 914--918
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 920--925
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 927--932
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 934--938
+
+ []
+
+[6]
+Underfull \hbox (badness 10000) in paragraph at lines 940--943
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 945--950
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 952--956
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 958--961
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 963--967
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 969--973
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 975--979
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 981--986
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 988--991
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 993--998
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1000--1004
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1006--1011
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1013--1018
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1020--1025
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1027--1031
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1033--1038
+
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1040--1045
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1047--1051
+
+ []
+
+[7] [8 <../figures/model_schematic_final.pdf>] [9 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf>] [10 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf>] [11 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf>] [12 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf>] [13 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf>] 
+enddocument/afterlastpage (AED): lastpage setting LastPage.
+(./paper.aux)
+ ***********
+LaTeX2e <2025-11-01>
+L3 programming layer <2026-01-19>
+ ***********
+Package rerunfilecheck Info: File `paper.out' has not changed.
+(rerunfilecheck)             Checksum: B591ABECB43AF6AC1FCA2A4D03424C28;3808.
+ ) 
 Here is how much of TeX's memory you used:
- 30441 strings out of 469471
- 568274 string characters out of 5467057
- 1029338 words of memory out of 5000000
- 58293 multiletter control sequences out of 15000+600000
- 711124 words of font info for 213 fonts, out of 8000000 for 9000
+ 30910 strings out of 469471
+ 579630 string characters out of 5467057
+ 1034433 words of memory out of 5000000
+ 58525 multiletter control sequences out of 15000+600000
+ 723154 words of font info for 315 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 117i,14n,121p,1046b,1114s stack positions out of 10000i,1000n,20000p,200000b,200000s
-!  ==> Fatal error occurred, no output PDF file produced!
+ 117i,14n,121p,1103b,1115s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
+Output written on paper.pdf (13 pages, 604968 bytes).
+PDF statistics:
+ 394 PDF objects out of 1000 (max. 8388607)
+ 311 compressed objects within 4 object streams
+ 55 named destinations out of 1000 (max. 500000)
+ 67755 words of extra memory for PDF output out of 74296 (max. 10000000)
+

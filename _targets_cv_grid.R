@@ -338,10 +338,16 @@ list(
     }
   ),
 
+  # Target 9b: Merge PACA_AU_array + PACA_AU_seq for survival validation
+  tar_target(
+    cv_grid_val_data_surv,
+    merge_paca_au_datasets(cv_grid_val_data)
+  ),
+
   # Target 10: Validate each grid fit against external datasets (440 parallel jobs)
   tar_target(
     cv_grid_val_result,
-    validate_grid_point(cv_grid_fit, cv_grid_val_data),
+    validate_grid_point(cv_grid_fit, cv_grid_val_data_surv),
     pattern = map(cv_grid_fit),
     iteration = "list",
     resources = tar_resources(
@@ -498,7 +504,7 @@ list(
     {
       out_dir <- "figures/cv_grid/km_val"
       dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
-      ds_names <- names(cv_grid_val_data)
+      ds_names <- names(cv_grid_val_data_surv)
       paths <- character(0)
 
       for (i in seq_len(nrow(cv_grid_best_alpha))) {
@@ -528,7 +534,7 @@ list(
 
         # Per-dataset KM plots
         for (ds_name in ds_names) {
-          p <- plot_km_validation(fit_entry, cv_grid_val_data[[ds_name]],
+          p <- plot_km_validation(fit_entry, cv_grid_val_data_surv[[ds_name]],
                                    ds_name)
           if (is.null(p)) next
 
@@ -540,7 +546,7 @@ list(
         }
 
         # Pooled KM plot
-        p_pooled <- plot_km_validation_pooled(fit_entry, cv_grid_val_data)
+        p_pooled <- plot_km_validation_pooled(fit_entry, cv_grid_val_data_surv)
         if (!is.null(p_pooled)) {
           fname <- sprintf("km_val_k%d_alpha%.2f_ntop%s_%s_pooled.pdf",
                             k_i, alpha_i, ntop_label, method_i)
@@ -655,7 +661,7 @@ list(
     {
       out_dir <- "figures/cv_grid/km_val"
       dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
-      ds_names <- names(cv_grid_val_data)
+      ds_names <- names(cv_grid_val_data_surv)
       paths <- character(0)
 
       for (i in seq_len(nrow(cv_grid_alpha0))) {
@@ -681,7 +687,7 @@ list(
         ntop_label <- if (is.na(ntop_i)) "ALL" else as.character(ntop_i)
 
         for (ds_name in ds_names) {
-          p <- plot_km_validation(fit_entry, cv_grid_val_data[[ds_name]],
+          p <- plot_km_validation(fit_entry, cv_grid_val_data_surv[[ds_name]],
                                    ds_name)
           if (is.null(p)) next
 
@@ -692,7 +698,7 @@ list(
           paths <- c(paths, fpath)
         }
 
-        p_pooled <- plot_km_validation_pooled(fit_entry, cv_grid_val_data)
+        p_pooled <- plot_km_validation_pooled(fit_entry, cv_grid_val_data_surv)
         if (!is.null(p_pooled)) {
           fname <- sprintf("km_val_k%d_alpha0.00_ntop%s_alpha0_pooled.pdf",
                             k_i, ntop_label)

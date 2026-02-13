@@ -315,14 +315,9 @@ contrast to the conflicting recommendations produced by unsupervised
 heuristics (Fig. \ref{fig:bo}D). Model selection followed the
 one-standard-error rule: we selected the smallest \(k\) whose predicted
 performance lay within one standard error of the maximum, yielding a
-parsimonious choice. Bayesian optimization selected
-\(k = [[PNAS_TODO:k_selected from tar_k_selection_tcgacptac]]\) and
-\(\alpha = [[PNAS_TODO:alpha from tar_params_best_tcgacptac]]\) (C-index
-\([[PNAS_TODO:best_mean from tar_k_selection_tcgacptac]]\); 1-SE rule;
-\(n = [[PNAS_TODO:ncol(tar_data_filtered_tcgacptac\)ex){]}{]}\$
-patients,
-\([[PNAS_TODO:sum(tar_data_filtered_tcgacptac\)sampInfo\(event)]]\)
-events).
+parsimonious choice. Bayesian optimization selected \(k = 3\) and
+\(\alpha = 0.3339356\) (C-index \(0.655\); 1-SE rule; \(n = 273\)
+patients, \(139\) events).
 
 To further evaluate rank recovery under controlled conditions, we
 conducted simulation studies in which the true underlying rank was known
@@ -373,11 +368,9 @@ precision, indicating that variance-driven factorization failed to
 concentrate on the genes that actually drove survival. This result
 supports the prediction that outcome-guided learning recovers prognostic
 programs more reliably when variance and prognosis diverge. Across 100
-replicates, DeSurv achieved median C-index
-\([[PNAS_TODO:median_cindex_desurv from sim_figs_by_scenario R0_easy]]\)
-versus \([[PNAS_TODO:median_cindex_nmf]]\) for standard NMF
-(\(\Delta = [[PNAS_TODO:delta_cindex]]\); \(p = 3{,}000\) genes,
-\(n = 200\) samples, true \(k = 3\)).
+replicates, DeSurv achieved median C-index \(\textrm{[TODO]}\) versus
+\(\textrm{[TODO]}\) for standard NMF (\(\Delta = \textrm{[TODO]}\);
+\(p = 3{,}000\) genes, \(n = 200\) samples, true \(k = 3\)).
 
 To verify that these gains reflect genuine signal recovery rather than
 overfitting, we repeated the analysis under two additional simulation
@@ -461,25 +454,22 @@ consistent with its enrichment for exocrine and composition-driven
 programs. In contrast, DeSurv concentrated survival signal into a single
 factor that explained substantially more survival association despite
 accounting for a smaller fraction of expression variance. Specifically,
-the highest-variance NMF factor explained
-\([[PNAS_TODO:max_varexpl_nmf]]\)\% of expression variance but
-contributed \(\Delta\ell = [[PNAS_TODO:delta_loglik_nmf_maxvar]]\) to
+the highest-variance NMF factor explained \(\textrm{[TODO]}\)\% of
+expression variance but contributed \(\Delta\ell = \textrm{[TODO]}\) to
 survival, whereas the DeSurv factor with the largest survival
-contribution explained \([[PNAS_TODO:varexpl_desurv_maxsurv]]\)\% of
-variance with
-\(\Delta\ell = [[PNAS_TODO:delta_loglik_desurv_maxsurv]]\). The
-remaining DeSurv factors contributed minimal survival signal, indicating
-that survival-relevant information was not diffusely distributed across
-factors. This result directly illustrates the misalignment between
-variance and prognosis anticipated by sufficient dimension reduction
-theory (9) and observed empirically in tumor purity analyses (12): the
-factors that explain the most transcriptomic variation need not be the
-factors most associated with patient outcomes. The observed pattern in
-PDAC, where the highest-variance factor shows minimal survival
-association while other factors show partial overlap between variance
-and prognosis, is consistent with the intermediate regime between the
-primary and mixed simulation scenarios, where DeSurv's advantage was
-largest.
+contribution explained \(\textrm{[TODO]}\)\% of variance with
+\(\Delta\ell = \textrm{[TODO]}\). The remaining DeSurv factors
+contributed minimal survival signal, indicating that survival-relevant
+information was not diffusely distributed across factors. This result
+directly illustrates the misalignment between variance and prognosis
+anticipated by sufficient dimension reduction theory (9) and observed
+empirically in tumor purity analyses (12): the factors that explain the
+most transcriptomic variation need not be the factors most associated
+with patient outcomes. The observed pattern in PDAC, where the
+highest-variance factor shows minimal survival association while other
+factors show partial overlap between variance and prognosis, is
+consistent with the intermediate regime between the primary and mixed
+simulation scenarios, where DeSurv's advantage was largest.
 
 To further characterize how the learned factor structure differs between
 DeSurv and standard NMF, we examined the correspondence between factors
@@ -525,16 +515,16 @@ factor per sample.
 
 For each method, we focused on the factor showing the largest increase
 in Cox model log partial likelihood in the training data. Across five
-independent PDAC cohorts (\(n = [[PNAS_TODO:total_val_n]]\)), the
-DeSurv-derived factor exhibited consistent survival effects, with hazard
-ratio estimates showing limited variability and predominantly protective
-associations (pooled HR \([[PNAS_TODO:pooled_hr_desurv]]\); 95\% CI
-\([[PNAS_TODO:ci_lower]]\)--\([[PNAS_TODO:ci_upper]]\); log-rank
-\(P = [[PNAS_TODO:logrank_p]]\); Fig. \ref{fig:extval}A). In contrast,
-the NMF factor identified by the same criterion showed greater
-heterogeneity across datasets and weaker survival associations,
-consistent with the expectation that variance-driven programs capture
-cohort-specific variation that does not transfer.
+independent PDAC cohorts (\(n = \textrm{[TODO]}\)), the DeSurv-derived
+factor exhibited consistent survival effects, with hazard ratio
+estimates showing limited variability and predominantly protective
+associations (pooled HR \(\textrm{[TODO]}\); 95\% CI
+\(\textrm{[TODO]}\); log-rank \(P = \textrm{[TODO]}\); Fig.
+\ref{fig:extval}A). In contrast, the NMF factor identified by the same
+criterion showed greater heterogeneity across datasets and weaker
+survival associations, consistent with the expectation that
+variance-driven programs capture cohort-specific variation that does not
+transfer.
 
 We pooled validation samples and stratified them into high- and
 low-score groups based on a median split of the DeSurv-derived factor,
@@ -586,13 +576,11 @@ survival-aligned factor retained prognostic relevance in the external
 cohort (Fig. \ref{fig:bladder}B). Kaplan-Meier analysis based on a
 median split of projected factor scores demonstrated clear separation of
 survival curves, despite differences in tissue context and
-transcriptional background (\(n = [[PNAS_TODO:n_bladder]]\),
-\([[PNAS_TODO:events_bladder]]\) events; log-rank
-\(P = [[PNAS_TODO:logrank_p_bladder]]\); HR
-\([[PNAS_TODO:hr_bladder]]\); 95\% CI \([[PNAS_TODO:ci_bladder]]\)).
-This finding suggests that survival supervision captures cross-cancer
-biology that unsupervised methods may distribute across multiple
-outcome-neutral factors.
+transcriptional background (\(n = \textrm{[TODO]}\), \(\textrm{[TODO]}\)
+events; log-rank \(P = \textrm{[TODO]}\); HR \(\textrm{[TODO]}\); 95\%
+CI \(\textrm{[TODO]}\)). This finding suggests that survival supervision
+captures cross-cancer biology that unsupervised methods may distribute
+across multiple outcome-neutral factors.
 
 Together, these results suggest that survival supervision separates
 variance-dominant from survival-relevant structure and that this
@@ -893,7 +881,7 @@ are available at github.com/ayoung31/DeSurv-paper.
 ## DeSurv git branch: main
 ## DeSurv git commit: 370c88aa9a89e0c71507fbb161d226c7e2e4c61f
 ## Paper git branch: main
-## Paper git commit: 6c60bd7360b8a4b8ab16cffb257a1f98477156d1
+## Paper git commit: 21b323b4685ef3b4443e34b7e4f106dc7e8096b4
 \end{verbatim}
 
 \phantomsection\label{refs}
