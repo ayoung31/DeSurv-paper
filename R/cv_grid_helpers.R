@@ -384,6 +384,7 @@ validate_grid_point <- function(grid_fit, val_datasets) {
     dataset = character(), method = character(),
     cindex = numeric(), cindex_se = numeric(),
     logrank_z = numeric(),
+    z_cutpoint = numeric(),
     n_samples = integer(), n_events = integer()
   )
 
@@ -421,6 +422,7 @@ validate_grid_point <- function(grid_fit, val_datasets) {
         method = method_names,
         cindex = rep(NA_real_, n_methods), cindex_se = rep(NA_real_, n_methods),
         logrank_z = rep(NA_real_, n_methods),
+        z_cutpoint = rep(z_cutpoint, n_methods),
         n_samples = rep(0L, n_methods), n_events = rep(0L, n_methods)
       )
       next
@@ -440,6 +442,7 @@ validate_grid_point <- function(grid_fit, val_datasets) {
         method = method_names,
         cindex = rep(NA_real_, n_methods), cindex_se = rep(NA_real_, n_methods),
         logrank_z = rep(NA_real_, n_methods),
+        z_cutpoint = rep(z_cutpoint, n_methods),
         n_samples = rep(length(valid_idx), n_methods),
         n_events = rep(sum(event_val[valid_idx]), n_methods)
       )
@@ -524,6 +527,7 @@ validate_grid_point <- function(grid_fit, val_datasets) {
       cindex = c(m1_cindex, m2_cindex, m3_cindex),
       cindex_se = c(m1_se, m2_se, m3_se),
       logrank_z = c(NA_real_, NA_real_, m3_logrank_z),
+      z_cutpoint = rep(z_cutpoint, n_methods),
       n_samples = rep(n_samp, n_methods),
       n_events = rep(n_evt, n_methods)
     )
@@ -542,6 +546,7 @@ validate_grid_point <- function(grid_fit, val_datasets) {
     method = method_names,
     cindex = rep(NA_real_, n_methods), cindex_se = rep(NA_real_, n_methods),
     logrank_z = rep(NA_real_, n_methods),
+    z_cutpoint = rep(z_cutpoint, n_methods),
     n_samples = rep(length(pooled_time), n_methods),
     n_events = rep(sum(pooled_event), n_methods)
   )
