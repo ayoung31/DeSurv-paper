@@ -290,7 +290,8 @@ data_bladder$samp_keeps = which(data_bladder$sampInfo$Consensus != "NE-like")
 data_bladder$sampInfo$dataset = "bladder"
 
 data_b_filtered = preprocess_validation_data(data_bladder,genes = rownames(tar_data_filtered_tcgacptac$ex),
-                                             method_trans_train = 'rank',dataname="bladder")
+                                             method_trans_train = 'rank',dataname="bladder",
+                                             zero_fill_missing = TRUE)
 
 
 keeps = intersect(rownames(data_b_filtered$ex),rownames(tar_fit_desurv_tcgacptac$W))

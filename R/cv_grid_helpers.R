@@ -769,6 +769,409 @@ select_optimal_cutpoint <- function(cutpoint_summary) {
     dplyr::rename(optimal_z_cutpoint = z_cutpoint)
 }
 
+#' Select the best alpha per (k, ntop) using multiple selection criteria
+#'
+#' For each (k, ntop), selects the alpha that maximizes each of 3 criteria:
+#'   - max_cindex: highest mean continuous C-index
+#'   - max_cindex_dichot: highest mean dichotomized C-index (at its own optimal cutpoint)
+#'   - max_logrank: highest mean |log-rank z| (at its own optimal cutpoint)
+#'
+#' @param cv_grid_summary Tibble with one row per (k, alpha, ntop), containing
+#'   columns: mean_cindex, optimal_z_cutpoint, mean_cindex_dichot, mean_abs_logrank_z
+#' @return Tibble with columns: k, ntop, selection_method, best_alpha,
+#'   optimal_z_cutpoint, mean_cindex, mean_cindex_dichot, mean_abs_logrank_z
+select_best_alpha_per_k <- function(cv_grid_summary) {
+  methods <- list(
+    list(name = "max_cindex", col = "mean_cindex"),
+    list(name = "max_cindex_dichot", col = "mean_cindex_dichot"),
+    list(name = "max_logrank", col = "mean_abs_logrank_z")
+  )
+
+  results <- lapply(methods, function(m) {
+    cv_grid_summary |>
+      dplyr::group_by(k, ntop) |>
+      dplyr::slice_max(.data[[m$col]], n = 1, with_ties = FALSE) |>
+      dplyr::ungroup() |>
+      dplyr::transmute(
+        k, ntop,
+        selection_method = m$name,
+        best_alpha = alpha,
+        optimal_z_cutpoint,
+        mean_cindex,
+        mean_cindex_dichot,
+        mean_abs_logrank_z
+      )
+  })
+
+  dplyr::bind_rows(results)
+}
+
+#' Extract alpha=0 (standard NMF) combos from CV grid summary
+#'
+#' Returns one row per (k, ntop) at alpha=0, with the same column layout
+#' as select_best_alpha_per_k() for compatibility with plotting targets.
+#'
+#' @param cv_grid_summary Tibble with one row per (k, alpha, ntop)
+#' @return Tibble with columns: k, ntop, selection_method, best_alpha,
+#'   optimal_z_cutpoint, mean_cindex, mean_cindex_dichot, mean_abs_logrank_z
+get_alpha0_combos <- function(cv_grid_summary) {
+  cv_grid_summary |>
+    dplyr::filter(alpha == 0) |>
+    dplyr::transmute(
+      k, ntop,
+      selection_method = "alpha0",
+      best_alpha = alpha,
+      optimal_z_cutpoint,
+      mean_cindex,
+      mean_cindex_dichot,
+      mean_abs_logrank_z
+    )
+}
+
+#' Plot cutpoint evaluation curves for a single (k, alpha, ntop) combo
+#'
+#' Produces side-by-side plots of dichotomized C-index and |log-rank z|
+#' as a function of z-score cutpoint, with ±1SE error bars.
+#'
+#' @param cutpoint_data Tibble filtered to one (k, alpha, ntop) from
+#'   cv_grid_cutpoint_summary, with columns: z_cutpoint, mean_cindex_dichot,
+#'   se_cindex_dichot, mean_abs_logrank_z, se_abs_logrank_z
+#' @param k Integer number of factors
+#' @param alpha Numeric supervision parameter
+#' @param ntop Integer or NA (NULL mapped to NA)
+#' @param optimal_z Numeric optimal z-score cutpoint (vertical line)
+#' @return Combined ggplot (cowplot::plot_grid)
+plot_cutpoint_curves <- function(cutpoint_data, k, alpha, ntop,
+                                 optimal_z = NULL) {
+  ntop_label <- if (is.na(ntop)) "ALL" else as.character(ntop)
+  title_base <- sprintf("k=%d, alpha=%.2f, ntop=%s", k, alpha, ntop_label)
+
+  p_cindex <- ggplot2::ggplot(
+    cutpoint_data,
+    ggplot2::aes(x = z_cutpoint, y = mean_cindex_dichot)
+  ) +
+    ggplot2::geom_line() +
+    ggplot2::geom_point(size = 1.5) +
+    ggplot2::geom_errorbar(
+      ggplot2::aes(
+        ymin = mean_cindex_dichot - se_cindex_dichot,
+        ymax = mean_cindex_dichot + se_cindex_dichot
+      ),
+      width = 0.05
+    ) +
+    ggplot2::labs(
+      x = "z-score cutpoint",
+      y = "Mean C-index (dichotomized)",
+      title = paste0("Dichot. C-index\n", title_base)
+    ) +
+    ggplot2::theme_bw(base_size = 10)
+
+  p_logrank <- ggplot2::ggplot(
+    cutpoint_data,
+    ggplot2::aes(x = z_cutpoint, y = mean_abs_logrank_z)
+  ) +
+    ggplot2::geom_line() +
+    ggplot2::geom_point(size = 1.5) +
+    ggplot2::geom_errorbar(
+      ggplot2::aes(
+        ymin = mean_abs_logrank_z - se_abs_logrank_z,
+        ymax = mean_abs_logrank_z + se_abs_logrank_z
+      ),
+      width = 0.05
+    ) +
+    ggplot2::labs(
+      x = "z-score cutpoint",
+      y = "Mean |log-rank z|",
+      title = paste0("|Log-rank z|\n", title_base)
+    ) +
+    ggplot2::theme_bw(base_size = 10)
+
+  if (!is.null(optimal_z) && is.finite(optimal_z)) {
+    p_cindex <- p_cindex +
+      ggplot2::geom_vline(xintercept = optimal_z, linetype = "dashed",
+                          color = "red", linewidth = 0.5)
+    p_logrank <- p_logrank +
+      ggplot2::geom_vline(xintercept = optimal_z, linetype = "dashed",
+                          color = "red", linewidth = 0.5)
+  }
+
+  cowplot::plot_grid(p_cindex, p_logrank, ncol = 2, align = "h")
+}
+
+#' Plot training Kaplan-Meier curves for a grid fit
+#'
+#' Computes LP from the fitted model, standardizes to z-scores, dichotomizes
+#' at the specified cutpoint, and produces a KM plot with risk table and
+#' annotations (HR, CI, log-rank z, p-value).
+#'
+#' @param grid_fit_entry Single element from cv_grid_fit list (from fit_grid_point)
+#' @param cv_grid_data Training data list with $ex, $sampInfo
+#' @return ggsurvplot object
+plot_km_training <- function(grid_fit_entry, cv_grid_data) {
+  fit <- grid_fit_entry$fit
+  if (is.null(fit)) return(NULL)
+
+  ntop <- grid_fit_entry$ntop
+  z_cut <- grid_fit_entry$z_cutpoint
+  if (is.na(z_cut)) return(NULL)
+
+  lp <- compute_lp(fit$W, fit$beta, cv_grid_data$ex, ntop)
+  lp_mu <- mean(lp, na.rm = TRUE)
+  lp_sd <- sd(lp, na.rm = TRUE)
+  if (!is.finite(lp_sd) || lp_sd <= 0) return(NULL)
+
+  z <- (lp - lp_mu) / lp_sd
+  group <- factor(
+    ifelse(z > z_cut, "High", "Low"),
+    levels = c("Low", "High")
+  )
+
+  df <- data.frame(
+    time = cv_grid_data$sampInfo$time,
+    event = cv_grid_data$sampInfo$event,
+    group = group,
+    stringsAsFactors = FALSE
+  )
+
+  sfit <- survival::survfit(survival::Surv(time, event) ~ group, data = df)
+
+  # Cox model for HR
+  cox_fit <- tryCatch(
+    survival::coxph(survival::Surv(time, event) ~ group, data = df),
+    error = function(e) NULL
+  )
+  hr_text <- ""
+  if (!is.null(cox_fit)) {
+    hr <- exp(coef(cox_fit))
+    ci <- exp(confint(cox_fit))
+    hr_text <- sprintf("HR=%.2f (%.2f-%.2f)", hr, ci[1], ci[2])
+  }
+
+  # Log-rank
+  lr_z <- compute_logrank_z(df$time, df$event, as.integer(group == "High"))
+  lr_p <- if (is.finite(lr_z)) 2 * pnorm(-abs(lr_z)) else NA_real_
+
+  ntop_label <- if (is.null(ntop)) "ALL" else as.character(ntop)
+  cutpoint_abs <- z_cut * lp_sd + lp_mu
+  annot <- paste0(
+    hr_text,
+    sprintf("\nLog-rank z=%.2f, p=%.1e", lr_z, lr_p),
+    sprintf("\nz-cutpoint=%.2f (abs=%.3f)", z_cut, cutpoint_abs)
+  )
+
+  title <- sprintf("Training KM: k=%d, alpha=%.2f, ntop=%s",
+                    grid_fit_entry$k, grid_fit_entry$alpha, ntop_label)
+
+  survminer::ggsurvplot(
+    sfit,
+    data = df,
+    risk.table = TRUE,
+    pval = FALSE,
+    title = title,
+    legend.labs = c("Low", "High"),
+    palette = c("#2166AC", "#B2182B"),
+    ggtheme = ggplot2::theme_bw(base_size = 10)
+  )$plot +
+    ggplot2::annotate("text", x = Inf, y = 0.95, label = annot,
+                      hjust = 1.1, vjust = 1, size = 3)
+}
+
+#' Plot validation Kaplan-Meier curves for a single dataset
+#'
+#' Intersects genes between W and validation data, computes LP, standardizes
+#' on validation data, dichotomizes at z_cutpoint, and produces a KM plot.
+#'
+#' @param grid_fit_entry Single element from cv_grid_fit list
+#' @param val_ds Single validation dataset with $ex, $sampInfo
+#' @param ds_name Character dataset name for title
+#' @return ggplot object (KM plot with annotations)
+plot_km_validation <- function(grid_fit_entry, val_ds, ds_name) {
+  fit <- grid_fit_entry$fit
+  if (is.null(fit)) return(NULL)
+
+  ntop <- grid_fit_entry$ntop
+  z_cut <- grid_fit_entry$z_cutpoint
+  if (is.na(z_cut)) return(NULL)
+
+  W <- fit$W
+  beta <- fit$beta
+  train_genes <- rownames(W)
+  val_genes <- rownames(val_ds$ex)
+  common_genes <- intersect(train_genes, val_genes)
+  if (length(common_genes) < 2) return(NULL)
+
+  W_common <- W[common_genes, , drop = FALSE]
+  X_val <- val_ds$ex[common_genes, , drop = FALSE]
+
+  lp <- compute_lp(W_common, beta, X_val, ntop)
+  lp_mu <- mean(lp, na.rm = TRUE)
+  lp_sd <- sd(lp, na.rm = TRUE)
+  if (!is.finite(lp_sd) || lp_sd <= 0) return(NULL)
+
+  z <- (lp - lp_mu) / lp_sd
+  group <- factor(
+    ifelse(z > z_cut, "High", "Low"),
+    levels = c("Low", "High")
+  )
+
+  df <- data.frame(
+    time = val_ds$sampInfo$time,
+    event = as.integer(val_ds$sampInfo$event),
+    group = group,
+    stringsAsFactors = FALSE
+  )
+  # Remove rows with invalid survival data
+  valid <- is.finite(df$time) & !is.na(df$event) & df$time > 0
+  df <- df[valid, ]
+  if (nrow(df) < 2 || length(unique(df$group)) < 2) return(NULL)
+
+  sfit <- survival::survfit(survival::Surv(time, event) ~ group, data = df)
+
+  cox_fit <- tryCatch(
+    survival::coxph(survival::Surv(time, event) ~ group, data = df),
+    error = function(e) NULL
+  )
+  hr_text <- ""
+  if (!is.null(cox_fit)) {
+    hr <- exp(coef(cox_fit))
+    ci <- exp(confint(cox_fit))
+    hr_text <- sprintf("HR=%.2f (%.2f-%.2f)", hr, ci[1], ci[2])
+  }
+
+  lr_z <- compute_logrank_z(df$time, df$event, as.integer(df$group == "High"))
+  lr_p <- if (is.finite(lr_z)) 2 * pnorm(-abs(lr_z)) else NA_real_
+
+  ntop_label <- if (is.null(ntop)) "ALL" else as.character(ntop)
+  annot <- paste0(
+    hr_text,
+    sprintf("\nLog-rank z=%.2f, p=%.1e", lr_z, lr_p),
+    sprintf("\nz-cutpoint=%.2f, n=%d", z_cut, nrow(df))
+  )
+
+  title <- sprintf("Validation KM (%s): k=%d, alpha=%.2f, ntop=%s",
+                    ds_name, grid_fit_entry$k, grid_fit_entry$alpha, ntop_label)
+
+  survminer::ggsurvplot(
+    sfit,
+    data = df,
+    risk.table = TRUE,
+    pval = FALSE,
+    title = title,
+    legend.labs = c("Low", "High"),
+    palette = c("#2166AC", "#B2182B"),
+    ggtheme = ggplot2::theme_bw(base_size = 10)
+  )$plot +
+    ggplot2::annotate("text", x = Inf, y = 0.95, label = annot,
+                      hjust = 1.1, vjust = 1, size = 3)
+}
+
+#' Plot pooled validation Kaplan-Meier curves across all datasets
+#'
+#' Pools all validation datasets, computes LP with gene intersection,
+#' standardizes on pooled data, dichotomizes, and produces KM with
+#' stratified log-rank test.
+#'
+#' @param grid_fit_entry Single element from cv_grid_fit list
+#' @param val_datasets Named list of validation datasets
+#' @return ggplot object (KM plot with annotations)
+plot_km_validation_pooled <- function(grid_fit_entry, val_datasets) {
+  fit <- grid_fit_entry$fit
+  if (is.null(fit)) return(NULL)
+
+  ntop <- grid_fit_entry$ntop
+  z_cut <- grid_fit_entry$z_cutpoint
+  if (is.na(z_cut)) return(NULL)
+
+  W <- fit$W
+  beta <- fit$beta
+  train_genes <- rownames(W)
+
+  pooled_lp <- numeric(0)
+  pooled_time <- numeric(0)
+  pooled_event <- integer(0)
+  pooled_ds <- character(0)
+
+  for (ds_name in names(val_datasets)) {
+    val_ds <- val_datasets[[ds_name]]
+    common_genes <- intersect(train_genes, rownames(val_ds$ex))
+    if (length(common_genes) < 2) next
+
+    W_common <- W[common_genes, , drop = FALSE]
+    X_val <- val_ds$ex[common_genes, , drop = FALSE]
+    lp <- compute_lp(W_common, beta, X_val, ntop)
+
+    si <- val_ds$sampInfo
+    valid <- is.finite(si$time) & !is.na(si$event) & si$time > 0
+    pooled_lp <- c(pooled_lp, lp[valid])
+    pooled_time <- c(pooled_time, si$time[valid])
+    pooled_event <- c(pooled_event, as.integer(si$event[valid]))
+    pooled_ds <- c(pooled_ds, rep(ds_name, sum(valid)))
+  }
+
+  if (length(pooled_lp) < 2) return(NULL)
+
+  lp_mu <- mean(pooled_lp, na.rm = TRUE)
+  lp_sd <- sd(pooled_lp, na.rm = TRUE)
+  if (!is.finite(lp_sd) || lp_sd <= 0) return(NULL)
+
+  z <- (pooled_lp - lp_mu) / lp_sd
+  group <- factor(
+    ifelse(z > z_cut, "High", "Low"),
+    levels = c("Low", "High")
+  )
+
+  df <- data.frame(
+    time = pooled_time,
+    event = pooled_event,
+    group = group,
+    dataset = pooled_ds,
+    stringsAsFactors = FALSE
+  )
+  if (length(unique(df$group)) < 2) return(NULL)
+
+  sfit <- survival::survfit(survival::Surv(time, event) ~ group, data = df)
+
+  cox_fit <- tryCatch(
+    survival::coxph(survival::Surv(time, event) ~ group + strata(dataset),
+                    data = df),
+    error = function(e) NULL
+  )
+  hr_text <- ""
+  if (!is.null(cox_fit)) {
+    hr <- exp(coef(cox_fit))
+    ci <- exp(confint(cox_fit))
+    hr_text <- sprintf("HR=%.2f (%.2f-%.2f)", hr, ci[1], ci[2])
+  }
+
+  lr_z <- compute_logrank_z(df$time, df$event,
+                             as.integer(df$group == "High"),
+                             strata = df$dataset)
+  lr_p <- if (is.finite(lr_z)) 2 * pnorm(-abs(lr_z)) else NA_real_
+
+  ntop_label <- if (is.null(ntop)) "ALL" else as.character(ntop)
+  annot <- paste0(
+    hr_text,
+    sprintf("\nStratified log-rank z=%.2f, p=%.1e", lr_z, lr_p),
+    sprintf("\nz-cutpoint=%.2f, n=%d", z_cut, nrow(df))
+  )
+
+  title <- sprintf("Pooled Validation KM: k=%d, alpha=%.2f, ntop=%s",
+                    grid_fit_entry$k, grid_fit_entry$alpha, ntop_label)
+
+  survminer::ggsurvplot(
+    sfit,
+    data = df,
+    risk.table = TRUE,
+    pval = FALSE,
+    title = title,
+    legend.labs = c("Low", "High"),
+    palette = c("#2166AC", "#B2182B"),
+    ggtheme = ggplot2::theme_bw(base_size = 10)
+  )$plot +
+    ggplot2::annotate("text", x = Inf, y = 0.95, label = annot,
+                      hjust = 1.1, vjust = 1, size = 3)
+}
+
 # Null-coalescing operator if not already defined
 `%||%` <- function(x, y) {
   if (is.null(x)) y else x

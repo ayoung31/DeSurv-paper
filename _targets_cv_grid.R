@@ -110,7 +110,8 @@ active_controller <- crew_controller_group(
 
 # ------ Global options ------
 tar_option_set(
-  packages = c("DeSurv", "dplyr", "purrr", "tibble", "survival"),
+  packages = c("DeSurv", "dplyr", "purrr", "tibble", "survival",
+                "ggplot2", "survminer", "cowplot"),
   format = "rds",
   controller = active_controller,
   error = "continue"
@@ -362,6 +363,346 @@ list(
       dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
       write.csv(cv_grid_val_summary, path, row.names = FALSE)
       path
+    },
+    format = "file"
+  ),
+
+  # Target 13: Select best alpha per (k, ntop) using 3 criteria
+  tar_target(
+    cv_grid_best_alpha,
+    select_best_alpha_per_k(cv_grid_summary)
+  ),
+
+  # Target 14: Save best alpha table to CSV
+  tar_target(
+    cv_grid_best_alpha_file,
+    {
+      path <- "results/cv_grid/cv_grid_best_alpha.csv"
+      dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
+      write.csv(cv_grid_best_alpha, path, row.names = FALSE)
+      path
+    },
+    format = "file"
+  ),
+
+  # Target 15a: Extract alpha=0 (standard NMF) combos for all k × ntop
+  tar_target(
+    cv_grid_alpha0,
+    get_alpha0_combos(cv_grid_summary)
+  ),
+
+  # Target 15: Cutpoint evaluation plots for each selected (k, alpha, ntop, method)
+  tar_target(
+    cv_grid_cutpoint_plots,
+    {
+      out_dir <- "figures/cv_grid/cutpoint"
+      dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+      paths <- character(nrow(cv_grid_best_alpha))
+
+      for (i in seq_len(nrow(cv_grid_best_alpha))) {
+        row <- cv_grid_best_alpha[i, ]
+        k_i <- row$k
+        alpha_i <- row$best_alpha
+        ntop_i <- row$ntop
+        method_i <- row$selection_method
+        opt_z <- row$optimal_z_cutpoint
+
+        # Filter cutpoint summary to this (k, alpha, ntop)
+        if (is.na(ntop_i)) {
+          cp_data <- cv_grid_cutpoint_summary |>
+            dplyr::filter(k == k_i, alpha == alpha_i, is.na(ntop))
+        } else {
+          cp_data <- cv_grid_cutpoint_summary |>
+            dplyr::filter(k == k_i, alpha == alpha_i, ntop == ntop_i)
+        }
+
+        if (nrow(cp_data) == 0) {
+          paths[i] <- NA_character_
+          next
+        }
+
+        ntop_label <- if (is.na(ntop_i)) "ALL" else as.character(ntop_i)
+        fname <- sprintf("cutpoint_k%d_alpha%.2f_ntop%s_%s.pdf",
+                          k_i, alpha_i, ntop_label, method_i)
+        fpath <- file.path(out_dir, fname)
+
+        p <- plot_cutpoint_curves(cp_data, k_i, alpha_i, ntop_i,
+                                   optimal_z = opt_z)
+        ggplot2::ggsave(fpath, p, width = 10, height = 4)
+        paths[i] <- fpath
+      }
+
+      paths[!is.na(paths)]
+    },
+    format = "file"
+  ),
+
+  # Target 16: Training KM plots for each selected combo
+  tar_target(
+    cv_grid_km_train_plots,
+    {
+      out_dir <- "figures/cv_grid/km_train"
+      dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+      paths <- character(nrow(cv_grid_best_alpha))
+
+      for (i in seq_len(nrow(cv_grid_best_alpha))) {
+        row <- cv_grid_best_alpha[i, ]
+        k_i <- row$k
+        alpha_i <- row$best_alpha
+        ntop_i <- row$ntop
+        method_i <- row$selection_method
+
+        # Find the matching fit entry
+        fit_entry <- NULL
+        for (fe in cv_grid_fit) {
+          if (is.null(fe)) next
+          fe_ntop <- if (is.null(fe$ntop)) NA_real_ else as.numeric(fe$ntop)
+          if (fe$k == k_i && fe$alpha == alpha_i &&
+              (is.na(ntop_i) && is.na(fe_ntop) ||
+               !is.na(ntop_i) && !is.na(fe_ntop) && fe_ntop == ntop_i)) {
+            fit_entry <- fe
+            break
+          }
+        }
+
+        if (is.null(fit_entry)) {
+          paths[i] <- NA_character_
+          next
+        }
+
+        # Override z_cutpoint with the selection-method-specific value
+        fit_entry$z_cutpoint <- row$optimal_z_cutpoint
+
+        p <- plot_km_training(fit_entry, cv_grid_data)
+        if (is.null(p)) {
+          paths[i] <- NA_character_
+          next
+        }
+
+        ntop_label <- if (is.na(ntop_i)) "ALL" else as.character(ntop_i)
+        fname <- sprintf("km_train_k%d_alpha%.2f_ntop%s_%s.pdf",
+                          k_i, alpha_i, ntop_label, method_i)
+        fpath <- file.path(out_dir, fname)
+        ggplot2::ggsave(fpath, p, width = 7, height = 5)
+        paths[i] <- fpath
+      }
+
+      paths[!is.na(paths)]
+    },
+    format = "file"
+  ),
+
+  # Target 17: Validation KM plots for each combo × dataset (+ pooled)
+  tar_target(
+    cv_grid_km_val_plots,
+    {
+      out_dir <- "figures/cv_grid/km_val"
+      dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+      ds_names <- names(cv_grid_val_data)
+      paths <- character(0)
+
+      for (i in seq_len(nrow(cv_grid_best_alpha))) {
+        row <- cv_grid_best_alpha[i, ]
+        k_i <- row$k
+        alpha_i <- row$best_alpha
+        ntop_i <- row$ntop
+        method_i <- row$selection_method
+
+        # Find the matching fit entry
+        fit_entry <- NULL
+        for (fe in cv_grid_fit) {
+          if (is.null(fe)) next
+          fe_ntop <- if (is.null(fe$ntop)) NA_real_ else as.numeric(fe$ntop)
+          if (fe$k == k_i && fe$alpha == alpha_i &&
+              (is.na(ntop_i) && is.na(fe_ntop) ||
+               !is.na(ntop_i) && !is.na(fe_ntop) && fe_ntop == ntop_i)) {
+            fit_entry <- fe
+            break
+          }
+        }
+
+        if (is.null(fit_entry)) next
+        fit_entry$z_cutpoint <- row$optimal_z_cutpoint
+
+        ntop_label <- if (is.na(ntop_i)) "ALL" else as.character(ntop_i)
+
+        # Per-dataset KM plots
+        for (ds_name in ds_names) {
+          p <- plot_km_validation(fit_entry, cv_grid_val_data[[ds_name]],
+                                   ds_name)
+          if (is.null(p)) next
+
+          fname <- sprintf("km_val_k%d_alpha%.2f_ntop%s_%s_%s.pdf",
+                            k_i, alpha_i, ntop_label, method_i, ds_name)
+          fpath <- file.path(out_dir, fname)
+          ggplot2::ggsave(fpath, p, width = 7, height = 5)
+          paths <- c(paths, fpath)
+        }
+
+        # Pooled KM plot
+        p_pooled <- plot_km_validation_pooled(fit_entry, cv_grid_val_data)
+        if (!is.null(p_pooled)) {
+          fname <- sprintf("km_val_k%d_alpha%.2f_ntop%s_%s_pooled.pdf",
+                            k_i, alpha_i, ntop_label, method_i)
+          fpath <- file.path(out_dir, fname)
+          ggplot2::ggsave(fpath, p_pooled, width = 7, height = 5)
+          paths <- c(paths, fpath)
+        }
+      }
+
+      paths
+    },
+    format = "file"
+  ),
+
+  # Target 18: Cutpoint evaluation plots for alpha=0 (standard NMF) baseline
+  tar_target(
+    cv_grid_cutpoint_plots_alpha0,
+    {
+      out_dir <- "figures/cv_grid/cutpoint"
+      dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+      paths <- character(nrow(cv_grid_alpha0))
+
+      for (i in seq_len(nrow(cv_grid_alpha0))) {
+        row <- cv_grid_alpha0[i, ]
+        k_i <- row$k
+        ntop_i <- row$ntop
+        opt_z <- row$optimal_z_cutpoint
+
+        if (is.na(ntop_i)) {
+          cp_data <- cv_grid_cutpoint_summary |>
+            dplyr::filter(k == k_i, alpha == 0, is.na(ntop))
+        } else {
+          cp_data <- cv_grid_cutpoint_summary |>
+            dplyr::filter(k == k_i, alpha == 0, ntop == ntop_i)
+        }
+
+        if (nrow(cp_data) == 0) {
+          paths[i] <- NA_character_
+          next
+        }
+
+        ntop_label <- if (is.na(ntop_i)) "ALL" else as.character(ntop_i)
+        fname <- sprintf("cutpoint_k%d_alpha0.00_ntop%s_alpha0.pdf",
+                          k_i, ntop_label)
+        fpath <- file.path(out_dir, fname)
+
+        p <- plot_cutpoint_curves(cp_data, k_i, 0, ntop_i,
+                                   optimal_z = opt_z)
+        ggplot2::ggsave(fpath, p, width = 10, height = 4)
+        paths[i] <- fpath
+      }
+
+      paths[!is.na(paths)]
+    },
+    format = "file"
+  ),
+
+  # Target 19: Training KM plots for alpha=0 baseline
+  tar_target(
+    cv_grid_km_train_plots_alpha0,
+    {
+      out_dir <- "figures/cv_grid/km_train"
+      dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+      paths <- character(nrow(cv_grid_alpha0))
+
+      for (i in seq_len(nrow(cv_grid_alpha0))) {
+        row <- cv_grid_alpha0[i, ]
+        k_i <- row$k
+        ntop_i <- row$ntop
+
+        fit_entry <- NULL
+        for (fe in cv_grid_fit) {
+          if (is.null(fe)) next
+          fe_ntop <- if (is.null(fe$ntop)) NA_real_ else as.numeric(fe$ntop)
+          if (fe$k == k_i && fe$alpha == 0 &&
+              (is.na(ntop_i) && is.na(fe_ntop) ||
+               !is.na(ntop_i) && !is.na(fe_ntop) && fe_ntop == ntop_i)) {
+            fit_entry <- fe
+            break
+          }
+        }
+
+        if (is.null(fit_entry)) {
+          paths[i] <- NA_character_
+          next
+        }
+
+        fit_entry$z_cutpoint <- row$optimal_z_cutpoint
+
+        p <- plot_km_training(fit_entry, cv_grid_data)
+        if (is.null(p)) {
+          paths[i] <- NA_character_
+          next
+        }
+
+        ntop_label <- if (is.na(ntop_i)) "ALL" else as.character(ntop_i)
+        fname <- sprintf("km_train_k%d_alpha0.00_ntop%s_alpha0.pdf",
+                          k_i, ntop_label)
+        fpath <- file.path(out_dir, fname)
+        ggplot2::ggsave(fpath, p, width = 7, height = 5)
+        paths[i] <- fpath
+      }
+
+      paths[!is.na(paths)]
+    },
+    format = "file"
+  ),
+
+  # Target 20: Validation KM plots for alpha=0 baseline (per-dataset + pooled)
+  tar_target(
+    cv_grid_km_val_plots_alpha0,
+    {
+      out_dir <- "figures/cv_grid/km_val"
+      dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+      ds_names <- names(cv_grid_val_data)
+      paths <- character(0)
+
+      for (i in seq_len(nrow(cv_grid_alpha0))) {
+        row <- cv_grid_alpha0[i, ]
+        k_i <- row$k
+        ntop_i <- row$ntop
+
+        fit_entry <- NULL
+        for (fe in cv_grid_fit) {
+          if (is.null(fe)) next
+          fe_ntop <- if (is.null(fe$ntop)) NA_real_ else as.numeric(fe$ntop)
+          if (fe$k == k_i && fe$alpha == 0 &&
+              (is.na(ntop_i) && is.na(fe_ntop) ||
+               !is.na(ntop_i) && !is.na(fe_ntop) && fe_ntop == ntop_i)) {
+            fit_entry <- fe
+            break
+          }
+        }
+
+        if (is.null(fit_entry)) next
+        fit_entry$z_cutpoint <- row$optimal_z_cutpoint
+
+        ntop_label <- if (is.na(ntop_i)) "ALL" else as.character(ntop_i)
+
+        for (ds_name in ds_names) {
+          p <- plot_km_validation(fit_entry, cv_grid_val_data[[ds_name]],
+                                   ds_name)
+          if (is.null(p)) next
+
+          fname <- sprintf("km_val_k%d_alpha0.00_ntop%s_alpha0_%s.pdf",
+                            k_i, ntop_label, ds_name)
+          fpath <- file.path(out_dir, fname)
+          ggplot2::ggsave(fpath, p, width = 7, height = 5)
+          paths <- c(paths, fpath)
+        }
+
+        p_pooled <- plot_km_validation_pooled(fit_entry, cv_grid_val_data)
+        if (!is.null(p_pooled)) {
+          fname <- sprintf("km_val_k%d_alpha0.00_ntop%s_alpha0_pooled.pdf",
+                            k_i, ntop_label)
+          fpath <- file.path(out_dir, fname)
+          ggplot2::ggsave(fpath, p_pooled, width = 7, height = 5)
+          paths <- c(paths, fpath)
+        }
+      }
+
+      paths
     },
     format = "file"
   )

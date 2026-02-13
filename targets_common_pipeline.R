@@ -1044,7 +1044,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
               ngene = val_run_bundle$bo_bundle$ngene_value,
               method_trans_train = val_run_bundle$bo_bundle$config$method_trans_train,
               dataname = dataname,
-              transform_target = val_run_bundle$bo_bundle$data_filtered$transform_target
+              transform_target = val_run_bundle$bo_bundle$data_filtered$transform_target,
+              zero_fill_missing = TRUE
             )
           }
         ),
@@ -1053,7 +1054,7 @@ COMMON_DESURV_VAL_TARGETS <- list(
     },
     iteration="list"
   ),
-  
+
   tar_target(
     data_val_filtered_elbowk,
     {
@@ -1071,7 +1072,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
               ngene = tar_ngene_value_elbowk,
               method_trans_train = val_run_bundle$bo_bundle$config$method_trans_train,
               dataname = dataname,
-              transform_target = val_run_bundle$bo_bundle$data_filtered$transform_target
+              transform_target = val_run_bundle$bo_bundle$data_filtered$transform_target,
+              zero_fill_missing = TRUE
             )
           }
         ),
@@ -1294,7 +1296,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
                      WtX = FALSE)
     },
     pattern = map(data_val_filtered),
-    iteration = "list"
+    iteration = "list",
+    cue = tar_cue(mode = "never")
   ),
   tar_target(
     nclusters_desurv_X,
@@ -1320,7 +1323,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
                          similarity_threshold = .5,
                          zscore_within_dataset = TRUE)
       temp
-    }
+    },
+    cue = tar_cue(mode = "never")
   ),
   
   tar_target(
@@ -1343,7 +1347,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
                      WtX = TRUE)
     },
     pattern = map(val_latent_desurv),
-    iteration = "list"
+    iteration = "list",
+    cue = tar_cue(mode = "never")
   ),
   tar_target(
     nclusters_desurv_WtX,
@@ -1369,7 +1374,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
                               similarity_threshold = .5,
                               zscore_within_dataset = TRUE)
       temp
-    }
+    },
+    cue = tar_cue(mode = "never")
   ),
   
   tar_target(
@@ -1392,7 +1398,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
                      WtX = FALSE)
     },
     pattern = map(data_val_filtered_elbowk),
-    iteration = "list"
+    iteration = "list",
+    cue = tar_cue(mode = "never")
   ),
   tar_target(
     nclusters_desurv_elbowk_X,
@@ -1441,7 +1448,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
                      WtX = TRUE)
     },
     pattern = map(val_latent_desurv_elbowk),
-    iteration = "list"
+    iteration = "list",
+    cue = tar_cue(mode = "never")
   ),
   tar_target(
     nclusters_desurv_elbowk_WtX,
@@ -1491,7 +1499,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
                      WtX = FALSE)
     },
     pattern = map(data_val_filtered_elbowk),
-    iteration = "list"
+    iteration = "list",
+    cue = tar_cue(mode = "never")
   ),
   tar_target(
     nclusters_std_elbowk_X,
@@ -1540,7 +1549,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
                      WtX = TRUE)
     },
     pattern = map(val_latent_std_elbowk),
-    iteration = "list"
+    iteration = "list",
+    cue = tar_cue(mode = "never")
   ),
   tar_target(
     nclusters_std_elbowk_WtX,
@@ -1590,7 +1600,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
                      WtX = FALSE)
     },
     pattern = map(data_val_filtered),
-    iteration = "list"
+    iteration = "list",
+    cue = tar_cue(mode = "never")
   ),
   tar_target(
     nclusters_std_desurvk_X,
@@ -1639,7 +1650,8 @@ COMMON_DESURV_VAL_TARGETS <- list(
                      WtX = TRUE)
     },
     pattern = map(val_latent_std_desurvk),
-    iteration = "list"
+    iteration = "list",
+    cue = tar_cue(mode = "never")
   ),
   tar_target(
     nclusters_std_desurvk_WtX,

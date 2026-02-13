@@ -318,7 +318,8 @@ targets_list <- tar_map(
           genes = genes_train,
           method_trans_train = val_run_bundle$bo_bundle$config$method_trans_train,
           dataname = data_val_comb$dataname,
-          transform_target = val_run_bundle$bo_bundle$data_filtered$transform_target
+          transform_target = val_run_bundle$bo_bundle$data_filtered$transform_target,
+          zero_fill_missing = TRUE
         )
       } else {
         NULL
