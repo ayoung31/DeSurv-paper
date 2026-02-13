@@ -601,6 +601,22 @@ preprocess_validation_data <- function(dataset, genes = NULL, ngene = NULL, meth
     d <- d[keep_idx]
     dataset_ids <- dataset_ids[keep_idx]
   }
+  # Zero-fill missing genes before preprocessing so rank transform
+  # operates on the same gene space as training
+  if (isTRUE(zero_fill_missing) && !is.null(genes)) {
+    missing_genes <- setdiff(genes, rownames(X))
+    if (length(missing_genes) > 0L) {
+      message(sprintf(
+        "Zero-filling %d of %d requested genes not found in %s: %s%s",
+        length(missing_genes), length(genes), dataname,
+        paste(head(missing_genes, 5L), collapse = ", "),
+        if (length(missing_genes) > 5L) ", ..." else ""
+      ))
+      zero_mat <- matrix(0, nrow = length(missing_genes), ncol = ncol(X),
+                         dimnames = list(missing_genes, colnames(X)))
+      X <- rbind(X, zero_mat)
+    }
+  }
   args <- list(
     X = X,
     y = y,
@@ -618,9 +634,6 @@ preprocess_validation_data <- function(dataset, genes = NULL, ngene = NULL, meth
   # Pass training transform_target to prevent quantile drift when method_trans_train == "quant"
   if (!is.null(transform_target)) {
     args$transform_target <- transform_target
-  }
-  if (isTRUE(zero_fill_missing)) {
-    args$zero_fill_missing <- TRUE
   }
   prep <- do.call(DeSurv::preprocess_data, args)
   prep$dataname <- dataname
