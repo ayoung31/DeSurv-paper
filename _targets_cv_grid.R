@@ -41,6 +41,7 @@ CV_GRID_NSTARTS <- 30
 CV_GRID_SEED <- 123
 CV_GRID_NSTARTS_FULL <- 100
 CV_GRID_METHOD_TRANSFORM <- "rank"
+CV_GRID_Z_CUTPOINTS <- seq(-2.0, 2.0, by = 0.2)  # 21 z-score cutpoints
 
 # ------ Source helpers ------
 source("R/cv_grid_helpers.R")
@@ -182,10 +183,71 @@ list(
     )
   ),
 
-  # Target 4: Aggregate all 220 results into final summary table
+  # Target N1: Evaluate z-score cutpoints for each grid point
+  tar_target(
+    cv_grid_cutpoint_eval,
+    evaluate_cutpoint_zscores(
+      cv_grid_result,
+      z_grid = CV_GRID_Z_CUTPOINTS
+    ),
+    pattern = map(cv_grid_result),
+    iteration = "list"
+  ),
+
+  # Target N2: Aggregate cutpoint evaluations across all grid points
+  tar_target(
+    cv_grid_cutpoint_summary,
+    {
+      all_evals <- dplyr::bind_rows(purrr::compact(cv_grid_cutpoint_eval))
+      all_evals |>
+        dplyr::mutate(abs_logrank_z = abs(logrank_z)) |>
+        dplyr::group_by(k, alpha, ntop, z_cutpoint) |>
+        dplyr::summarise(
+          mean_cindex_dichot = mean(cindex_dichot, na.rm = TRUE),
+          se_cindex_dichot = sd(cindex_dichot, na.rm = TRUE) /
+            sqrt(sum(!is.na(cindex_dichot))),
+          mean_abs_logrank_z = mean(abs_logrank_z, na.rm = TRUE),
+          se_abs_logrank_z = sd(abs_logrank_z, na.rm = TRUE) /
+            sqrt(sum(!is.na(abs_logrank_z))),
+          .groups = "drop"
+        )
+    }
+  ),
+
+  # Target N3: Save cutpoint summary to CSV (with absolute cutpoints from full fits)
+  tar_target(
+    cv_grid_cutpoint_summary_file,
+    {
+      fit_stats <- aggregate_cv_grid_fit_results(cv_grid_fit) |>
+        dplyr::select(k, alpha, ntop, lp_mean, lp_sd)
+      out <- cv_grid_cutpoint_summary |>
+        dplyr::left_join(fit_stats, by = c("k", "alpha", "ntop")) |>
+        dplyr::mutate(cutpoint_abs = z_cutpoint * lp_sd + lp_mean) |>
+        dplyr::select(k, alpha, ntop, z_cutpoint, cutpoint_abs,
+                      mean_cindex_dichot, se_cindex_dichot,
+                      mean_abs_logrank_z, se_abs_logrank_z)
+      path <- "results/cv_grid/cv_grid_cutpoint_summary.csv"
+      dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
+      write.csv(out, path, row.names = FALSE)
+      path
+    },
+    format = "file"
+  ),
+
+  # Target N4: Select optimal cutpoint per grid point
+  tar_target(
+    cv_grid_optimal_cutpoint,
+    select_optimal_cutpoint(cv_grid_cutpoint_summary)
+  ),
+
+  # Target 4: Aggregate all CV results with optimal cutpoint info
   tar_target(
     cv_grid_summary,
-    aggregate_cv_grid_results(cv_grid_result)
+    {
+      cv_tbl <- aggregate_cv_grid_results(cv_grid_result)
+      opt_tbl <- cv_grid_optimal_cutpoint
+      dplyr::left_join(cv_tbl, opt_tbl, by = c("k", "alpha", "ntop"))
+    }
   ),
 
   # Target 5: Save summary table to CSV
@@ -207,6 +269,15 @@ list(
       params <- cv_grid_params
       fixed <- CV_GRID_FIXED_PARAMS
       fixed$ntop <- params$ntop
+      ntop_match <- if (is.null(params$ntop)) NA_real_ else as.numeric(params$ntop)
+      if (is.na(ntop_match)) {
+        opt_row <- cv_grid_optimal_cutpoint |>
+          dplyr::filter(k == params$k, alpha == params$alpha, is.na(ntop))
+      } else {
+        opt_row <- cv_grid_optimal_cutpoint |>
+          dplyr::filter(k == params$k, alpha == params$alpha, ntop == ntop_match)
+      }
+      opt_z <- if (nrow(opt_row) == 1) opt_row$optimal_z_cutpoint else NA_real_
       fit_grid_point(
         data = cv_grid_data,
         k = params$k,
@@ -214,6 +285,7 @@ list(
         fixed_params = fixed,
         n_starts = CV_GRID_NSTARTS_FULL,
         seed = CV_GRID_SEED,
+        optimal_z_cutpoint = opt_z,
         verbose = TRUE
       )
     },
@@ -256,7 +328,8 @@ list(
           genes = train_genes,
           method_trans_train = CV_GRID_METHOD_TRANSFORM,
           dataname = ds_name,
-          transform_target = transform_target
+          transform_target = transform_target,
+          zero_fill_missing = TRUE
         )
       })
       names(val_list) <- CV_GRID_VAL_DATASETS
