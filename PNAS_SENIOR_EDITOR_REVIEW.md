@@ -68,6 +68,8 @@ The paper compares DeSurv only to standard NMF (alpha=0). This is the minimum ab
 
 1. **Why not compare to the two prior survival-NMF methods cited (Huang et al., 2020; Le Goff et al., 2025)?** If these methods are deemed insufficient in the Introduction, the reader expects to see empirical evidence of this insufficiency, or at minimum a clear technical argument for why comparison is unnecessary.
 
+**These methods do not provide software, where and how should we address this in the paper?**
+
 2. **Why not compare to penalized Cox regression on all genes (LASSO-Cox)?** This is the most natural "prediction-only" baseline that doesn't perform factorization. If DeSurv's advantage is structural reorganization rather than prediction, showing that LASSO-Cox achieves similar C-index but without interpretable programs would strengthen the argument.
 
 3. **Why not compare to sparse NMF or semi-NMF?** These are standard alternatives in the NMF literature.

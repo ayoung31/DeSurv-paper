@@ -4,6 +4,21 @@
 # over a grid of k (2-12), alpha (0 to 0.95 by 0.05), and ntop (NULL, 300)
 # with fixed lambda=0.3, nu=0.05, lambdaW=0, lambdaH=0.
 
+#' Save a ggsurvplot object to PDF
+#'
+#' @param ggsurv A ggsurvplot object (list with $plot and $table)
+#' @param file Output PDF file path
+#' @param width PDF width in inches
+#' @param height PDF height in inches
+save_ggsurvplot <- function(ggsurv, file, width = 7, height = 5) {
+  combined <- cowplot::plot_grid(
+    ggsurv$plot, ggsurv$table,
+    ncol = 1, rel_heights = c(3, 1), align = "v"
+  )
+  ggplot2::ggsave(file, combined, width = width, height = height)
+  invisible(file)
+}
+
 #' Create a grid of (k, alpha, ntop) parameter combinations
 #'
 #' @param k_values Integer vector of k values to test
@@ -147,6 +162,12 @@ run_cv_grid_point <- function(data,
     mu_train <- mean(lp_train, na.rm = TRUE)
     sigma_train <- sd(lp_train, na.rm = TRUE)
 
+    # Per-factor scores for per-factor cutpoint analysis
+    Z_train <- t(X_train) %*% W_fold
+    Z_val <- t(X_val) %*% W_fold
+    mu_z_train <- colMeans(Z_train)
+    sigma_z_train <- apply(Z_train, 2, sd)
+
     # Continuous validation C-index
     ci <- tryCatch({
       cc <- survival::concordance(
@@ -164,7 +185,10 @@ run_cv_grid_point <- function(data,
       event_val = as.integer(d[val_idx]),
       mu_train = mu_train,
       sigma_train = sigma_train,
-      cindex = ci
+      cindex = ci,
+      Z_val = Z_val,
+      mu_z_train = mu_z_train,
+      sigma_z_train = sigma_z_train
     )
 
     if (verbose) {
@@ -1021,6 +1045,8 @@ plot_km_training <- function(grid_fit_entry, cv_grid_data) {
     stringsAsFactors = FALSE
   )
 
+  if (length(unique(as.character(df$group))) < 2) return(NULL)
+
   sfit <- survival::survfit(survival::Surv(time, event) ~ group, data = df)
 
   # Cox model for HR
@@ -1050,7 +1076,7 @@ plot_km_training <- function(grid_fit_entry, cv_grid_data) {
   title <- sprintf("Training KM: k=%d, alpha=%.2f, ntop=%s",
                     grid_fit_entry$k, grid_fit_entry$alpha, ntop_label)
 
-  survminer::ggsurvplot(
+  ggsurv <- survminer::ggsurvplot(
     sfit,
     data = df,
     risk.table = TRUE,
@@ -1059,9 +1085,11 @@ plot_km_training <- function(grid_fit_entry, cv_grid_data) {
     legend.labs = c("Low", "High"),
     palette = c("#2166AC", "#B2182B"),
     ggtheme = ggplot2::theme_bw(base_size = 10)
-  )$plot +
+  )
+  ggsurv$plot <- ggsurv$plot +
     ggplot2::annotate("text", x = Inf, y = 0.95, label = annot,
                       hjust = 1.1, vjust = 1, size = 3)
+  ggsurv
 }
 
 #' Plot validation Kaplan-Meier curves for a single dataset
@@ -1073,7 +1101,7 @@ plot_km_training <- function(grid_fit_entry, cv_grid_data) {
 #'   $lp_mean and $lp_sd from training)
 #' @param val_ds Single validation dataset with $ex, $sampInfo
 #' @param ds_name Character dataset name for title
-#' @return ggplot object (KM plot with annotations)
+#' @return ggsurvplot object (KM plot with risk table and annotations)
 plot_km_validation <- function(grid_fit_entry, val_ds, ds_name) {
   fit <- grid_fit_entry$fit
   if (is.null(fit)) return(NULL)
@@ -1182,7 +1210,7 @@ plot_km_validation <- function(grid_fit_entry, val_ds, ds_name) {
 #' @param grid_fit_entry Single element from cv_grid_fit list (must have
 #'   $lp_mean and $lp_sd from training)
 #' @param val_datasets Named list of validation datasets
-#' @return ggplot object (KM plot with annotations)
+#' @return ggsurvplot object (KM plot with risk table and annotations)
 plot_km_validation_pooled <- function(grid_fit_entry, val_datasets) {
   fit <- grid_fit_entry$fit
   if (is.null(fit)) return(NULL)
@@ -1271,7 +1299,7 @@ plot_km_validation_pooled <- function(grid_fit_entry, val_datasets) {
   title <- sprintf("Pooled Validation KM: k=%d, alpha=%.2f, ntop=%s",
                     grid_fit_entry$k, grid_fit_entry$alpha, ntop_label)
 
-  survminer::ggsurvplot(
+  ggsurv <- survminer::ggsurvplot(
     sfit,
     data = df,
     risk.table = TRUE,
@@ -1280,9 +1308,11 @@ plot_km_validation_pooled <- function(grid_fit_entry, val_datasets) {
     legend.labs = c("Low", "High"),
     palette = c("#2166AC", "#B2182B"),
     ggtheme = ggplot2::theme_bw(base_size = 10)
-  )$plot +
+  )
+  ggsurv$plot <- ggsurv$plot +
     ggplot2::annotate("text", x = Inf, y = 0.95, label = annot,
                       hjust = 1.1, vjust = 1, size = 3)
+  ggsurv
 }
 
 #' Merge PACA_AU_array and PACA_AU_seq into a single PACA_AU dataset
@@ -1347,6 +1377,737 @@ merge_paca_au_datasets <- function(val_list) {
   ))
 
   val_list
+}
+
+#' Compute risk group assignment from model parameters and a z-score cutpoint
+#'
+#' @param W Basis matrix (genes x k)
+#' @param beta Coefficient vector (length k)
+#' @param X Expression matrix (genes x samples)
+#' @param ntop Integer or NULL; number of top genes per factor
+#' @param lp_mean Training LP mean for z-score standardization
+#' @param lp_sd Training LP sd for z-score standardization
+#' @param z_cut Z-score cutpoint for dichotomization
+#' @return Factor with levels c("Low", "High")
+compute_risk_group <- function(W, beta, X, ntop, lp_mean, lp_sd, z_cut) {
+  lp <- compute_lp(W, beta, X, ntop)
+  z <- (lp - lp_mean) / lp_sd
+  factor(ifelse(z > z_cut, "High", "Low"), levels = c("Low", "High"))
+}
+
+#' Plot subtype composition by risk group as stacked bar charts
+#'
+#' Creates a side-by-side panel with PurIST and DeCAF composition by Low/High
+#' risk group, with count labels and Fisher's exact test p-values.
+#'
+#' @param df Data frame with columns: group (factor Low/High), PurIST, DeCAF
+#' @param dataset_label Optional character label for the plot title
+#' @return A cowplot::plot_grid object
+plot_subtype_overlap <- function(df, dataset_label = NULL) {
+  # Recode permCAF -> proCAF for safety
+  df$DeCAF <- as.character(df$DeCAF)
+  df$DeCAF[df$DeCAF == "permCAF"] <- "proCAF"
+  df$PurIST <- as.character(df$PurIST)
+
+  purist_colors <- c(`Basal-like` = "orange", Classical = "blue")
+  decaf_colors <- c(proCAF = "#FF4DA6", restCAF = "#1B9E9E")
+
+  make_bar <- function(df, subtype_col, colors, subtype_label) {
+    tbl <- table(df$group, df[[subtype_col]])
+    fisher_p <- tryCatch(
+      fisher.test(tbl)$p.value,
+      error = function(e) NA_real_
+    )
+
+    plot_df <- as.data.frame(tbl, stringsAsFactors = FALSE)
+    names(plot_df) <- c("group", "subtype", "count")
+    totals <- tapply(plot_df$count, plot_df$group, sum)
+    plot_df$prop <- plot_df$count / totals[plot_df$group]
+
+    p_label <- if (is.na(fisher_p)) {
+      "Fisher p = NA"
+    } else if (fisher_p < 0.001) {
+      sprintf("Fisher p = %.1e", fisher_p)
+    } else {
+      sprintf("Fisher p = %.3f", fisher_p)
+    }
+
+    ggplot2::ggplot(plot_df, ggplot2::aes(x = group, y = prop, fill = subtype)) +
+      ggplot2::geom_col(width = 0.7) +
+      ggplot2::geom_text(
+        ggplot2::aes(label = count),
+        position = ggplot2::position_stack(vjust = 0.5),
+        size = 3, color = "white", fontface = "bold"
+      ) +
+      ggplot2::scale_fill_manual(values = colors, name = subtype_label) +
+      ggplot2::scale_y_continuous(labels = scales::percent_format()) +
+      ggplot2::labs(x = "Risk group", y = "Proportion", subtitle = p_label) +
+      ggplot2::theme_bw(base_size = 10) +
+      ggplot2::theme(legend.position = "bottom")
+  }
+
+  p_purist <- make_bar(df, "PurIST", purist_colors, "PurIST")
+  p_decaf <- make_bar(df, "DeCAF", decaf_colors, "DeCAF")
+
+  title_text <- if (!is.null(dataset_label)) dataset_label else ""
+  title_grob <- cowplot::ggdraw() +
+    cowplot::draw_label(title_text, fontface = "bold", size = 12)
+
+  cowplot::plot_grid(
+    title_grob,
+    cowplot::plot_grid(p_purist, p_decaf, ncol = 2, align = "h"),
+    ncol = 1, rel_heights = c(0.08, 1)
+  )
+}
+
+#' Plot subtype enrichment relative to expected proportions
+#'
+#' Three-panel visualization that addresses confounding between PurIST and DeCAF:
+#' Panel A: Enrichment relative to marginal proportion (observed - expected)
+#' Panel B: DeCAF composition stratified by PurIST x Risk group
+#' Panel C: Sample counts table (2x2x2 contingency)
+#'
+#' @param df Data frame with columns: group (High/Low), PurIST, DeCAF
+#' @param dataset_label Optional character label for the plot title
+#' @return A cowplot::plot_grid object
+plot_subtype_enrichment <- function(df, dataset_label = NULL) {
+  df$DeCAF <- as.character(df$DeCAF)
+  df$DeCAF[df$DeCAF == "permCAF"] <- "proCAF"
+  df$PurIST <- as.character(df$PurIST)
+  df$group <- as.character(df$group)
+
+  n_total <- nrow(df)
+
+  # --- Panel A: Enrichment relative to expected ---
+  # For each subtype, compute (observed proportion in group) - (marginal proportion)
+  marginal_purist <- prop.table(table(df$PurIST))
+  marginal_decaf <- prop.table(table(df$DeCAF))
+
+  enrich_rows <- list()
+  for (grp in c("Low", "High")) {
+    grp_df <- df[df$group == grp, ]
+    n_grp <- nrow(grp_df)
+    if (n_grp == 0) next
+
+    obs_purist <- prop.table(table(factor(grp_df$PurIST, levels = names(marginal_purist))))
+    for (st in names(marginal_purist)) {
+      enrich_rows[[length(enrich_rows) + 1]] <- data.frame(
+        group = grp, classifier = "PurIST", subtype = st,
+        observed = as.numeric(obs_purist[st]),
+        expected = as.numeric(marginal_purist[st]),
+        diff = as.numeric(obs_purist[st]) - as.numeric(marginal_purist[st]),
+        n = n_grp, stringsAsFactors = FALSE
+      )
+    }
+
+    obs_decaf <- prop.table(table(factor(grp_df$DeCAF, levels = names(marginal_decaf))))
+    for (st in names(marginal_decaf)) {
+      enrich_rows[[length(enrich_rows) + 1]] <- data.frame(
+        group = grp, classifier = "DeCAF", subtype = st,
+        observed = as.numeric(obs_decaf[st]),
+        expected = as.numeric(marginal_decaf[st]),
+        diff = as.numeric(obs_decaf[st]) - as.numeric(marginal_decaf[st]),
+        n = n_grp, stringsAsFactors = FALSE
+      )
+    }
+  }
+  enrich_df <- do.call(rbind, enrich_rows)
+
+  all_colors <- c(`Basal-like` = "orange", Classical = "blue",
+                   proCAF = "#FF4DA6", restCAF = "#1B9E9E")
+
+  panel_a <- ggplot2::ggplot(
+    enrich_df,
+    ggplot2::aes(x = group, y = diff, fill = subtype)
+  ) +
+    ggplot2::geom_col(position = ggplot2::position_dodge(width = 0.7), width = 0.6) +
+    ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "grey40") +
+    ggplot2::facet_wrap(~classifier, scales = "free_x") +
+    ggplot2::scale_fill_manual(values = all_colors, name = "Subtype") +
+    ggplot2::scale_y_continuous(labels = scales::percent_format()) +
+    ggplot2::labs(
+      x = "Risk group", y = "Observed \u2212 Expected proportion",
+      title = "A. Enrichment relative to marginal"
+    ) +
+    ggplot2::theme_bw(base_size = 10) +
+    ggplot2::theme(legend.position = "bottom")
+
+  # --- Panel B: DeCAF composition stratified by PurIST x Risk group ---
+  decaf_colors <- c(proCAF = "#FF4DA6", restCAF = "#1B9E9E")
+
+  strat_rows <- list()
+  fisher_labels <- list()
+  for (pur in unique(df$PurIST)) {
+    sub <- df[df$PurIST == pur, ]
+    if (nrow(sub) < 2) next
+
+    tbl <- table(sub$group, sub$DeCAF)
+    fp <- tryCatch(fisher.test(tbl)$p.value, error = function(e) NA_real_)
+
+    fisher_labels[[pur]] <- if (is.na(fp)) {
+      "p = NA"
+    } else if (fp < 0.001) {
+      sprintf("p = %.1e", fp)
+    } else {
+      sprintf("p = %.3f", fp)
+    }
+
+    for (grp in c("Low", "High")) {
+      grp_sub <- sub[sub$group == grp, ]
+      n_grp <- nrow(grp_sub)
+      if (n_grp == 0) next
+      decaf_tbl <- table(factor(grp_sub$DeCAF, levels = c("restCAF", "proCAF")))
+      for (dc in names(decaf_tbl)) {
+        strat_rows[[length(strat_rows) + 1]] <- data.frame(
+          purist = pur, group = grp, decaf = dc,
+          count = as.integer(decaf_tbl[dc]),
+          prop = as.numeric(decaf_tbl[dc]) / n_grp,
+          stringsAsFactors = FALSE
+        )
+      }
+    }
+  }
+
+  if (length(strat_rows) > 0) {
+    strat_df <- do.call(rbind, strat_rows)
+    strat_df$decaf <- factor(strat_df$decaf, levels = c("restCAF", "proCAF"))
+    strat_df$bar_label <- paste0(strat_df$group, "\n(", strat_df$purist, ")")
+
+    # Order: Low-Classical, Low-Basal, High-Classical, High-Basal
+    strat_df$bar_label <- factor(strat_df$bar_label,
+      levels = c(
+        paste0("Low\n(Classical)"), paste0("Low\n(Basal-like)"),
+        paste0("High\n(Classical)"), paste0("High\n(Basal-like)")
+      ))
+
+    # Annotation df for Fisher p-values
+    annot_df <- data.frame(
+      purist = names(fisher_labels),
+      label = unlist(fisher_labels),
+      stringsAsFactors = FALSE
+    )
+
+    panel_b <- ggplot2::ggplot(
+      strat_df,
+      ggplot2::aes(x = bar_label, y = prop, fill = decaf)
+    ) +
+      ggplot2::geom_col(width = 0.7) +
+      ggplot2::geom_text(
+        ggplot2::aes(label = count),
+        position = ggplot2::position_stack(vjust = 0.5),
+        size = 3, color = "white", fontface = "bold"
+      ) +
+      ggplot2::scale_fill_manual(values = decaf_colors, name = "DeCAF") +
+      ggplot2::scale_y_continuous(labels = scales::percent_format()) +
+      ggplot2::labs(
+        x = NULL, y = "Proportion",
+        title = "B. DeCAF by PurIST \u00d7 Risk group",
+        subtitle = paste(
+          sapply(names(fisher_labels), function(p) {
+            sprintf("Fisher %s: %s", p, fisher_labels[[p]])
+          }),
+          collapse = "   "
+        )
+      ) +
+      ggplot2::theme_bw(base_size = 10) +
+      ggplot2::theme(legend.position = "bottom")
+  } else {
+    panel_b <- ggplot2::ggplot() +
+      ggplot2::annotate("text", x = 0.5, y = 0.5,
+        label = "Insufficient data", size = 4) +
+      ggplot2::theme_void()
+  }
+
+  # --- Panel C: Sample counts table ---
+  count_rows <- list()
+  for (grp in c("Low", "High")) {
+    for (pur in sort(unique(df$PurIST))) {
+      for (dc in sort(unique(df$DeCAF))) {
+        n <- sum(df$group == grp & df$PurIST == pur & df$DeCAF == dc)
+        count_rows[[length(count_rows) + 1]] <- data.frame(
+          Risk = grp, PurIST = pur, DeCAF = dc, N = n,
+          stringsAsFactors = FALSE
+        )
+      }
+    }
+  }
+  count_df <- do.call(rbind, count_rows)
+
+  # Render as ggplot tile table
+  count_df$label <- paste0(count_df$PurIST, " / ", count_df$DeCAF)
+  panel_c <- ggplot2::ggplot(
+    count_df,
+    ggplot2::aes(x = Risk, y = label)
+  ) +
+    ggplot2::geom_tile(fill = "grey95", color = "grey70") +
+    ggplot2::geom_text(ggplot2::aes(label = N), size = 4) +
+    ggplot2::labs(x = "Risk group", y = NULL,
+      title = "C. Sample counts") +
+    ggplot2::theme_minimal(base_size = 10) +
+    ggplot2::theme(
+      panel.grid = ggplot2::element_blank(),
+      plot.title = ggplot2::element_text(face = "bold", size = 10)
+    )
+
+  # --- Combine ---
+  title_text <- if (!is.null(dataset_label)) dataset_label else ""
+  title_grob <- cowplot::ggdraw() +
+    cowplot::draw_label(title_text, fontface = "bold", size = 12)
+
+  top_row <- cowplot::plot_grid(panel_a, panel_b, ncol = 2, align = "h")
+
+  cowplot::plot_grid(
+    title_grob,
+    top_row,
+    panel_c,
+    ncol = 1, rel_heights = c(0.06, 1, 0.5)
+  )
+}
+
+#' Plot training + validation C-index vs k: DeSurv vs NMF
+#'
+#' Returns a named list of ggplot objects, one per unique ntop value. Each plot
+#' has two facet panels: Training (CV C-index +/- SE) and Validation (pooled
+#' external C-index +/- SE). Uncertainty shown as geom_ribbon with alpha=0.2.
+#'
+#' @param cv_grid_summary Tibble with k, alpha, ntop, mean_cindex, se_cindex
+#' @param cv_grid_best_alpha Tibble from select_best_alpha_per_k()
+#' @param cv_grid_val_summary Tibble from aggregate_cv_grid_val_results()
+#' @param dataset_filter Character; validation dataset(s). Default "pooled".
+#' @param val_method Character; validation method. Default "transfer_beta".
+#' @return Named list of ggplot objects keyed by ntop label (e.g., "ALL", "300")
+plot_cindex_by_k <- function(cv_grid_summary,
+                              cv_grid_best_alpha,
+                              cv_grid_val_summary,
+                              dataset_filter = "pooled",
+                              val_method = "transfer_beta") {
+  # --- Training data ---
+  best_train <- cv_grid_best_alpha |>
+    dplyr::filter(selection_method == "max_cindex") |>
+    dplyr::transmute(k, ntop, alpha = best_alpha) |>
+    dplyr::left_join(cv_grid_summary, by = c("k", "alpha", "ntop")) |>
+    dplyr::mutate(method = "DeSurv")
+
+  alpha0_train <- cv_grid_summary |>
+    dplyr::filter(alpha == 0) |>
+    dplyr::mutate(method = "NMF")
+
+  df_train <- dplyr::bind_rows(
+    best_train |> dplyr::select(k, ntop, cindex = mean_cindex, cindex_se = se_cindex, method),
+    alpha0_train |> dplyr::select(k, ntop, cindex = mean_cindex, cindex_se = se_cindex, method)
+  ) |>
+    dplyr::mutate(panel = "Training (CV)")
+
+  # --- Validation data ---
+  val_df <- cv_grid_val_summary |>
+    dplyr::filter(method == val_method)
+  if (!is.null(dataset_filter)) {
+    val_df <- val_df |> dplyr::filter(dataset %in% dataset_filter)
+  }
+
+  best_val <- cv_grid_best_alpha |>
+    dplyr::filter(selection_method == "max_cindex") |>
+    dplyr::transmute(k, ntop, alpha = best_alpha) |>
+    dplyr::left_join(val_df, by = c("k", "alpha", "ntop")) |>
+    dplyr::mutate(method = "DeSurv")
+
+  alpha0_val <- val_df |>
+    dplyr::filter(alpha == 0) |>
+    dplyr::mutate(method = "NMF")
+
+  df_val <- dplyr::bind_rows(
+    best_val |> dplyr::select(k, ntop, cindex, cindex_se, method),
+    alpha0_val |> dplyr::select(k, ntop, cindex, cindex_se, method)
+  ) |>
+    dplyr::mutate(panel = "Validation (External)")
+
+  # --- Combine ---
+  df_all <- dplyr::bind_rows(df_train, df_val) |>
+    dplyr::mutate(
+      ntop_label = ifelse(is.na(ntop), "ALL", as.character(ntop)),
+      panel = factor(panel, levels = c("Training (CV)", "Validation (External)"))
+    )
+
+  # --- One plot per ntop ---
+  ntop_levels <- unique(df_all$ntop_label)
+  plots <- setNames(lapply(ntop_levels, function(nt) {
+    df_nt <- df_all |> dplyr::filter(ntop_label == nt)
+
+    ggplot2::ggplot(df_nt, ggplot2::aes(x = k, y = cindex,
+                                          color = method, fill = method,
+                                          group = method)) +
+      ggplot2::geom_ribbon(
+        ggplot2::aes(ymin = cindex - cindex_se,
+                     ymax = cindex + cindex_se),
+        alpha = 0.2, color = NA
+      ) +
+      ggplot2::geom_line() +
+      ggplot2::geom_point(size = 2) +
+      ggplot2::scale_x_continuous(breaks = seq(2, 12)) +
+      ggplot2::scale_color_manual(values = c("DeSurv" = "blue", "NMF" = "red")) +
+      ggplot2::scale_fill_manual(values = c("DeSurv" = "blue", "NMF" = "red")) +
+      ggplot2::facet_wrap(~ panel) +
+      ggplot2::labs(
+        x = "Factorization rank (k)",
+        y = "C-index",
+        color = NULL, fill = NULL
+      ) +
+      ggplot2::theme_classic(base_size = 10) +
+      ggplot2::theme(legend.position = "bottom")
+  }), ntop_levels)
+
+  plots
+}
+
+#' Evaluate z-score cutpoints per factor for a single CV grid point
+#'
+#' For each factor j in 1:k, for each fold, standardizes the j-th factor score
+#' using training mean/sd, then evaluates each z-score cutpoint by computing
+#' dichotomized C-index and log-rank z-statistic.
+#'
+#' @param cv_result Single result from run_cv_grid_point() containing fold_data
+#'   with Z_val, mu_z_train, sigma_z_train
+#' @param z_grid Numeric vector of z-score cutpoints to evaluate
+#' @param k Integer number of factors
+#' @return Tibble with columns: k, alpha, ntop, factor_id, z_cutpoint, fold,
+#'   cindex_dichot, logrank_z
+evaluate_cutpoint_zscores_per_factor <- function(cv_result, z_grid, k) {
+  if (is.null(cv_result) || is.null(cv_result$fold_data)) {
+    return(NULL)
+  }
+
+  k_val <- cv_result$k
+  alpha_val <- cv_result$alpha
+  ntop_val <- if (is.null(cv_result$ntop)) NA_real_ else as.numeric(cv_result$ntop)
+
+  rows <- list()
+  idx <- 0L
+
+  for (fi in seq_along(cv_result$fold_data)) {
+    fd <- cv_result$fold_data[[fi]]
+    Z_val <- fd$Z_val
+    mu_z <- fd$mu_z_train
+    sigma_z <- fd$sigma_z_train
+    time_val <- fd$time_val
+    event_val <- fd$event_val
+
+    if (is.null(Z_val) || is.null(mu_z)) next
+
+    for (j in seq_len(k)) {
+      if (is.na(sigma_z[j]) || sigma_z[j] <= 0) next
+      z_val_j <- (Z_val[, j] - mu_z[j]) / sigma_z[j]
+
+      for (zc in z_grid) {
+        idx <- idx + 1L
+        group <- as.integer(z_val_j > zc)
+
+        if (length(unique(group)) < 2 || sum(event_val) == 0) {
+          rows[[idx]] <- tibble::tibble(
+            k = as.integer(k_val), alpha = alpha_val, ntop = ntop_val,
+            factor_id = j, z_cutpoint = zc, fold = fi,
+            cindex_dichot = NA_real_, logrank_z = NA_real_
+          )
+          next
+        }
+
+        ci <- tryCatch({
+          cc <- survival::concordance(
+            survival::Surv(time_val, event_val) ~ group,
+            reverse = TRUE
+          )
+          cc$concordance
+        }, error = function(e) NA_real_)
+
+        lr_z <- compute_logrank_z(time_val, event_val, group)
+
+        rows[[idx]] <- tibble::tibble(
+          k = as.integer(k_val), alpha = alpha_val, ntop = ntop_val,
+          factor_id = j, z_cutpoint = zc, fold = fi,
+          cindex_dichot = ci, logrank_z = lr_z
+        )
+      }
+    }
+  }
+
+  dplyr::bind_rows(purrr::compact(rows))
+}
+
+#' Compute factor-based group assignment from model W matrix
+#'
+#' Projects samples onto a single factor column of Z = t(X) %*% W, standardizes
+#' using training mean/sd, and dichotomizes at z_cut.
+#'
+#' @param W Basis matrix (genes x k)
+#' @param X Expression matrix (genes x samples)
+#' @param factor_id Integer index of the factor column to use
+#' @param z_mean Training mean for this factor
+#' @param z_sd Training sd for this factor
+#' @param z_cut Z-score cutpoint for dichotomization
+#' @return Factor with levels c("Low", "High")
+compute_factor_group <- function(W, X, factor_id, z_mean, z_sd, z_cut) {
+  Z <- t(X) %*% W
+  z <- (Z[, factor_id] - z_mean) / z_sd
+  factor(ifelse(z > z_cut, "High", "Low"), levels = c("Low", "High"))
+}
+
+#' Plot training KM curves dichotomized on a single factor score
+#'
+#' @param fit DeSurv fit object with $W
+#' @param train_data Training data list with $ex, $sampInfo
+#' @param factor_id Integer factor index
+#' @param z_mean Training factor mean
+#' @param z_sd Training factor sd
+#' @param z_cut Z-score cutpoint
+#' @param k Integer number of factors
+#' @param alpha Numeric supervision parameter
+#' @return ggsurvplot object
+plot_km_training_factor <- function(fit, train_data, factor_id, z_mean, z_sd,
+                                     z_cut, k, alpha) {
+  if (is.null(fit) || is.na(z_cut)) return(NULL)
+  if (!is.finite(z_sd) || z_sd <= 0) return(NULL)
+
+  group <- compute_factor_group(fit$W, train_data$ex, factor_id, z_mean, z_sd, z_cut)
+
+  df <- data.frame(
+    time = train_data$sampInfo$time,
+    event = train_data$sampInfo$event,
+    group = group,
+    stringsAsFactors = FALSE
+  )
+  if (length(unique(df$group)) < 2) return(NULL)
+
+  sfit <- survival::survfit(survival::Surv(time, event) ~ group, data = df)
+
+  cox_fit <- tryCatch(
+    survival::coxph(survival::Surv(time, event) ~ group, data = df),
+    error = function(e) NULL
+  )
+  hr_text <- ""
+  if (!is.null(cox_fit)) {
+    hr <- exp(coef(cox_fit))
+    ci <- exp(confint(cox_fit))
+    hr_text <- sprintf("HR=%.2f (%.2f-%.2f)", hr, ci[1], ci[2])
+  }
+
+  lr_z <- compute_logrank_z(df$time, df$event, as.integer(group == "High"))
+  lr_p <- if (is.finite(lr_z)) 2 * pnorm(-abs(lr_z)) else NA_real_
+
+  annot <- paste0(
+    hr_text,
+    sprintf("\nLog-rank z=%.2f, p=%.1e", lr_z, lr_p),
+    sprintf("\nz-cutpoint=%.2f", z_cut)
+  )
+
+  title <- sprintf("Training KM Factor %d: k=%d, alpha=%.2f", factor_id, k, alpha)
+
+  ggsurv <- survminer::ggsurvplot(
+    sfit,
+    data = df,
+    risk.table = TRUE,
+    pval = FALSE,
+    title = title,
+    legend.labs = c("Low", "High"),
+    palette = c("#2166AC", "#B2182B"),
+    ggtheme = ggplot2::theme_bw(base_size = 10)
+  )
+  ggsurv$plot <- ggsurv$plot +
+    ggplot2::annotate("text", x = Inf, y = 0.95, label = annot,
+                      hjust = 1.1, vjust = 1, size = 3)
+  ggsurv
+}
+
+#' Plot validation KM curves dichotomized on a single factor score
+#'
+#' @param fit DeSurv fit object with $W
+#' @param val_ds Single validation dataset with $ex, $sampInfo
+#' @param ds_name Character dataset name
+#' @param factor_id Integer factor index
+#' @param z_mean Training factor mean
+#' @param z_sd Training factor sd
+#' @param z_cut Z-score cutpoint
+#' @param k Integer number of factors
+#' @param alpha Numeric supervision parameter
+#' @return ggsurvplot object
+plot_km_validation_factor <- function(fit, val_ds, ds_name, factor_id,
+                                       z_mean, z_sd, z_cut, k, alpha) {
+  if (is.null(fit) || is.na(z_cut)) return(NULL)
+  if (!is.finite(z_sd) || z_sd <= 0) return(NULL)
+
+  W <- fit$W
+  train_genes <- rownames(W)
+  val_genes <- rownames(val_ds$ex)
+  common_genes <- intersect(train_genes, val_genes)
+  if (length(common_genes) < 2) return(NULL)
+
+  W_common <- W[common_genes, , drop = FALSE]
+  X_val <- val_ds$ex[common_genes, , drop = FALSE]
+
+  si <- val_ds$sampInfo
+  time_val <- si$time
+  event_val <- as.integer(si$event)
+  valid <- is.finite(time_val) & !is.na(event_val) & time_val > 0
+
+  ds_col <- si$dataset
+  has_strata <- !is.null(ds_col) && length(unique(ds_col[valid])) > 1
+
+  X_val_valid <- X_val[, valid, drop = FALSE]
+  group <- compute_factor_group(W_common, X_val_valid, factor_id, z_mean, z_sd, z_cut)
+
+  df <- data.frame(
+    time = time_val[valid],
+    event = event_val[valid],
+    group = group,
+    stringsAsFactors = FALSE
+  )
+  if (has_strata) df$strata_var <- ds_col[valid]
+  if (nrow(df) < 2 || length(unique(df$group)) < 2) return(NULL)
+
+  sfit <- survival::survfit(survival::Surv(time, event) ~ group, data = df)
+
+  cox_fit <- tryCatch({
+    if (has_strata) {
+      survival::coxph(survival::Surv(time, event) ~ group + strata(strata_var), data = df)
+    } else {
+      survival::coxph(survival::Surv(time, event) ~ group, data = df)
+    }
+  }, error = function(e) NULL)
+  hr_text <- ""
+  if (!is.null(cox_fit)) {
+    hr <- exp(coef(cox_fit))
+    ci <- exp(confint(cox_fit))
+    hr_text <- sprintf("HR=%.2f (%.2f-%.2f)", hr, ci[1], ci[2])
+  }
+
+  lr_z <- compute_logrank_z(
+    df$time, df$event, as.integer(df$group == "High"),
+    strata = if (has_strata) df$strata_var else NULL
+  )
+  lr_p <- if (is.finite(lr_z)) 2 * pnorm(-abs(lr_z)) else NA_real_
+
+  lr_label <- if (has_strata) "Stratified log-rank" else "Log-rank"
+  annot <- paste0(
+    hr_text,
+    sprintf("\n%s z=%.2f, p=%.1e", lr_label, lr_z, lr_p),
+    sprintf("\nz-cutpoint=%.2f, n=%d", z_cut, nrow(df))
+  )
+
+  title <- sprintf("Validation KM (%s) Factor %d: k=%d, alpha=%.2f",
+                    ds_name, factor_id, k, alpha)
+
+  ggsurv <- survminer::ggsurvplot(
+    sfit,
+    data = df,
+    risk.table = TRUE,
+    pval = FALSE,
+    title = title,
+    legend.labs = c("Low", "High"),
+    palette = c("#2166AC", "#B2182B"),
+    ggtheme = ggplot2::theme_bw(base_size = 10)
+  )
+  ggsurv$plot <- ggsurv$plot +
+    ggplot2::annotate("text", x = Inf, y = 0.95, label = annot,
+                      hjust = 1.1, vjust = 1, size = 3)
+  ggsurv
+}
+
+#' Plot pooled validation KM curves dichotomized on a single factor score
+#'
+#' @param fit DeSurv fit object with $W
+#' @param val_datasets Named list of validation datasets
+#' @param factor_id Integer factor index
+#' @param z_mean Training factor mean
+#' @param z_sd Training factor sd
+#' @param z_cut Z-score cutpoint
+#' @param k Integer number of factors
+#' @param alpha Numeric supervision parameter
+#' @return ggsurvplot object
+plot_km_validation_pooled_factor <- function(fit, val_datasets, factor_id,
+                                              z_mean, z_sd, z_cut, k, alpha) {
+  if (is.null(fit) || is.na(z_cut)) return(NULL)
+  if (!is.finite(z_sd) || z_sd <= 0) return(NULL)
+
+  W <- fit$W
+  train_genes <- rownames(W)
+
+  pooled_group <- character(0)
+  pooled_time <- numeric(0)
+  pooled_event <- integer(0)
+  pooled_ds <- character(0)
+
+  for (ds_name in names(val_datasets)) {
+    val_ds <- val_datasets[[ds_name]]
+    common_genes <- intersect(train_genes, rownames(val_ds$ex))
+    if (length(common_genes) < 2) next
+
+    W_common <- W[common_genes, , drop = FALSE]
+    X_val <- val_ds$ex[common_genes, , drop = FALSE]
+
+    si <- val_ds$sampInfo
+    valid <- is.finite(si$time) & !is.na(si$event) & si$time > 0
+    X_val_valid <- X_val[, valid, drop = FALSE]
+    group <- compute_factor_group(W_common, X_val_valid, factor_id, z_mean, z_sd, z_cut)
+
+    pooled_group <- c(pooled_group, as.character(group))
+    pooled_time <- c(pooled_time, si$time[valid])
+    pooled_event <- c(pooled_event, as.integer(si$event[valid]))
+    ds_labels <- si$dataset[valid]
+    if (is.null(ds_labels)) ds_labels <- rep(ds_name, sum(valid))
+    pooled_ds <- c(pooled_ds, ds_labels)
+  }
+
+  if (length(pooled_time) < 2) return(NULL)
+
+  group <- factor(pooled_group, levels = c("Low", "High"))
+  df <- data.frame(
+    time = pooled_time,
+    event = pooled_event,
+    group = group,
+    dataset = pooled_ds,
+    stringsAsFactors = FALSE
+  )
+  if (length(unique(df$group)) < 2) return(NULL)
+
+  sfit <- survival::survfit(survival::Surv(time, event) ~ group, data = df)
+
+  cox_fit <- tryCatch(
+    survival::coxph(survival::Surv(time, event) ~ group + strata(dataset), data = df),
+    error = function(e) NULL
+  )
+  hr_text <- ""
+  if (!is.null(cox_fit)) {
+    hr <- exp(coef(cox_fit))
+    ci <- exp(confint(cox_fit))
+    hr_text <- sprintf("HR=%.2f (%.2f-%.2f)", hr, ci[1], ci[2])
+  }
+
+  lr_z <- compute_logrank_z(df$time, df$event,
+                             as.integer(df$group == "High"),
+                             strata = df$dataset)
+  lr_p <- if (is.finite(lr_z)) 2 * pnorm(-abs(lr_z)) else NA_real_
+
+  annot <- paste0(
+    hr_text,
+    sprintf("\nStratified log-rank z=%.2f, p=%.1e", lr_z, lr_p),
+    sprintf("\nz-cutpoint=%.2f, n=%d", z_cut, nrow(df))
+  )
+
+  title <- sprintf("Pooled Validation KM Factor %d: k=%d, alpha=%.2f",
+                    factor_id, k, alpha)
+
+  ggsurv <- survminer::ggsurvplot(
+    sfit,
+    data = df,
+    risk.table = TRUE,
+    pval = FALSE,
+    title = title,
+    legend.labs = c("Low", "High"),
+    palette = c("#2166AC", "#B2182B"),
+    ggtheme = ggplot2::theme_bw(base_size = 10)
+  )
+  ggsurv$plot <- ggsurv$plot +
+    ggplot2::annotate("text", x = Inf, y = 0.95, label = annot,
+                      hjust = 1.1, vjust = 1, size = 3)
+  ggsurv
 }
 
 # Null-coalescing operator if not already defined

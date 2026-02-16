@@ -612,7 +612,8 @@ COMMON_DESURV_RUN_TARGETS <- list(
     ),
     resources = tar_resources(
       crew = tar_resources_crew(controller = "med_mem")
-    )
+    ),
+    cue = tar_cue(mode = "never")
   ),
 
   tar_target(
@@ -684,6 +685,149 @@ COMMON_DESURV_RUN_TARGETS <- list(
       ggplot2::ggsave(fpath_logrank, p_logrank, width = 5, height = 4)
 
       c(fpath_cindex, fpath_logrank)
+    },
+    format = "file"
+  ),
+
+  # --- Per-factor cutpoint evaluation ---
+  tar_target(
+    desurv_cutpoint_eval_per_factor,
+    evaluate_cutpoint_zscores_per_factor(
+      desurv_cv_cutpoint_result,
+      z_grid = seq(-2.0, 2.0, by = 0.2),
+      k = bo_bundle_selected$params_best$k
+    )
+  ),
+
+  tar_target(
+    desurv_cutpoint_summary_per_factor,
+    {
+      desurv_cutpoint_eval_per_factor |>
+        dplyr::group_by(factor_id, z_cutpoint) |>
+        dplyr::summarise(
+          mean_cindex_dichot = mean(cindex_dichot, na.rm = TRUE),
+          se_cindex_dichot = sd(cindex_dichot, na.rm = TRUE) / sqrt(sum(!is.na(cindex_dichot))),
+          mean_abs_logrank_z = mean(abs(logrank_z), na.rm = TRUE),
+          se_abs_logrank_z = sd(abs(logrank_z), na.rm = TRUE) / sqrt(sum(!is.na(logrank_z))),
+          .groups = "drop"
+        )
+    }
+  ),
+
+  tar_target(
+    desurv_optimal_z_cutpoint_per_factor,
+    {
+      desurv_cutpoint_summary_per_factor |>
+        dplyr::group_by(factor_id) |>
+        dplyr::slice_max(mean_abs_logrank_z, n = 1, with_ties = FALSE) |>
+        dplyr::ungroup() |>
+        dplyr::select(factor_id, z_cutpoint)
+    }
+  ),
+
+  tar_target(
+    desurv_optimal_z_cutpoint_cindex_per_factor,
+    {
+      desurv_cutpoint_summary_per_factor |>
+        dplyr::group_by(factor_id) |>
+        dplyr::slice_max(mean_cindex_dichot, n = 1, with_ties = FALSE) |>
+        dplyr::ungroup() |>
+        dplyr::select(factor_id, z_cutpoint)
+    }
+  ),
+
+  tar_target(
+    desurv_factor_stats,
+    {
+      W <- tar_fit_desurv$W
+      X <- bo_bundle_selected$data_filtered$ex
+      Z <- t(X) %*% W
+      k <- ncol(Z)
+      logrank_cuts <- desurv_optimal_z_cutpoint_per_factor
+      cindex_cuts <- desurv_optimal_z_cutpoint_cindex_per_factor
+      lapply(seq_len(k), function(j) {
+        list(
+          factor_id = j,
+          z_mean = mean(Z[, j]),
+          z_sd = sd(Z[, j]),
+          optimal_z_logrank = logrank_cuts$z_cutpoint[logrank_cuts$factor_id == j],
+          optimal_z_cindex = cindex_cuts$z_cutpoint[cindex_cuts$factor_id == j]
+        )
+      })
+    }
+  ),
+
+  tar_target(
+    fig_cutpoint_curves_per_factor,
+    {
+      k_val <- bo_bundle_selected$params_best$k
+      alpha_val <- bo_bundle_selected$params_best$alpha
+      out_dir <- "figures"
+      dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+      paths <- character(0)
+
+      for (j in seq_len(k_val)) {
+        fac_data <- desurv_cutpoint_summary_per_factor |>
+          dplyr::filter(factor_id == j)
+        if (nrow(fac_data) == 0) next
+
+        opt_logrank <- desurv_optimal_z_cutpoint_per_factor$z_cutpoint[
+          desurv_optimal_z_cutpoint_per_factor$factor_id == j]
+        opt_cindex <- desurv_optimal_z_cutpoint_cindex_per_factor$z_cutpoint[
+          desurv_optimal_z_cutpoint_cindex_per_factor$factor_id == j]
+
+        # Logrank curve
+        p_lr <- ggplot2::ggplot(
+          fac_data, ggplot2::aes(x = z_cutpoint, y = mean_abs_logrank_z)
+        ) +
+          ggplot2::geom_line() +
+          ggplot2::geom_point(size = 1.5) +
+          ggplot2::geom_errorbar(
+            ggplot2::aes(
+              ymin = mean_abs_logrank_z - se_abs_logrank_z,
+              ymax = mean_abs_logrank_z + se_abs_logrank_z
+            ), width = 0.05
+          ) +
+          ggplot2::labs(
+            x = "z-score cutpoint", y = "Mean |log-rank z|",
+            title = sprintf("Factor %d |Log-rank z|", j)
+          ) +
+          ggplot2::theme_bw(base_size = 10)
+        if (length(opt_logrank) && is.finite(opt_logrank)) {
+          p_lr <- p_lr + ggplot2::geom_vline(
+            xintercept = opt_logrank, linetype = "dashed", color = "red", linewidth = 0.5)
+        }
+        fpath_lr <- file.path(out_dir, sprintf("cutpoint_curve_factor%d_logrank_%s.pdf", j, bo_label))
+        ggplot2::ggsave(fpath_lr, p_lr, width = 5, height = 4)
+        paths <- c(paths, fpath_lr)
+
+        # Cindex curve
+        p_ci <- ggplot2::ggplot(
+          fac_data, ggplot2::aes(x = z_cutpoint, y = mean_cindex_dichot)
+        ) +
+          ggplot2::geom_line() +
+          ggplot2::geom_point(size = 1.5) +
+          ggplot2::geom_errorbar(
+            ggplot2::aes(
+              ymin = mean_cindex_dichot - se_cindex_dichot,
+              ymax = mean_cindex_dichot + se_cindex_dichot
+            ), width = 0.05
+          ) +
+          ggplot2::labs(
+            x = "z-score cutpoint", y = "Mean C-index (dichotomized)",
+            title = sprintf("Factor %d Dichot. C-index", j)
+          ) +
+          ggplot2::theme_bw(base_size = 10)
+        if (length(opt_cindex) && is.finite(opt_cindex)) {
+          p_ci <- p_ci + ggplot2::geom_vline(
+            xintercept = opt_cindex, linetype = "dashed", color = "red", linewidth = 0.5)
+        }
+        fpath_ci <- file.path(out_dir, sprintf("cutpoint_curve_factor%d_cindex_%s.pdf", j, bo_label))
+        ggplot2::ggsave(fpath_ci, p_ci, width = 5, height = 4)
+        paths <- c(paths, fpath_ci)
+      }
+
+      paths
     },
     format = "file"
   ),
@@ -1502,7 +1646,7 @@ COMMON_DESURV_VAL_TARGETS <- list(
           if (is.null(p)) next
           fpath <- file.path(out_dir, sprintf("km_val_%s_%s_%s.pdf",
                                                ds_name, method, bo_label))
-          ggplot2::ggsave(fpath, p, width = 7, height = 5)
+          save_ggsurvplot(p, fpath, width = 7, height = 5)
           paths <- c(paths, fpath)
         }
 
@@ -1511,8 +1655,354 @@ COMMON_DESURV_VAL_TARGETS <- list(
         if (!is.null(p_pooled)) {
           fpath <- file.path(out_dir, sprintf("km_val_pooled_%s_%s.pdf",
                                                method, bo_label))
-          ggplot2::ggsave(fpath, p_pooled, width = 7, height = 5)
+          save_ggsurvplot(p_pooled, fpath, width = 7, height = 5)
           paths <- c(paths, fpath)
+        }
+      }
+
+      paths
+    },
+    format = "file"
+  ),
+
+  # --- Subtype overlap with dichotomized risk groups ---
+  tar_target(
+    fig_subtype_overlap,
+    {
+      W <- val_run_bundle$fit_desurv$W
+      beta <- val_run_bundle$fit_desurv$beta
+      ntop <- val_run_bundle$ntop_value
+      lp_mean <- desurv_lp_stats$lp_mean
+      lp_sd <- desurv_lp_stats$lp_sd
+
+      cutpoints <- list(
+        logrank = desurv_optimal_z_cutpoint,
+        cindex = desurv_optimal_z_cutpoint_cindex
+      )
+
+      out_dir <- file.path("figures", "km_dichot")
+      dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+      paths <- character(0)
+
+      for (method in names(cutpoints)) {
+        z_cut <- cutpoints[[method]]
+
+        # --- Training data ---
+        train_ids <- colnames(bo_bundle_selected$data_filtered$ex)
+        train_si <- tar_data$sampInfo
+        # Match by rownames (set during preprocessing) or ID column
+        train_match <- match(train_ids, rownames(train_si))
+        if (any(is.na(train_match)) && "ID" %in% names(train_si)) {
+          train_match <- match(train_ids, train_si$ID)
+        }
+        if (!all(is.na(train_match))) {
+          train_si_matched <- train_si[train_match[!is.na(train_match)], ]
+          train_X <- bo_bundle_selected$data_filtered$ex[, !is.na(train_match), drop = FALSE]
+          if ("PurIST" %in% names(train_si_matched) && "DeCAF" %in% names(train_si_matched)) {
+            train_group <- compute_risk_group(W, beta, train_X, ntop, lp_mean, lp_sd, z_cut)
+            train_df <- data.frame(
+              group = train_group,
+              PurIST = train_si_matched$PurIST,
+              DeCAF = train_si_matched$DeCAF,
+              stringsAsFactors = FALSE
+            )
+            train_df <- train_df[complete.cases(train_df), ]
+            if (nrow(train_df) > 0) {
+              p <- plot_subtype_overlap(train_df,
+                dataset_label = sprintf("Training (%s cutpoint)", method))
+              fpath <- file.path(out_dir, sprintf("subtype_overlap_train_%s_%s.pdf",
+                                                   method, bo_label))
+              ggplot2::ggsave(fpath, p, width = 8, height = 5)
+              paths <- c(paths, fpath)
+
+              # Enrichment plot (confounding-aware)
+              pe <- plot_subtype_enrichment(train_df,
+                dataset_label = sprintf("Training (%s cutpoint)", method))
+              fpath_e <- file.path(out_dir, sprintf("subtype_enrichment_train_%s_%s.pdf",
+                                                     method, bo_label))
+              ggplot2::ggsave(fpath_e, pe, width = 12, height = 8)
+              paths <- c(paths, fpath_e)
+            }
+          }
+        }
+
+        # --- Per validation dataset ---
+        pooled_rows <- list()
+        for (ds_name in names(data_val_filtered_surv)) {
+          val_ds <- data_val_filtered_surv[[ds_name]]
+          val_genes <- rownames(val_ds$ex)
+          common_genes <- intersect(rownames(W), val_genes)
+          if (length(common_genes) < 2) next
+
+          W_common <- W[common_genes, , drop = FALSE]
+          X_val <- val_ds$ex[common_genes, , drop = FALSE]
+
+          time_val <- val_ds$sampInfo$time
+          event_val <- val_ds$sampInfo$event
+          valid_idx <- which(is.finite(time_val) & !is.na(event_val) & time_val > 0)
+          if (length(valid_idx) < 2) next
+
+          val_group <- compute_risk_group(W_common, beta,
+            X_val[, valid_idx, drop = FALSE], ntop, lp_mean, lp_sd, z_cut)
+          val_si <- val_ds$sampInfo[valid_idx, ]
+
+          if ("PurIST" %in% names(val_si) && "DeCAF" %in% names(val_si)) {
+            ds_df <- data.frame(
+              group = val_group,
+              PurIST = val_si$PurIST,
+              DeCAF = val_si$DeCAF,
+              stringsAsFactors = FALSE
+            )
+            ds_df <- ds_df[complete.cases(ds_df), ]
+            pooled_rows[[ds_name]] <- ds_df
+            if (nrow(ds_df) > 0) {
+              p <- plot_subtype_overlap(ds_df,
+                dataset_label = sprintf("%s (%s cutpoint)", ds_name, method))
+              fpath <- file.path(out_dir, sprintf("subtype_overlap_%s_%s_%s.pdf",
+                                                   ds_name, method, bo_label))
+              ggplot2::ggsave(fpath, p, width = 8, height = 5)
+              paths <- c(paths, fpath)
+
+              # Enrichment plot (confounding-aware)
+              pe <- plot_subtype_enrichment(ds_df,
+                dataset_label = sprintf("%s (%s cutpoint)", ds_name, method))
+              fpath_e <- file.path(out_dir, sprintf("subtype_enrichment_%s_%s_%s.pdf",
+                                                     ds_name, method, bo_label))
+              ggplot2::ggsave(fpath_e, pe, width = 12, height = 8)
+              paths <- c(paths, fpath_e)
+            }
+          }
+        }
+
+        # --- Pooled validation ---
+        if (length(pooled_rows) > 0) {
+          pooled_df <- do.call(rbind, pooled_rows)
+          if (nrow(pooled_df) > 0) {
+            p <- plot_subtype_overlap(pooled_df,
+              dataset_label = sprintf("Pooled validation (%s cutpoint)", method))
+            fpath <- file.path(out_dir, sprintf("subtype_overlap_pooled_%s_%s.pdf",
+                                                 method, bo_label))
+            ggplot2::ggsave(fpath, p, width = 8, height = 5)
+            paths <- c(paths, fpath)
+
+            # Enrichment plot (confounding-aware)
+            pe <- plot_subtype_enrichment(pooled_df,
+              dataset_label = sprintf("Pooled validation (%s cutpoint)", method))
+            fpath_e <- file.path(out_dir, sprintf("subtype_enrichment_pooled_%s_%s.pdf",
+                                                   method, bo_label))
+            ggplot2::ggsave(fpath_e, pe, width = 12, height = 8)
+            paths <- c(paths, fpath_e)
+          }
+        }
+      }
+
+      paths
+    },
+    format = "file"
+  ),
+
+  # --- Per-factor KM figures (validation + training) ---
+  tar_target(
+    fig_val_km_dichot_per_factor,
+    {
+      fit <- val_run_bundle$fit_desurv
+      k_val <- val_run_bundle$bo_bundle$params_best$k
+      alpha_val <- val_run_bundle$bo_bundle$params_best$alpha %||% NA_real_
+      factor_stats <- desurv_factor_stats
+
+      out_dir <- file.path("figures", "km_dichot")
+      dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+      paths <- character(0)
+
+      for (fstat in factor_stats) {
+        j <- fstat$factor_id
+        z_mean <- fstat$z_mean
+        z_sd <- fstat$z_sd
+
+        cutpoints <- list(
+          logrank = fstat$optimal_z_logrank,
+          cindex = fstat$optimal_z_cindex
+        )
+
+        for (method in names(cutpoints)) {
+          z_cut <- cutpoints[[method]]
+          if (!length(z_cut) || is.na(z_cut)) next
+
+          # Training KM
+          p_train <- plot_km_training_factor(
+            fit, bo_bundle_selected$data_filtered,
+            j, z_mean, z_sd, z_cut, k_val, alpha_val
+          )
+          if (!is.null(p_train)) {
+            fpath <- file.path(out_dir, sprintf("km_val_train_factor%d_%s_%s.pdf",
+                                                 j, method, bo_label))
+            save_ggsurvplot(p_train, fpath, width = 7, height = 5)
+            paths <- c(paths, fpath)
+          }
+
+          # Per-dataset validation KM
+          for (ds_name in names(data_val_filtered_surv)) {
+            p <- plot_km_validation_factor(
+              fit, data_val_filtered_surv[[ds_name]], ds_name,
+              j, z_mean, z_sd, z_cut, k_val, alpha_val
+            )
+            if (is.null(p)) next
+            fpath <- file.path(out_dir, sprintf("km_val_%s_factor%d_%s_%s.pdf",
+                                                 ds_name, j, method, bo_label))
+            save_ggsurvplot(p, fpath, width = 7, height = 5)
+            paths <- c(paths, fpath)
+          }
+
+          # Pooled validation KM
+          p_pooled <- plot_km_validation_pooled_factor(
+            fit, data_val_filtered_surv,
+            j, z_mean, z_sd, z_cut, k_val, alpha_val
+          )
+          if (!is.null(p_pooled)) {
+            fpath <- file.path(out_dir, sprintf("km_val_pooled_factor%d_%s_%s.pdf",
+                                                 j, method, bo_label))
+            save_ggsurvplot(p_pooled, fpath, width = 7, height = 5)
+            paths <- c(paths, fpath)
+          }
+        }
+      }
+
+      paths
+    },
+    format = "file"
+  ),
+
+  # --- Per-factor subtype overlap figures ---
+  tar_target(
+    fig_subtype_overlap_per_factor,
+    {
+      W <- val_run_bundle$fit_desurv$W
+      factor_stats <- desurv_factor_stats
+
+      out_dir <- file.path("figures", "km_dichot")
+      dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+      paths <- character(0)
+
+      for (fstat in factor_stats) {
+        j <- fstat$factor_id
+        z_mean <- fstat$z_mean
+        z_sd <- fstat$z_sd
+        if (!is.finite(z_sd) || z_sd <= 0) next
+
+        cutpoints <- list(
+          logrank = fstat$optimal_z_logrank,
+          cindex = fstat$optimal_z_cindex
+        )
+
+        for (method in names(cutpoints)) {
+          z_cut <- cutpoints[[method]]
+          if (!length(z_cut) || is.na(z_cut)) next
+
+          # --- Training data ---
+          train_ids <- colnames(bo_bundle_selected$data_filtered$ex)
+          train_si <- tar_data$sampInfo
+          train_match <- match(train_ids, rownames(train_si))
+          if (any(is.na(train_match)) && "ID" %in% names(train_si)) {
+            train_match <- match(train_ids, train_si$ID)
+          }
+          if (!all(is.na(train_match))) {
+            train_si_matched <- train_si[train_match[!is.na(train_match)], ]
+            train_X <- bo_bundle_selected$data_filtered$ex[, !is.na(train_match), drop = FALSE]
+            if ("PurIST" %in% names(train_si_matched) && "DeCAF" %in% names(train_si_matched)) {
+              train_group <- compute_factor_group(W, train_X, j, z_mean, z_sd, z_cut)
+              train_df <- data.frame(
+                group = train_group,
+                PurIST = train_si_matched$PurIST,
+                DeCAF = train_si_matched$DeCAF,
+                stringsAsFactors = FALSE
+              )
+              train_df <- train_df[complete.cases(train_df), ]
+              if (nrow(train_df) > 0) {
+                p <- plot_subtype_overlap(train_df,
+                  dataset_label = sprintf("Training Factor %d (%s cutpoint)", j, method))
+                fpath <- file.path(out_dir, sprintf("subtype_overlap_train_factor%d_%s_%s.pdf",
+                                                     j, method, bo_label))
+                ggplot2::ggsave(fpath, p, width = 8, height = 5)
+                paths <- c(paths, fpath)
+
+                # Enrichment plot (confounding-aware)
+                pe <- plot_subtype_enrichment(train_df,
+                  dataset_label = sprintf("Training Factor %d (%s cutpoint)", j, method))
+                fpath_e <- file.path(out_dir, sprintf("subtype_enrichment_train_factor%d_%s_%s.pdf",
+                                                       j, method, bo_label))
+                ggplot2::ggsave(fpath_e, pe, width = 12, height = 8)
+                paths <- c(paths, fpath_e)
+              }
+            }
+          }
+
+          # --- Per validation dataset ---
+          pooled_rows <- list()
+          for (ds_name in names(data_val_filtered_surv)) {
+            val_ds <- data_val_filtered_surv[[ds_name]]
+            common_genes <- intersect(rownames(W), rownames(val_ds$ex))
+            if (length(common_genes) < 2) next
+
+            W_common <- W[common_genes, , drop = FALSE]
+            X_val <- val_ds$ex[common_genes, , drop = FALSE]
+
+            time_val <- val_ds$sampInfo$time
+            event_val <- val_ds$sampInfo$event
+            valid_idx <- which(is.finite(time_val) & !is.na(event_val) & time_val > 0)
+            if (length(valid_idx) < 2) next
+
+            val_group <- compute_factor_group(
+              W_common, X_val[, valid_idx, drop = FALSE], j, z_mean, z_sd, z_cut)
+            val_si <- val_ds$sampInfo[valid_idx, ]
+
+            if ("PurIST" %in% names(val_si) && "DeCAF" %in% names(val_si)) {
+              ds_df <- data.frame(
+                group = val_group,
+                PurIST = val_si$PurIST,
+                DeCAF = val_si$DeCAF,
+                stringsAsFactors = FALSE
+              )
+              ds_df <- ds_df[complete.cases(ds_df), ]
+              pooled_rows[[ds_name]] <- ds_df
+              if (nrow(ds_df) > 0) {
+                p <- plot_subtype_overlap(ds_df,
+                  dataset_label = sprintf("%s Factor %d (%s cutpoint)", ds_name, j, method))
+                fpath <- file.path(out_dir, sprintf("subtype_overlap_%s_factor%d_%s_%s.pdf",
+                                                     ds_name, j, method, bo_label))
+                ggplot2::ggsave(fpath, p, width = 8, height = 5)
+                paths <- c(paths, fpath)
+
+                # Enrichment plot (confounding-aware)
+                pe <- plot_subtype_enrichment(ds_df,
+                  dataset_label = sprintf("%s Factor %d (%s cutpoint)", ds_name, j, method))
+                fpath_e <- file.path(out_dir, sprintf("subtype_enrichment_%s_factor%d_%s_%s.pdf",
+                                                       ds_name, j, method, bo_label))
+                ggplot2::ggsave(fpath_e, pe, width = 12, height = 8)
+                paths <- c(paths, fpath_e)
+              }
+            }
+          }
+
+          # --- Pooled validation ---
+          if (length(pooled_rows) > 0) {
+            pooled_df <- do.call(rbind, pooled_rows)
+            if (nrow(pooled_df) > 0) {
+              p <- plot_subtype_overlap(pooled_df,
+                dataset_label = sprintf("Pooled Factor %d (%s cutpoint)", j, method))
+              fpath <- file.path(out_dir, sprintf("subtype_overlap_pooled_factor%d_%s_%s.pdf",
+                                                   j, method, bo_label))
+              ggplot2::ggsave(fpath, p, width = 8, height = 5)
+              paths <- c(paths, fpath)
+
+              # Enrichment plot (confounding-aware)
+              pe <- plot_subtype_enrichment(pooled_df,
+                dataset_label = sprintf("Pooled Factor %d (%s cutpoint)", j, method))
+              fpath_e <- file.path(out_dir, sprintf("subtype_enrichment_pooled_factor%d_%s_%s.pdf",
+                                                     j, method, bo_label))
+              ggplot2::ggsave(fpath_e, pe, width = 12, height = 8)
+              paths <- c(paths, fpath_e)
+            }
+          }
         }
       }
 

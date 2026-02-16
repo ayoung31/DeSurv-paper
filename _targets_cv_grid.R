@@ -489,7 +489,7 @@ list(
         fname <- sprintf("km_train_k%d_alpha%.2f_ntop%s_%s.pdf",
                           k_i, alpha_i, ntop_label, method_i)
         fpath <- file.path(out_dir, fname)
-        ggplot2::ggsave(fpath, p, width = 7, height = 5)
+        save_ggsurvplot(p, fpath, width = 7, height = 5)
         paths[i] <- fpath
       }
 
@@ -541,7 +541,7 @@ list(
           fname <- sprintf("km_val_k%d_alpha%.2f_ntop%s_%s_%s.pdf",
                             k_i, alpha_i, ntop_label, method_i, ds_name)
           fpath <- file.path(out_dir, fname)
-          ggplot2::ggsave(fpath, p, width = 7, height = 5)
+          save_ggsurvplot(p, fpath, width = 7, height = 5)
           paths <- c(paths, fpath)
         }
 
@@ -551,7 +551,7 @@ list(
           fname <- sprintf("km_val_k%d_alpha%.2f_ntop%s_%s_pooled.pdf",
                             k_i, alpha_i, ntop_label, method_i)
           fpath <- file.path(out_dir, fname)
-          ggplot2::ggsave(fpath, p_pooled, width = 7, height = 5)
+          save_ggsurvplot(p_pooled, fpath, width = 7, height = 5)
           paths <- c(paths, fpath)
         }
       }
@@ -646,7 +646,7 @@ list(
         fname <- sprintf("km_train_k%d_alpha0.00_ntop%s_alpha0.pdf",
                           k_i, ntop_label)
         fpath <- file.path(out_dir, fname)
-        ggplot2::ggsave(fpath, p, width = 7, height = 5)
+        save_ggsurvplot(p, fpath, width = 7, height = 5)
         paths[i] <- fpath
       }
 
@@ -694,7 +694,7 @@ list(
           fname <- sprintf("km_val_k%d_alpha0.00_ntop%s_alpha0_%s.pdf",
                             k_i, ntop_label, ds_name)
           fpath <- file.path(out_dir, fname)
-          ggplot2::ggsave(fpath, p, width = 7, height = 5)
+          save_ggsurvplot(p, fpath, width = 7, height = 5)
           paths <- c(paths, fpath)
         }
 
@@ -703,11 +703,32 @@ list(
           fname <- sprintf("km_val_k%d_alpha0.00_ntop%s_alpha0_pooled.pdf",
                             k_i, ntop_label)
           fpath <- file.path(out_dir, fname)
-          ggplot2::ggsave(fpath, p_pooled, width = 7, height = 5)
+          save_ggsurvplot(p_pooled, fpath, width = 7, height = 5)
           paths <- c(paths, fpath)
         }
       }
 
+      paths
+    },
+    format = "file"
+  ),
+
+  # Target 21: Training + Validation C-index by k (one file per ntop)
+  tar_target(
+    cv_grid_plot_cindex_by_k,
+    {
+      plots <- plot_cindex_by_k(
+        cv_grid_summary, cv_grid_best_alpha, cv_grid_val_summary
+      )
+      out_dir <- "figures/cv_grid"
+      dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+      paths <- character(0)
+      for (ntop_label in names(plots)) {
+        fname <- sprintf("cv_cindex_by_k_ntop_%s.pdf", ntop_label)
+        path <- file.path(out_dir, fname)
+        ggplot2::ggsave(path, plots[[ntop_label]], width = 10, height = 5)
+        paths <- c(paths, path)
+      }
       paths
     },
     format = "file"

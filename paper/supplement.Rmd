@@ -1,4 +1,11 @@
-```{r, echo=FALSE}
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE)
+library(targets)
 if (!exists("set_fig_font", inherits = TRUE)) {
   set_fig_font <- function(plot_obj, size = 10) {
     if (inherits(plot_obj, "ggplot")) {
@@ -14,25 +21,38 @@ if (!exists("set_fig_font", inherits = TRUE)) {
 
 Across datasets and initialization schemes, the NMF–Cox algorithm consistently converged to numerically stable solutions within the designated iteration budget. Warm-start strategies, in which solutions at $\alpha=0$ initialized supervised runs, substantially reduced variability across restarts and improved reproducibility. Figure \@ref(fig:fig-converge) shows representative loss trajectories demonstrating monotone decreases until convergence across restarts. Compared with naïve random initialization, warm-starts produced tighter distributions of cross-validated C-index and partial likelihood, confirming stability of the optimization procedure.
 
-```{r fig-converge, fig.width = 6, fig.height= 4, fig.cap="Convergence of model for k=8 alpha=.5" , fig.env='figure*', fig.pos='t', out.height= "4in", out.width='\\textwidth'}
-tar_load(full_model)
-runs=readRDS(full_model)
-# iter_cold = 
-
-iters = list()
-for(i in 1:5){
-  lossit = runs[[i]]$fits[[as.character(0.5)]]$lossit
-  lossit = data.frame(lossit=lossit,iter=1:length(lossit))
-  lossit$init=i
-  iters[[i]] = lossit
+```{r fig-converge, fig.width = 6, fig.height= 4, fig.cap="Convergence of model across initializations." , fig.env='figure*', fig.pos='t', out.height= "4in", out.width='\\textwidth'}
+tar_load(desurv_seed_fits_tcgacptac)
+set.seed(147)
+seeds = sample(1:length(desurv_seed_fits_tcgacptac$fits),5,replace = FALSE)
+iters <- list()
+for (i in seeds) {
+  loss_vec <- desurv_seed_fits_tcgacptac$fits[[i]]$lossit
+  iters[[i]] <- data.frame(
+    lossit = loss_vec,
+    slossit = desurv_seed_fits_tcgacptac$fits[[i]]$slossit,
+    nlossit = desurv_seed_fits_tcgacptac$fits[[i]]$nlossit,
+    iter = seq_along(loss_vec),
+    init = i
+  )
 }
 
-lossit=dplyr::bind_rows(iters) %>% filter(iter<5000)
+lossit <- dplyr::bind_rows(iters) |> dplyr::filter(iter < 5000)
 
-ggplot(lossit,aes(y=lossit,x=iter,color=as.factor(init)))+
-  geom_line(linewidth=.8)+
-  theme_minimal(base_size = 10)+
-  labs(x="Iteration",y="Loss",color="Initialization")
+lossit = lossit %>%
+  group_by(init) %>%
+  arrange(iter) %>%
+  mutate(
+    rel_delta_loss = lossit / dplyr::first(lossit),
+    rel_delta_sloss = slossit / dplyr::first(slossit),
+    rel_delta_nloss = nlossit / dplyr::first(nlossit)
+  ) %>%
+  filter(!is.na(rel_delta_loss))
+
+ggplot2::ggplot(lossit, ggplot2::aes(y = rel_delta_loss, x = iter, color = as.factor(init))) +
+  ggplot2::geom_line(linewidth = 0.8) +
+  ggplot2::theme_minimal(base_size = 10) +
+  ggplot2::labs(x = "Iteration", y = "Loss normalized to initial value", color = "Initialization")
 
 ```
 
@@ -101,17 +121,89 @@ plot_grid(null_row, mixed_row, nrow = 2, rel_heights = c(1, 1))
 ```
 
 
+## Cross-validated C-index across factorization rank {.unnumbered}
+
+To evaluate how the number of latent factors $k$ affects prognostic performance, we performed an exhaustive grid search over $k \in \{2, 3, \ldots, 12\}$ and supervision strength $\alpha \in \{0, 0.05, \ldots, 0.95\}$ using 5-fold cross-validation on the TCGA+CPTAC training cohort, with all genes retained (ntop = ALL). For each $k$, the best-performing $\alpha$ was selected by maximizing the mean CV C-index. The unsupervised NMF baseline ($\alpha = 0$) was evaluated at the same $k$ values for comparison.
+
+Figure \@ref(fig:fig-cindex-by-k) shows the resulting C-index curves for both training (CV) and external validation (pooled across held-out cohorts), with shaded ribbons indicating $\pm 1$ standard error. In training, DeSurv consistently outperforms NMF across all $k$, confirming that survival supervision improves in-sample concordance. In external validation, DeSurv maintains a comparable or improved C-index relative to NMF, demonstrating that the supervised signal generalizes beyond the training data rather than reflecting overfitting to the survival labels.
+
+```{r fig-cindex-by-k, fig.width = 10, fig.height = 5, fig.cap="Training (CV) and external validation C-index as a function of factorization rank $k$ for DeSurv (blue) and standard NMF (red, $\\alpha = 0$). Shaded ribbons show $\\pm 1$ SE. For each $k$, the best $\\alpha$ was selected by maximizing the mean CV C-index. Validation C-index is pooled across all external cohorts.", fig.env='figure*', fig.pos='t', out.width='\\textwidth', echo=FALSE}
+library(magick)
+library(cowplot)
+# This figure is produced by the cv_grid pipeline (separate store);
+# read directly from the file output.
+fig_path <- "figures/cv_grid/cv_cindex_by_k_ntop_ALL.pdf"
+img <- magick::image_read_pdf(fig_path, density = 300)
+cowplot::ggdraw() + cowplot::draw_image(img)
+```
+
+## Cutpoint selection and validation of dichotomized risk groups {.unnumbered}
+
+To convert the continuous DeSurv linear predictor into a clinically interpretable binary risk stratification, we selected an optimal z-score cutpoint via cross-validation on the TCGA+CPTAC training cohort. For each candidate cutpoint in $\{-2.0, -1.8, \ldots, 2.0\}$, we computed the mean absolute log-rank z-statistic across held-out folds and selected the cutpoint maximizing this metric (Figure \@ref(fig:fig-cutpoint-km)A). We then applied this cutpoint to external validation cohorts by standardizing each patient's linear predictor using the training mean and standard deviation. Figure \@ref(fig:fig-cutpoint-km)B shows the resulting Kaplan–Meier curves for the pooled external validation analysis, with a stratified log-rank test accounting for dataset of origin. Panels C–F display per-cohort validation KM curves for Dijk, Moffitt, PACA-AU, and Puleo, respectively. Across all cohorts, the DeSurv-derived high-risk group showed consistently shorter survival, confirming that the training-derived cutpoint generalizes to independent datasets.
+
+```{r fig-cutpoint-km, fig.width = 10, fig.height = 14, fig.cap = "Cutpoint selection and external validation of dichotomized risk groups. (A) Cross-validated mean absolute log-rank z-statistic as a function of z-score cutpoint; red dashed line indicates the selected optimum. (B) Pooled validation Kaplan--Meier curves (stratified log-rank test). (C--D) Per-cohort validation KM curves: (C) Dijk, (D) Moffitt. (E--F) Per-cohort validation KM curves: (E) PACA-AU, (F) Puleo.", fig.env='figure*', fig.pos='t', out.width='\\textwidth', echo=FALSE}
+library(cowplot)
+library(magick)
+
+# Load file targets to establish dependency chain
+tar_load(fig_cutpoint_curves_tcgacptac)
+tar_load(fig_val_km_dichot_tcgacptac)
+
+read_pdf_as_grob <- function(path) {
+  img <- magick::image_read_pdf(path, density = 300)
+  cowplot::ggdraw() + cowplot::draw_image(img)
+}
+
+# fig_cutpoint_curves_tcgacptac is a character vector of file paths
+cutpoint_logrank_path <- grep("logrank", fig_cutpoint_curves_tcgacptac, value = TRUE)
+p_cutpoint <- read_pdf_as_grob(cutpoint_logrank_path)
+
+# fig_val_km_dichot_tcgacptac is a character vector of file paths
+km_paths <- fig_val_km_dichot_tcgacptac
+p_pooled  <- read_pdf_as_grob(grep("km_val_pooled_logrank", km_paths, value = TRUE))
+p_dijk    <- read_pdf_as_grob(grep("km_val_Dijk_logrank", km_paths, value = TRUE))
+p_moffitt <- read_pdf_as_grob(grep("km_val_Moffitt_GEO_array_logrank", km_paths, value = TRUE))
+p_paca    <- read_pdf_as_grob(grep("km_val_PACA_AU_logrank", km_paths, value = TRUE))
+p_puleo   <- read_pdf_as_grob(grep("km_val_Puleo_array_logrank", km_paths, value = TRUE))
+
+row1 <- plot_grid(
+  p_cutpoint, p_pooled,
+  ncol = 2, labels = c("A", "B"), label_size = 14
+)
+
+row2 <- plot_grid(
+  p_dijk, p_moffitt,
+  ncol = 2, labels = c("C", "D"), label_size = 14
+)
+
+row3 <- plot_grid(
+  p_paca, p_puleo,
+  ncol = 2, labels = c("E", "F"), label_size = 14
+)
+
+plot_grid(row1, row2, row3, nrow = 3, rel_heights = c(1, 1, 1))
+```
+
+## Overlap of DeSurv risk groups with known molecular subtypes {.unnumbered}
+
+To assess whether the DeSurv-derived risk stratification captures biologically meaningful transcriptional programs, we examined the overlap between dichotomized risk groups (High vs Low) and two established PDAC molecular classifiers: PurIST (Basal-like vs Classical) and DeCAF (proCAF vs restCAF). Figure \@ref(fig:fig-subtype-overlap) shows the composition of each risk group across all pooled external validation cohorts, with Fisher's exact test p-values quantifying the association. The high-risk group was significantly enriched for Basal-like (PurIST) and proCAF (DeCAF) subtypes, consistent with the known poor prognosis of these molecular classes. This concordance confirms that DeSurv's survival-driven factorization recovers clinically relevant biology without requiring subtype labels during training.
+
+```{r fig-subtype-overlap, fig.width = 8, fig.height = 5, fig.cap = "Subtype composition of DeSurv risk groups in pooled external validation cohorts. Stacked bar charts show the proportion of PurIST (left) and DeCAF (right) subtypes within Low and High risk groups defined by the log-rank-optimized cutpoint. Numbers indicate sample counts; Fisher's exact test p-values are shown above each panel.", fig.env='figure*', fig.pos='t', out.width='\\textwidth'}
+library(magick)
+library(cowplot)
+
+tar_load(fig_subtype_overlap_tcgacptac)
+
+overlap_path <- grep("subtype_overlap_pooled_logrank", fig_subtype_overlap_tcgacptac, value = TRUE)
+img <- magick::image_read_pdf(overlap_path, density = 300)
+cowplot::ggdraw() + cowplot::draw_image(img)
+```
+
 ## Analysis of scRNA-seq {.unnumbered}
 Next, we verify our findings at the cellular level using the Elyada scRNA-seq data [@elyada2019cross]. We found that our DeSurv factor 1 signature was expressed primarily in iCAF and B cells, factor 2 was expressed in Acinar and Classical PDAC 2, and factor 3 was expressed primarily in Basal-like PDAC cells (Figure \@ref(fig:fig-sc)B-E). This is consistent with our ORA analysis which found that factor 1 was mostly immune and factor 3 was basal-like, and with the overlap we saw with published gene lists that identified factor 1 as iCAF/classical/immune and factor 3 as basal-like. Interestingly, we do not see a large overlap of factor 1 with the classical PDAC cell types despite some overlap with classical gene lists. Need more here...
 
 ```{r fig-sc, fig.cap="A. Cell type clusters from the Elyada scRNA-seq data. B-D. VAM scores for the DeSurv factor signatures in each cell shown on the UMAP of cells in the Elyada-sc data. E. Heatmap of average VAM scores by cell type and factor signature in the Elyada-sc data.", fig.env='figure*', fig.pos='t', out.height= "8in", out.width='\\textwidth'}
 
-fig_sc_plot <- tar_read_raw(resolve_target_name(
-  "fig_sc_plot",
-  bo_label = bo_label,
-  run_label = run_label,
-  available = available_targets
-))
-fig_sc_plot = set_fig_font(fig_sc_plot, size = 10)
-fig_sc_plot
+tar_load(fig_sc_plot_tcgacptac)
+fig_sc_plot_tcgacptac
 ```

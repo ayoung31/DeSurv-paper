@@ -350,6 +350,13 @@ c(
     quiet = FALSE,
     output_file = "paper.pdf",
     output_dir = "paper"
+  ),
+  tarchetypes::tar_render(
+    supplement,
+    "paper/supplement.Rmd",
+    quiet = FALSE,
+    output_file = "supplement.pdf",
+    output_dir = "paper"
   )
 )
 
