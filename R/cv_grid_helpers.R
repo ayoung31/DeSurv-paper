@@ -904,6 +904,88 @@ plot_cutpoint_curves <- function(cutpoint_data, k, alpha, ntop,
   cowplot::plot_grid(p_cindex, p_logrank, ncol = 2, align = "h")
 }
 
+#' Plot a single cutpoint curve panel for C-index
+#'
+#' @param cutpoint_data Tibble from cv_grid_cutpoint_summary
+#' @param k Integer number of factors
+#' @param alpha Numeric supervision parameter
+#' @param ntop Integer or NA
+#' @param optimal_z Numeric optimal z-score cutpoint (vertical line)
+#' @return ggplot object
+plot_cutpoint_curve_cindex <- function(cutpoint_data, k, alpha, ntop,
+                                       optimal_z = NULL) {
+  ntop_label <- if (is.na(ntop)) "ALL" else as.character(ntop)
+  title_base <- sprintf("k=%d, alpha=%.2f, ntop=%s", k, alpha, ntop_label)
+
+  p <- ggplot2::ggplot(
+    cutpoint_data,
+    ggplot2::aes(x = z_cutpoint, y = mean_cindex_dichot)
+  ) +
+    ggplot2::geom_line() +
+    ggplot2::geom_point(size = 1.5) +
+    ggplot2::geom_errorbar(
+      ggplot2::aes(
+        ymin = mean_cindex_dichot - se_cindex_dichot,
+        ymax = mean_cindex_dichot + se_cindex_dichot
+      ),
+      width = 0.05
+    ) +
+    ggplot2::labs(
+      x = "z-score cutpoint",
+      y = "Mean C-index (dichotomized)",
+      title = paste0("Dichot. C-index\n", title_base)
+    ) +
+    ggplot2::theme_bw(base_size = 10)
+
+  if (!is.null(optimal_z) && is.finite(optimal_z)) {
+    p <- p +
+      ggplot2::geom_vline(xintercept = optimal_z, linetype = "dashed",
+                          color = "red", linewidth = 0.5)
+  }
+  p
+}
+
+#' Plot a single cutpoint curve panel for log-rank z
+#'
+#' @param cutpoint_data Tibble from cv_grid_cutpoint_summary
+#' @param k Integer number of factors
+#' @param alpha Numeric supervision parameter
+#' @param ntop Integer or NA
+#' @param optimal_z Numeric optimal z-score cutpoint (vertical line)
+#' @return ggplot object
+plot_cutpoint_curve_logrank <- function(cutpoint_data, k, alpha, ntop,
+                                        optimal_z = NULL) {
+  ntop_label <- if (is.na(ntop)) "ALL" else as.character(ntop)
+  title_base <- sprintf("k=%d, alpha=%.2f, ntop=%s", k, alpha, ntop_label)
+
+  p <- ggplot2::ggplot(
+    cutpoint_data,
+    ggplot2::aes(x = z_cutpoint, y = mean_abs_logrank_z)
+  ) +
+    ggplot2::geom_line() +
+    ggplot2::geom_point(size = 1.5) +
+    ggplot2::geom_errorbar(
+      ggplot2::aes(
+        ymin = mean_abs_logrank_z - se_abs_logrank_z,
+        ymax = mean_abs_logrank_z + se_abs_logrank_z
+      ),
+      width = 0.05
+    ) +
+    ggplot2::labs(
+      x = "z-score cutpoint",
+      y = "Mean |log-rank z|",
+      title = paste0("|Log-rank z|\n", title_base)
+    ) +
+    ggplot2::theme_bw(base_size = 10)
+
+  if (!is.null(optimal_z) && is.finite(optimal_z)) {
+    p <- p +
+      ggplot2::geom_vline(xintercept = optimal_z, linetype = "dashed",
+                          color = "red", linewidth = 0.5)
+  }
+  p
+}
+
 #' Plot training Kaplan-Meier curves for a grid fit
 #'
 #' Computes LP from the fitted model, standardizes to z-scores, dichotomizes
@@ -1075,7 +1157,7 @@ plot_km_validation <- function(grid_fit_entry, val_ds, ds_name) {
   title <- sprintf("Validation KM (%s): k=%d, alpha=%.2f, ntop=%s",
                     ds_name, grid_fit_entry$k, grid_fit_entry$alpha, ntop_label)
 
-  survminer::ggsurvplot(
+  ggsurv <- survminer::ggsurvplot(
     sfit,
     data = df,
     risk.table = TRUE,
@@ -1084,9 +1166,11 @@ plot_km_validation <- function(grid_fit_entry, val_ds, ds_name) {
     legend.labs = c("Low", "High"),
     palette = c("#2166AC", "#B2182B"),
     ggtheme = ggplot2::theme_bw(base_size = 10)
-  )$plot +
+  )
+  ggsurv$plot <- ggsurv$plot +
     ggplot2::annotate("text", x = Inf, y = 0.95, label = annot,
                       hjust = 1.1, vjust = 1, size = 3)
+  ggsurv
 }
 
 #' Plot pooled validation Kaplan-Meier curves across all datasets

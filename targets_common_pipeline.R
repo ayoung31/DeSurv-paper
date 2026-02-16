@@ -648,6 +648,47 @@ COMMON_DESURV_RUN_TARGETS <- list(
   ),
 
   tar_target(
+    desurv_optimal_z_cutpoint_cindex,
+    {
+      desurv_cutpoint_summary |>
+        dplyr::slice_max(mean_cindex_dichot, n = 1, with_ties = FALSE) |>
+        dplyr::pull(z_cutpoint)
+    }
+  ),
+
+  tar_target(
+    fig_cutpoint_curves,
+    {
+      k_val <- bo_bundle_selected$params_best$k
+      alpha_val <- bo_bundle_selected$params_best$alpha
+      ntop_val <- tar_ntop_value
+      ntop_na <- if (is.null(ntop_val) || is.na(ntop_val)) NA_real_ else as.numeric(ntop_val)
+
+      out_dir <- "figures"
+      dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+
+      p_cindex <- plot_cutpoint_curve_cindex(
+        desurv_cutpoint_summary,
+        k = k_val, alpha = alpha_val, ntop = ntop_na,
+        optimal_z = desurv_optimal_z_cutpoint_cindex
+      )
+      fpath_cindex <- file.path(out_dir, sprintf("cutpoint_curve_cindex_%s.pdf", bo_label))
+      ggplot2::ggsave(fpath_cindex, p_cindex, width = 5, height = 4)
+
+      p_logrank <- plot_cutpoint_curve_logrank(
+        desurv_cutpoint_summary,
+        k = k_val, alpha = alpha_val, ntop = ntop_na,
+        optimal_z = desurv_optimal_z_cutpoint
+      )
+      fpath_logrank <- file.path(out_dir, sprintf("cutpoint_curve_logrank_%s.pdf", bo_label))
+      ggplot2::ggsave(fpath_logrank, p_logrank, width = 5, height = 4)
+
+      c(fpath_cindex, fpath_logrank)
+    },
+    format = "file"
+  ),
+
+  tar_target(
     desurv_lp_stats,
     {
       lp <- compute_lp(
@@ -662,7 +703,9 @@ COMMON_DESURV_RUN_TARGETS <- list(
         lp_mean = lp_mean,
         lp_sd = lp_sd,
         optimal_z_cutpoint = desurv_optimal_z_cutpoint,
-        cutpoint_abs = desurv_optimal_z_cutpoint * lp_sd + lp_mean
+        cutpoint_abs = desurv_optimal_z_cutpoint * lp_sd + lp_mean,
+        optimal_z_cutpoint_cindex = desurv_optimal_z_cutpoint_cindex,
+        cutpoint_abs_cindex = desurv_optimal_z_cutpoint_cindex * lp_sd + lp_mean
       )
     }
   ),
@@ -1131,9 +1174,19 @@ COMMON_DESURV_VAL_TARGETS <- list(
   ),
 
   # Merged PACA_AU for survival validation (deduplicates overlapping subjects)
+  # Reconstruct names lost by iteration="list" aggregation, then merge
   tar_target(
     data_val_filtered_surv,
-    merge_paca_au_datasets(data_val_filtered)
+    {
+      val_named <- data_val_filtered
+      # Restore dataset names from each element's dataname field
+      nms <- vapply(val_named, function(x) {
+        if (!is.null(x$dataname) && nzchar(x$dataname)) x$dataname
+        else infer_dataset_name(x, fallback = "unknown")
+      }, character(1))
+      names(val_named) <- nms
+      merge_paca_au_datasets(val_named)
+    }
   ),
 
   tar_target(
@@ -1318,85 +1371,95 @@ COMMON_DESURV_VAL_TARGETS <- list(
       W <- val_run_bundle$fit_desurv$W
       beta <- val_run_bundle$fit_desurv$beta
       ntop <- val_run_bundle$ntop_value
-      z_cut <- desurv_optimal_z_cutpoint
       train_lp_mean <- desurv_lp_stats$lp_mean
       train_lp_sd <- desurv_lp_stats$lp_sd
 
+      cutpoints <- list(
+        logrank = desurv_optimal_z_cutpoint,
+        cindex = desurv_optimal_z_cutpoint_cindex
+      )
+
       ds_names <- names(data_val_filtered_surv)
-      rows <- lapply(ds_names, function(ds_name) {
-        val_ds <- data_val_filtered_surv[[ds_name]]
-        val_genes <- rownames(val_ds$ex)
-        common_genes <- intersect(rownames(W), val_genes)
-        if (length(common_genes) < 2) {
-          return(tibble::tibble(
-            dataset = ds_name, n_samples = 0L, n_events = 0L,
-            cindex_dichot = NA_real_, logrank_z = NA_real_,
-            z_cutpoint = z_cut
-          ))
-        }
+      all_rows <- list()
 
-        W_common <- W[common_genes, , drop = FALSE]
-        X_val <- val_ds$ex[common_genes, , drop = FALSE]
-        lp <- compute_lp(W_common, beta, X_val, ntop)
+      for (method in names(cutpoints)) {
+        z_cut <- cutpoints[[method]]
+        rows <- lapply(ds_names, function(ds_name) {
+          val_ds <- data_val_filtered_surv[[ds_name]]
+          val_genes <- rownames(val_ds$ex)
+          common_genes <- intersect(rownames(W), val_genes)
+          if (length(common_genes) < 2) {
+            return(tibble::tibble(
+              dataset = ds_name, n_samples = 0L, n_events = 0L,
+              cindex_dichot = NA_real_, logrank_z = NA_real_,
+              z_cutpoint = z_cut, method = method
+            ))
+          }
 
-        time_val <- val_ds$sampInfo$time
-        event_val <- as.integer(val_ds$sampInfo$event)
-        valid_idx <- which(is.finite(time_val) & !is.na(event_val) & time_val > 0)
-        if (length(valid_idx) < 2) {
-          return(tibble::tibble(
-            dataset = ds_name, n_samples = length(valid_idx),
-            n_events = sum(event_val[valid_idx]),
-            cindex_dichot = NA_real_, logrank_z = NA_real_,
-            z_cutpoint = z_cut
-          ))
-        }
+          W_common <- W[common_genes, , drop = FALSE]
+          X_val <- val_ds$ex[common_genes, , drop = FALSE]
+          lp <- compute_lp(W_common, beta, X_val, ntop)
 
-        lp <- lp[valid_idx]
-        time_val <- time_val[valid_idx]
-        event_val <- event_val[valid_idx]
+          time_val <- val_ds$sampInfo$time
+          event_val <- as.integer(val_ds$sampInfo$event)
+          valid_idx <- which(is.finite(time_val) & !is.na(event_val) & time_val > 0)
+          if (length(valid_idx) < 2) {
+            return(tibble::tibble(
+              dataset = ds_name, n_samples = length(valid_idx),
+              n_events = sum(event_val[valid_idx]),
+              cindex_dichot = NA_real_, logrank_z = NA_real_,
+              z_cutpoint = z_cut, method = method
+            ))
+          }
 
-        if (!is.finite(train_lp_sd) || train_lp_sd <= 0) {
-          return(tibble::tibble(
-            dataset = ds_name, n_samples = length(valid_idx),
-            n_events = sum(event_val),
-            cindex_dichot = NA_real_, logrank_z = NA_real_,
-            z_cutpoint = z_cut
-          ))
-        }
+          lp <- lp[valid_idx]
+          time_val <- time_val[valid_idx]
+          event_val <- event_val[valid_idx]
 
-        z_val <- (lp - train_lp_mean) / train_lp_sd
-        group <- as.integer(z_val > z_cut)
+          if (!is.finite(train_lp_sd) || train_lp_sd <= 0) {
+            return(tibble::tibble(
+              dataset = ds_name, n_samples = length(valid_idx),
+              n_events = sum(event_val),
+              cindex_dichot = NA_real_, logrank_z = NA_real_,
+              z_cutpoint = z_cut, method = method
+            ))
+          }
 
-        ci <- NA_real_
-        lr_z <- NA_real_
-        if (length(unique(group)) == 2 && sum(event_val) > 0) {
-          ci <- tryCatch({
-            cc <- survival::concordance(
-              survival::Surv(time_val, event_val) ~ group,
-              reverse = TRUE
+          z_val <- (lp - train_lp_mean) / train_lp_sd
+          group <- as.integer(z_val > z_cut)
+
+          ci <- NA_real_
+          lr_z <- NA_real_
+          if (length(unique(group)) == 2 && sum(event_val) > 0) {
+            ci <- tryCatch({
+              cc <- survival::concordance(
+                survival::Surv(time_val, event_val) ~ group,
+                reverse = TRUE
+              )
+              cc$concordance
+            }, error = function(e) NA_real_)
+            ds_col <- val_ds$sampInfo$dataset[valid_idx]
+            has_strata <- !is.null(ds_col) && length(unique(ds_col)) > 1
+            lr_z <- compute_logrank_z(
+              time_val, event_val, group,
+              strata = if (has_strata) ds_col else NULL
             )
-            cc$concordance
-          }, error = function(e) NA_real_)
-          # Detect multi-platform merged dataset (e.g., merged PACA_AU)
-          ds_col <- val_ds$sampInfo$dataset[valid_idx]
-          has_strata <- !is.null(ds_col) && length(unique(ds_col)) > 1
-          lr_z <- compute_logrank_z(
-            time_val, event_val, group,
-            strata = if (has_strata) ds_col else NULL
+          }
+
+          tibble::tibble(
+            dataset = ds_name,
+            n_samples = length(valid_idx),
+            n_events = sum(event_val),
+            cindex_dichot = ci,
+            logrank_z = lr_z,
+            z_cutpoint = z_cut,
+            method = method
           )
-        }
+        })
+        all_rows <- c(all_rows, rows)
+      }
 
-        tibble::tibble(
-          dataset = ds_name,
-          n_samples = length(valid_idx),
-          n_events = sum(event_val),
-          cindex_dichot = ci,
-          logrank_z = lr_z,
-          z_cutpoint = z_cut
-        )
-      })
-
-      dplyr::bind_rows(rows)
+      dplyr::bind_rows(all_rows)
     }
   ),
 
@@ -1407,41 +1470,50 @@ COMMON_DESURV_VAL_TARGETS <- list(
       W <- val_run_bundle$fit_desurv$W
       beta <- val_run_bundle$fit_desurv$beta
       ntop <- val_run_bundle$ntop_value
-      z_cut <- desurv_optimal_z_cutpoint
       lp_mean <- desurv_lp_stats$lp_mean
       lp_sd <- desurv_lp_stats$lp_sd
 
-      # Build a grid_fit_entry-like list for the plot helpers
-      fit_entry <- list(
-        fit = list(W = W, beta = beta),
-        ntop = ntop,
-        z_cutpoint = z_cut,
-        lp_mean = lp_mean,
-        lp_sd = lp_sd,
-        k = ncol(W),
-        alpha = val_run_bundle$bo_bundle$params_best$alpha %||% NA_real_
+      cutpoints <- list(
+        logrank = desurv_optimal_z_cutpoint,
+        cindex = desurv_optimal_z_cutpoint_cindex
       )
 
       out_dir <- file.path("figures", "km_dichot")
       dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
       paths <- character(0)
 
-      # Per-dataset KM plots (uses merged PACA_AU for survival)
-      for (ds_name in names(data_val_filtered_surv)) {
-        p <- plot_km_validation(fit_entry, data_val_filtered_surv[[ds_name]],
-                                 ds_name)
-        if (is.null(p)) next
-        fpath <- file.path(out_dir, paste0("km_val_", ds_name, ".pdf"))
-        ggplot2::ggsave(fpath, p, width = 7, height = 5)
-        paths <- c(paths, fpath)
-      }
+      for (method in names(cutpoints)) {
+        z_cut <- cutpoints[[method]]
 
-      # Pooled KM plot
-      p_pooled <- plot_km_validation_pooled(fit_entry, data_val_filtered_surv)
-      if (!is.null(p_pooled)) {
-        fpath <- file.path(out_dir, "km_val_pooled.pdf")
-        ggplot2::ggsave(fpath, p_pooled, width = 7, height = 5)
-        paths <- c(paths, fpath)
+        fit_entry <- list(
+          fit = list(W = W, beta = beta),
+          ntop = ntop,
+          z_cutpoint = z_cut,
+          lp_mean = lp_mean,
+          lp_sd = lp_sd,
+          k = val_run_bundle$bo_bundle$params_best$k,
+          alpha = val_run_bundle$bo_bundle$params_best$alpha %||% NA_real_
+        )
+
+        # Per-dataset KM plots
+        for (ds_name in names(data_val_filtered_surv)) {
+          p <- plot_km_validation(fit_entry, data_val_filtered_surv[[ds_name]],
+                                   ds_name)
+          if (is.null(p)) next
+          fpath <- file.path(out_dir, sprintf("km_val_%s_%s_%s.pdf",
+                                               ds_name, method, bo_label))
+          ggplot2::ggsave(fpath, p, width = 7, height = 5)
+          paths <- c(paths, fpath)
+        }
+
+        # Pooled KM plot
+        p_pooled <- plot_km_validation_pooled(fit_entry, data_val_filtered_surv)
+        if (!is.null(p_pooled)) {
+          fpath <- file.path(out_dir, sprintf("km_val_pooled_%s_%s.pdf",
+                                               method, bo_label))
+          ggplot2::ggsave(fpath, p_pooled, width = 7, height = 5)
+          paths <- c(paths, fpath)
+        }
       }
 
       paths
