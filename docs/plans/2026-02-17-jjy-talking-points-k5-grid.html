@@ -1,0 +1,1090 @@
+<style>body{max-width:1400px;margin:0 auto;padding:20px;font-family:sans-serif;font-size:13px;line-height:1.5}table{border-collapse:collapse;width:100%;margin:1em 0;white-space:nowrap}th,td{border:1px solid #ddd;padding:4px 8px;text-align:left}th{background:#f5f5f5;font-weight:bold}tr:nth-child(even){background:#fafafa}h1{font-size:1.5em}h2{font-size:1.25em;border-bottom:1px solid #ccc;padding-bottom:4px}h3{font-size:1.1em}code{background:#f0f0f0;padding:1px 4px;border-radius:2px;font-size:12px}pre{background:#f0f0f0;padding:8px;overflow-x:auto;font-size:12px}</style>
+<h1 id="k5-desurv-factor-analysis-cv-grid-fits">K=5 DeSurv Factor
+Analysis: CV Grid Fits</h1>
+<p><strong>For discussion with Jen Jen Yeh</strong> <strong>Date:
+2026-02-17</strong> <strong>Companion to:
+2026-02-17-jjy-talking-points-k3-grid.md,
+2026-02-17-jjy-talking-points-k2-grid.md</strong> <strong>Data source:
+cv_grid exhaustive search (fixed lambda=0.3, nu=0.05, 100
+inits)</strong></p>
+<p><strong>Note for Amber:</strong> This document uses the cv_grid
+exhaustive search fits, not the BO-selected production fit. By holding
+lambda, nu, and ntop constant, we get a controlled comparison across K
+values. See the glossary at the end for term definitions. The analysis
+scripts are in <code>inst/cv_grid_training_analysis.R</code> (training)
+and <code>inst/cv_grid_validation_analysis.R</code> (validation). Run
+from the repo root.</p>
+<h2 id="key-change-from-previous-k5-analysis">Key Change from Previous
+K=5 Analysis</h2>
+<p>The previous K=5 analysis used the production HPC fit with
+BO-selected hyperparameters (alpha=0.362, lambda=0.314,
+<strong>nu=0.005</strong>). The critical parameter was nu=0.005, 11x
+smaller than K=3’s nu=0.056, meaning the BO had essentially turned off
+survival weighting at K=5, making it converge toward standard NMF. That
+made it difficult to attribute differences to K alone.</p>
+<p>This document uses cv_grid fits where <strong>nu=0.05 is fixed across
+all K values</strong>. The BO’s conclusion that “K=5 needs less survival
+weighting” is set aside; we ask instead: at a fixed survival penalty,
+what happens to the iCAF program at K=5? Three fits are examined:</p>
+<ul>
+<li><strong>K5_a0</strong> (alpha=0.00): Standard NMF baseline</li>
+<li><strong>K5_a25</strong> (alpha=0.25): Validation-optimal alpha for
+K=5</li>
+<li><strong>K5_a55</strong> (alpha=0.55): Matched to K=3 CV-optimal
+alpha</li>
+</ul>
+<p><strong>Branch hashes:</strong> - K5_a0:
+<code>cv_grid_fit_128a06d24f80875e</code> - K5_a25:
+<code>cv_grid_fit_5c725504aa99734e</code> - K5_a55:
+<code>cv_grid_fit_ed2d68b41575585f</code></p>
+<p><strong>Training cohort:</strong> TCGA + CPTAC (n=273)
+<strong>Validation cohort:</strong> 4 independent datasets (n=570
+pooled): Dijk (n=90), Moffitt GEO array (n=123), Puleo array (n=288),
+PACA-AU (n=69). All validation Cox models use
+<code>strata(dataset)</code>.</p>
+<p><strong>iCAF reference</strong>: The “iCAF program” refers to the
+factor best matching the original K=3 Factor 1, characterized by overlap
+with the <strong>Elyada et al. (2019) iCAF 35-gene signature</strong>
+(25 of 35 present in the 1970-gene universe).</p>
+<hr />
+<h2
+id="summary-k5-recovers-icaf-but-fragments-it-among-competing-factors">Summary:
+K=5 Recovers iCAF But Fragments It Among Competing Factors</h2>
+<p>At K=5, with survival penalty, the iCAF program emerges (rho=0.737
+with original F1 at alpha=0.55) but is accompanied by additional
+prognostic factors. Unlike K=3 where the iCAF factor is the sole
+survival signal, K=5 spreads prognostic weight across 2-3 factors.</p>
+<p><strong>The validation reveals an interesting pattern.</strong>
+K5_a25’s iCAF factor has the strongest unadjusted validation (HR=0.797,
+p=0.0005) and the strongest KM separation (25.6 vs 18.0 months,
+p=4.4e-6) of any fit. But it does not survive PurIST+DeCAF adjustment
+(p=0.069), and its H-correlation with the original iCAF program is only
+0.449. It is a “purer” immune factor that shares survival signal with
+PurIST/DeCAF rather than an independent iCAF program.</p>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 31%" />
+<col style="width: 31%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>alpha=0.00</th>
+<th>alpha=0.25</th>
+<th>alpha=0.55</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Best iCAF factor</strong></td>
+<td>F1</td>
+<td>F4</td>
+<td>F4</td>
+</tr>
+<tr class="even">
+<td><strong>H-cor with orig F1</strong></td>
+<td>0.313</td>
+<td>0.449</td>
+<td><strong>0.737</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>Top-270 overlap</strong></td>
+<td>47/270</td>
+<td>121/270</td>
+<td><strong>146/270</strong></td>
+</tr>
+<tr class="even">
+<td><strong>Elyada iCAF overlap</strong></td>
+<td>3/25 (12%)</td>
+<td>6/25 (24%)</td>
+<td>6/25 (24%)</td>
+</tr>
+<tr class="odd">
+<td><strong>DECODER Immune</strong></td>
+<td>1/60 (2%)</td>
+<td><strong>27/60 (45%)</strong></td>
+<td>15/60 (25%)</td>
+</tr>
+<tr class="even">
+<td><strong>Train HR (unadj)</strong></td>
+<td>0.969 (p=0.72)</td>
+<td><strong>0.652 (p&lt;0.0001)</strong></td>
+<td><strong>0.529 (p&lt;0.0001)</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>Val HR (unadj)</strong></td>
+<td>0.971 (p=0.65)</td>
+<td><strong>0.797 (p=0.0005)</strong></td>
+<td>0.884 (p=0.13)</td>
+</tr>
+<tr class="even">
+<td><strong>Val KM p</strong></td>
+<td>0.59</td>
+<td><strong>4.4e-6</strong></td>
+<td><strong>0.005</strong></td>
+</tr>
+<tr class="odd">
+<td><strong># prognostic factors</strong></td>
+<td>1 (not iCAF)</td>
+<td>2</td>
+<td><strong>3</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="k5_a0-standard-nmf-alpha0.00">K5_a0: Standard NMF
+(alpha=0.00)</h2>
+<h3 id="factor-identity">Factor identity</h3>
+<p>H-score correlation with original K=3:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Orig_F1</th>
+<th>Orig_F2</th>
+<th>Orig_F3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>F1</td>
+<td>0.313</td>
+<td><strong>-0.961</strong></td>
+<td><strong>0.925</strong></td>
+</tr>
+<tr class="even">
+<td>F2</td>
+<td>-0.490</td>
+<td>0.463</td>
+<td>-0.141</td>
+</tr>
+<tr class="odd">
+<td>F3</td>
+<td>0.112</td>
+<td>0.274</td>
+<td>-0.243</td>
+</tr>
+<tr class="even">
+<td>F4</td>
+<td>-0.133</td>
+<td><strong>0.964</strong></td>
+<td><strong>-0.884</strong></td>
+</tr>
+<tr class="odd">
+<td>F5</td>
+<td>0.292</td>
+<td>-0.471</td>
+<td>0.554</td>
+</tr>
+</tbody>
+</table>
+<p>The dominant correlations are with original F2 and F3 (the
+stroma/basal axis), not F1 (iCAF). F1 and F4 are anti-correlated
+versions of the stroma axis (F1 &lt;-&gt; -origF2, F4 &lt;-&gt;
++origF2). No factor strongly matches the iCAF program.</p>
+<h3
+id="reference-signature-overlaps-f1-as-best-icaf-match-top-270">Reference
+signature overlaps (F1 as best iCAF match, top-270)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Signature</th>
+<th>Overlap</th>
+<th>%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Elyada iCAF (25)</td>
+<td>3/25</td>
+<td>12.0%</td>
+</tr>
+<tr class="even">
+<td>SCISSORS iCAF (17)</td>
+<td>0/17</td>
+<td>0.0%</td>
+</tr>
+<tr class="odd">
+<td>DECODER Immune (60)</td>
+<td>1/60</td>
+<td>1.7%</td>
+</tr>
+<tr class="even">
+<td>DECODER BasalTumor (139)</td>
+<td>19/139</td>
+<td>13.7%</td>
+</tr>
+<tr class="odd">
+<td>DECODER ClassicalTumor (166)</td>
+<td>35/166</td>
+<td>21.1%</td>
+</tr>
+</tbody>
+</table>
+<p>F1 is dominated by Classical Tumor genes (21%), not iCAF. Where do
+the Immune genes go? F4 has 33/60 DECODER Immune genes (55%), but F4
+anti-correlates with original F1 (rho=-0.133). At K=5 with alpha=0, the
+immune program forms its own factor but is not linked to the iCAF
+program.</p>
+<h3 id="per-factor-cox-training-and-validation">Per-factor Cox: Training
+AND Validation</h3>
+<p><strong>Unadjusted</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Factor</th>
+<th>Train HR</th>
+<th>Train p</th>
+<th>Val HR</th>
+<th>Val p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>F1 (best iCAF)</td>
+<td>0.969</td>
+<td>0.72</td>
+<td>0.971</td>
+<td>0.65</td>
+</tr>
+<tr class="even">
+<td><strong>F2</strong></td>
+<td><strong>1.320</strong></td>
+<td><strong>0.004</strong></td>
+<td><strong>1.301</strong></td>
+<td><strong>&lt;0.0001</strong></td>
+</tr>
+<tr class="odd">
+<td>F3</td>
+<td>0.912</td>
+<td>0.29</td>
+<td>0.961</td>
+<td>0.45</td>
+</tr>
+<tr class="even">
+<td>F4</td>
+<td>0.954</td>
+<td>0.58</td>
+<td>0.940</td>
+<td>0.32</td>
+</tr>
+<tr class="odd">
+<td>F5</td>
+<td>0.898</td>
+<td>0.21</td>
+<td>0.901</td>
+<td>0.13</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Adjusted for PurIST + DeCAF</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Factor</th>
+<th>Train HR</th>
+<th>Train p</th>
+<th>Val HR</th>
+<th>Val p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>F1 (best iCAF)</td>
+<td>0.972</td>
+<td>0.75</td>
+<td>0.962</td>
+<td>0.57</td>
+</tr>
+<tr class="even">
+<td>F2</td>
+<td>0.952</td>
+<td>0.68</td>
+<td>1.138</td>
+<td>0.068</td>
+</tr>
+<tr class="odd">
+<td>F3</td>
+<td>1.048</td>
+<td>0.61</td>
+<td>1.022</td>
+<td>0.68</td>
+</tr>
+<tr class="even">
+<td>F4</td>
+<td>0.986</td>
+<td>0.87</td>
+<td>0.941</td>
+<td>0.34</td>
+</tr>
+<tr class="odd">
+<td>F5</td>
+<td>0.886</td>
+<td>0.20</td>
+<td>0.839</td>
+<td>0.022</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The iCAF factor is not prognostic at alpha=0.</strong> Only
+F2 is significant, and F2 captures the basal-like tumor axis, not iCAF.
+In validation, F2 replicates strongly (p&lt;0.0001), confirming that
+standard NMF captures tumor subtype but not the iCAF program.</p>
+<p><strong>LRT adding F1 (iCAF) to PurIST + DeCAF:</strong> Training
+p=0.75, Validation p=0.57</p>
+<p><strong>Median-split KM for F1 (iCAF):</strong> - Training (n=273):
+High 20.5 vs Low 23.4 months, p=0.79 (reversed!) - Validation (n=570):
+High 22.5 vs Low 21.4 months, p=0.59</p>
+<h3 id="beta-structure">Beta structure</h3>
+<p>F1=0, F2=1.34e-04, F3=-1.37e-05, F4=-4.28e-05, F5=-1.13e-04</p>
+<p>All tiny (no survival penalty -&gt; near-zero betas).</p>
+<hr />
+<h2 id="k5_a25-validation-optimal-alpha-alpha0.25">K5_a25:
+Validation-Optimal Alpha (alpha=0.25)</h2>
+<h3 id="factor-identity-1">Factor identity</h3>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Orig_F1</th>
+<th>Orig_F2</th>
+<th>Orig_F3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>F1</td>
+<td>-0.246</td>
+<td><strong>0.992</strong></td>
+<td>-0.857</td>
+</tr>
+<tr class="even">
+<td>F2</td>
+<td>-0.345</td>
+<td>0.281</td>
+<td>0.051</td>
+</tr>
+<tr class="odd">
+<td>F3</td>
+<td>0.225</td>
+<td>-0.907</td>
+<td><strong>0.936</strong></td>
+</tr>
+<tr class="even">
+<td><strong>F4</strong></td>
+<td><strong>0.449</strong></td>
+<td>0.484</td>
+<td>-0.512</td>
+</tr>
+<tr class="odd">
+<td>F5</td>
+<td>0.078</td>
+<td>-0.213</td>
+<td>0.538</td>
+</tr>
+</tbody>
+</table>
+<p>F4 is the best iCAF match (rho=0.449). F1 perfectly matches original
+F2 (rho=0.992) and F3 matches original F3 (rho=0.936). The stroma/basal
+axis is well recovered; the iCAF program is partially forming in F4.</p>
+<h3 id="reference-signature-overlaps-f4-top-270-genes">Reference
+signature overlaps (F4, top-270 genes)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Signature</th>
+<th>Overlap</th>
+<th>%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Elyada iCAF (25)</td>
+<td>6/25</td>
+<td>24.0%</td>
+</tr>
+<tr class="even">
+<td>Elyada myCAF (15)</td>
+<td>2/15</td>
+<td>13.3%</td>
+</tr>
+<tr class="odd">
+<td>SCISSORS iCAF (17)</td>
+<td><strong>7/17</strong></td>
+<td><strong>41.2%</strong></td>
+</tr>
+<tr class="even">
+<td>SCISSORS myCAF (16)</td>
+<td>1/16</td>
+<td>6.2%</td>
+</tr>
+<tr class="odd">
+<td>DeCAF restCAF (8)</td>
+<td>2/8</td>
+<td>25.0%</td>
+</tr>
+<tr class="even">
+<td>DECODER Immune (60)</td>
+<td><strong>27/60</strong></td>
+<td><strong>45.0%</strong></td>
+</tr>
+<tr class="odd">
+<td>DECODER ActivatedStroma (108)</td>
+<td>5/108</td>
+<td>4.6%</td>
+</tr>
+<tr class="even">
+<td>DECODER NormalStroma (15)</td>
+<td>5/15</td>
+<td>33.3%</td>
+</tr>
+<tr class="odd">
+<td>DECODER BasalTumor (139)</td>
+<td>0/139</td>
+<td>0.0%</td>
+</tr>
+<tr class="even">
+<td>DECODER ClassicalTumor (166)</td>
+<td>16/166</td>
+<td>9.6%</td>
+</tr>
+</tbody>
+</table>
+<p>F4 is remarkably pure: <strong>45% DECODER Immune, 0% Basal
+Tumor</strong>. The SCISSORS iCAF overlap (41%) and DeCAF restCAF
+overlap (25%) are the highest across all fits. This is arguably the
+purest immune/iCAF factor in the entire grid.</p>
+<h3 id="where-do-the-icaf-adjacent-genes-go">Where do the iCAF-adjacent
+genes go?</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Factor</th>
+<th>Elyada iCAF</th>
+<th>DECODER Immune</th>
+<th>DECODER Basal</th>
+<th>Identity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>F1</td>
+<td>6/25</td>
+<td>23/60</td>
+<td>2/139</td>
+<td>Stroma/Immune</td>
+</tr>
+<tr class="even">
+<td>F2</td>
+<td>3/25</td>
+<td>0/60</td>
+<td>23/139</td>
+<td>Basal Tumor</td>
+</tr>
+<tr class="odd">
+<td>F3</td>
+<td>0/25</td>
+<td>0/60</td>
+<td>43/139</td>
+<td>Basal Tumor (dominant)</td>
+</tr>
+<tr class="even">
+<td><strong>F4</strong></td>
+<td><strong>6/25</strong></td>
+<td><strong>27/60</strong></td>
+<td><strong>0/139</strong></td>
+<td><strong>iCAF/Immune (purest)</strong></td>
+</tr>
+<tr class="odd">
+<td>F5</td>
+<td>7/25</td>
+<td>4/60</td>
+<td>13/139</td>
+<td>Mixed</td>
+</tr>
+</tbody>
+</table>
+<p>But note: F1 also has 23/60 DECODER Immune genes and 6/25 Elyada iCAF
+genes. The immune/iCAF signal is split between F1 and F4. Both capture
+parts of it. At K=5, the model has enough capacity to separate Immune
+from iCAF, but this fragmentation means no single factor captures the
+full iCAF program as K=3 does.</p>
+<h3 id="per-factor-cox-training-and-validation-1">Per-factor Cox:
+Training AND Validation</h3>
+<p><strong>Unadjusted</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Factor</th>
+<th>Train HR</th>
+<th>Train p</th>
+<th>Val HR</th>
+<th>Val p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>F1</td>
+<td>1.011</td>
+<td>0.90</td>
+<td>1.055</td>
+<td>0.38</td>
+</tr>
+<tr class="even">
+<td><strong>F2</strong></td>
+<td><strong>1.336</strong></td>
+<td><strong>0.002</strong></td>
+<td><strong>1.224</strong></td>
+<td><strong>0.003</strong></td>
+</tr>
+<tr class="odd">
+<td>F3</td>
+<td>1.009</td>
+<td>0.92</td>
+<td>1.022</td>
+<td>0.73</td>
+</tr>
+<tr class="even">
+<td><strong>F4 (iCAF)</strong></td>
+<td><strong>0.652</strong></td>
+<td><strong>&lt;0.0001</strong></td>
+<td><strong>0.797</strong></td>
+<td><strong>0.0005</strong></td>
+</tr>
+<tr class="odd">
+<td>F5</td>
+<td>1.009</td>
+<td>0.91</td>
+<td>1.173</td>
+<td>0.052</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Adjusted for PurIST + DeCAF</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Factor</th>
+<th>Train HR</th>
+<th>Train p</th>
+<th>Val HR</th>
+<th>Val p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>F1</td>
+<td>1.003</td>
+<td>0.97</td>
+<td>1.008</td>
+<td>0.89</td>
+</tr>
+<tr class="even">
+<td><strong>F2</strong></td>
+<td><strong>1.256</strong></td>
+<td><strong>0.017</strong></td>
+<td>1.093</td>
+<td>0.21</td>
+</tr>
+<tr class="odd">
+<td>F3</td>
+<td>0.955</td>
+<td>0.61</td>
+<td>0.941</td>
+<td>0.38</td>
+</tr>
+<tr class="even">
+<td><strong>F4 (iCAF)</strong></td>
+<td><strong>0.767</strong></td>
+<td><strong>0.007</strong></td>
+<td>0.879</td>
+<td>0.069</td>
+</tr>
+<tr class="odd">
+<td>F5</td>
+<td>0.860</td>
+<td>0.10</td>
+<td>1.037</td>
+<td>0.67</td>
+</tr>
+</tbody>
+</table>
+<p>F4 (iCAF) validates unadjusted (HR=0.797, p=0.0005) but is borderline
+adjusted (HR=0.879, p=0.069). Two factors are independently prognostic
+in training (F4 + F2), and the iCAF factor’s training signal (HR=0.652,
+p&lt;0.0001) matches K=3’s pattern. In validation, F4 is the strongest
+single-factor prognostic signal in the entire grid (unadj p=0.0005).</p>
+<p><strong>LRT adding F4 (iCAF) to PurIST + DeCAF:</strong> Training
+p=0.008, Validation p=0.072</p>
+<p><strong>Median-split KM for F4 (iCAF):</strong> - Training (n=273):
+High 24.8 vs Low 15.7 months, <strong>p=6.9e-5</strong> - Validation
+(n=570): High 25.6 vs Low 18.0 months, <strong>p=4.4e-6</strong></p>
+<p>The validation KM is the strongest in the entire grid, with a
+7.6-month survival gap, p=4.4e-6 in 570 patients. But this factor only
+has rho=0.449 with the original iCAF program. It is a purer immune
+factor, not the full iCAF program.</p>
+<h3 id="beta-structure-1">Beta structure</h3>
+<p>F1=6.02e-05, F2=<strong>5.18e-04</strong>, F3=-6.72e-05,
+F4=<strong>-6.77e-04</strong> (dominant), F5=-9.62e-05</p>
+<p>F4 (iCAF) has the dominant beta, but F2 (Basal) also has substantial
+weight.</p>
+<hr />
+<h2 id="k5_a55-matched-to-k3-cv-optimal-alpha-alpha0.55">K5_a55: Matched
+to K=3 CV-Optimal Alpha (alpha=0.55)</h2>
+<h3 id="factor-identity-2">Factor identity</h3>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Orig_F1</th>
+<th>Orig_F2</th>
+<th>Orig_F3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>F1</td>
+<td>-0.081</td>
+<td>-0.646</td>
+<td><strong>0.920</strong></td>
+</tr>
+<tr class="even">
+<td>F2</td>
+<td>-0.223</td>
+<td><strong>0.886</strong></td>
+<td>-0.614</td>
+</tr>
+<tr class="odd">
+<td>F3</td>
+<td>-0.054</td>
+<td>-0.256</td>
+<td>0.630</td>
+</tr>
+<tr class="even">
+<td><strong>F4</strong></td>
+<td><strong>0.737</strong></td>
+<td>-0.652</td>
+<td>0.654</td>
+</tr>
+<tr class="odd">
+<td>F5</td>
+<td>-0.089</td>
+<td><strong>0.920</strong></td>
+<td>-0.813</td>
+</tr>
+</tbody>
+</table>
+<p>F4 matches original F1 well (rho=0.737). F1 matches original F3
+(rho=0.920). F2 and F5 both match original F2 (rho=0.886 and 0.920). The
+stroma axis has split into two factors at K=5.</p>
+<h3 id="reference-signature-overlaps-f4-top-270-genes-1">Reference
+signature overlaps (F4, top-270 genes)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Signature</th>
+<th>Overlap</th>
+<th>%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Elyada iCAF (25)</td>
+<td>6/25</td>
+<td>24.0%</td>
+</tr>
+<tr class="even">
+<td>Elyada myCAF (15)</td>
+<td>0/15</td>
+<td>0.0%</td>
+</tr>
+<tr class="odd">
+<td>SCISSORS iCAF (17)</td>
+<td><strong>7/17</strong></td>
+<td><strong>41.2%</strong></td>
+</tr>
+<tr class="even">
+<td>SCISSORS myCAF (16)</td>
+<td>2/16</td>
+<td>12.5%</td>
+</tr>
+<tr class="odd">
+<td>DeCAF restCAF (8)</td>
+<td>1/8</td>
+<td>12.5%</td>
+</tr>
+<tr class="even">
+<td>DeCAF proCAF (4)</td>
+<td><strong>2/4</strong></td>
+<td><strong>50.0%</strong></td>
+</tr>
+<tr class="odd">
+<td>DECODER Immune (60)</td>
+<td>15/60</td>
+<td>25.0%</td>
+</tr>
+<tr class="even">
+<td>DECODER ActivatedStroma (108)</td>
+<td>4/108</td>
+<td>3.7%</td>
+</tr>
+<tr class="odd">
+<td>DECODER NormalStroma (15)</td>
+<td><strong>6/15</strong></td>
+<td><strong>40.0%</strong></td>
+</tr>
+<tr class="even">
+<td>DECODER BasalTumor (139)</td>
+<td>15/139</td>
+<td>10.8%</td>
+</tr>
+<tr class="odd">
+<td>DECODER ClassicalTumor (166)</td>
+<td>42/166</td>
+<td>25.3%</td>
+</tr>
+</tbody>
+</table>
+<p>F4 maintains SCISSORS iCAF overlap (41%) and gains NormalStroma
+(40%). But unlike K5_a25 where F4 had 45% DECODER Immune overlap with
+zero Basal Tumor, here F4 has only 25% Immune and picks up 11% Basal
+Tumor and 25% Classical Tumor. The factor is becoming less pure; it is
+absorbing more tumor genes as alpha increases.</p>
+<h3 id="decoder-compartment-breakdown-for-all-factors">DECODER
+compartment breakdown for ALL factors</h3>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 10%" />
+<col style="width: 15%" />
+<col style="width: 17%" />
+<col style="width: 18%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Factor</th>
+<th>Immune</th>
+<th>Basal</th>
+<th>Classical</th>
+<th>Act.Stroma</th>
+<th>Norm.Stroma</th>
+<th>Identity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>F1</td>
+<td>0/60</td>
+<td><strong>39/139</strong></td>
+<td>12/166</td>
+<td>22/108</td>
+<td>0/15</td>
+<td>Basal/Stroma</td>
+</tr>
+<tr class="even">
+<td>F2</td>
+<td>5/60</td>
+<td>12/139</td>
+<td><strong>36/166</strong></td>
+<td>10/108</td>
+<td>1/15</td>
+<td>Classical Tumor</td>
+</tr>
+<tr class="odd">
+<td>F3</td>
+<td>5/60</td>
+<td><strong>31/139</strong></td>
+<td>13/166</td>
+<td>10/108</td>
+<td>0/15</td>
+<td>Mixed/Basal</td>
+</tr>
+<tr class="even">
+<td><strong>F4</strong></td>
+<td><strong>15/60</strong></td>
+<td>15/139</td>
+<td><strong>42/166</strong></td>
+<td>4/108</td>
+<td><strong>6/15</strong></td>
+<td><strong>iCAF/Mixed</strong></td>
+</tr>
+<tr class="odd">
+<td>F5</td>
+<td><strong>24/60</strong></td>
+<td>1/139</td>
+<td>18/166</td>
+<td>2/108</td>
+<td>3/15</td>
+<td>Immune/Classical</td>
+</tr>
+</tbody>
+</table>
+<p>At K=5 alpha=0.55, the Immune genes are split: F4 gets 15/60, F5 gets
+24/60. Compare to K=3 alpha=0.55 where F1 (iCAF) gets 16/60 and F3 gets
+16/60, a similar split, but at K=3 the iCAF factor combines Immune +
+NormalStroma into a single coherent program, while K=5’s F4 dilutes this
+with Classical Tumor genes (42/166 = 25%).</p>
+<h3 id="per-factor-cox-training-and-validation-2">Per-factor Cox:
+Training AND Validation</h3>
+<p><strong>Unadjusted</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Factor</th>
+<th>Train HR</th>
+<th>Train p</th>
+<th>Val HR</th>
+<th>Val p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>F1</strong></td>
+<td><strong>1.318</strong></td>
+<td><strong>0.003</strong></td>
+<td><strong>1.166</strong></td>
+<td><strong>0.039</strong></td>
+</tr>
+<tr class="even">
+<td>F2</td>
+<td>1.008</td>
+<td>0.92</td>
+<td>1.119</td>
+<td>0.13</td>
+</tr>
+<tr class="odd">
+<td><strong>F3</strong></td>
+<td><strong>1.218</strong></td>
+<td><strong>0.029</strong></td>
+<td>1.166</td>
+<td>0.054</td>
+</tr>
+<tr class="even">
+<td><strong>F4 (iCAF)</strong></td>
+<td><strong>0.529</strong></td>
+<td><strong>&lt;0.0001</strong></td>
+<td>0.884</td>
+<td>0.13</td>
+</tr>
+<tr class="odd">
+<td>F5</td>
+<td>0.920</td>
+<td>0.32</td>
+<td>0.955</td>
+<td>0.50</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Adjusted for PurIST + DeCAF</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Factor</th>
+<th>Train HR</th>
+<th>Train p</th>
+<th>Val HR</th>
+<th>Val p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>F1</strong></td>
+<td>1.178</td>
+<td>0.091</td>
+<td>1.001</td>
+<td>0.99</td>
+</tr>
+<tr class="even">
+<td>F2</td>
+<td>0.941</td>
+<td>0.51</td>
+<td>1.014</td>
+<td>0.85</td>
+</tr>
+<tr class="odd">
+<td>F3</td>
+<td>1.047</td>
+<td>0.64</td>
+<td>1.014</td>
+<td>0.87</td>
+</tr>
+<tr class="even">
+<td><strong>F4 (iCAF)</strong></td>
+<td><strong>0.562</strong></td>
+<td><strong>&lt;0.0001</strong></td>
+<td>0.888</td>
+<td>0.17</td>
+</tr>
+<tr class="odd">
+<td>F5</td>
+<td>0.986</td>
+<td>0.88</td>
+<td>0.962</td>
+<td>0.58</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Three training factors are prognostic but only F4 survives
+PurIST+DeCAF adjustment in training.</strong> In validation, the iCAF
+factor DOES NOT reach significance, neither unadjusted (p=0.13) nor
+adjusted (p=0.17). This is a critical failure: K=5 at high alpha
+overtrains the survival signal. The extremely strong training HR (0.529)
+does not replicate (val HR=0.884).</p>
+<p><strong>LRT adding F4 (iCAF) to PurIST + DeCAF:</strong> Training
+p=4.3e-9, Validation p=0.17</p>
+<p><strong>Median-split KM for F4 (iCAF):</strong> - Training (n=273):
+High 24.6 vs Low 14.2 months, <strong>p=3.0e-7</strong> - Validation
+(n=570): High 25.3 vs Low 19.2 months, <strong>p=0.005</strong></p>
+<p>The KM still validates (6.1-month gap, p=0.005) despite the Cox model
+failure, suggesting the iCAF signal exists but is spread across multiple
+factors that individually don’t reach significance.</p>
+<h3 id="beta-structure-2">Beta structure</h3>
+<p>F1=7.25e-04, F2=-1.12e-04, F3=4.15e-04, F4=<strong>-1.53e-03</strong>
+(dominant), F5=-4.42e-05</p>
+<p>F4 (iCAF) dominates the LP, but F1 and F3 also have substantial
+betas.</p>
+<hr />
+<h2 id="the-k5-limitation-fragmentation-and-validation-failure">The K=5
+Limitation: Fragmentation and Validation Failure</h2>
+<h3 id="the-fragmentation-problem-confirmed-by-validation">The
+fragmentation problem, confirmed by validation</h3>
+<p>At K=5, the model has enough capacity to separate biological programs
+into finer components. But this creates two problems visible in
+validation:</p>
+<ol type="1">
+<li><p><strong>Immune/iCAF splitting</strong>: The immune component that
+is part of the K=3 iCAF program gets split across multiple K=5 factors
+(F4 gets 15/60 Immune genes, F5 gets 24/60, F1 gets 0). At K=3, F1
+captures the combined iCAF+Immune signal coherently.</p></li>
+<li><p><strong>Validation instability across alpha</strong>: K5_a25’s
+iCAF factor validates strongly (unadj p=0.0005), but K5_a55’s does not
+(unadj p=0.13). At K=3, both alpha values validate (p=0.027 and
+p=0.003). The K=5 validation signal is fragile. It depends on the
+specific alpha, whereas K=3 is robust.</p></li>
+<li><p><strong>Multiple survival axes hurt replication</strong>: At K=5
+alpha=0.55, 3 of 5 factors are independently prognostic in training,
+meaning the survival signal is distributed. None of the individual
+factors reliably replicate in validation.</p></li>
+</ol>
+<h3 id="comparison-across-k-at-alpha0.55-with-validation">Comparison
+across K at alpha=0.55 (with validation)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>K=2</th>
+<th>K=3</th>
+<th>K=5</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>iCAF H-cor with orig F1</td>
+<td>0.664</td>
+<td><strong>0.906</strong></td>
+<td>0.737</td>
+</tr>
+<tr class="even">
+<td>iCAF gene overlap</td>
+<td>92/270</td>
+<td><strong>168/270</strong></td>
+<td>146/270</td>
+</tr>
+<tr class="odd">
+<td>iCAF Train HR (unadj)</td>
+<td>0.634</td>
+<td><strong>0.344</strong></td>
+<td>0.529</td>
+</tr>
+<tr class="even">
+<td>iCAF Val HR (unadj)</td>
+<td>0.876 (p=0.088)</td>
+<td><strong>0.800 (p=0.003)</strong></td>
+<td>0.884 (p=0.13)</td>
+</tr>
+<tr class="odd">
+<td>iCAF Val HR (adj)</td>
+<td>0.891 (p=0.16)</td>
+<td>0.867 (p=0.075)</td>
+<td>0.888 (p=0.17)</td>
+</tr>
+<tr class="even">
+<td>Val KM gap</td>
+<td>4.0 mo (p=0.012)</td>
+<td><strong>8.8 mo (p=3e-4)</strong></td>
+<td>6.1 mo (p=0.005)</td>
+</tr>
+<tr class="odd">
+<td># prognostic factors</td>
+<td>2</td>
+<td><strong>1</strong></td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td>iCAF beta dominance</td>
+<td>1.6x</td>
+<td><strong>4.6x</strong></td>
+<td>2.2x</td>
+</tr>
+</tbody>
+</table>
+<p>K=3 wins on validation: strongest unadjusted validation (p=0.003),
+largest KM gap (8.8 months), and the only K where the iCAF factor is the
+sole prognostic signal. K=5’s stronger training signal (HR=0.529)
+doesn’t replicate, suggesting overfitting at higher K with strong
+survival penalty.</p>
+<h3 id="the-purest-immune-factor-at-k5_a25">The “purest immune factor”
+at K=5_a25</h3>
+<p>Worth noting: K5_a25’s F4 (45% DECODER Immune, 0% Basal Tumor) is
+arguably the purest immune/iCAF factor in the entire grid, and it has
+the best unadjusted validation KM (p=4.4e-6). But it only captures
+rho=0.449 of the original K=3 F1 program, because the original F1 was
+not purely immune; it was a mixed iCAF + immune + normal stroma program.
+K=5 separates what K=3 combined, and the original paper’s claim is about
+the combined program, not just the immune component.</p>
+<p>The K5_a25 result does suggest that the immune component of Factor 1
+is the primary driver of the survival signal, and that this signal
+exists independently of PurIST/DeCAF (since the unadjusted validation is
+highly significant). But the adjusted validation borderline (p=0.069)
+indicates substantial overlap with existing classifiers. The immune
+signal alone is not fully independent of PurIST.</p>
+<hr />
+<h2 id="glossary">Glossary</h2>
+<ul>
+<li><strong>H-score</strong>: Factor loading score for each sample,
+computed as H = X^T W. Measures how strongly each sample expresses a
+given factor’s gene program.</li>
+<li><strong>H-cor</strong>: Spearman rank correlation between H-score
+vectors from two fits. Used to compare cv_grid factors against original
+production K=3 factors.</li>
+<li><strong>LP</strong>: Cox model linear predictor, sum of beta_k * H_k
+across factors.</li>
+<li><strong>LRT</strong>: Likelihood ratio test comparing nested Cox
+models. Tests whether adding a factor improves a model already
+containing PurIST + DeCAF.</li>
+<li><strong>ntop</strong>: Number of top genes per factor for H-scores.
+ntop=NULL = all 1970 genes; ntop=270 (production fit) = top 270 genes
+per factor.</li>
+<li><strong>strata(dataset)</strong>: Stratified Cox allowing each
+validation cohort its own baseline hazard while sharing covariate
+effects.</li>
+<li><strong>Gene universe</strong>: The 1970 genes remaining after
+filtering from the initial
+<ol start="3000" type="1">
+<li>All overlap counts (e.g., “25 in universe”) refer to this set.</li>
+</ol></li>
+<li><strong>CV-optimal alpha</strong>: Alpha minimizing cross-validated
+partial log-likelihood.</li>
+<li><strong>Validation-optimal alpha</strong>: Alpha with strongest
+external validation signal.</li>
+</ul>
