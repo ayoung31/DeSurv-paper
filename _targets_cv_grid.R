@@ -1,15 +1,14 @@
 # _targets_cv_grid.R
 #
-# Cross-validation grid search pipeline for k x alpha x ntop parameter space.
+# Cross-validation grid search pipeline for k x alpha x ntop x lambda x nu.
 # Performs exhaustive CV over:
 #   - k: 2, 3, 4, ..., 12 (11 values)
 #   - alpha: 0, 0.05, 0.10, ..., 0.95 (20 values)
-#   - ntop: NULL (all genes), 300 (2 values)
-#   - Total: 440 parameter combinations
+#   - ntop: NULL (all genes), 300, 270 (3 values)
+#   - lambda: configurable (default: 0.3)
+#   - nu: configurable (default: 0.05)
 #
 # Fixed parameters:
-#   - lambda = 0.3
-#   - nu = 0.05
 #   - lambdaW = 0
 #   - lambdaH = 0
 #   - ngene = 3000 (for preprocessing)
@@ -28,10 +27,10 @@ suppressPackageStartupMessages({
 # ------ Configuration ------
 CV_GRID_K_VALUES <- 2:12
 CV_GRID_ALPHA_VALUES <- seq(0, 0.95, by = 0.05)
-CV_GRID_NTOP_VALUES <- list(NULL, 300)  # NULL = all genes, 300 = top 300
+CV_GRID_NTOP_VALUES <- list(NULL, 300, 270)  # NULL = all genes, 300 = top 300
+CV_GRID_LAMBDA_VALUES <- c(0.3, 0.349)   # expand to e.g. c(0.1, 0.3, 1.0) to search
+CV_GRID_NU_VALUES <- c(0.05, 0.056)      # expand to e.g. c(0.01, 0.05, 0.1) to search
 CV_GRID_FIXED_PARAMS <- list(
-  lambda = 0.3,
-  nu = 0.05,
   lambdaW = 0,
   lambdaH = 0
 )
@@ -119,13 +118,15 @@ tar_option_set(
 
 # ------ Target definitions ------
 list(
-  # Target 1: Generate the 440 (k, alpha, ntop) parameter combinations
+  # Target 1: Generate the (k, alpha, ntop, lambda, nu) parameter combinations
   tar_target(
     cv_grid_params,
     create_cv_grid(
       k_values = CV_GRID_K_VALUES,
       alpha_values = CV_GRID_ALPHA_VALUES,
-      ntop_values = CV_GRID_NTOP_VALUES
+      ntop_values = CV_GRID_NTOP_VALUES,
+      lambda_values = CV_GRID_LAMBDA_VALUES,
+      nu_values = CV_GRID_NU_VALUES
     ),
     iteration = "list"
   ),
@@ -159,13 +160,15 @@ list(
     }
   ),
 
-  # Target 3: Run CV for each (k, alpha, ntop) combination (440 parallel jobs)
+  # Target 3: Run CV for each (k, alpha, ntop, lambda, nu) combination
   tar_target(
     cv_grid_result,
     {
       params <- cv_grid_params
       fixed <- CV_GRID_FIXED_PARAMS
       fixed$ntop <- params$ntop
+      fixed$lambda <- params$lambda
+      fixed$nu <- params$nu
       run_cv_grid_point(
         data = cv_grid_data,
         k = params$k,
@@ -202,7 +205,7 @@ list(
       all_evals <- dplyr::bind_rows(purrr::compact(cv_grid_cutpoint_eval))
       all_evals |>
         dplyr::mutate(abs_logrank_z = abs(logrank_z)) |>
-        dplyr::group_by(k, alpha, ntop, z_cutpoint) |>
+        dplyr::group_by(k, alpha, ntop, lambda, nu, z_cutpoint) |>
         dplyr::summarise(
           mean_cindex_dichot = mean(cindex_dichot, na.rm = TRUE),
           se_cindex_dichot = sd(cindex_dichot, na.rm = TRUE) /
@@ -220,11 +223,11 @@ list(
     cv_grid_cutpoint_summary_file,
     {
       fit_stats <- aggregate_cv_grid_fit_results(cv_grid_fit) |>
-        dplyr::select(k, alpha, ntop, lp_mean, lp_sd)
+        dplyr::select(k, alpha, ntop, lambda, nu, lp_mean, lp_sd)
       out <- cv_grid_cutpoint_summary |>
-        dplyr::left_join(fit_stats, by = c("k", "alpha", "ntop")) |>
+        dplyr::left_join(fit_stats, by = c("k", "alpha", "ntop", "lambda", "nu")) |>
         dplyr::mutate(cutpoint_abs = z_cutpoint * lp_sd + lp_mean) |>
-        dplyr::select(k, alpha, ntop, z_cutpoint, cutpoint_abs,
+        dplyr::select(k, alpha, ntop, lambda, nu, z_cutpoint, cutpoint_abs,
                       mean_cindex_dichot, se_cindex_dichot,
                       mean_abs_logrank_z, se_abs_logrank_z)
       path <- "results/cv_grid/cv_grid_cutpoint_summary.csv"
@@ -247,7 +250,7 @@ list(
     {
       cv_tbl <- aggregate_cv_grid_results(cv_grid_result)
       opt_tbl <- cv_grid_optimal_cutpoint
-      dplyr::left_join(cv_tbl, opt_tbl, by = c("k", "alpha", "ntop"))
+      dplyr::left_join(cv_tbl, opt_tbl, by = c("k", "alpha", "ntop", "lambda", "nu"))
     }
   ),
 
@@ -263,20 +266,24 @@ list(
     format = "file"
   ),
 
-  # Target 6: Full model fit per grid point (440 parallel jobs, 100 inits each)
+  # Target 6: Full model fit per grid point (parallel jobs, 100 inits each)
   tar_target(
     cv_grid_fit,
     {
       params <- cv_grid_params
       fixed <- CV_GRID_FIXED_PARAMS
       fixed$ntop <- params$ntop
+      fixed$lambda <- params$lambda
+      fixed$nu <- params$nu
       ntop_match <- if (is.null(params$ntop)) NA_real_ else as.numeric(params$ntop)
       if (is.na(ntop_match)) {
         opt_row <- cv_grid_optimal_cutpoint |>
-          dplyr::filter(k == params$k, alpha == params$alpha, is.na(ntop))
+          dplyr::filter(k == params$k, alpha == params$alpha, is.na(ntop),
+                        lambda == params$lambda, nu == params$nu)
       } else {
         opt_row <- cv_grid_optimal_cutpoint |>
-          dplyr::filter(k == params$k, alpha == params$alpha, ntop == ntop_match)
+          dplyr::filter(k == params$k, alpha == params$alpha, ntop == ntop_match,
+                        lambda == params$lambda, nu == params$nu)
       }
       opt_z <- if (nrow(opt_row) == 1) opt_row$optimal_z_cutpoint else NA_real_
       fit_grid_point(
@@ -410,16 +417,20 @@ list(
         k_i <- row$k
         alpha_i <- row$best_alpha
         ntop_i <- row$ntop
+        lambda_i <- row$lambda
+        nu_i <- row$nu
         method_i <- row$selection_method
         opt_z <- row$optimal_z_cutpoint
 
-        # Filter cutpoint summary to this (k, alpha, ntop)
+        # Filter cutpoint summary to this (k, alpha, ntop, lambda, nu)
         if (is.na(ntop_i)) {
           cp_data <- cv_grid_cutpoint_summary |>
-            dplyr::filter(k == k_i, alpha == alpha_i, is.na(ntop))
+            dplyr::filter(k == k_i, alpha == alpha_i, is.na(ntop),
+                          lambda == lambda_i, nu == nu_i)
         } else {
           cp_data <- cv_grid_cutpoint_summary |>
-            dplyr::filter(k == k_i, alpha == alpha_i, ntop == ntop_i)
+            dplyr::filter(k == k_i, alpha == alpha_i, ntop == ntop_i,
+                          lambda == lambda_i, nu == nu_i)
         }
 
         if (nrow(cp_data) == 0) {
@@ -428,8 +439,8 @@ list(
         }
 
         ntop_label <- if (is.na(ntop_i)) "ALL" else as.character(ntop_i)
-        fname <- sprintf("cutpoint_k%d_alpha%.2f_ntop%s_%s.pdf",
-                          k_i, alpha_i, ntop_label, method_i)
+        fname <- sprintf("cutpoint_k%d_alpha%.2f_ntop%s_lam%.2f_nu%.3f_%s.pdf",
+                          k_i, alpha_i, ntop_label, lambda_i, nu_i, method_i)
         fpath <- file.path(out_dir, fname)
 
         p <- plot_cutpoint_curves(cp_data, k_i, alpha_i, ntop_i,
@@ -456,6 +467,8 @@ list(
         k_i <- row$k
         alpha_i <- row$best_alpha
         ntop_i <- row$ntop
+        lambda_i <- row$lambda
+        nu_i <- row$nu
         method_i <- row$selection_method
 
         # Find the matching fit entry
@@ -464,6 +477,7 @@ list(
           if (is.null(fe)) next
           fe_ntop <- if (is.null(fe$ntop)) NA_real_ else as.numeric(fe$ntop)
           if (fe$k == k_i && fe$alpha == alpha_i &&
+              fe$lambda == lambda_i && fe$nu == nu_i &&
               (is.na(ntop_i) && is.na(fe_ntop) ||
                !is.na(ntop_i) && !is.na(fe_ntop) && fe_ntop == ntop_i)) {
             fit_entry <- fe
@@ -486,11 +500,14 @@ list(
         }
 
         ntop_label <- if (is.na(ntop_i)) "ALL" else as.character(ntop_i)
-        fname <- sprintf("km_train_k%d_alpha%.2f_ntop%s_%s.pdf",
-                          k_i, alpha_i, ntop_label, method_i)
+        fname <- sprintf("km_train_k%d_alpha%.2f_ntop%s_lam%.2f_nu%.3f_%s.pdf",
+                          k_i, alpha_i, ntop_label, lambda_i, nu_i, method_i)
         fpath <- file.path(out_dir, fname)
-        save_ggsurvplot(p, fpath, width = 7, height = 5)
-        paths[i] <- fpath
+        tryCatch(
+          save_ggsurvplot(p, fpath, width = 7, height = 5),
+          error = function(e) message(sprintf("save failed %s: %s", fpath, e$message))
+        )
+        paths[i] <- if (file.exists(fpath)) fpath else NA_character_
       }
 
       paths[!is.na(paths)]
@@ -512,6 +529,8 @@ list(
         k_i <- row$k
         alpha_i <- row$best_alpha
         ntop_i <- row$ntop
+        lambda_i <- row$lambda
+        nu_i <- row$nu
         method_i <- row$selection_method
 
         # Find the matching fit entry
@@ -520,6 +539,7 @@ list(
           if (is.null(fe)) next
           fe_ntop <- if (is.null(fe$ntop)) NA_real_ else as.numeric(fe$ntop)
           if (fe$k == k_i && fe$alpha == alpha_i &&
+              fe$lambda == lambda_i && fe$nu == nu_i &&
               (is.na(ntop_i) && is.na(fe_ntop) ||
                !is.na(ntop_i) && !is.na(fe_ntop) && fe_ntop == ntop_i)) {
             fit_entry <- fe
@@ -538,21 +558,30 @@ list(
                                    ds_name)
           if (is.null(p)) next
 
-          fname <- sprintf("km_val_k%d_alpha%.2f_ntop%s_%s_%s.pdf",
-                            k_i, alpha_i, ntop_label, method_i, ds_name)
+          fname <- sprintf("km_val_k%d_alpha%.2f_ntop%s_lam%.2f_nu%.3f_%s_%s.pdf",
+                            k_i, alpha_i, ntop_label, lambda_i, nu_i, method_i, ds_name)
           fpath <- file.path(out_dir, fname)
-          save_ggsurvplot(p, fpath, width = 7, height = 5)
-          paths <- c(paths, fpath)
+          tryCatch(
+            save_ggsurvplot(p, fpath, width = 7, height = 5),
+            error = function(e) message(sprintf("save failed %s: %s", fpath, e$message))
+          )
+          if (file.exists(fpath)) paths <- c(paths, fpath)
         }
 
         # Pooled KM plot
-        p_pooled <- plot_km_validation_pooled(fit_entry, cv_grid_val_data_surv)
+        p_pooled <- tryCatch(
+          plot_km_validation_pooled(fit_entry, cv_grid_val_data_surv),
+          error = function(e) { message(sprintf("pooled plot failed: %s", e$message)); NULL }
+        )
         if (!is.null(p_pooled)) {
-          fname <- sprintf("km_val_k%d_alpha%.2f_ntop%s_%s_pooled.pdf",
-                            k_i, alpha_i, ntop_label, method_i)
+          fname <- sprintf("km_val_k%d_alpha%.2f_ntop%s_lam%.2f_nu%.3f_%s_pooled.pdf",
+                            k_i, alpha_i, ntop_label, lambda_i, nu_i, method_i)
           fpath <- file.path(out_dir, fname)
-          save_ggsurvplot(p_pooled, fpath, width = 7, height = 5)
-          paths <- c(paths, fpath)
+          tryCatch(
+            save_ggsurvplot(p_pooled, fpath, width = 7, height = 5),
+            error = function(e) message(sprintf("save failed %s: %s", fpath, e$message))
+          )
+          if (file.exists(fpath)) paths <- c(paths, fpath)
         }
       }
 
@@ -573,14 +602,18 @@ list(
         row <- cv_grid_alpha0[i, ]
         k_i <- row$k
         ntop_i <- row$ntop
+        lambda_i <- row$lambda
+        nu_i <- row$nu
         opt_z <- row$optimal_z_cutpoint
 
         if (is.na(ntop_i)) {
           cp_data <- cv_grid_cutpoint_summary |>
-            dplyr::filter(k == k_i, alpha == 0, is.na(ntop))
+            dplyr::filter(k == k_i, alpha == 0, is.na(ntop),
+                          lambda == lambda_i, nu == nu_i)
         } else {
           cp_data <- cv_grid_cutpoint_summary |>
-            dplyr::filter(k == k_i, alpha == 0, ntop == ntop_i)
+            dplyr::filter(k == k_i, alpha == 0, ntop == ntop_i,
+                          lambda == lambda_i, nu == nu_i)
         }
 
         if (nrow(cp_data) == 0) {
@@ -589,8 +622,8 @@ list(
         }
 
         ntop_label <- if (is.na(ntop_i)) "ALL" else as.character(ntop_i)
-        fname <- sprintf("cutpoint_k%d_alpha0.00_ntop%s_alpha0.pdf",
-                          k_i, ntop_label)
+        fname <- sprintf("cutpoint_k%d_alpha0.00_ntop%s_lam%.2f_nu%.3f_alpha0.pdf",
+                          k_i, ntop_label, lambda_i, nu_i)
         fpath <- file.path(out_dir, fname)
 
         p <- plot_cutpoint_curves(cp_data, k_i, 0, ntop_i,
@@ -616,12 +649,15 @@ list(
         row <- cv_grid_alpha0[i, ]
         k_i <- row$k
         ntop_i <- row$ntop
+        lambda_i <- row$lambda
+        nu_i <- row$nu
 
         fit_entry <- NULL
         for (fe in cv_grid_fit) {
           if (is.null(fe)) next
           fe_ntop <- if (is.null(fe$ntop)) NA_real_ else as.numeric(fe$ntop)
           if (fe$k == k_i && fe$alpha == 0 &&
+              fe$lambda == lambda_i && fe$nu == nu_i &&
               (is.na(ntop_i) && is.na(fe_ntop) ||
                !is.na(ntop_i) && !is.na(fe_ntop) && fe_ntop == ntop_i)) {
             fit_entry <- fe
@@ -643,11 +679,14 @@ list(
         }
 
         ntop_label <- if (is.na(ntop_i)) "ALL" else as.character(ntop_i)
-        fname <- sprintf("km_train_k%d_alpha0.00_ntop%s_alpha0.pdf",
-                          k_i, ntop_label)
+        fname <- sprintf("km_train_k%d_alpha0.00_ntop%s_lam%.2f_nu%.3f_alpha0.pdf",
+                          k_i, ntop_label, lambda_i, nu_i)
         fpath <- file.path(out_dir, fname)
-        save_ggsurvplot(p, fpath, width = 7, height = 5)
-        paths[i] <- fpath
+        tryCatch(
+          save_ggsurvplot(p, fpath, width = 7, height = 5),
+          error = function(e) message(sprintf("save failed %s: %s", fpath, e$message))
+        )
+        paths[i] <- if (file.exists(fpath)) fpath else NA_character_
       }
 
       paths[!is.na(paths)]
@@ -668,12 +707,15 @@ list(
         row <- cv_grid_alpha0[i, ]
         k_i <- row$k
         ntop_i <- row$ntop
+        lambda_i <- row$lambda
+        nu_i <- row$nu
 
         fit_entry <- NULL
         for (fe in cv_grid_fit) {
           if (is.null(fe)) next
           fe_ntop <- if (is.null(fe$ntop)) NA_real_ else as.numeric(fe$ntop)
           if (fe$k == k_i && fe$alpha == 0 &&
+              fe$lambda == lambda_i && fe$nu == nu_i &&
               (is.na(ntop_i) && is.na(fe_ntop) ||
                !is.na(ntop_i) && !is.na(fe_ntop) && fe_ntop == ntop_i)) {
             fit_entry <- fe
@@ -691,20 +733,29 @@ list(
                                    ds_name)
           if (is.null(p)) next
 
-          fname <- sprintf("km_val_k%d_alpha0.00_ntop%s_alpha0_%s.pdf",
-                            k_i, ntop_label, ds_name)
+          fname <- sprintf("km_val_k%d_alpha0.00_ntop%s_lam%.2f_nu%.3f_alpha0_%s.pdf",
+                            k_i, ntop_label, lambda_i, nu_i, ds_name)
           fpath <- file.path(out_dir, fname)
-          save_ggsurvplot(p, fpath, width = 7, height = 5)
-          paths <- c(paths, fpath)
+          tryCatch(
+            save_ggsurvplot(p, fpath, width = 7, height = 5),
+            error = function(e) message(sprintf("save failed %s: %s", fpath, e$message))
+          )
+          if (file.exists(fpath)) paths <- c(paths, fpath)
         }
 
-        p_pooled <- plot_km_validation_pooled(fit_entry, cv_grid_val_data_surv)
+        p_pooled <- tryCatch(
+          plot_km_validation_pooled(fit_entry, cv_grid_val_data_surv),
+          error = function(e) { message(sprintf("pooled plot failed: %s", e$message)); NULL }
+        )
         if (!is.null(p_pooled)) {
-          fname <- sprintf("km_val_k%d_alpha0.00_ntop%s_alpha0_pooled.pdf",
-                            k_i, ntop_label)
+          fname <- sprintf("km_val_k%d_alpha0.00_ntop%s_lam%.2f_nu%.3f_alpha0_pooled.pdf",
+                            k_i, ntop_label, lambda_i, nu_i)
           fpath <- file.path(out_dir, fname)
-          save_ggsurvplot(p_pooled, fpath, width = 7, height = 5)
-          paths <- c(paths, fpath)
+          tryCatch(
+            save_ggsurvplot(p_pooled, fpath, width = 7, height = 5),
+            error = function(e) message(sprintf("save failed %s: %s", fpath, e$message))
+          )
+          if (file.exists(fpath)) paths <- c(paths, fpath)
         }
       }
 

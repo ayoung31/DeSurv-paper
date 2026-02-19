@@ -2366,8 +2366,8 @@ FIGURE_TARGETS <- list(
         ) +
         scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
         labs(
-          x = "Fraction of expression variance explained",
-          y = "Δ partial log-likelihood (survival)",
+          x = "Conditional variance explained (semi-partial R\u00b2)",
+          y = "\u0394 partial log-likelihood (full vs. k\u22121 factor model)",
           color = "Method"
         ) +
         theme_classic(base_size = 10)

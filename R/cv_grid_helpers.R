@@ -1,8 +1,9 @@
-# Helper functions for CV grid search over k x alpha x ntop
+# Helper functions for CV grid search over k x alpha x ntop x lambda x nu
 #
 # This module supports _targets_cv_grid.R for exhaustive cross-validation
-# over a grid of k (2-12), alpha (0 to 0.95 by 0.05), and ntop (NULL, 300)
-# with fixed lambda=0.3, nu=0.05, lambdaW=0, lambdaH=0.
+# over a grid of k (2-12), alpha (0 to 0.95 by 0.05), ntop (NULL, 300),
+# lambda (e.g. 0.3), and nu (e.g. 0.05)
+# with fixed lambdaW=0, lambdaH=0.
 
 #' Save a ggsurvplot object to PDF
 #'
@@ -11,28 +12,39 @@
 #' @param width PDF width in inches
 #' @param height PDF height in inches
 save_ggsurvplot <- function(ggsurv, file, width = 7, height = 5) {
+  # Open the PDF device first so cowplot's internal ggplotGrob() calls
+  # (triggered by align = "v") render to a valid device rather than
+  # trying to open a headless default device.
+  grDevices::pdf(file, width = width, height = height)
+  on.exit(grDevices::dev.off(), add = TRUE)
   combined <- cowplot::plot_grid(
     ggsurv$plot, ggsurv$table,
     ncol = 1, rel_heights = c(3, 1), align = "v"
   )
-  ggplot2::ggsave(file, combined, width = width, height = height)
+  print(combined)
   invisible(file)
 }
 
-#' Create a grid of (k, alpha, ntop) parameter combinations
+#' Create a grid of (k, alpha, ntop, lambda, nu) parameter combinations
 #'
 #' @param k_values Integer vector of k values to test
 #' @param alpha_values Numeric vector of alpha values to test
 #' @param ntop_values List of ntop values to test (NULL means all genes)
-#' @return List of lists, each with $k, $alpha, and $ntop elements
+#' @param lambda_values Numeric vector of lambda values to test
+#' @param nu_values Numeric vector of nu values to test
+#' @return List of lists, each with $k, $alpha, $ntop, $lambda, $nu elements
 create_cv_grid <- function(k_values = 2:12,
                            alpha_values = seq(0, 0.95, by = 0.05),
-                           ntop_values = list(NULL)) {
-  # Build base grid of k x alpha
+                           ntop_values = list(NULL),
+                           lambda_values = c(0.3),
+                           nu_values = c(0.05)) {
+  # Build base grid of k x alpha x ntop x lambda x nu
   base_grid <- expand.grid(
     k = as.integer(k_values),
     alpha = alpha_values,
     ntop_idx = seq_along(ntop_values),
+    lambda = lambda_values,
+    nu = nu_values,
     KEEP.OUT.ATTRS = FALSE,
     stringsAsFactors = FALSE
   )
@@ -42,7 +54,9 @@ create_cv_grid <- function(k_values = 2:12,
     list(
       k = base_grid$k[i],
       alpha = base_grid$alpha[i],
-      ntop = ntop_values[[base_grid$ntop_idx[i]]]
+      ntop = ntop_values[[base_grid$ntop_idx[i]]],
+      lambda = base_grid$lambda[i],
+      nu = base_grid$nu[i]
     )
   })
 }
@@ -205,6 +219,8 @@ run_cv_grid_point <- function(data,
     k = k,
     alpha = alpha,
     ntop = ntop,
+    lambda = lambda,
+    nu = nu,
     mean_cindex = mean_ci,
     se_cindex = se_ci,
     fold_data = fold_data
@@ -225,6 +241,8 @@ aggregate_cv_grid_results <- function(result_list) {
       k = integer(),
       alpha = numeric(),
       ntop = numeric(),
+      lambda = numeric(),
+      nu = numeric(),
       mean_cindex = numeric(),
       se_cindex = numeric()
     ))
@@ -234,6 +252,8 @@ aggregate_cv_grid_results <- function(result_list) {
     k = purrr::map_int(valid_results, ~ as.integer(.x$k)),
     alpha = purrr::map_dbl(valid_results, ~ as.numeric(.x$alpha)),
     ntop = purrr::map_dbl(valid_results, ~ if (is.null(.x$ntop)) NA_real_ else as.numeric(.x$ntop)),
+    lambda = purrr::map_dbl(valid_results, ~ .x$lambda %||% NA_real_),
+    nu = purrr::map_dbl(valid_results, ~ .x$nu %||% NA_real_),
     mean_cindex = purrr::map_dbl(valid_results, ~ .x$mean_cindex %||% NA_real_),
     se_cindex = purrr::map_dbl(valid_results, ~ .x$se_cindex %||% NA_real_)
   )
@@ -335,6 +355,8 @@ fit_grid_point <- function(data, k, alpha,
     k = k,
     alpha = alpha,
     ntop = ntop,
+    lambda = lambda,
+    nu = nu,
     fit = fit,
     cindex = if (!is.null(fit)) fit$cindex else NA_real_,
     convergence = if (!is.null(fit)) fit$convergence else NA,
@@ -360,6 +382,8 @@ aggregate_cv_grid_fit_results <- function(result_list) {
       k = integer(),
       alpha = numeric(),
       ntop = numeric(),
+      lambda = numeric(),
+      nu = numeric(),
       cindex = numeric(),
       convergence = logical(),
       cutpoint_abs = numeric(),
@@ -374,6 +398,8 @@ aggregate_cv_grid_fit_results <- function(result_list) {
     k = purrr::map_int(valid_results, ~ as.integer(.x$k)),
     alpha = purrr::map_dbl(valid_results, ~ as.numeric(.x$alpha)),
     ntop = purrr::map_dbl(valid_results, ~ if (is.null(.x$ntop)) NA_real_ else as.numeric(.x$ntop)),
+    lambda = purrr::map_dbl(valid_results, ~ .x$lambda %||% NA_real_),
+    nu = purrr::map_dbl(valid_results, ~ .x$nu %||% NA_real_),
     cindex = purrr::map_dbl(valid_results, ~ .x$cindex %||% NA_real_),
     convergence = purrr::map_lgl(valid_results, ~ .x$convergence %||% NA),
     cutpoint_abs = purrr::map_dbl(valid_results, ~ .x$cutpoint_abs %||% NA_real_),
@@ -405,6 +431,7 @@ validate_grid_point <- function(grid_fit, val_datasets) {
 
   empty_result <- tibble::tibble(
     k = integer(), alpha = numeric(), ntop = numeric(),
+    lambda = numeric(), nu = numeric(),
     dataset = character(), method = character(),
     cindex = numeric(), cindex_se = numeric(),
     logrank_z = numeric(),
@@ -421,6 +448,8 @@ validate_grid_point <- function(grid_fit, val_datasets) {
   alpha_val <- as.numeric(grid_fit$alpha)
   ntop_val <- if (is.null(grid_fit$ntop)) NA_real_ else as.numeric(grid_fit$ntop)
   ntop_raw <- grid_fit$ntop
+  lambda_val <- grid_fit$lambda %||% NA_real_
+  nu_val <- grid_fit$nu %||% NA_real_
   z_cutpoint <- grid_fit$z_cutpoint %||% NA_real_
   train_lp_mean <- grid_fit$lp_mean %||% NA_real_
   train_lp_sd <- grid_fit$lp_sd %||% NA_real_
@@ -444,7 +473,9 @@ validate_grid_point <- function(grid_fit, val_datasets) {
     if (length(common_genes) < 2) {
       per_ds_rows[[ds_name]] <- tibble::tibble(
         k = rep(k_val, n_methods), alpha = rep(alpha_val, n_methods),
-        ntop = rep(ntop_val, n_methods), dataset = rep(ds_name, n_methods),
+        ntop = rep(ntop_val, n_methods),
+        lambda = rep(lambda_val, n_methods), nu = rep(nu_val, n_methods),
+        dataset = rep(ds_name, n_methods),
         method = method_names,
         cindex = rep(NA_real_, n_methods), cindex_se = rep(NA_real_, n_methods),
         logrank_z = rep(NA_real_, n_methods),
@@ -464,7 +495,9 @@ validate_grid_point <- function(grid_fit, val_datasets) {
     if (length(valid_idx) < 2) {
       per_ds_rows[[ds_name]] <- tibble::tibble(
         k = rep(k_val, n_methods), alpha = rep(alpha_val, n_methods),
-        ntop = rep(ntop_val, n_methods), dataset = rep(ds_name, n_methods),
+        ntop = rep(ntop_val, n_methods),
+        lambda = rep(lambda_val, n_methods), nu = rep(nu_val, n_methods),
+        dataset = rep(ds_name, n_methods),
         method = method_names,
         cindex = rep(NA_real_, n_methods), cindex_se = rep(NA_real_, n_methods),
         logrank_z = rep(NA_real_, n_methods),
@@ -551,7 +584,9 @@ validate_grid_point <- function(grid_fit, val_datasets) {
 
     per_ds_rows[[ds_name]] <- tibble::tibble(
       k = rep(k_val, n_methods), alpha = rep(alpha_val, n_methods),
-      ntop = rep(ntop_val, n_methods), dataset = rep(ds_name, n_methods),
+      ntop = rep(ntop_val, n_methods),
+      lambda = rep(lambda_val, n_methods), nu = rep(nu_val, n_methods),
+      dataset = rep(ds_name, n_methods),
       method = method_names,
       cindex = c(m1_cindex, m2_cindex, m3_cindex),
       cindex_se = c(m1_se, m2_se, m3_se),
@@ -575,7 +610,9 @@ validate_grid_point <- function(grid_fit, val_datasets) {
   # Pooled results
   pooled_row <- tibble::tibble(
     k = rep(k_val, n_methods), alpha = rep(alpha_val, n_methods),
-    ntop = rep(ntop_val, n_methods), dataset = rep("pooled", n_methods),
+    ntop = rep(ntop_val, n_methods),
+    lambda = rep(lambda_val, n_methods), nu = rep(nu_val, n_methods),
+    dataset = rep("pooled", n_methods),
     method = method_names,
     cindex = rep(NA_real_, n_methods), cindex_se = rep(NA_real_, n_methods),
     logrank_z = rep(NA_real_, n_methods),
@@ -729,6 +766,8 @@ evaluate_cutpoint_zscores <- function(cv_result, z_grid) {
   k_val <- cv_result$k
   alpha_val <- cv_result$alpha
   ntop_val <- if (is.null(cv_result$ntop)) NA_real_ else as.numeric(cv_result$ntop)
+  lambda_val <- cv_result$lambda %||% NA_real_
+  nu_val <- cv_result$nu %||% NA_real_
 
   rows <- vector("list", length(z_grid) * length(cv_result$fold_data))
   idx <- 0L
@@ -753,6 +792,7 @@ evaluate_cutpoint_zscores <- function(cv_result, z_grid) {
       if (length(unique(group)) < 2 || sum(event_val) == 0) {
         rows[[idx]] <- tibble::tibble(
           k = as.integer(k_val), alpha = alpha_val, ntop = ntop_val,
+          lambda = lambda_val, nu = nu_val,
           z_cutpoint = zc, fold = fi,
           cindex_dichot = NA_real_, logrank_z = NA_real_
         )
@@ -773,6 +813,7 @@ evaluate_cutpoint_zscores <- function(cv_result, z_grid) {
 
       rows[[idx]] <- tibble::tibble(
         k = as.integer(k_val), alpha = alpha_val, ntop = ntop_val,
+        lambda = lambda_val, nu = nu_val,
         z_cutpoint = zc, fold = fi,
         cindex_dichot = ci, logrank_z = lr_z
       )
@@ -793,7 +834,7 @@ evaluate_cutpoint_zscores <- function(cv_result, z_grid) {
 #'   mean_cindex_dichot, se_cindex_dichot, mean_abs_logrank_z, se_abs_logrank_z
 select_optimal_cutpoint <- function(cutpoint_summary) {
   cutpoint_summary |>
-    dplyr::group_by(k, alpha, ntop) |>
+    dplyr::group_by(k, alpha, ntop, lambda, nu) |>
     dplyr::slice_max(mean_abs_logrank_z, n = 1, with_ties = FALSE) |>
     dplyr::ungroup() |>
     dplyr::rename(optimal_z_cutpoint = z_cutpoint)
@@ -819,11 +860,11 @@ select_best_alpha_per_k <- function(cv_grid_summary) {
 
   results <- lapply(methods, function(m) {
     cv_grid_summary |>
-      dplyr::group_by(k, ntop) |>
+      dplyr::group_by(k, ntop, lambda, nu) |>
       dplyr::slice_max(.data[[m$col]], n = 1, with_ties = FALSE) |>
       dplyr::ungroup() |>
       dplyr::transmute(
-        k, ntop,
+        k, ntop, lambda, nu,
         selection_method = m$name,
         best_alpha = alpha,
         optimal_z_cutpoint,
@@ -848,7 +889,7 @@ get_alpha0_combos <- function(cv_grid_summary) {
   cv_grid_summary |>
     dplyr::filter(alpha == 0) |>
     dplyr::transmute(
-      k, ntop,
+      k, ntop, lambda, nu,
       selection_method = "alpha0",
       best_alpha = alpha,
       optimal_z_cutpoint,
@@ -1684,8 +1725,8 @@ plot_cindex_by_k <- function(cv_grid_summary,
   # --- Training data ---
   best_train <- cv_grid_best_alpha |>
     dplyr::filter(selection_method == "max_cindex") |>
-    dplyr::transmute(k, ntop, alpha = best_alpha) |>
-    dplyr::left_join(cv_grid_summary, by = c("k", "alpha", "ntop")) |>
+    dplyr::transmute(k, ntop, lambda, nu, alpha = best_alpha) |>
+    dplyr::left_join(cv_grid_summary, by = c("k", "alpha", "ntop", "lambda", "nu")) |>
     dplyr::mutate(method = "DeSurv")
 
   alpha0_train <- cv_grid_summary |>
@@ -1707,8 +1748,8 @@ plot_cindex_by_k <- function(cv_grid_summary,
 
   best_val <- cv_grid_best_alpha |>
     dplyr::filter(selection_method == "max_cindex") |>
-    dplyr::transmute(k, ntop, alpha = best_alpha) |>
-    dplyr::left_join(val_df, by = c("k", "alpha", "ntop")) |>
+    dplyr::transmute(k, ntop, lambda, nu, alpha = best_alpha) |>
+    dplyr::left_join(val_df, by = c("k", "alpha", "ntop", "lambda", "nu")) |>
     dplyr::mutate(method = "DeSurv")
 
   alpha0_val <- val_df |>
@@ -1779,6 +1820,8 @@ evaluate_cutpoint_zscores_per_factor <- function(cv_result, z_grid, k) {
   k_val <- cv_result$k
   alpha_val <- cv_result$alpha
   ntop_val <- if (is.null(cv_result$ntop)) NA_real_ else as.numeric(cv_result$ntop)
+  lambda_val <- cv_result$lambda %||% NA_real_
+  nu_val <- cv_result$nu %||% NA_real_
 
   rows <- list()
   idx <- 0L
@@ -1804,6 +1847,7 @@ evaluate_cutpoint_zscores_per_factor <- function(cv_result, z_grid, k) {
         if (length(unique(group)) < 2 || sum(event_val) == 0) {
           rows[[idx]] <- tibble::tibble(
             k = as.integer(k_val), alpha = alpha_val, ntop = ntop_val,
+            lambda = lambda_val, nu = nu_val,
             factor_id = j, z_cutpoint = zc, fold = fi,
             cindex_dichot = NA_real_, logrank_z = NA_real_
           )
@@ -1822,6 +1866,7 @@ evaluate_cutpoint_zscores_per_factor <- function(cv_result, z_grid, k) {
 
         rows[[idx]] <- tibble::tibble(
           k = as.integer(k_val), alpha = alpha_val, ntop = ntop_val,
+          lambda = lambda_val, nu = nu_val,
           factor_id = j, z_cutpoint = zc, fold = fi,
           cindex_dichot = ci, logrank_z = lr_z
         )

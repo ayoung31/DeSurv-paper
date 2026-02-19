@@ -2268,54 +2268,79 @@ compute_variance_explained <- function(X, W, H, center = FALSE) {
   # X : genes x subjects
   # W : genes x factors
   # H : factors x subjects
-  
+  #
+  # Returns semi-partial R²: fraction of total SS explained by each factor
+  # conditional on all other factors already being in the model.
+  # i.e. (RSS_{-j} - RSS_full) / SS_total, where RSS_{-j} is the residual
+  # SS from the (k-1)-factor model excluding factor j.
+
   X <- as.matrix(X)
   W <- as.matrix(W)
   H <- as.matrix(H)
-  
+
   stopifnot(nrow(X) == nrow(W))   # genes
   stopifnot(ncol(X) == ncol(H))   # subjects
   stopifnot(ncol(W) == nrow(H))   # factors
-  
+
   X_use <- X
   if (center) {
     # center each gene across subjects (rows of X)
     X_use <- t(scale(t(X_use), center = TRUE, scale = FALSE))
   }
-  
+
   total_ss <- sum(X_use^2, na.rm = TRUE)
   if (!is.finite(total_ss) || total_ss <= 0) {
     stop("Total sum-of-squares is not positive/finite.")
   }
-  
+
   k <- ncol(W)
-  
+
+  # Full reconstruction and its residual SS
+  X_hat_full <- W %*% H
+  if (center) {
+    X_hat_full <- t(scale(t(X_hat_full), center = TRUE, scale = FALSE))
+  }
+  rss_full <- sum((X_use - X_hat_full)^2, na.rm = TRUE)
+
   tibble::tibble(
     factor = seq_len(k),
     variance_explained = purrr::map_dbl(seq_len(k), function(j) {
-      X_hat_j <- W[, j, drop = FALSE] %*% H[j, , drop = FALSE]  # genes x subjects
-      
+      # Reconstruction without factor j
+      X_hat_mj <- W[, -j, drop = FALSE] %*% H[-j, , drop = FALSE]
       if (center) {
-        X_hat_j <- t(scale(t(X_hat_j), center = TRUE, scale = FALSE))
+        X_hat_mj <- t(scale(t(X_hat_mj), center = TRUE, scale = FALSE))
       }
-      
-      sum(X_hat_j^2, na.rm = TRUE) / total_ss
+      rss_mj <- sum((X_use - X_hat_mj)^2, na.rm = TRUE)
+      # Semi-partial R²: incremental SS explained by factor j / total SS
+      (rss_mj - rss_full) / total_ss
     })
   )
 }
 
 compute_survival_explained <- function(X, scores, time, event) {
-  null_fit <- coxph(Surv(time, event) ~ 1)
-  ll_null <- null_fit$loglik
-  
-  keep = intersect(rownames(X),rownames(scores))
-  XtW = t(X[keep,]) %*% scores[keep,]
-  
+  # Returns the conditional log-likelihood contribution of each factor:
+  # delta_loglik_j = loglik(full k-factor Cox) - loglik((k-1)-factor Cox excluding j)
+  # This is the Type III partial likelihood contribution of each factor.
+
+  keep <- intersect(rownames(X), rownames(scores))
+  XtW <- t(X[keep, ]) %*% scores[keep, ]   # subjects x factors
+
+  k <- ncol(XtW)
+
+  # Full model with all k factors
+  full_fit <- coxph(Surv(time, event) ~ XtW)
+  ll_full <- full_fit$loglik[2]
+
   tibble::tibble(
-    factor = seq_len(ncol(scores)),
-    delta_loglik = apply(XtW,2, function(s) {
-      fit <- coxph(Surv(time, event) ~ s)
-      fit$loglik[2] - ll_null
+    factor = seq_len(k),
+    delta_loglik = purrr::map_dbl(seq_len(k), function(j) {
+      XtW_mj <- XtW[, -j, drop = FALSE]
+      reduced_fit <- if (ncol(XtW_mj) == 0) {
+        coxph(Surv(time, event) ~ 1)
+      } else {
+        coxph(Surv(time, event) ~ XtW_mj)
+      }
+      ll_full - reduced_fit$loglik[2]
     })
   )
 }
