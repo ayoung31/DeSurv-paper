@@ -1,4 +1,33 @@
-<style>body{max-width:1400px;margin:0 auto;padding:20px;font-family:sans-serif;font-size:13px;line-height:1.5}table{border-collapse:collapse;width:100%;margin:1em 0;white-space:nowrap}th,td{border:1px solid #ddd;padding:4px 8px;text-align:left}th{background:#f5f5f5;font-weight:bold}tr:nth-child(even){background:#fafafa}h1{font-size:1.5em}h2{font-size:1.25em;border-bottom:1px solid #ccc;padding-bottom:4px}h3{font-size:1.1em}code{background:#f0f0f0;padding:1px 4px;border-radius:2px;font-size:12px}pre{background:#f0f0f0;padding:8px;overflow-x:auto;font-size:12px}</style>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>DeSurv K-Sensitivity Synthesis</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="-" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">DeSurv K-Sensitivity Synthesis</h1>
+</header>
 <h1 id="desurv-k-sensitivity-synthesis-the-icaf-coherence-story">DeSurv
 K-Sensitivity Synthesis: The iCAF Coherence Story</h1>
 <p><strong>For discussion with Jen Jen Yeh</strong> <strong>Date:
@@ -24,6 +53,28 @@ alpha held constant</strong> (lambda=0.3, nu=0.05, 100 initializations,
 ntop=NULL). This is an apples-to-apples comparison that eliminates the
 confound in the previous analysis where different K values used
 different BO-selected hyperparameters.</p>
+<h3 id="why-these-alpha-values">Why these alpha values</h3>
+<p>The cv_grid searched alpha from 0 to 0.95 in steps of 0.05. For each
+K, we selected three alpha values to examine in detail:</p>
+<ol type="1">
+<li><strong>alpha=0</strong>: Standard NMF baseline (no survival
+penalty). Included as a control to show what NMF finds without survival
+weighting.</li>
+<li><strong>CV-optimal alpha</strong>: The alpha that maximizes the mean
+5-fold cross-validated concordance index (<code>mean_cindex</code> from
+<code>select_best_alpha_per_k()</code> in the pipeline). For K=3 with
+ntop=NULL, this is <strong>alpha=0.55</strong> (mean CV c-index=0.670).
+For K=5, this is also alpha=0.55 (mean CV c-index=0.668).</li>
+<li><strong>Validation-optimal alpha</strong>: The alpha that maximizes
+the pooled external validation c-index using the
+<code>transfer_beta</code> method (project training betas onto
+validation H-scores, from <code>cv_grid_val_summary</code>). For K=3,
+this is <strong>alpha=0.35</strong> (pooled val c-index=0.646). For K=5,
+this is <strong>alpha=0.25</strong>.</li>
+</ol>
+<p>For K=2, we used alpha=0.35 and alpha=0.55 to match the K=3 values,
+since K=2’s validation-optimal and CV-optimal happen to coincide at
+alpha=0.55.</p>
 <p><strong>All results are validated in 570 independent
 patients</strong> across 4 external cohorts (Dijk, Moffitt GEO, Puleo,
 PACA-AU), using <code>strata(dataset)</code> to account for
@@ -921,3 +972,5 @@ subtypes (proCAF vs restCAF). Based on CAF gene expression.</li>
 from Peng et al. Provides Immune, BasalTumor, ClassicalTumor,
 ActivatedStroma, and NormalStroma gene lists.</li>
 </ul>
+</body>
+</html>

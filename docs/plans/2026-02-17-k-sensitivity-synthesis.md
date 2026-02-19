@@ -24,6 +24,28 @@ exhaustive search, with **all hyperparameters except K and alpha held constant**
 apples-to-apples comparison that eliminates the confound in the previous
 analysis where different K values used different BO-selected hyperparameters.
 
+### Why these alpha values
+
+The cv_grid searched alpha from 0 to 0.95 in steps of 0.05. For each K, we
+selected three alpha values to examine in detail:
+
+1. **alpha=0**: Standard NMF baseline (no survival penalty). Included as
+   a control to show what NMF finds without survival weighting.
+2. **CV-optimal alpha**: The alpha that maximizes the mean 5-fold
+   cross-validated concordance index (`mean_cindex` from
+   `select_best_alpha_per_k()` in the pipeline). For K=3 with ntop=NULL,
+   this is **alpha=0.55** (mean CV c-index=0.670). For K=5, this is also
+   alpha=0.55 (mean CV c-index=0.668).
+3. **Validation-optimal alpha**: The alpha that maximizes the pooled
+   external validation c-index using the `transfer_beta` method (project
+   training betas onto validation H-scores, from `cv_grid_val_summary`).
+   For K=3, this is **alpha=0.35** (pooled val c-index=0.646). For K=5,
+   this is **alpha=0.25**.
+
+For K=2, we used alpha=0.35 and alpha=0.55 to match the K=3 values,
+since K=2's validation-optimal and CV-optimal happen to coincide at
+alpha=0.55.
+
 **All results are validated in 570 independent patients** across 4 external
 cohorts (Dijk, Moffitt GEO, Puleo, PACA-AU), using `strata(dataset)` to account
 for cohort-specific baseline hazards and adjusting for PurIST + DeCAF classifiers.
