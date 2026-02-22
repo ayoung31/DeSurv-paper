@@ -89,10 +89,8 @@ upper = plot_grid(fig_residuals_tcgacptac,
                   ncol = 3,
                   labels = c("A","B","C"))
 
-k_hist = plot_grid(alt_plots$k_hist,NULL,nrow=2,rel_heights = c(4,1))
-
 lower = plot_grid(fig_bo_heat_tcgacptac,
-                  k_hist,ncol=2,labels=c("D","E"),rel_widths = c(3,2))
+                  alt_plots$k_hist,ncol=2,labels=c("D","E"),rel_widths = c(3,2))
 
 plot_grid(upper,lower,nrow=2,rel_heights = c(2,3))
 
@@ -144,8 +142,7 @@ right = plot_grid(fig_variation_explained_tcgacptac +
           bottom_right,
           nrow=2,labels=c("C","D"),
           rel_heights = c(3,2))
-legend = get_legend(fig_gene_overlap_heatmap_desurv_tcgacptac)
-plot_grid(fig_gene_overlap_heatmap_std_desurvk_tcgacptac + theme(legend.position = "none"),fig_gene_overlap_heatmap_desurv_tcgacptac,right,ncol=3,labels=c("A","B",""),rel_widths = c(2.5,2.5,3))
+plot_grid(fig_gene_overlap_heatmap_std_desurvk_tcgacptac,fig_gene_overlap_heatmap_desurv_tcgacptac,right,ncol=3,labels=c("A","B",""),rel_widths = c(2.5,3,3))
 
 ```
 
@@ -213,10 +210,35 @@ stack_surv <- function(surv_obj, keep_legend = FALSE) {
 # Keep legend only once (B), remove from C to reduce clutter
 # -------------------------
 med_desurv <- fig_median_survival_desurv_tcgacptac
-mid  <- stack_surv(med_desurv, keep_legend = TRUE)
+med_std    <- fig_median_survival_std_desurvk_tcgacptac
 
-med_std <- fig_median_survival_std_desurvk_tcgacptac
-right <- stack_surv(med_std, keep_legend = FALSE)
+# Both KM panels without inline legend (equal plot heights)
+mid   <- stack_surv(med_desurv, keep_legend = FALSE)
+right <- stack_surv(med_std,    keep_legend = FALSE)
+
+# Shared strata legend spanning both B and C
+shared_legend <- get_legend(
+  med_desurv$plot +
+    theme_pnas +
+    theme(legend.position = "bottom") +
+    guides(color = guide_legend(nrow = 1, title = "Strata"))
+)
+
+# B and C side-by-side
+bc <- plot_grid(
+  mid, right,
+  ncol = 2,
+  labels = c("B", "C"),
+  label_size = 14,
+  label_fontface = "bold",
+  label_x = 0.02,
+  label_y = 0.98,
+  hjust = 0,
+  vjust = 1
+)
+
+# Add shared legend below B+C
+bc_with_legend <- plot_grid(bc, shared_legend, ncol = 1, rel_heights = c(12, 1))
 
 # -------------------------
 # Panel A (forest): nicer spacing + readable y labels + stable margins
@@ -235,17 +257,17 @@ left <- fig_hr_forest_tcgacptac +
   theme(
     legend.position = "bottom",
     axis.title.y = element_blank(),
-    plot.margin = margin(6, 12, 6, 6)
+    plot.margin = margin(6, 20, 6, 6)
   )
 
 # -------------------------
 # Build the 3-panel figure with consistent label placement
 # -------------------------
 plot_grid(
-  left, mid, right,
+  left, bc_with_legend,
   nrow = 1,
-  rel_widths = c(3.2, 2.2, 2.2),
-  labels = c("A", "B", "C"),
+  rel_widths = c(3.2, 4.4),
+  labels = c("A", ""),
   label_size = 14,
   label_fontface = "bold",
   label_x = 0.02,
@@ -316,6 +338,8 @@ splot = ggsurvplot(sfit,data=df,risk.table = TRUE,
            xlab = "Time (months)",
            palette = c("violetred2","turquoise4"),
            break.time.by = 5,
+           legend = "bottom",
+           legend.title = "Strata",
            legend.labs=c('Low (< median)','High (≥ median)'),
            risk.table.y.text=FALSE,
            censor.size=2,

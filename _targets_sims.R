@@ -1156,6 +1156,61 @@ format_result_params <- function(params) {
   paste(pieces, collapse = ", ")
 }
 
+compute_sim_variance_survival_df <- function(fit, processed) {
+  # Compute per-factor variance explained and survival contribution for one
+  # simulation replicate.
+  #
+  # Returns a tibble with columns: factor, variance_explained, delta_loglik.
+  # Returns NULL silently on any error or missing data so that the calling
+  # summarize_simulation_results() is never interrupted.
+  tryCatch({
+    if (is.null(fit) || is.null(fit$W) || is.null(fit$H)) return(NULL)
+    train  <- processed$train %||% processed
+    X      <- as.matrix(train$ex)
+    W      <- as.matrix(fit$W)
+    H      <- as.matrix(fit$H)
+    time   <- train$sampInfo$time
+    event  <- train$sampInfo$event
+    if (is.null(X) || is.null(time) || is.null(event)) return(NULL)
+    if (nrow(X) != nrow(W) || ncol(X) != ncol(H) || ncol(W) != nrow(H)) {
+      return(NULL)
+    }
+    k <- ncol(W)
+    if (k == 0L) return(NULL)
+
+    # --- Variance explained (semi-partial R², leave-one-out) ---
+    total_ss   <- sum(X^2, na.rm = TRUE)
+    if (!is.finite(total_ss) || total_ss <= 0) return(NULL)
+    X_hat_full <- W %*% H
+    rss_full   <- sum((X - X_hat_full)^2, na.rm = TRUE)
+    var_exp <- vapply(seq_len(k), function(j) {
+      X_hat_mj <- W[, -j, drop = FALSE] %*% H[-j, , drop = FALSE]
+      rss_mj   <- sum((X - X_hat_mj)^2, na.rm = TRUE)
+      (rss_mj - rss_full) / total_ss
+    }, numeric(1))
+
+    # --- Survival contribution (Type III partial log-likelihood) ---
+    XtW      <- t(X) %*% W   # subjects × factors
+    full_fit <- survival::coxph(survival::Surv(time, event) ~ XtW)
+    ll_full  <- full_fit$loglik[2]
+    delta_ll <- vapply(seq_len(k), function(j) {
+      XtW_mj <- XtW[, -j, drop = FALSE]
+      reduced <- if (ncol(XtW_mj) == 0L) {
+        survival::coxph(survival::Surv(time, event) ~ 1)
+      } else {
+        survival::coxph(survival::Surv(time, event) ~ XtW_mj)
+      }
+      ll_full - reduced$loglik[2]
+    }, numeric(1))
+
+    tibble::tibble(
+      factor             = seq_len(k),
+      variance_explained = var_exp,
+      delta_loglik       = delta_ll
+    )
+  }, error = function(e) NULL)
+}
+
 summarize_simulation_results <- function(result_list) {
   empty_tbl <- tibble::tibble(
     scenario_id = character(),
@@ -1282,6 +1337,15 @@ summarize_simulation_results <- function(result_list) {
     result_tbl$truth,
     summary_tbl$learned_top_genes,
     compute_global_marker_recall
+  )
+  summary_tbl$variance_survival_df <- purrr::map(
+    seq_len(nrow(result_tbl)),
+    function(i) {
+      compute_sim_variance_survival_df(
+        fit       = result_tbl$fit[[i]],
+        processed = result_tbl$processed[[i]]
+      )
+    }
   )
   param_names <- result_tbl$params %>%
     purrr::map(names) %>%
@@ -1592,13 +1656,28 @@ targets_list <- list(
     iteration = "list",
     resources =
       tar_resources(crew =
-                      tar_resources_crew(controller = "sim_analysis"))
+                      tar_resources_crew(controller = "sim_analysis")),
+    cue = tar_cue(mode = "never")
   ),
   tar_target(
     sim_results_table,
     {
       summarize_simulation_results(sim_analysis_result)
     }
+  ),
+  tar_target(
+    fig_sim_variance_survival,
+    plot_sim_variance_survival(sim_results_table)
+  ),
+  tar_target(
+    fig_sim_variance_survival_file,
+    save_sim_plot(
+      fig_sim_variance_survival,
+      file.path(SIM_FIGURE_DIR, "sim_variance_survival.pdf"),
+      width = 7.5,
+      height = 4.5
+    ),
+    format = "file"
   ),
   tar_target(
     sim_figs_by_scenario,

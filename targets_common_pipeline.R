@@ -2198,7 +2198,8 @@ FIGURE_TARGETS <- list(
     fig_gene_overlap_heatmap_desurv,
     {
       browser()
-      p = make_gene_overlap_heatmap(tar_fit_desurv,tar_tops_desurv$top_genes,top_genes)
+      p = make_gene_overlap_heatmap(tar_fit_desurv,tar_tops_desurv$top_genes,top_genes,
+                                    factor_labels = FIGURE_CONFIGS$heatmap_factor_labels[[bo_label]])
       save_plot_pdf(
         p,
         file.path(
@@ -2303,7 +2304,8 @@ FIGURE_TARGETS <- list(
     {
       p = make_gene_overlap_heatmap(fit_std_desurvk,
                                     tar_tops_std_desurvk$top_genes,
-                                    top_genes)
+                                    top_genes,
+                                    show_legend = FALSE)
       save_plot_pdf(
         p,
         file.path(
@@ -2366,8 +2368,8 @@ FIGURE_TARGETS <- list(
         ) +
         scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
         labs(
-          x = "Conditional variance explained (semi-partial R\u00b2)",
-          y = "\u0394 partial log-likelihood (full vs. k\u22121 factor model)",
+          x = "Conditional variance explained\n(semi-partial R\u00b2)",
+          y = "\u0394 partial log-likelihood\n(full vs. k\u22121 factor model)",
           color = "Method"
         ) +
         theme_classic(base_size = 10)

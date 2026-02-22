@@ -537,18 +537,30 @@ make_gp_curve_plot_combined <- function(curve_df) {
 }
 
 make_nmf_metric_plot <- function(fit_std, metric) {
-  plot(
+  p <- plot(
     fit_std,
     what = metric,
     main = NULL,
     xlab = "Rank (k)"
   ) +
     ggplot2::theme_minimal(base_size = 9) +
-    ggplot2::theme(
-      panel.grid.minor.x = ggplot2::element_blank(),
-      legend.position = "none"
-    ) +
+    ggplot2::theme(panel.grid.minor.x = ggplot2::element_blank()) +
     ggplot2::scale_x_continuous(breaks = seq(2, 12, by = 2))
+
+  if (metric == "silhouette") {
+    # Show legend for 3 distance-metric curves; use a palette distinct from
+    # the single-line color used in the cophenetic/residuals panels.
+    p <- p +
+      ggplot2::scale_color_brewer(palette = "Set2") +
+      ggplot2::theme(
+        legend.position = "bottom",
+        legend.title    = ggplot2::element_blank(),
+        legend.text     = ggplot2::element_text(size = 7)
+      )
+  } else {
+    p <- p + ggplot2::theme(legend.position = "none")
+  }
+  p
 }
 
 build_fig_bo_panels <- function(bo_history_path, bo_history_alpha0_path, bo_results_supervised,
@@ -647,7 +659,7 @@ make_ora_dotplots = function(ora_analysis){
   p1
 }
 
-make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref){
+make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref, show_legend = TRUE, factor_labels = NULL){
   
   if (is.null(top_genes_ref) || !length(top_genes_ref)) {
     stop("Reference gene signatures are missing.")
@@ -719,8 +731,10 @@ make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref){
   sig[p_mat_adj < .1] = "*"
   
   colnames(mat) = paste0("F",1:ncol(mat))
+  if (!is.null(factor_labels) && length(factor_labels) == ncol(mat)) {
+    colnames(mat) <- factor_labels
+  }
 
-  
   my_colors <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
   ph <- pheatmap::pheatmap(
     mat,
@@ -734,11 +748,12 @@ make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref){
     silent = TRUE,
     fontsize_number = 20,
     treeheight_row = 0,
-    show_colnames = TRUE
+    show_colnames = TRUE,
+    legend = show_legend
   )
   ph_grob <- ph$gtable
-  
-  pheat <- cowplot::plot_grid(NULL, cowplot::ggdraw(ph_grob), nrow = 2, rel_heights = c(0.25, 4)) 
+
+  pheat <- cowplot::plot_grid(NULL, cowplot::ggdraw(ph_grob), nrow = 2, rel_heights = c(0.25, 4))
   pheat
 }
 
@@ -2418,6 +2433,9 @@ splot_median = function(data_val_filtered,tar_fit_desurv,factor){
     hr_summary[1, "lower .95"],
     hr_summary[1, "upper .95"]
   )
+  lr_test = survdiff(Surv(time,event)~factor,data=df)
+  p_val = 1 - pchisq(lr_test$chisq, df = 1)
+  p_label = if (p_val < 0.001) "Log-rank p < 0.001" else sprintf("Log-rank p = %.3f", p_val)
 
   splot = ggsurvplot(sfit,data=df,risk.table = TRUE,
                      xlab = "Time (months)",
@@ -2428,11 +2446,21 @@ splot_median = function(data_val_filtered,tar_fit_desurv,factor){
                      censor.size=2,
                      font.main=12)
   splot$plot = splot$plot +
-    geom_text(
-      x = max(splot$data.survtable$time, na.rm = TRUE) * 0.7,
-      y = 0.85,
-      size = 4,
+    ggplot2::annotate(
+      "text",
+      x     = 0,
+      y     = 0.12,
+      hjust = 0,
+      size  = 2.5,
       label = hr_label
+    ) +
+    ggplot2::annotate(
+      "text",
+      x     = 0,
+      y     = 0.05,
+      hjust = 0,
+      size  = 2.5,
+      label = p_label
     )
 
   splot

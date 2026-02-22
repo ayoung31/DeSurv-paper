@@ -302,6 +302,120 @@ save_sim_figs_by_scenario = function(sim_figs,sim_dir,figure_configs){
   paths
 }
 
+get_best_matched_factor_index <- function(lfm) {
+  # From a lethal_factor_metrics tibble (per_program_tbl), returns the
+  # learned_factor_index with the highest precision against the first true
+  # prognostic program.  Returns NA_integer_ when no prognostic programs exist
+  # (e.g., null scenario) so callers can label all factors as non-prognostic.
+  if (is.null(lfm) || !inherits(lfm, "data.frame") || !nrow(lfm)) {
+    return(NA_integer_)
+  }
+  pf <- lfm$per_factor_stats[[1]]
+  if (is.null(pf) || !inherits(pf, "data.frame") || !nrow(pf)) {
+    return(NA_integer_)
+  }
+  idx <- which.max(pf$precision)
+  if (!length(idx)) return(NA_integer_)
+  pf$learned_factor_index[idx]
+}
+
+plot_sim_variance_survival <- function(
+    sim_results_table,
+    analysis_ids = c("bo", "bo_alpha0"),
+    base_size = 11) {
+  # Build a 2×3 facet scatter (method × scenario) showing per-factor
+  # variance explained vs. survival contribution (delta log-likelihood),
+  # coloured by whether each learned factor was matched to the true prognostic
+  # program.  Intended as a supplementary figure grounding Fig 4C in simulations.
+
+  tbl <- sim_results_table
+  if (!is.null(analysis_ids)) {
+    tbl <- tbl[tbl$analysis_id %in% analysis_ids, , drop = FALSE]
+  }
+  has_vs <- !purrr::map_lgl(tbl$variance_survival_df, is.null)
+  if (!any(has_vs)) {
+    message("plot_sim_variance_survival: no variance_survival_df data available.")
+    return(NULL)
+  }
+  tbl <- tbl[has_vs, , drop = FALSE]
+
+  # Expand list column to long form, attaching metadata and prognostic label
+  df <- purrr::map_dfr(seq_len(nrow(tbl)), function(i) {
+    vs <- tbl$variance_survival_df[[i]]
+    if (is.null(vs) || !nrow(vs)) return(NULL)
+    best_idx        <- get_best_matched_factor_index(tbl$lethal_factor_metrics[[i]])
+    vs$scenario_id  <- tbl$scenario_id[i]
+    vs$analysis_id  <- tbl$analysis_id[i]
+    vs$alpha        <- tbl$alpha[i]
+    vs$is_prognostic <- !is.na(best_idx) & (vs$factor == best_idx)
+    vs
+  })
+
+  if (!nrow(df)) return(NULL)
+
+  df <- df |>
+    dplyr::mutate(
+      method = dplyr::if_else(alpha == 0, "Standard NMF", "DeSurv"),
+      method = factor(method, levels = c("DeSurv", "Standard NMF")),
+      scenario_label = dplyr::case_when(
+        scenario_id %in% names(sim_scenario_labels) ~ sim_scenario_labels[scenario_id],
+        TRUE ~ scenario_id
+      )
+    )
+
+  # Facet order: Null → Primary → Mixed (increasing survival signal)
+  ordered_labels <- c("Null", "Primary", "Mixed")
+  present <- ordered_labels[ordered_labels %in% unique(df$scenario_label)]
+  extra   <- setdiff(unique(df$scenario_label), ordered_labels)
+  df$scenario_label <- factor(df$scenario_label, levels = c(present, extra))
+
+  df$factor_type <- factor(
+    dplyr::if_else(
+      df$is_prognostic,
+      "Prognostic (ground truth)",
+      "Non-prognostic (ground truth)"
+    ),
+    levels = c("Prognostic (ground truth)", "Non-prognostic (ground truth)")
+  )
+
+  ggplot2::ggplot(df, ggplot2::aes(
+    x     = variance_explained,
+    y     = delta_loglik,
+    color = factor_type,
+    shape = factor_type
+  )) +
+    ggplot2::geom_hline(
+      yintercept = 0, linetype = "dashed",
+      color = "grey60", linewidth = 0.4
+    ) +
+    ggplot2::geom_point(alpha = 0.20, size = 0.9) +
+    ggplot2::stat_summary(
+      fun = median, geom = "point",
+      size = 3.0, stroke = 1.5
+    ) +
+    ggplot2::scale_color_manual(
+      values = c(
+        "Prognostic (ground truth)"     = "#e31a1c",
+        "Non-prognostic (ground truth)" = "grey50"
+      )
+    ) +
+    ggplot2::scale_shape_manual(
+      values = c(
+        "Prognostic (ground truth)"     = 16,
+        "Non-prognostic (ground truth)" = 1
+      )
+    ) +
+    ggplot2::facet_grid(method ~ scenario_label) +
+    ggplot2::labs(
+      x     = "Fraction of expression variance explained",
+      y     = "Survival contribution (\u0394 log-likelihood)",
+      color = NULL,
+      shape = NULL
+    ) +
+    sim_pub_theme(base_size = base_size) +
+    ggplot2::theme(legend.position = "bottom")
+}
+
 if (interactive()) {
   library(targets)
   tar_load_globals(script = "_targets_sims.R")

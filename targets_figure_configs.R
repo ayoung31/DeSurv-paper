@@ -9,6 +9,9 @@ targets_figure_configs <- function() {
       run_key = "tcgacptac",
       val_key = "tcgacptac"
     ),
+    heatmap_factor_labels = list(
+      tcgacptac = c("Classical/Immune", "Microenvironmental", "Basal-like")
+    ),
     sc_data_paths = list(
       all = "data/derv/Elyada_umap.Rds",
       caf = "data/derv/Elyada_caf_umap.Rds",
