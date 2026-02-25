@@ -1178,6 +1178,55 @@ COMMON_DESURV_RUN_TARGETS <- list(
   ),
 
   tar_target(
+    fig_cutpoint_curves_std_elbowk,
+    {
+      out_dir <- "figures"
+      dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+
+      p_cindex <- plot_cutpoint_curve_cindex(
+        std_elbowk_cutpoint_summary,
+        k = std_nmf_selected_k, alpha = 0, ntop = NA_real_,
+        optimal_z = std_elbowk_optimal_z_cutpoint_cindex
+      )
+      fpath_cindex <- file.path(out_dir, sprintf("cutpoint_curve_std_elbowk_cindex_%s.pdf", bo_label))
+      ggplot2::ggsave(fpath_cindex, p_cindex, width = 5, height = 4)
+
+      p_logrank <- plot_cutpoint_curve_logrank(
+        std_elbowk_cutpoint_summary,
+        k = std_nmf_selected_k, alpha = 0, ntop = NA_real_,
+        optimal_z = std_elbowk_optimal_z_cutpoint
+      )
+      fpath_logrank <- file.path(out_dir, sprintf("cutpoint_curve_std_elbowk_logrank_%s.pdf", bo_label))
+      ggplot2::ggsave(fpath_logrank, p_logrank, width = 5, height = 4)
+
+      c(fpath_cindex, fpath_logrank)
+    },
+    format = "file"
+  ),
+
+  tar_target(
+    std_elbowk_lp_stats,
+    {
+      lp <- compute_lp(
+        fit_std_elbowk$W,
+        fit_std_elbowk$beta,
+        tar_data_filtered_elbowk$ex,
+        NULL
+      )
+      lp_mean <- mean(lp, na.rm = TRUE)
+      lp_sd <- sd(lp, na.rm = TRUE)
+      list(
+        lp_mean = lp_mean,
+        lp_sd = lp_sd,
+        optimal_z_cutpoint = std_elbowk_optimal_z_cutpoint,
+        cutpoint_abs = std_elbowk_optimal_z_cutpoint * lp_sd + lp_mean,
+        optimal_z_cutpoint_cindex = std_elbowk_optimal_z_cutpoint_cindex,
+        cutpoint_abs_cindex = std_elbowk_optimal_z_cutpoint_cindex * lp_sd + lp_mean
+      )
+    }
+  ),
+
+  tar_target(
     fit_std_desurvk,
     {
       # selected k model
@@ -2667,8 +2716,12 @@ FIGURE_VAL_TARGETS <- list(
       )
       
       nmf_fac = nmf_var$factor[which.max(nmf_var$delta_loglik)]
-      
+
       splot_median(data_val_filtered,fit_std_desurvk,nmf_fac)
     }
+  ),
+  tar_target(
+    fig_median_survival_std_elbowk,
+    splot_cutpoint(data_val_filtered, fit_std_elbowk, std_elbowk_lp_stats, ntop = NULL)
   )
 )

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  25 FEB 2026 10:41
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  25 FEB 2026 12:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1128,12 +1128,12 @@ File: mt-bch.cfg 2007/03/03 v1.5 microtype config. file: Bitstream Charter (RS)
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
 (hyperref)                be the same. Added a new anchor on input line 260.
 
-<../figures/model_schematic_final.pdf, id=86, 578.16pt x 505.89pt>
+<../figures/model_schematic_final.pdf, id=85, 578.16pt x 505.89pt>
 File: ../figures/model_schematic_final.pdf Graphic file (type pdf)
 <use ../figures/model_schematic_final.pdf>
 Package pdftex.def Info: ../figures/model_schematic_final.pdf  used on input line 274.
 (pdftex.def)             Requested size: 505.69467pt x 433.62885pt.
-</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf, id=90, 433.62pt x 397.485pt>
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf, id=89, 433.62pt x 397.485pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf>
 Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf  used on input line 334.
@@ -1143,7 +1143,7 @@ LaTeX Font Info:    Font shape `T1/phv/m/it' in size <7> not available
 LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
 (Font)              scaled to size 6.64998pt on input line 374.
 [2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
-</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf, id=102, 469.755pt x 216.81pt>
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf, id=101, 469.755pt x 216.81pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf>
 Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf  used on input line 395.
@@ -1151,30 +1151,28 @@ Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files
 
 LaTeX Warning: Reference `fig:varsurvival' on page 3 undefined on input line 451.
 
-</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf, id=107, 469.755pt x 325.215pt>
+
+LaTeX Warning: Reference `fig:corr' on page 3 undefined on input line 477.
+
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf, id=105, 469.755pt x 325.215pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf>
 Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf  used on input line 493.
-(pdftex.def)             Requested size: 505.69357pt x 325.23901pt.
+(pdftex.def)             Requested size: 505.69357pt x 505.929pt.
 [3]
-</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf, id=116, 469.755pt x 325.215pt>
-File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf Graphic file (type pdf)
-<use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf  used on input line 541.
-(pdftex.def)             Requested size: 505.69374pt x 350.09555pt.
-</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf, id=121, 469.755pt x 325.215pt>
+
+LaTeX Warning: Reference `fig:forest' on page 4 undefined on input line 524.
+
+</work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf, id=117, 469.755pt x 325.215pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf  used on input line 594.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf  used on input line 585.
 (pdftex.def)             Requested size: 505.69374pt x 350.09555pt.
-
-Underfull \vbox (badness 1082) has occurred while \output is active []
-
 [4]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [5]
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 880.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 871.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -1183,132 +1181,132 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 
-Overfull \hbox (17.39314pt too wide) in paragraph at lines 886--886
+Overfull \hbox (17.39314pt too wide) in paragraph at lines 877--877
 []\T1/lmtt/m/n/8 ## DeSurv git commit: 370c88aa9a89e0c71507fbb161d226c7e2e4c61f[] 
  []
 
 
-Overfull \hbox (13.14114pt too wide) in paragraph at lines 886--886
-[]\T1/lmtt/m/n/8 ## Paper git commit: 7829bcd63f8698e7210a705133040b4e93529c4b[] 
+Overfull \hbox (13.14714pt too wide) in paragraph at lines 877--877
+[]\T1/lmtt/m/n/8 ## Paper git commit: de14b81a2fbff947711c07f417793f85b22d3091[] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 891--895
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 897--902
+Underfull \hbox (badness 10000) in paragraph at lines 882--886
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 904--907
+Underfull \hbox (badness 10000) in paragraph at lines 888--893
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 909--913
+Underfull \hbox (badness 10000) in paragraph at lines 895--898
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 915--919
+Underfull \hbox (badness 10000) in paragraph at lines 900--904
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 921--926
+Underfull \hbox (badness 10000) in paragraph at lines 906--910
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 928--933
+Underfull \hbox (badness 10000) in paragraph at lines 912--917
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 935--939
+Underfull \hbox (badness 10000) in paragraph at lines 919--924
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 926--930
 
  []
 
 [6]
-Underfull \hbox (badness 10000) in paragraph at lines 941--944
+Underfull \hbox (badness 10000) in paragraph at lines 932--935
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 946--951
+Underfull \hbox (badness 10000) in paragraph at lines 937--942
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 953--957
+Underfull \hbox (badness 10000) in paragraph at lines 944--948
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 959--962
+Underfull \hbox (badness 10000) in paragraph at lines 950--953
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 964--968
+Underfull \hbox (badness 10000) in paragraph at lines 955--959
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 970--974
+Underfull \hbox (badness 10000) in paragraph at lines 961--965
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 976--980
+Underfull \hbox (badness 10000) in paragraph at lines 967--971
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 982--987
+Underfull \hbox (badness 10000) in paragraph at lines 973--978
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 989--992
+Underfull \hbox (badness 10000) in paragraph at lines 980--983
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 994--999
+Underfull \hbox (badness 10000) in paragraph at lines 985--990
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1001--1005
+Underfull \hbox (badness 10000) in paragraph at lines 992--996
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1007--1012
+Underfull \hbox (badness 10000) in paragraph at lines 998--1003
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1014--1019
+Underfull \hbox (badness 10000) in paragraph at lines 1005--1010
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1021--1026
+Underfull \hbox (badness 10000) in paragraph at lines 1012--1017
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1028--1032
+Underfull \hbox (badness 10000) in paragraph at lines 1019--1023
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1034--1039
+Underfull \hbox (badness 10000) in paragraph at lines 1025--1030
 
  []
 
@@ -1316,16 +1314,16 @@ Underfull \hbox (badness 10000) in paragraph at lines 1034--1039
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1041--1046
+Underfull \hbox (badness 10000) in paragraph at lines 1032--1037
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1048--1052
+Underfull \hbox (badness 10000) in paragraph at lines 1039--1043
 
  []
 
-[7] [8 <../figures/model_schematic_final.pdf>] [9 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf>] [10 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf> </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf>] [11 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1.pdf>] [12 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf>] 
+[7] [8 <../figures/model_schematic_final.pdf>] [9 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf>] [10 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf>] [11 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf>] [12 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf>] 
 enddocument/afterlastpage (AED): lastpage setting LastPage.
 (./paper.aux)
  ***********
@@ -1336,21 +1334,21 @@ L3 programming layer <2026-01-19>
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `paper.out' has not changed.
-(rerunfilecheck)             Checksum: B591ABECB43AF6AC1FCA2A4D03424C28;3808.
+(rerunfilecheck)             Checksum: 720DD279015B58310D37C89B07C64CD8;3808.
  ) 
 Here is how much of TeX's memory you used:
- 30915 strings out of 469471
- 579707 string characters out of 5467057
- 1033570 words of memory out of 5000000
- 58528 multiletter control sequences out of 15000+600000
- 726254 words of font info for 317 fonts, out of 8000000 for 9000
+ 30883 strings out of 469471
+ 578636 string characters out of 5467057
+ 1038490 words of memory out of 5000000
+ 58518 multiletter control sequences out of 15000+600000
+ 725426 words of font info for 304 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 117i,14n,121p,1046b,1115s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 117i,14n,121p,1425b,1115s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on paper.pdf (12 pages, 623456 bytes).
+Output written on paper.pdf (12 pages, 613917 bytes).
 PDF statistics:
- 394 PDF objects out of 1000 (max. 8388607)
- 309 compressed objects within 4 object streams
- 54 named destinations out of 1000 (max. 500000)
- 69803 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 384 PDF objects out of 1000 (max. 8388607)
+ 301 compressed objects within 4 object streams
+ 53 named destinations out of 1000 (max. 500000)
+ 69798 words of extra memory for PDF output out of 74296 (max. 10000000)
 

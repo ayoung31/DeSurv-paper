@@ -474,12 +474,12 @@ DeSurv's advantage was largest.
 
 To further characterize how the learned factor structure differs between
 DeSurv and standard NMF, we examined the correspondence between factors
-derived from the two methods (Fig. \ref{fig:bio}C). Tumor-intrinsic
-structure was largely preserved, with one DeSurv factor showing strong
-correspondence to the classical tumor-associated NMF factor. The
-microenvironmental factor identified by standard NMF mapped primarily to
-a single DeSurv factor enriched for activated immune and stromal
-programs, indicating that DeSurv refines variance-driven
+derived from the two methods (Supplementary Fig. \ref{fig:corr}).
+Tumor-intrinsic structure was largely preserved, with one DeSurv factor
+showing strong correspondence to the classical tumor-associated NMF
+factor. The microenvironmental factor identified by standard NMF mapped
+primarily to a single DeSurv factor enriched for activated immune and
+stromal programs, indicating that DeSurv refines variance-driven
 microenvironmental structure into a survival-aligned axis. Notably, the
 NMF factor dominated by exocrine expression did not correspond strongly
 to any single DeSurv factor, consistent with the suppression of
@@ -490,11 +490,11 @@ deprioritizing patterns of variation that contribute little to survival.
 
 \begin{figure*}[t]
 
-{\centering \includegraphics[width=\textwidth,height=4.5in]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1} 
+{\centering \includegraphics[width=\textwidth,height=7in]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1} 
 
 }
 
-\caption{Survival supervision reorganizes the learned factor structure relative to standard NMF in PDAC training data (TCGA and CPTAC). Both methods are compared at factorization rank $k = 3$, selected by DeSurv's Bayesian optimization; standard NMF at independently selected ranks is shown in SI Appendix. (A) Correlation of DeSurv factor gene rankings with established PDAC gene programs. (B) Corresponding correlations for standard NMF factors. Asterisks indicate significant correlations after multiple testing correction; only gene programs with $|r| > 0.2$ shown. (C) Pairwise Spearman correlation between NMF and DeSurv factor loadings ($W$ columns), showing which biological programs are preserved, reorganized, or suppressed under survival supervision. \label{fig:bio}}\label{fig:fig-bio}
+\caption{Survival-informed factorization reorganizes transcriptional structure and generalizes to independent datasets. (A) Correlation of DeSurv factor gene rankings with established pancreatic ductal adenocarcinoma (PDAC) gene programs. DeSurv isolates tumor-intrinsic classical and basal-like programs and resolves an activated immune--stromal microenvironment, while exocrine-associated expression does not dominate any factor. (B) Corresponding correlations for standard NMF. NMF recovers variance-dominant structure, including an exocrine-associated factor opposing immune and stromal signatures, a classical tumor factor, and a composite microenvironmental factor. Asterisks indicate significant correlations after multiple testing correction. Only gene lists with correlation > 0.2 included in A and B. (C) Kaplan--Meier curves for pooled validation samples stratified into high and low groups using the cross-validated optimal cutpoint applied to the DeSurv linear predictor. Clear separation of survival trajectories indicates robust out-of-sample prognostic performance. (D) Corresponding analysis for the NMF-derived factor selected using the same survival-based criterion, showing weaker discrimination between risk groups. \label{fig:bio}}\label{fig:fig-bio}
 \end{figure*}
 
 \subsection*{Survival-aligned programs generalize across independent
@@ -520,30 +520,21 @@ independent PDAC cohorts (\(n = \textrm{[TODO]}\)), the DeSurv-derived
 factor exhibited consistent survival effects, with hazard ratio
 estimates showing limited variability and predominantly protective
 associations (pooled HR \(\textrm{[TODO]}\); 95\% CI
-\(\textrm{[TODO]}\); log-rank \(P = \textrm{[TODO]}\); Fig.
-\ref{fig:extval}A). In contrast, the NMF factor identified by the same
-criterion showed greater heterogeneity across datasets and weaker
+\(\textrm{[TODO]}\); log-rank \(P = \textrm{[TODO]}\); Supplementary
+Fig. \ref{fig:forest}). In contrast, the NMF factor identified by the
+same criterion showed greater heterogeneity across datasets and weaker
 survival associations, consistent with the expectation that
 variance-driven programs capture cohort-specific variation that does not
 transfer.
 
-We pooled validation samples and stratified them into high- and
-low-score groups based on a median split of the DeSurv-derived factor,
-observing clear separation of survival trajectories (Fig.
-\ref{fig:extval}B). The same procedure applied to NMF yielded weaker
-survival stratification (Fig. \ref{fig:extval}C). These results support
-the prediction that outcome-aligned programs capture biology that
+When validation samples were pooled and stratified using the
+cross-validated optimal cutpoint applied to the DeSurv linear predictor,
+clear separation of survival trajectories was observed (Fig.
+\ref{fig:bio}C). The same procedure applied to NMF yielded weaker
+survival stratification (Fig. \ref{fig:bio}D). These results support the
+prediction that outcome-aligned programs capture biology that
 generalizes, whereas variance-driven programs may include
 cohort-specific signals that attenuate across datasets.
-
-\begin{figure*}[t]
-
-{\centering \includegraphics[width=\textwidth]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-extval-1} 
-
-}
-
-\caption{External validation of DeSurv and standard NMF prognostic factors in independent PDAC cohorts, both at factorization rank $k = 3$. (A) Forest plot of hazard ratios (HRs; 95\% CIs) for the factor with the largest training-set Cox partial log-likelihood contribution, evaluated in five held-out PDAC cohorts. DeSurv (blue) and standard NMF (red). (B) Kaplan--Meier curves for pooled validation samples stratified by median split of the DeSurv-derived factor score. (C) Corresponding median-split stratification for the standard NMF-derived factor. \label{fig:extval}}\label{fig:fig-extval}
-\end{figure*}
 
 \subsection*{A PDAC-trained program retains prognostic signal in bladder
 cancer}\label{a-pdac-trained-program-retains-prognostic-signal-in-bladder-cancer}
@@ -882,7 +873,7 @@ are available at github.com/ayoung31/DeSurv-paper.
 ## DeSurv git branch: main
 ## DeSurv git commit: 370c88aa9a89e0c71507fbb161d226c7e2e4c61f
 ## Paper git branch: main
-## Paper git commit: 7829bcd63f8698e7210a705133040b4e93529c4b
+## Paper git commit: de14b81a2fbff947711c07f417793f85b22d3091
 \end{verbatim}
 
 \phantomsection\label{refs}

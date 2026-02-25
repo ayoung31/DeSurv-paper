@@ -2574,7 +2574,7 @@ splot_cutpoint = function(data_val_filtered, tar_fit_desurv, lp_stats, ntop = NU
     ggplot2::annotate(
       "text",
       x     = x_max * 0.98,
-      y     = 0.92,
+      y     = 0.97,
       hjust = 1,
       size  = 2.5,
       label = hr_label
@@ -2582,7 +2582,7 @@ splot_cutpoint = function(data_val_filtered, tar_fit_desurv, lp_stats, ntop = NU
     ggplot2::annotate(
       "text",
       x     = x_max * 0.98,
-      y     = 0.85,
+      y     = 0.78,
       hjust = 1,
       size  = 2.5,
       label = p_label

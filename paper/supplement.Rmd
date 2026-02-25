@@ -223,3 +223,48 @@ fig_variation_explained_tcgacptac +
     axis.title         = element_text(size = 8)
   )
 ```
+
+## DeSurv and NMF factor correspondence {.unnumbered}
+
+Pairwise Spearman correlations between DeSurv and standard NMF factor scores illustrate how the two factorizations relate. Tumor-intrinsic structure is largely preserved across methods, with one DeSurv factor showing strong correspondence to the classical tumor-associated NMF factor. The microenvironmental NMF factor maps primarily to a single DeSurv factor enriched for activated immune and stromal programs. The exocrine-dominated NMF factor does not correspond strongly to any single DeSurv factor, consistent with the suppression of differentiation-driven signals under survival-informed optimization (Fig. \ref{fig:corr}).
+
+```{r fig-corr, fig.width = 5, fig.height = 3.5, fig.cap = "Pairwise correspondence between NMF and DeSurv factors, measured by Spearman rank correlation of factor scores across training samples. Tumor-intrinsic structure is preserved across methods, while variance-driven microenvironmental structure is reorganized into a survival-aligned axis; the exocrine-dominated NMF factor shows no strong one-to-one correspondence with any DeSurv factor. \\label{fig:corr}", fig.env='figure', fig.pos='t'}
+library(cowplot)
+tar_load(fig_desurv_std_correlation_tcgacptac)
+cowplot::plot_grid(
+  fig_desurv_std_correlation_tcgacptac$plot,
+  cowplot::ggdraw(fig_desurv_std_correlation_tcgacptac$legend),
+  ncol = 2, rel_widths = c(4, 1)
+)
+```
+
+## Per-cohort hazard ratios for the most prognostic factor {.unnumbered}
+
+Hazard ratios for the factor with the largest training-data Cox partial log-likelihood improvement were estimated separately in each external validation cohort. DeSurv-derived factor hazard ratio estimates are more stable across cohorts than those from the corresponding standard NMF factor (Fig. \ref{fig:forest}).
+
+```{r fig-forest, fig.width = 5, fig.height = 3.5, fig.cap = "Forest plot summarizing per-cohort hazard ratios (HRs; 95\\% CIs) for the latent factor most predictive of survival in the training data, evaluated in held-out validation datasets. Estimates from DeSurv (blue) show more consistent and predominantly protective associations across cohorts compared with standard NMF (red). \\label{fig:forest}", fig.env='figure', fig.pos='t'}
+library(cowplot)
+library(ggplot2)
+tar_load(fig_hr_forest_tcgacptac)
+base_size <- 10
+theme_pnas <- theme_classic(base_size = base_size) +
+  theme(
+    plot.margin = margin(6, 10, 6, 6),
+    legend.box.margin = margin(0, 0, 0, 0)
+  )
+fig_hr_forest_tcgacptac +
+  scale_y_discrete(
+    labels = c(
+      "Puleo_array"       = "Puleo",
+      "Dijk"              = "Dijk",
+      "PACA_AU_seq"       = "PACA seq",
+      "PACA_AU_array"     = "PACA array",
+      "Moffitt_GEO_array" = "Moffitt"
+    )
+  ) +
+  theme_pnas +
+  theme(
+    legend.position = "bottom",
+    axis.title.y = element_blank()
+  )
+```
