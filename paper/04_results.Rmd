@@ -126,12 +126,25 @@ tar_load(fig_gene_overlap_heatmap_std_desurvk_tcgacptac)
 tar_load(fig_variation_explained_tcgacptac)
 tar_load(fig_desurv_std_correlation_tcgacptac)
 
-fig_gene_overlap_heatmap_desurv_tcgacptac = set_fig_font(fig_gene_overlap_heatmap_desurv_tcgacptac, size = 10)
-fig_gene_overlap_heatmap_std_desurvk_tcgacptac = set_fig_font(fig_gene_overlap_heatmap_std_desurvk_tcgacptac, size = 10)
 fig_variation_explained_tcgacptac = set_fig_font(fig_variation_explained_tcgacptac, size = 10)
-fig_desurv_std_correlation_tcgacptac = set_fig_font(fig_desurv_std_correlation_tcgacptac, size = 10)
+# Unpack heatmap plots and legends from list targets
+plot_4a <- fig_gene_overlap_heatmap_desurv_tcgacptac$plot
+plot_4b <- fig_gene_overlap_heatmap_std_desurvk_tcgacptac$plot
+legend_4ab <- fig_gene_overlap_heatmap_desurv_tcgacptac$legend
+plot_4d <- fig_desurv_std_correlation_tcgacptac$plot
+legend_4d <- fig_desurv_std_correlation_tcgacptac$legend
 
-bottom_right = plot_grid(NULL,fig_desurv_std_correlation_tcgacptac,ncol=2,rel_widths = c(1,4))
+# Align 4A and 4B to identical height and width
+aligned_ab <- cowplot::align_plots(plot_4a, plot_4b, align = "hv", axis = "tblr")
+
+# Left block: 4A, 4B, then shared legend to the right (legend gets ~10% of width)
+left_block <- plot_grid(
+  aligned_ab[[1]], aligned_ab[[2]], cowplot::ggdraw(legend_4ab),
+  ncol = 3, labels = c("A", "B", ""),
+  rel_widths = c(2.5, 2.5, 0.5)
+)
+
+bottom_right = plot_grid(NULL,plot_4d,ncol=2,rel_widths = c(1,4))
 
 right = plot_grid(fig_variation_explained_tcgacptac +
                     theme(
@@ -142,7 +155,7 @@ right = plot_grid(fig_variation_explained_tcgacptac +
           bottom_right,
           nrow=2,labels=c("C","D"),
           rel_heights = c(3,2))
-plot_grid(fig_gene_overlap_heatmap_std_desurvk_tcgacptac,fig_gene_overlap_heatmap_desurv_tcgacptac,right,ncol=3,labels=c("A","B",""),rel_widths = c(2.5,3,3))
+plot_grid(left_block, right, ncol = 2, rel_widths = c(5, 3))
 
 ```
 

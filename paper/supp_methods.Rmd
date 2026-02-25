@@ -825,3 +825,53 @@ median splits of $\hat{\eta}$ within each dataset to avoid cross-cohort scaling
 differences. When multiple datasets were pooled, Cox models were stratified
 by dataset to allow cohort-specific baseline hazards. All p-values reported for
 survival differences between groups correspond to two-sided log-rank tests.
+
+\subsection{Gene Program Correlation Analysis}
+
+To assess the biological identity of learned factors, we evaluated the
+correspondence between factor-specific gene rankings and established PDAC gene
+programs. For each factor column $j$ of the gene program matrix $W$, we
+identified the top 50 genes by factor specificity score. Each column of $W$
+was first scaled by its column maximum to produce $\tilde{W}_{ij} = W_{ij} /
+\max_i W_{ij}$, placing all factors on a common $[0,1]$ scale. The
+specificity score for gene $i$ in factor $j$ was then defined as
+$$s_{ij} = \tilde{W}_{ij} - \max_{j' \neq j} \tilde{W}_{ij'}.$$
+Genes were ranked in descending order of $s_{ij}$, and the top 50 per factor
+were retained. The union of these gene sets across all factors was then
+intersected with the genes present in any reference program to form the set of
+genes used in the correlation analysis.
+
+For each factor $j$ and each reference gene program $G_k$, we computed the
+Spearman rank correlation between the continuous factor loadings $W_{\cdot j}$
+(restricted to the intersection gene set) and a binary indicator vector
+$\mathbf{1}[\text{gene} \in G_k]$. P-values were derived from the asymptotic
+approximation to the Spearman test statistic and adjusted for multiple
+comparisons using the Benjamini--Hochberg procedure applied within each factor
+column independently. Gene programs were included in the visualization only if
+at least one factor yielded a Spearman correlation exceeding 0.2. Asterisks
+($*$) indicate adjusted p-value $< 0.1$.
+
+Reference gene programs included classical and basal-like tumor cell signatures
+from Moffitt et al.\ \cite{moffitt2015virtual}; iCAF and myCAF
+cancer-associated fibroblast signatures from Elyada et al.\
+\cite{elyada2019cross}; activated (proCAF) and resting (restCAF) fibroblast
+programs from the deCAF study [CITE]; SCISSORS PDAC subtypes [CITE]; tumor,
+stromal, and immune compartment signatures from DECODER \cite{peng2019novo};
+and classical and basal-like subtype classifiers from PurIST
+\cite{rashid2020purity}. Programs from Bailey et al.\ \cite{Bailey2016},
+periductal subtypes, and MSI subtypes were excluded from visualization due to
+redundancy with other included programs or low overall correlation across all
+factors.
+
+\subsection{Factor Correspondence Analysis}
+
+To assess which biological programs are preserved, reorganized, or suppressed
+under survival supervision, we quantified the pairwise correspondence between
+NMF and DeSurv factor loadings. For each pair of factors
+$(j_{\text{NMF}},\, j_{\text{DeSurv}})$, we computed the Spearman rank
+correlation between the corresponding columns of the NMF gene program matrix
+$W_{\text{NMF}}$ and the DeSurv gene program matrix $W_{\text{DeSurv}}$,
+restricted to genes present in both models. Spearman correlation was used to
+capture monotone correspondence in gene loading ranks while remaining robust
+to scale differences between the two methods. Results are displayed as a
+heatmap with NMF factors as rows and DeSurv factors as columns (Fig.\ \ref{fig:bio}D).

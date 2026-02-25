@@ -659,8 +659,8 @@ make_ora_dotplots = function(ora_analysis){
   p1
 }
 
-make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref, show_legend = TRUE, factor_labels = NULL){
-  
+make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref, factor_labels = NULL, title = NULL){
+
   if (is.null(top_genes_ref) || !length(top_genes_ref)) {
     stop("Reference gene signatures are missing.")
   }
@@ -675,18 +675,33 @@ make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref, show_legen
   if (length(top_genes_local) >= 13) names(top_genes_local)[13] <- "SCISSORS"
   if (length(top_genes_local) >= 16) names(top_genes_local)[16] <- "SCISSORS"
   if (length(top_genes_local) >= 12) names(top_genes_local)[12] <- "Elyada"
-  
+
   temp <- purrr::list_flatten(top_genes_local)
-  ref_sigs <- temp[
-    !startsWith(names(temp), "Bailey") &
-      !grepl("peri", names(temp)) &
-      !startsWith(names(temp), "DECODER") &
-      !startsWith(names(temp), "MSI") &
-      !startsWith(names(temp), "PurISS")
-  ]
-  
+
+  # Rename entries: unique SCISSORS peri entries + MSI_Immune -> Moffitt
+  rename_map <- c(
+    "SCISSORS_CAF_vs_peri_top25_Perivascular" = "SCISSORS_Perivascular",
+    "SCISSORS_panCAF_vs_peri_top25_panCAF"    = "SCISSORS_panCAF",
+    "MSI_Immune"                              = "Moffitt_Immune"
+  )
+  to_rename <- names(temp) %in% names(rename_map)
+  names(temp)[to_rename] <- rename_map[names(temp)[to_rename]]
+
+  # Drop exact duplicates only (Jaccard = 1.0 with a retained entry)
+  drop <- c(
+    "MSI_Activated",
+    "MSI_Normal",
+    "SCISSORS_CAF_vs_peri_top25_apCAF",
+    "SCISSORS_CAF_vs_peri_top25_iCAF",
+    "SCISSORS_CAF_vs_peri_top25_myCAF",
+    "SCISSORS_panCAF_vs_peri_top25_Perivascular",
+    "PurISS.final_iCAF",
+    "PurISS.final_myCAF"
+  )
+  ref_sigs <- temp[!names(temp) %in% drop]
+
   W <- fit_desurv$W
-  
+
   tops = tops[1:50,]
 
   W <- W[unlist(tops), , drop = FALSE]
@@ -729,32 +744,71 @@ make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref, show_legen
   p_mat_adj = p_mat_adj[which(keep),,drop=FALSE]
   sig = matrix("",nrow=nrow(mat),ncol=ncol(mat))
   sig[p_mat_adj < .1] = "*"
-  
+
+  # Format row labels: "GROUP_SubtypeName" -> "GROUP: Subtype Name"
+  rownames(mat) <- vapply(rownames(mat), function(x) {
+    idx <- regexpr("_", x)
+    if (idx == -1L) return(x)
+    group <- substr(x, 1, idx - 1L)
+    sub   <- substr(x, idx + 1L, nchar(x))
+    sub   <- gsub("_", " ", sub)
+    sub   <- gsub("([a-z])([A-Z][a-z])", "\\1 \\2", sub)
+    paste0(group, ": ", sub)
+  }, character(1))
+
   colnames(mat) = paste0("F",1:ncol(mat))
   if (!is.null(factor_labels) && length(factor_labels) == ncol(mat)) {
     colnames(mat) <- factor_labels
   }
 
-  my_colors <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
-  ph <- pheatmap::pheatmap(
-    mat,
+  my_colors <- grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu")))(100)
+  ph_args <- list(
+    mat = mat,
     cluster_cols = FALSE,
-    #display_numbers = TRUE,
-    # display_numbers = sig,
-    # number_color = "white",
     color = my_colors,
-    breaks = seq(-0.6, 0.6, length.out = 101),
+    breaks = seq(-0.5, 0.5, length.out = 101),
     fontsize = 6,
     silent = TRUE,
     fontsize_number = 20,
     treeheight_row = 0,
     show_colnames = TRUE,
-    legend = show_legend
+    main = title
   )
+
+  # Render without legend for the main plot
+  ph <- do.call(pheatmap::pheatmap, c(ph_args, list(legend = FALSE)))
   ph_grob <- ph$gtable
 
+  # Build a standalone ggplot2 color bar matching the heatmap scale.
+  # cowplot::get_legend() on a ggplot object produces a correctly-sized
+  # legend grob that plot_grid can place without clipping.
+  legend_dummy <- ggplot2::ggplot(
+    data.frame(x = 0, y = seq(-0.6, 0.6, length.out = 100)),
+    ggplot2::aes(x = x, y = y, fill = y)
+  ) +
+    ggplot2::geom_tile() +
+    ggplot2::scale_fill_gradientn(
+      colors = my_colors,
+      limits = c(-0.6, 0.6),
+      breaks = c(-0.6, -0.3, 0, 0.3, 0.6),
+      name = "Spearman r"
+    ) +
+    ggplot2::guides(fill = ggplot2::guide_colorbar(
+      barwidth  = ggplot2::unit(0.3, "cm"),
+      barheight = ggplot2::unit(3,   "cm"),
+      title.position = "top",
+      title.hjust    = 0.5
+    )) +
+    ggplot2::theme_void() +
+    ggplot2::theme(
+      legend.position = "right",
+      legend.title = ggplot2::element_text(size = 6),
+      legend.text  = ggplot2::element_text(size = 6)
+    )
+  legend_gg <- cowplot::get_legend(legend_dummy)
+
   pheat <- cowplot::plot_grid(NULL, cowplot::ggdraw(ph_grob), nrow = 2, rel_heights = c(0.25, 4))
-  pheat
+  list(plot = pheat, legend = legend_gg)
 }
 
 build_fig_bio_panels <- function(ora_analysis, fit_desurv, tops_desurv, top_genes_ref) {
@@ -2428,7 +2482,7 @@ splot_median = function(data_val_filtered,tar_fit_desurv,factor){
   hr_fit = coxph(Surv(time,event)~factor,data=df)
   hr_summary = summary(hr_fit)$conf.int
   hr_label = sprintf(
-    "HR (High vs Low) = %.2f (95%% CI %.2f-%.2f)",
+    "HR (High vs Low) = %.2f\n(95%% CI %.2f-%.2f)",
     hr_summary[1, "exp(coef)"],
     hr_summary[1, "lower .95"],
     hr_summary[1, "upper .95"]
@@ -2437,28 +2491,31 @@ splot_median = function(data_val_filtered,tar_fit_desurv,factor){
   p_val = 1 - pchisq(lr_test$chisq, df = 1)
   p_label = if (p_val < 0.001) "Log-rank p < 0.001" else sprintf("Log-rank p = %.3f", p_val)
 
+  x_max = max(df$time, na.rm = TRUE)
+
   splot = ggsurvplot(sfit,data=df,risk.table = TRUE,
                      xlab = "Time (months)",
                      palette = c("violetred2","turquoise4"),
                      break.time.by = 25,
-                     legend.labs=c('Low (< median)','High (≥ median)'),
-                     risk.table.y.text=FALSE,
+                     legend.labs=c('Low','High'),
+                     risk.table.y.text=TRUE,
+                     fontsize=2.5,
                      censor.size=2,
                      font.main=12)
   splot$plot = splot$plot +
     ggplot2::annotate(
       "text",
-      x     = 0,
-      y     = 0.12,
-      hjust = 0,
+      x     = x_max * 0.98,
+      y     = 0.92,
+      hjust = 1,
       size  = 2.5,
       label = hr_label
     ) +
     ggplot2::annotate(
       "text",
-      x     = 0,
-      y     = 0.05,
-      hjust = 0,
+      x     = x_max * 0.98,
+      y     = 0.85,
+      hjust = 1,
       size  = 2.5,
       label = p_label
     )

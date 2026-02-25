@@ -126,31 +126,44 @@ At the same rank, standard NMF organized the three factors around dominant sourc
 We quantified these differences by contrasting the fraction of expression variance explained by each factor with its contribution to survival (Fig. \ref{fig:bio}C). The NMF factor explaining the largest proportion of transcriptional variance contributed little to survival, consistent with its enrichment for exocrine and composition-driven programs. In contrast, DeSurv concentrated survival signal into a single factor that explained substantially more survival association despite accounting for a smaller fraction of expression variance. Specifically, the highest-variance NMF factor explained $\textrm{[TODO]}$% of expression variance but contributed $\Delta\ell = \textrm{[TODO]}$ to survival, whereas the DeSurv factor with the largest survival contribution explained $\textrm{[TODO]}$% of variance with $\Delta\ell = \textrm{[TODO]}$. The remaining DeSurv factors contributed minimal survival signal, indicating that survival-relevant information was not diffusely distributed across factors. This result directly illustrates the misalignment between variance and prognosis anticipated by sufficient dimension reduction theory [@cook2007fisher] and observed empirically in tumor purity analyses [@aran2015systematic]: the factors that explain the most transcriptomic variation need not be the factors most associated with patient outcomes. The observed pattern in PDAC, where the highest-variance factor shows minimal survival association while other factors show partial overlap between variance and prognosis, is consistent with the intermediate regime between the primary and mixed simulation scenarios, where DeSurv's advantage was largest.
 
 To further characterize how the learned factor structure differs between DeSurv and standard NMF, we examined the correspondence between factors derived from the two methods (Fig. \ref{fig:bio}D). Tumor-intrinsic structure was largely preserved, with one DeSurv factor showing strong correspondence to the classical tumor-associated NMF factor. The microenvironmental factor identified by standard NMF mapped primarily to a single DeSurv factor enriched for activated immune and stromal programs, indicating that DeSurv refines variance-driven microenvironmental structure into a survival-aligned axis. Notably, the NMF factor dominated by exocrine expression did not correspond strongly to any single DeSurv factor, consistent with the suppression of differentiation- and composition-driven signals under survival supervision. Together, these results demonstrate that DeSurv selectively preserves tumor and microenvironmental structure while reorganizing or deprioritizing patterns of variation that contribute little to survival.
-```{r fig-bio, fig.cap="Survival supervision reorganizes the learned factor structure relative to standard NMF in PDAC training data (TCGA and CPTAC). Both methods are compared at factorization rank $k = 3$, selected by DeSurv's Bayesian optimization; standard NMF at independently selected ranks is shown in SI Appendix. (A) Correlation of DeSurv factor gene rankings with established PDAC gene programs. (B) Corresponding correlations for standard NMF factors. Asterisks indicate significant correlations after multiple testing correction; only gene programs with $|r| > 0.2$ shown. (C) Fraction of expression variance explained versus survival contribution for each factor, quantified by the change in partial log-likelihood from univariate Cox models. (D) Pairwise correlation between NMF and DeSurv factor gene rankings, showing which biological programs are preserved, reorganized, or suppressed under survival supervision. \\label{fig:bio}", fig.env='figure*', fig.pos='t', out.height= "4.5in", out.width='\\textwidth'}
+```{r fig-bio, fig.cap="Survival supervision reorganizes the learned factor structure relative to standard NMF in PDAC training data (TCGA and CPTAC). Both methods are compared at factorization rank $k = 3$, selected by DeSurv's Bayesian optimization; standard NMF at independently selected ranks is shown in SI Appendix. (A) Correlation of DeSurv factor gene rankings with established PDAC gene programs. (B) Corresponding correlations for standard NMF factors. Asterisks indicate significant correlations after multiple testing correction; only gene programs with $|r| > 0.2$ shown. (C) Fraction of expression variance explained versus survival contribution for each factor, quantified by the change in partial log-likelihood from univariate Cox models. (D) Pairwise Spearman correlation between NMF and DeSurv factor loadings ($W$ columns), showing which biological programs are preserved, reorganized, or suppressed under survival supervision. \\label{fig:bio}", fig.env='figure*', fig.pos='t', out.height= "4.5in", out.width='\\textwidth'}
 
 tar_load(fig_gene_overlap_heatmap_desurv_tcgacptac)
 tar_load(fig_gene_overlap_heatmap_std_desurvk_tcgacptac)
 tar_load(fig_variation_explained_tcgacptac)
 tar_load(fig_desurv_std_correlation_tcgacptac)
 
-fig_gene_overlap_heatmap_desurv_tcgacptac = set_fig_font(fig_gene_overlap_heatmap_desurv_tcgacptac, size = 10)
-fig_gene_overlap_heatmap_std_desurvk_tcgacptac = set_fig_font(fig_gene_overlap_heatmap_std_desurvk_tcgacptac, size = 10)
 fig_variation_explained_tcgacptac = set_fig_font(fig_variation_explained_tcgacptac, size = 10)
-fig_desurv_std_correlation_tcgacptac = set_fig_font(fig_desurv_std_correlation_tcgacptac, size = 10)
+# Unpack heatmap plots and legends from list targets
+plot_4a <- fig_gene_overlap_heatmap_desurv_tcgacptac$plot
+plot_4b <- fig_gene_overlap_heatmap_std_desurvk_tcgacptac$plot
+legend_4ab <- fig_gene_overlap_heatmap_desurv_tcgacptac$legend
+plot_4d <- fig_desurv_std_correlation_tcgacptac$plot
+legend_4d <- fig_desurv_std_correlation_tcgacptac$legend
 
-bottom_right = plot_grid(NULL,fig_desurv_std_correlation_tcgacptac,ncol=2,rel_widths = c(1,4))
+# Align 4A and 4B to identical height and width
+aligned_ab <- cowplot::align_plots(plot_4a, plot_4b, align = "hv", axis = "tblr")
+
+# Left block: 4A, 4B, then shared legend to the right (legend gets ~10% of width)
+left_block <- plot_grid(
+  aligned_ab[[1]], aligned_ab[[2]], legend_4ab,
+  ncol = 3, labels = c("A", "B", ""),
+  rel_widths = c(2.5, 2.5, 0.5)
+)
+
+bottom_right = plot_grid(NULL,plot_4d,ncol=2,rel_widths = c(1,4))
 
 right = plot_grid(fig_variation_explained_tcgacptac +
                     theme(
-                      legend.position = c(1, 0.65),   # x, y in [0,1]
+                      legend.position = c(1, 0.5),    # x, y in [0,1]
                       legend.justification = c(1, 0),   # anchor point of legend box
                       legend.background = element_rect(color="black")
                     ),
           bottom_right,
           nrow=2,labels=c("C","D"),
           rel_heights = c(3,2))
-legend = get_legend(fig_gene_overlap_heatmap_desurv_tcgacptac)
-plot_grid(fig_gene_overlap_heatmap_desurv_tcgacptac,fig_gene_overlap_heatmap_std_desurvk_tcgacptac + theme(legend.position = "none"),right,ncol=3,labels=c("A","B",""),rel_widths = c(2.5,2.5,3))
+
+plot_grid(left_block, right, ncol = 2, rel_widths = c(5, 3))
 
 ```
 
@@ -189,12 +202,14 @@ theme_pnas <- theme_classic(base_size = base_size) +
 # -------------------------
 # Helper: stack KM plot + risk table with better spacing
 # -------------------------
-stack_surv <- function(surv_obj, keep_legend = FALSE) {
+stack_surv <- function(surv_obj, keep_legend = FALSE, remove_ylab = FALSE) {
   p <- surv_obj$plot +
     theme_pnas +
     theme(
       legend.position = if (keep_legend) "bottom" else "none",
       axis.title.x = element_blank(),              # x-label goes on the table panel
+      axis.title.y = if (remove_ylab) element_blank() else element_text(),
+      axis.text.x  = element_text(size = base_size - 3),
       plot.margin = margin(6, 10, 2, 6)
     )
 
@@ -204,8 +219,8 @@ stack_surv <- function(surv_obj, keep_legend = FALSE) {
     theme(
       legend.position = "none",
       axis.title.y = element_blank(),
-      axis.text.x  = element_text(size = base_size - 1),
-      axis.text.y  = element_text(size = base_size - 1),
+      axis.text.x  = element_text(size = base_size - 4),
+      axis.text.y  = element_text(size = base_size - 4),
       plot.margin  = margin(2, 10, 6, 6)
     ) +
     labs(x = "Time (months)")
@@ -215,13 +230,45 @@ stack_surv <- function(surv_obj, keep_legend = FALSE) {
 
 # -------------------------
 # Panels B and C (KM + risk table)
-# Keep legend only once (B), remove from C to reduce clutter
+# Shared legend spanning both panels placed below
 # -------------------------
 med_desurv <- fig_median_survival_desurv_tcgacptac
-mid  <- stack_surv(med_desurv, keep_legend = TRUE)
+med_std    <- fig_median_survival_std_desurvk_tcgacptac
 
-med_std <- fig_median_survival_std_desurvk_tcgacptac
-right <- stack_surv(med_std, keep_legend = FALSE)
+mid   <- stack_surv(med_desurv, keep_legend = FALSE)
+right <- stack_surv(med_std,    keep_legend = FALSE, remove_ylab = TRUE)
+
+# Shared strata legend: built from a simple dummy ggplot for reliability
+leg_df <- data.frame(
+  x = 1:2, y = 1:2,
+  Strata = factor(c("Low (< median)", "High (\u2265 median)"),
+                  levels = c("Low (< median)", "High (\u2265 median)"))
+)
+shared_legend <- cowplot::get_legend(
+  ggplot2::ggplot(leg_df, ggplot2::aes(x = x, y = y, color = Strata)) +
+    ggplot2::geom_line(linewidth = 1) +
+    ggplot2::scale_color_manual(
+      values = c("Low (< median)" = "violetred2", "High (\u2265 median)" = "turquoise4"),
+      name = "Strata"
+    ) +
+    theme_pnas +
+    ggplot2::theme(legend.position = "bottom") +
+    ggplot2::guides(color = ggplot2::guide_legend(nrow = 1))
+)
+
+bc <- plot_grid(
+  mid, right,
+  ncol = 2,
+  labels = c("B", "C"),
+  label_size = 14,
+  label_fontface = "bold",
+  label_x = 0.02,
+  label_y = 0.98,
+  hjust = 0,
+  vjust = 1
+)
+
+bc_with_legend <- plot_grid(bc, shared_legend, ncol = 1, rel_heights = c(10, 1))
 
 # -------------------------
 # Panel A (forest): nicer spacing + readable y labels + stable margins
@@ -247,10 +294,10 @@ left <- fig_hr_forest_tcgacptac +
 # Build the 3-panel figure with consistent label placement
 # -------------------------
 plot_grid(
-  left, mid, right,
+  left, bc_with_legend,
   nrow = 1,
-  rel_widths = c(3.2, 2.2, 2.2),
-  labels = c("A", "B", "C"),
+  rel_widths = c(2.6, 5.0),
+  labels = c("A", ""),
   label_size = 14,
   label_fontface = "bold",
   label_x = 0.02,
@@ -275,6 +322,14 @@ Separately, we projected the DeSurv model trained in PDAC directly onto bladder 
 Together, these results suggest that survival supervision separates variance-dominant from survival-relevant structure and that this separation can transfer across cancer types, providing initial evidence that outcome-guided dimension reduction targets different subspaces than variance-driven reduction.
 
 ```{r fig-bladder, fig.cap="Survival-associated factor structure in bladder cancer and cross-cancer transfer from PDAC. (A) Fraction of expression variance explained versus survival contribution (change in Cox partial log-likelihood) for each factor in bladder cancer, comparing DeSurv and standard NMF. (B) Kaplan--Meier curves for bladder cancer samples stratified by median split of projected factor scores from a PDAC-trained DeSurv model, with numbers at risk shown below. \\label{fig:bladder}", fig.env='figure*', fig.pos='t', out.width='\\textwidth'}
+# bladder_nobcg updates (commented out for now):
+# tar_load(fig_variation_explained_bladder_nobcg)
+# tar_load(raw_data_bladder_nobcg)
+# data_bladder = readRDS(raw_data_bladder_nobcg)
+# fig_variation_explained_bladder_nobcg = set_fig_font(fig_variation_explained_bladder_nobcg, size = 10)
+# nobcg_idx <- which(data_bladder$clinical$Intravesical.BCG.administered == "N")
+# data_bladder$samp_keeps = intersect(data_bladder$samp_keeps, nobcg_idx)
+
 tar_load(fig_variation_explained_bladder)
 tar_load(raw_data_bladder)
 tar_load(tar_data_filtered_tcgacptac)
@@ -334,5 +389,6 @@ splot$table = set_fig_font(splot$table, size = 10)
 
 splot2 = plot_grid(splot$plot,splot$table,nrow=2,rel_heights=c(3,1))
 
+# plot_grid(fig_variation_explained_bladder_nobcg,splot2,ncol=2,labels=c("A","B"))
 plot_grid(fig_variation_explained_bladder,splot2,ncol=2,labels=c("A","B"))
 ```

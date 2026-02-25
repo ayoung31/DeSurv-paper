@@ -2198,16 +2198,17 @@ FIGURE_TARGETS <- list(
     fig_gene_overlap_heatmap_desurv,
     {
       browser()
-      p = make_gene_overlap_heatmap(tar_fit_desurv,tar_tops_desurv$top_genes,top_genes,
-                                    factor_labels = FIGURE_CONFIGS$heatmap_factor_labels[[bo_label]])
+      result = make_gene_overlap_heatmap(tar_fit_desurv,tar_tops_desurv$top_genes,top_genes,
+                                    factor_labels = FIGURE_CONFIGS$heatmap_factor_labels[[bo_label]],
+                                    title = "DeSurv")
       save_plot_pdf(
-        p,
+        result$plot,
         file.path(
           FIGURE_CONFIGS$panel_dir,
           sprintf("fig_gene_overlap_heatmap_desurv_%s.pdf", bo_label)
         )
       )
-      p
+      result
     }
   ),
   
@@ -2232,17 +2233,17 @@ FIGURE_TARGETS <- list(
   tar_target(
     fig_gene_overlap_heatmap_desurv_elbowk,
     {
-      p = make_gene_overlap_heatmap(tar_fit_desurv_elbowk,
+      result = make_gene_overlap_heatmap(tar_fit_desurv_elbowk,
                                     tar_tops_desurv_elbowk$top_genes,
                                     top_genes)
       save_plot_pdf(
-        p,
+        result$plot,
         file.path(
           FIGURE_CONFIGS$panel_dir,
           sprintf("fig_gene_overlap_heatmap_desurv_elbowk_%s.pdf", bo_label)
         )
       )
-      p
+      result
     }
   ),
   
@@ -2267,17 +2268,17 @@ FIGURE_TARGETS <- list(
   tar_target(
     fig_gene_overlap_heatmap_std_elbowk,
     {
-      p = make_gene_overlap_heatmap(fit_std_elbowk,
+      result = make_gene_overlap_heatmap(fit_std_elbowk,
                                     tar_tops_std_elbowk$top_genes,
                                     top_genes)
       save_plot_pdf(
-        p,
+        result$plot,
         file.path(
           FIGURE_CONFIGS$panel_dir,
           sprintf("fig_gene_overlap_heatmap_std_elbowk_%s.pdf", bo_label)
         )
       )
-      p
+      result
     }
   ),
   
@@ -2302,18 +2303,19 @@ FIGURE_TARGETS <- list(
   tar_target(
     fig_gene_overlap_heatmap_std_desurvk,
     {
-      p = make_gene_overlap_heatmap(fit_std_desurvk,
+      result = make_gene_overlap_heatmap(fit_std_desurvk,
                                     tar_tops_std_desurvk$top_genes,
                                     top_genes,
-                                    show_legend = FALSE)
+                                    factor_labels = FIGURE_CONFIGS$heatmap_factor_labels_std[[bo_label]],
+                                    title = "NMF")
       save_plot_pdf(
-        p,
+        result$plot,
         file.path(
           FIGURE_CONFIGS$panel_dir,
           sprintf("fig_gene_overlap_heatmap_std_desurvk_%s.pdf", bo_label)
         )
       )
-      p
+      result
     }
   ),
   
@@ -2369,7 +2371,7 @@ FIGURE_TARGETS <- list(
         scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
         labs(
           x = "Conditional variance explained\n(semi-partial R\u00b2)",
-          y = "\u0394 partial log-likelihood\n(full vs. k\u22121 factor model)",
+          y = expression(atop(Delta ~ "partial log-likelihood", "(full vs. k-1 factor model)")),
           color = "Method"
         ) +
         theme_classic(base_size = 10)
@@ -2380,18 +2382,29 @@ FIGURE_TARGETS <- list(
   tar_target(
     fig_desurv_std_correlation,
     {
-      c = cor(fit_std_desurvk$W,tar_fit_desurv$W)
-      rownames(c) = paste0("NMF F",1:ncol(c))
-      colnames(c) = paste0("DeSurv F",1:ncol(c))
-      ph = pheatmap::pheatmap(c,
-                         cluster_rows = FALSE,
-                         cluster_cols = FALSE,
-                         show_colnames = TRUE,
-                         show_rownames = TRUE,
-                         silent = TRUE)
+      c = cor(fit_std_desurvk$W,tar_fit_desurv$W, method = "spearman")
+      rownames(c) = sub(" .*", "", FIGURE_CONFIGS$heatmap_factor_labels_std[[bo_label]])
+      colnames(c) = sub(" .*", "", FIGURE_CONFIGS$heatmap_factor_labels[[bo_label]])
+      ph_args <- list(
+        mat = c,
+        cluster_rows = FALSE,
+        cluster_cols = FALSE,
+        show_colnames = TRUE,
+        show_rownames = TRUE,
+        fontsize = 7,
+        breaks = seq(-1, 1, length.out = 101),
+        main = "NMF (rows) vs. DeSurv (cols)",
+        silent = TRUE
+      )
+      ph <- do.call(pheatmap::pheatmap, c(ph_args, list(legend = FALSE)))
       ph_grob <- ph$gtable
       pheat <- cowplot::plot_grid(NULL, cowplot::ggdraw(ph_grob), nrow = 2, rel_heights = c(0.25, 4))
-      pheat
+
+      ph_leg <- do.call(pheatmap::pheatmap, c(ph_args, list(legend = TRUE)))
+      leg_idx <- which(ph_leg$gtable$layout$name == "legend")
+      legend_grob <- if (length(leg_idx) > 0) ph_leg$gtable$grobs[[leg_idx[1]]] else grid::nullGrob()
+
+      list(plot = pheat, legend = legend_grob)
     }
   ),
   
