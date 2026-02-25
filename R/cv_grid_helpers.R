@@ -1860,79 +1860,110 @@ plot_subtype_enrichment <- function(df, dataset_label = NULL) {
 
 #' Plot training + validation C-index vs k: DeSurv vs NMF
 #'
-#' Returns a named list of ggplot objects, one per unique ntop value. Each plot
-#' has two facet panels: Training (CV C-index +/- SE) and Validation (pooled
-#' external C-index +/- SE). Uncertainty shown as geom_ribbon with alpha=0.2.
+#' Returns a named list of ggplot objects, one per entry in \code{configs}.
+#' Each plot has two facet panels: Training (CV C-index +/- SE) and Validation
+#' (pooled external C-index +/- SE). Uncertainty shown as geom_ribbon.
 #'
-#' @param cv_grid_summary Tibble with k, alpha, ntop, mean_cindex, se_cindex
+#' @param cv_grid_summary Tibble with k, alpha, ntop, lambda, nu, mean_cindex, se_cindex
 #' @param cv_grid_best_alpha Tibble from select_best_alpha_per_k()
 #' @param cv_grid_val_summary Tibble from aggregate_cv_grid_val_results()
+#' @param configs Data frame with columns ntop, lambda, nu, label. Each row
+#'   produces one plot filtered to that (ntop, lambda, nu) combination. ntop=NA
+#'   matches rows where ntop is NA (i.e., all genes retained). If NULL, one
+#'   plot is generated per unique (ntop, lambda, nu) combo in cv_grid_summary.
 #' @param dataset_filter Character; validation dataset(s). Default "pooled".
 #' @param val_method Character; validation method. Default "transfer_beta".
-#' @return Named list of ggplot objects keyed by ntop label (e.g., "ALL", "300")
+#' @return Named list of ggplot objects keyed by configs$label
 plot_cindex_by_k <- function(cv_grid_summary,
                               cv_grid_best_alpha,
                               cv_grid_val_summary,
+                              configs = NULL,
                               dataset_filter = "pooled",
                               val_method = "transfer_beta") {
-  # --- Training data ---
-  best_train <- cv_grid_best_alpha |>
-    dplyr::filter(selection_method == "max_cindex") |>
-    dplyr::transmute(k, ntop, lambda, nu, alpha = best_alpha) |>
-    dplyr::left_join(cv_grid_summary, by = c("k", "alpha", "ntop", "lambda", "nu")) |>
-    dplyr::mutate(method = "DeSurv")
+  if (is.null(configs)) {
+    combos <- cv_grid_summary |>
+      dplyr::distinct(ntop, lambda, nu) |>
+      dplyr::mutate(
+        ntop_label = ifelse(is.na(ntop), "ALL", as.character(ntop)),
+        label = sprintf("ntop%s_lam%.3f_nu%.3f", ntop_label, lambda, nu)
+      )
+    configs <- combos[, c("ntop", "lambda", "nu", "label")]
+  }
 
-  alpha0_train <- cv_grid_summary |>
-    dplyr::filter(alpha == 0) |>
-    dplyr::mutate(method = "NMF")
-
-  df_train <- dplyr::bind_rows(
-    best_train |> dplyr::select(k, ntop, cindex = mean_cindex, cindex_se = se_cindex, method),
-    alpha0_train |> dplyr::select(k, ntop, cindex = mean_cindex, cindex_se = se_cindex, method)
-  ) |>
-    dplyr::mutate(panel = "Training (CV)")
-
-  # --- Validation data ---
   val_df <- cv_grid_val_summary |>
     dplyr::filter(method == val_method)
   if (!is.null(dataset_filter)) {
     val_df <- val_df |> dplyr::filter(dataset %in% dataset_filter)
   }
 
-  best_val <- cv_grid_best_alpha |>
-    dplyr::filter(selection_method == "max_cindex") |>
-    dplyr::transmute(k, ntop, lambda, nu, alpha = best_alpha) |>
-    dplyr::left_join(val_df, by = c("k", "alpha", "ntop", "lambda", "nu")) |>
-    dplyr::mutate(method = "DeSurv")
+  plots <- vector("list", nrow(configs))
+  names(plots) <- configs$label
 
-  alpha0_val <- val_df |>
-    dplyr::filter(alpha == 0) |>
-    dplyr::mutate(method = "NMF")
+  for (i in seq_len(nrow(configs))) {
+    cfg      <- configs[i, ]
+    ntop_i   <- cfg$ntop
+    lambda_i <- cfg$lambda
+    nu_i     <- cfg$nu
 
-  df_val <- dplyr::bind_rows(
-    best_val |> dplyr::select(k, ntop, cindex, cindex_se, method),
-    alpha0_val |> dplyr::select(k, ntop, cindex, cindex_se, method)
-  ) |>
-    dplyr::mutate(panel = "Validation (External)")
+    match_ntop <- function(col) {
+      if (is.na(ntop_i)) is.na(col) else (!is.na(col) & col == ntop_i)
+    }
 
-  # --- Combine ---
-  df_all <- dplyr::bind_rows(df_train, df_val) |>
-    dplyr::mutate(
-      ntop_label = ifelse(is.na(ntop), "ALL", as.character(ntop)),
-      panel = factor(panel, levels = c("Training (CV)", "Validation (External)"))
-    )
+    summary_i <- cv_grid_summary |>
+      dplyr::filter(match_ntop(ntop), abs(lambda - lambda_i) < 1e-6, abs(nu - nu_i) < 1e-6)
 
-  # --- One plot per ntop ---
-  ntop_levels <- unique(df_all$ntop_label)
-  plots <- setNames(lapply(ntop_levels, function(nt) {
-    df_nt <- df_all |> dplyr::filter(ntop_label == nt)
+    best_alpha_i <- cv_grid_best_alpha |>
+      dplyr::filter(
+        selection_method == "max_cindex",
+        match_ntop(ntop),
+        abs(lambda - lambda_i) < 1e-6,
+        abs(nu - nu_i) < 1e-6
+      )
 
-    ggplot2::ggplot(df_nt, ggplot2::aes(x = k, y = cindex,
-                                          color = method, fill = method,
-                                          group = method)) +
+    val_i <- val_df |>
+      dplyr::filter(match_ntop(ntop), abs(lambda - lambda_i) < 1e-6, abs(nu - nu_i) < 1e-6)
+
+    best_train <- best_alpha_i |>
+      dplyr::transmute(k, ntop, lambda, nu, alpha = best_alpha) |>
+      dplyr::left_join(summary_i, by = c("k", "alpha", "ntop", "lambda", "nu")) |>
+      dplyr::mutate(method = "DeSurv")
+
+    alpha0_train <- summary_i |>
+      dplyr::filter(alpha == 0) |>
+      dplyr::mutate(method = "NMF")
+
+    df_train <- dplyr::bind_rows(
+      best_train |> dplyr::select(k, cindex = mean_cindex, cindex_se = se_cindex, method),
+      alpha0_train |> dplyr::select(k, cindex = mean_cindex, cindex_se = se_cindex, method)
+    ) |>
+      dplyr::mutate(panel = "Training (CV)")
+
+    best_val <- best_alpha_i |>
+      dplyr::transmute(k, ntop, lambda, nu, alpha = best_alpha) |>
+      dplyr::left_join(val_i, by = c("k", "alpha", "ntop", "lambda", "nu")) |>
+      dplyr::mutate(method = "DeSurv")
+
+    alpha0_val <- val_i |>
+      dplyr::filter(alpha == 0) |>
+      dplyr::mutate(method = "NMF")
+
+    df_val <- dplyr::bind_rows(
+      best_val |> dplyr::select(k, cindex, cindex_se, method),
+      alpha0_val |> dplyr::select(k, cindex, cindex_se, method)
+    ) |>
+      dplyr::mutate(panel = "Validation (External)")
+
+    df_all <- dplyr::bind_rows(df_train, df_val) |>
+      dplyr::mutate(panel = factor(panel, levels = c("Training (CV)", "Validation (External)")))
+
+    ntop_label <- ifelse(is.na(ntop_i), "ALL", as.character(ntop_i))
+    subtitle <- sprintf("ntop = %s, \u03bb = %.3f, \u03bd = %.3f", ntop_label, lambda_i, nu_i)
+
+    plots[[i]] <- ggplot2::ggplot(
+      df_all, ggplot2::aes(x = k, y = cindex, color = method, fill = method, group = method)
+    ) +
       ggplot2::geom_ribbon(
-        ggplot2::aes(ymin = cindex - cindex_se,
-                     ymax = cindex + cindex_se),
+        ggplot2::aes(ymin = cindex - cindex_se, ymax = cindex + cindex_se),
         alpha = 0.2, color = NA
       ) +
       ggplot2::geom_line() +
@@ -1942,13 +1973,12 @@ plot_cindex_by_k <- function(cv_grid_summary,
       ggplot2::scale_fill_manual(values = c("DeSurv" = "blue", "NMF" = "red")) +
       ggplot2::facet_wrap(~ panel) +
       ggplot2::labs(
-        x = "Factorization rank (k)",
-        y = "C-index",
-        color = NULL, fill = NULL
+        x = "Factorization rank (k)", y = "C-index",
+        subtitle = subtitle, color = NULL, fill = NULL
       ) +
       ggplot2::theme_classic(base_size = 10) +
       ggplot2::theme(legend.position = "bottom")
-  }), ntop_levels)
+  }
 
   plots
 }

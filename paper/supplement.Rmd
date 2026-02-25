@@ -123,16 +123,16 @@ plot_grid(null_row, mixed_row, nrow = 2, rel_heights = c(1, 1))
 
 ## Cross-validated C-index across factorization rank {.unnumbered}
 
-To evaluate how the number of latent factors $k$ affects prognostic performance, we performed an exhaustive grid search over $k \in \{2, 3, \ldots, 12\}$ and supervision strength $\alpha \in \{0, 0.05, \ldots, 0.95\}$ using 5-fold cross-validation on the TCGA+CPTAC training cohort, with all genes retained (ntop = ALL). For each $k$, the best-performing $\alpha$ was selected by maximizing the mean CV C-index. The unsupervised NMF baseline ($\alpha = 0$) was evaluated at the same $k$ values for comparison.
+To evaluate how the number of latent factors $k$ affects prognostic performance, we performed an exhaustive grid search over $k \in \{2, 3, \ldots, 12\}$ and supervision strength $\alpha \in \{0, 0.05, \ldots, 0.95\}$ using 5-fold cross-validation on the TCGA+CPTAC training cohort. For each $k$, the best-performing $\alpha$ was selected by maximizing the mean CV C-index. The unsupervised NMF baseline ($\alpha = 0$) was evaluated at the same $k$ values for comparison. Results are shown for two gene-selection settings: ntop = 270 top genes per factor, and ntop = ALL (all genes retained), both at $\lambda = 0.349$ and $\nu = 0.056$.
 
 Figure \@ref(fig:fig-cindex-by-k) shows the resulting C-index curves for both training (CV) and external validation (pooled across held-out cohorts), with shaded ribbons indicating $\pm 1$ standard error. In training, DeSurv consistently outperforms NMF across all $k$, confirming that survival supervision improves in-sample concordance. In external validation, DeSurv maintains a comparable or improved C-index relative to NMF, demonstrating that the supervised signal generalizes beyond the training data rather than reflecting overfitting to the survival labels.
 
-```{r fig-cindex-by-k, fig.width = 10, fig.height = 5, fig.cap="Training (CV) and external validation C-index as a function of factorization rank $k$ for DeSurv (blue) and standard NMF (red, $\\alpha = 0$). Shaded ribbons show $\\pm 1$ SE. For each $k$, the best $\\alpha$ was selected by maximizing the mean CV C-index. Validation C-index is pooled across all external cohorts.", fig.env='figure*', fig.pos='t', out.width='\\textwidth', echo=FALSE}
+```{r fig-cindex-by-k, fig.width = 10, fig.height = 10, fig.cap="Training (CV) and external validation C-index as a function of factorization rank $k$ for DeSurv (blue) and standard NMF (red, $\\alpha = 0$). Shaded ribbons show $\\pm 1$ SE. For each $k$, the best $\\alpha$ was selected by maximizing the mean CV C-index. Validation C-index is pooled across all external cohorts. (A) Results using ntop = 270 top genes per factor ($\\lambda = 0.349$, $\\nu = 0.056$). (B) Results retaining all genes (ntop = ALL; $\\lambda = 0.349$, $\\nu = 0.056$).", fig.env='figure*', fig.pos='t', out.width='\\textwidth', echo=FALSE}
 library(magick)
 library(cowplot)
 # This figure is produced by the cv_grid pipeline (separate store);
 # read directly from the file output.
-fig_path <- "figures/cv_grid/cv_cindex_by_k_ntop_ALL.pdf"
+fig_path <- "figures/cv_grid/cv_cindex_by_k_primary.pdf"
 img <- magick::image_read_pdf(fig_path, density = 300)
 cowplot::ggdraw() + cowplot::draw_image(img)
 ```

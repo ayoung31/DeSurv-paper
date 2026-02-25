@@ -764,22 +764,40 @@ list(
     format = "file"
   ),
 
-  # Target 21: Training + Validation C-index by k (one file per ntop)
+  # Target 21: Training + Validation C-index by k for selected (ntop, lambda, nu) configs
   tar_target(
     cv_grid_plot_cindex_by_k,
     {
+      configs <- data.frame(
+        ntop   = c(270L, NA_integer_),
+        lambda = c(0.349, 0.349),
+        nu     = c(0.056, 0.056),
+        label  = c("ntop270_lam0.349_nu0.056", "ntopALL_lam0.349_nu0.056"),
+        stringsAsFactors = FALSE
+      )
       plots <- plot_cindex_by_k(
-        cv_grid_summary, cv_grid_best_alpha, cv_grid_val_summary
+        cv_grid_summary, cv_grid_best_alpha, cv_grid_val_summary,
+        configs = configs
       )
       out_dir <- "figures/cv_grid"
       dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
       paths <- character(0)
-      for (ntop_label in names(plots)) {
-        fname <- sprintf("cv_cindex_by_k_ntop_%s.pdf", ntop_label)
-        path <- file.path(out_dir, fname)
-        ggplot2::ggsave(path, plots[[ntop_label]], width = 10, height = 5)
+
+      # Save individual plots
+      for (lbl in names(plots)) {
+        path <- file.path(out_dir, sprintf("cv_cindex_by_k_%s.pdf", lbl))
+        ggplot2::ggsave(path, plots[[lbl]], width = 10, height = 5)
         paths <- c(paths, path)
       }
+
+      # Save combined figure (two rows) for supplement
+      combined <- cowplot::plot_grid(
+        plotlist = plots, nrow = 2, labels = c("A", "B"), label_size = 12
+      )
+      combined_path <- file.path(out_dir, "cv_cindex_by_k_primary.pdf")
+      ggplot2::ggsave(combined_path, combined, width = 10, height = 10)
+      paths <- c(paths, combined_path)
+
       paths
     },
     format = "file"

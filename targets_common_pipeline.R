@@ -546,8 +546,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
     },
     resources = tar_resources(
       crew = tar_resources_crew(controller = "med_mem")
-    ),
-    cue = tar_cue(mode = "never")
+    )
   ),
   tar_target(
     desurv_consensus_init,
@@ -900,8 +899,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
     },
     resources = tar_resources(
       crew = tar_resources_crew(controller = "med_mem")
-    ),
-    cue = tar_cue(mode = "never")
+    )
   ),
 
   tar_target(
@@ -994,8 +992,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
     },
     resources = tar_resources(
       crew = tar_resources_crew(controller = "med_mem")
-    ),
-    cue = tar_cue(mode = "never")
+    )
   ),
   tar_target(
     desurv_consensus_init_elbowk,
@@ -1103,19 +1100,29 @@ COMMON_DESURV_RUN_TARGETS <- list(
       keep_genes = intersect(rownames(W),rownames(X))
       W = W[keep_genes,]
       X = X[keep_genes,]
-      XtW = t(X)%*%W
+
+      # Compute union of top genes — used for external validation scoring only
+      # (matches compute_lp(ntop) / CV LP formula; beta is still fitted on all genes
+      # to match how desurv_fit trains on all genes)
+      top_info = DeSurv::desurv_get_top_genes(W, ntop = tar_ntop_value_elbowk)
+      union_idx = unique(as.integer(unlist(top_info$top_indices, use.names = FALSE)))
+      union_idx = union_idx[!is.na(union_idx) & union_idx >= 1L & union_idx <= nrow(W)]
+      union_genes = rownames(W)[union_idx]
+
+      XtW = t(X) %*% W
       colnames(XtW) = paste0("XtW",1:ncol(XtW))
-      
+
       # dataframe
       df = cbind(tar_data_filtered_elbowk$sampInfo,XtW)
-      
+
       beta = fit_cox_model(XtW,df,bo_config$nfold)
-      
+
       fit = list()
       fit$W = fit_nmf@fit@W
       fit$H = fit_nmf@fit@H
       fit$beta = beta
-      
+      fit$union_top_genes = union_genes
+
       fit
     }
   ),
@@ -1315,7 +1322,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
   tar_target(
     tar_tops_desurv_elbowk,
     {
-      get_top_genes(W = tar_fit_desurv_elbowk$W, ntop = bo_config$ntop_default)
+      get_top_genes(W = tar_fit_desurv_elbowk$W, ntop = tar_ntop_value_elbowk)
     }
   ),
   tar_target(
@@ -1510,10 +1517,21 @@ COMMON_DESURV_VAL_TARGETS <- list(
   tar_target(
     val_latent_desurv,
     {
+      per_factor_tg = val_run_bundle$tops_desurv$top_genes
+      union_genes = unique(stats::na.omit(as.character(unlist(per_factor_tg, use.names = FALSE))))
+      k = ncol(val_run_bundle$fit_desurv$W)
+      factor_names = colnames(val_run_bundle$fit_desurv$W)
+      if (is.null(factor_names)) factor_names = paste0("factor", seq_len(k))
+      union_top_df = as.data.frame(
+        matrix(union_genes, nrow = length(union_genes), ncol = k),
+        stringsAsFactors = FALSE
+      )
+      colnames(union_top_df) = factor_names
+
       latent <- desurv_collect_validation_latent(
         fit = val_run_bundle$fit_desurv,
         data_list = data_val_filtered,
-        top_genes = val_run_bundle$tops_desurv$top_genes
+        top_genes = union_top_df
       )
       write_validation_latent_outputs(
         latent_list = latent,
@@ -1531,10 +1549,21 @@ COMMON_DESURV_VAL_TARGETS <- list(
   tar_target(
     val_latent_desurv_alpha0,
     {
+      per_factor_tg = val_run_bundle$tops_desurv_alpha0$top_genes
+      union_genes = unique(stats::na.omit(as.character(unlist(per_factor_tg, use.names = FALSE))))
+      k = ncol(val_run_bundle$fit_desurv_alpha0$W)
+      factor_names = colnames(val_run_bundle$fit_desurv_alpha0$W)
+      if (is.null(factor_names)) factor_names = paste0("factor", seq_len(k))
+      union_top_df = as.data.frame(
+        matrix(union_genes, nrow = length(union_genes), ncol = k),
+        stringsAsFactors = FALSE
+      )
+      colnames(union_top_df) = factor_names
+
       latent <- desurv_collect_validation_latent(
         fit = val_run_bundle$fit_desurv_alpha0,
         data_list = data_val_filtered,
-        top_genes = val_run_bundle$tops_desurv_alpha0$top_genes
+        top_genes = union_top_df
       )
       write_validation_latent_outputs(
         latent_list = latent,
@@ -1551,10 +1580,21 @@ COMMON_DESURV_VAL_TARGETS <- list(
   tar_target(
     val_latent_desurv_elbowk,
     {
+      per_factor_tg = tar_tops_desurv_elbowk$top_genes
+      union_genes = unique(stats::na.omit(as.character(unlist(per_factor_tg, use.names = FALSE))))
+      k = ncol(tar_fit_desurv_elbowk$W)
+      factor_names = colnames(tar_fit_desurv_elbowk$W)
+      if (is.null(factor_names)) factor_names = paste0("factor", seq_len(k))
+      union_top_df = as.data.frame(
+        matrix(union_genes, nrow = length(union_genes), ncol = k),
+        stringsAsFactors = FALSE
+      )
+      colnames(union_top_df) = factor_names
+
       latent <- desurv_collect_validation_latent(
         fit = tar_fit_desurv_elbowk,
         data_list = data_val_filtered_elbowk,
-        top_genes = tar_tops_desurv_elbowk$top_genes
+        top_genes = union_top_df
       )
       latent
     },
@@ -1564,10 +1604,22 @@ COMMON_DESURV_VAL_TARGETS <- list(
   tar_target(
     val_latent_std_elbowk,
     {
+      # Build top_genes data frame where all factors share the union gene set —
+      # matches compute_lp(ntop) / CV LP formula used in Cox fitting
+      union_genes = fit_std_elbowk$union_top_genes
+      k = ncol(fit_std_elbowk$W)
+      factor_names = colnames(fit_std_elbowk$W)
+      if (is.null(factor_names)) factor_names = paste0("factor", seq_len(k))
+      union_top_df = as.data.frame(
+        matrix(union_genes, nrow = length(union_genes), ncol = k),
+        stringsAsFactors = FALSE
+      )
+      colnames(union_top_df) = factor_names
+
       latent <- desurv_collect_validation_latent(
         fit = fit_std_elbowk,
         data_list = data_val_filtered_elbowk,
-        top_genes = tar_tops_std_elbowk$top_genes
+        top_genes = union_top_df
       )
       latent
     },
@@ -1577,10 +1629,21 @@ COMMON_DESURV_VAL_TARGETS <- list(
   tar_target(
     val_latent_std_desurvk,
     {
+      per_factor_tg = tar_tops_std_desurvk$top_genes
+      union_genes = unique(stats::na.omit(as.character(unlist(per_factor_tg, use.names = FALSE))))
+      k = ncol(fit_std_desurvk$W)
+      factor_names = colnames(fit_std_desurvk$W)
+      if (is.null(factor_names)) factor_names = paste0("factor", seq_len(k))
+      union_top_df = as.data.frame(
+        matrix(union_genes, nrow = length(union_genes), ncol = k),
+        stringsAsFactors = FALSE
+      )
+      colnames(union_top_df) = factor_names
+
       latent <- desurv_collect_validation_latent(
         fit = fit_std_desurvk,
         data_list = data_val_filtered,
-        top_genes = tar_tops_std_desurvk$top_genes
+        top_genes = union_top_df
       )
       latent
     },
