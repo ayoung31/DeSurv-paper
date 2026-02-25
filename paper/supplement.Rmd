@@ -207,3 +207,19 @@ Next, we verify our findings at the cellular level using the Elyada scRNA-seq da
 tar_load(fig_sc_plot_tcgacptac)
 fig_sc_plot_tcgacptac
 ```
+
+## Variance explained versus survival contribution per factor {.unnumbered}
+
+For each factor learned by DeSurv and standard NMF at $k = 3$, we compared the fraction of transcriptional variance explained with the Type III partial likelihood contribution to survival. The NMF factor explaining the greatest proportion of expression variance contributed minimally to survival prediction, consistent with its enrichment for exocrine and composition-driven programs. In contrast, the DeSurv factor with the largest survival contribution explained substantially less expression variance, directly illustrating the misalignment between variance-dominant and prognosis-relevant signals in PDAC (Fig. \ref{fig:varsurvival}).
+
+```{r fig-varsurvival, fig.width = 4, fig.height = 3.5, fig.cap = "Fraction of expression variance explained versus Type III partial likelihood contribution for each factor ($k = 3$). Each point represents one factor; DeSurv factors (blue) and standard NMF factors (red) are labeled D1--D3 and N1--N3 respectively. Survival contribution is quantified as the reduction in Cox partial log-likelihood when each factor is removed from the full $k$-factor model (see SI Methods). \\label{fig:varsurvival}", fig.env='figure', fig.pos='t'}
+tar_load(fig_variation_explained_tcgacptac)
+fig_variation_explained_tcgacptac <- set_fig_font(fig_variation_explained_tcgacptac, size = 10)
+fig_variation_explained_tcgacptac +
+  theme(
+    legend.position    = c(1, 0.5),
+    legend.justification = c(1, 0),
+    legend.background  = element_rect(color = "black"),
+    axis.title         = element_text(size = 8)
+  )
+```

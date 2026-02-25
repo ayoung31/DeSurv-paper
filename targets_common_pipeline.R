@@ -1119,8 +1119,64 @@ COMMON_DESURV_RUN_TARGETS <- list(
       fit
     }
   ),
-  
-  
+
+  # --- CV-based cutpoint selection for std NMF (elbow k) model ---
+  tar_target(
+    std_elbowk_cv_cutpoint_result,
+    run_cv_grid_point_std_nmf(
+      data = tar_data_filtered_elbowk,
+      k = std_nmf_selected_k,
+      nrun = 30,
+      nfolds = 5,
+      seed = 123
+    ),
+    resources = tar_resources(
+      crew = tar_resources_crew(controller = "med_mem")
+    ),
+    cue = tar_cue(mode = "never")
+  ),
+
+  tar_target(
+    std_elbowk_cutpoint_eval,
+    evaluate_cutpoint_zscores(
+      std_elbowk_cv_cutpoint_result,
+      z_grid = seq(-2.0, 2.0, by = 0.2)
+    )
+  ),
+
+  tar_target(
+    std_elbowk_cutpoint_summary,
+    {
+      std_elbowk_cutpoint_eval |>
+        dplyr::group_by(z_cutpoint) |>
+        dplyr::summarise(
+          mean_cindex_dichot = mean(cindex_dichot, na.rm = TRUE),
+          se_cindex_dichot = sd(cindex_dichot, na.rm = TRUE) / sqrt(sum(!is.na(cindex_dichot))),
+          mean_abs_logrank_z = mean(abs(logrank_z), na.rm = TRUE),
+          se_abs_logrank_z = sd(abs(logrank_z), na.rm = TRUE) / sqrt(sum(!is.na(logrank_z))),
+          .groups = "drop"
+        )
+    }
+  ),
+
+  tar_target(
+    std_elbowk_optimal_z_cutpoint,
+    {
+      std_elbowk_cutpoint_summary |>
+        dplyr::slice_max(mean_abs_logrank_z, n = 1, with_ties = FALSE) |>
+        dplyr::pull(z_cutpoint)
+    }
+  ),
+
+  tar_target(
+    std_elbowk_optimal_z_cutpoint_cindex,
+    {
+      std_elbowk_cutpoint_summary |>
+        dplyr::slice_max(mean_cindex_dichot, n = 1, with_ties = FALSE) |>
+        dplyr::pull(z_cutpoint)
+    }
+  ),
+
   tar_target(
     fit_std_desurvk,
     {
@@ -2596,21 +2652,7 @@ FIGURE_VAL_TARGETS <- list(
   ),
   tar_target(
     fig_median_survival_desurv,
-    {
-      
-      desurv_var <- build_variance_survival_df(
-        X = tar_data_filtered$ex,
-        scores = tar_fit_desurv$W,
-        loadings = tar_fit_desurv$H,
-        time = tar_data_filtered$sampInfo$time,
-        event = tar_data_filtered$sampInfo$event,
-        method = "DeSurv"
-      )
-      
-      desurv_fac = desurv_var$factor[which.max(desurv_var$delta_loglik)]
-      
-      splot_median(data_val_filtered,tar_fit_desurv,desurv_fac)
-    }
+    splot_cutpoint(data_val_filtered, tar_fit_desurv, desurv_lp_stats, tar_ntop_value)
   ),
   tar_target(
     fig_median_survival_std_desurvk,

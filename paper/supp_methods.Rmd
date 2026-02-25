@@ -863,6 +863,27 @@ periductal subtypes, and MSI subtypes were excluded from visualization due to
 redundancy with other included programs or low overall correlation across all
 factors.
 
+\subsection{Variance and Survival Contribution per Factor}
+
+For each factor $j \in \{1, \ldots, k\}$, we quantified two quantities to assess
+the alignment between expression variance and prognostic relevance. The fraction
+of expression variance explained by factor $j$ was computed as:
+$$V_j = \frac{\| W_{\cdot j}\, H_{j \cdot} \|_F^2}{\| X \|_F^2}$$
+where $W_{\cdot j}$ is the $j$-th column of $W$ and $H_{j \cdot}$ is the $j$-th
+row of $H$, so $W_{\cdot j} H_{j \cdot}$ is the rank-1 approximation contributed
+by factor $j$.
+
+The survival contribution of factor $j$ was quantified as the Type III partial
+likelihood increment: the reduction in Cox partial log-likelihood when factor $j$
+is omitted from the full $k$-factor model,
+$$\Delta\ell_j = \ell(\beta_1, \ldots, \beta_k) - \ell(\beta_1, \ldots,
+\beta_{j-1}, \beta_{j+1}, \ldots, \beta_k),$$
+where $\ell(\cdot)$ denotes the Cox partial log-likelihood evaluated at the
+maximum partial likelihood estimates. Larger $\Delta\ell_j$ indicates a greater
+marginal contribution of factor $j$ to survival prediction given all other
+factors. These two quantities are plotted against each other in
+SI Appendix, Fig.\ \ref{fig:varsurvival}.
+
 \subsection{Factor Correspondence Analysis}
 
 To assess which biological programs are preserved, reorganized, or suppressed
@@ -874,4 +895,4 @@ $W_{\text{NMF}}$ and the DeSurv gene program matrix $W_{\text{DeSurv}}$,
 restricted to genes present in both models. Spearman correlation was used to
 capture monotone correspondence in gene loading ranks while remaining robust
 to scale differences between the two methods. Results are displayed as a
-heatmap with NMF factors as rows and DeSurv factors as columns (Fig.\ \ref{fig:bio}D).
+heatmap with NMF factors as rows and DeSurv factors as columns (Fig.\ \ref{fig:bio}C).

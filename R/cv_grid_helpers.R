@@ -227,6 +227,159 @@ run_cv_grid_point <- function(data,
   )
 }
 
+#' CV-based cutpoint analysis for standard NMF + Cox model
+#'
+#' Mirrors run_cv_grid_point() but fits standard NMF (NMF::nmf) instead of
+#' DeSurv on each training fold, then evaluates a post-hoc Cox model.
+#' Returns fold_data in the same format so evaluate_cutpoint_zscores() works.
+#'
+#' @param data List with $ex (genes x samples) and $sampInfo (time, event, dataset)
+#' @param k Integer rank for NMF
+#' @param nrun Integer number of NMF random starts per fold
+#' @param nfolds Integer number of CV folds
+#' @param seed Integer random seed
+#' @param verbose Logical; print progress messages
+#' @return List with k, alpha=0, ntop=NULL, mean_cindex, se_cindex, fold_data
+run_cv_grid_point_std_nmf <- function(data,
+                                      k,
+                                      nrun = 30,
+                                      nfolds = 5,
+                                      seed = 123,
+                                      verbose = TRUE) {
+  if (verbose) {
+    message(sprintf("Running std NMF CV for k=%d, nrun=%d", k, nrun))
+  }
+
+  X <- data$ex
+  y <- data$sampInfo$time
+  d <- data$sampInfo$event
+  dataset <- data$sampInfo$dataset
+
+  folds <- DeSurv:::.desurv_make_folds_stratified(d, dataset, nfolds, seed)
+  n_actual_folds <- attr(folds, "nfolds") %||% nfolds
+
+  fold_data <- vector("list", n_actual_folds)
+  fold_cindices <- numeric(n_actual_folds)
+
+  for (fi in seq_len(n_actual_folds)) {
+    train_idx <- which(folds != fi)
+    val_idx <- which(folds == fi)
+
+    if (length(val_idx) < 2 || sum(d[val_idx]) == 0) {
+      fold_cindices[fi] <- NA_real_
+      fold_data[[fi]] <- list(
+        lp_train = numeric(0), lp_val = numeric(0),
+        time_val = numeric(0), event_val = integer(0),
+        mu_train = NA_real_, sigma_train = NA_real_, cindex = NA_real_
+      )
+      next
+    }
+
+    X_train <- X[, train_idx, drop = FALSE]
+    X_val <- X[, val_idx, drop = FALSE]
+
+    fit_nmf_fold <- tryCatch({
+      NMF::nmf(
+        X_train, k,
+        nrun = nrun,
+        method = "lee",
+        .options = paste0("p", nrun)
+      )
+    }, error = function(e) {
+      if (verbose) {
+        message(sprintf("  Fold %d NMF failed: %s", fi, conditionMessage(e)))
+      }
+      NULL
+    })
+
+    if (is.null(fit_nmf_fold)) {
+      fold_cindices[fi] <- NA_real_
+      fold_data[[fi]] <- list(
+        lp_train = numeric(0), lp_val = numeric(0),
+        time_val = numeric(0), event_val = integer(0),
+        mu_train = NA_real_, sigma_train = NA_real_, cindex = NA_real_
+      )
+      next
+    }
+
+    W_fold <- fit_nmf_fold@fit@W
+
+    XtW_train <- t(X_train) %*% W_fold
+    colnames(XtW_train) <- paste0("XtW", seq_len(ncol(XtW_train)))
+    df_train <- data$sampInfo[train_idx, , drop = FALSE]
+
+    beta_fold <- tryCatch({
+      fit_cox_model(XtW_train, df_train, nfolds)
+    }, error = function(e) {
+      if (verbose) {
+        message(sprintf("  Fold %d Cox failed: %s", fi, conditionMessage(e)))
+      }
+      NULL
+    })
+
+    if (is.null(beta_fold)) {
+      fold_cindices[fi] <- NA_real_
+      fold_data[[fi]] <- list(
+        lp_train = numeric(0), lp_val = numeric(0),
+        time_val = numeric(0), event_val = integer(0),
+        mu_train = NA_real_, sigma_train = NA_real_, cindex = NA_real_
+      )
+      next
+    }
+
+    lp_train <- compute_lp(W_fold, beta_fold, X_train, NULL)
+    lp_val <- compute_lp(W_fold, beta_fold, X_val, NULL)
+
+    mu_train <- mean(lp_train, na.rm = TRUE)
+    sigma_train <- sd(lp_train, na.rm = TRUE)
+
+    Z_train <- t(X_train) %*% W_fold
+    Z_val <- t(X_val) %*% W_fold
+    mu_z_train <- colMeans(Z_train)
+    sigma_z_train <- apply(Z_train, 2, sd)
+
+    ci <- tryCatch({
+      cc <- survival::concordance(
+        survival::Surv(y[val_idx], d[val_idx]) ~ lp_val,
+        reverse = TRUE
+      )
+      cc$concordance
+    }, error = function(e) NA_real_)
+
+    fold_cindices[fi] <- ci
+    fold_data[[fi]] <- list(
+      lp_train = lp_train,
+      lp_val = lp_val,
+      time_val = y[val_idx],
+      event_val = as.integer(d[val_idx]),
+      mu_train = mu_train,
+      sigma_train = sigma_train,
+      cindex = ci,
+      Z_val = Z_val,
+      mu_z_train = mu_z_train,
+      sigma_z_train = sigma_z_train
+    )
+
+    if (verbose) {
+      message(sprintf("  Fold %d: cindex=%.4f, mu=%.4f, sigma=%.4f",
+                      fi, ci, mu_train, sigma_train))
+    }
+  }
+
+  valid_ci <- fold_cindices[!is.na(fold_cindices)]
+  mean_ci <- if (length(valid_ci) > 0) mean(valid_ci) else NA_real_
+  se_ci <- if (length(valid_ci) > 1) sd(valid_ci) / sqrt(length(valid_ci)) else NA_real_
+
+  list(
+    k = k,
+    alpha = 0,
+    ntop = NULL,
+    mean_cindex = mean_ci,
+    se_cindex = se_ci,
+    fold_data = fold_data
+  )
+}
+
 #' Aggregate results from all CV grid points
 #'
 #' @param result_list List of results from run_cv_grid_point calls

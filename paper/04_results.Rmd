@@ -127,6 +127,7 @@ tar_load(fig_variation_explained_tcgacptac)
 tar_load(fig_desurv_std_correlation_tcgacptac)
 
 fig_variation_explained_tcgacptac = set_fig_font(fig_variation_explained_tcgacptac, size = 10)
+
 # Unpack heatmap plots and legends from list targets
 plot_4a <- fig_gene_overlap_heatmap_desurv_tcgacptac$plot
 plot_4b <- fig_gene_overlap_heatmap_std_desurvk_tcgacptac$plot

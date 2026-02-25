@@ -448,32 +448,33 @@ microenvironmental states that DeSurv separates.
 
 We quantified these differences by contrasting the fraction of
 expression variance explained by each factor with its contribution to
-survival (Fig. \ref{fig:bio}C). The NMF factor explaining the largest
-proportion of transcriptional variance contributed little to survival,
-consistent with its enrichment for exocrine and composition-driven
-programs. In contrast, DeSurv concentrated survival signal into a single
-factor that explained substantially more survival association despite
-accounting for a smaller fraction of expression variance. Specifically,
-the highest-variance NMF factor explained \(\textrm{[TODO]}\)\% of
-expression variance but contributed \(\Delta\ell = \textrm{[TODO]}\) to
-survival, whereas the DeSurv factor with the largest survival
-contribution explained \(\textrm{[TODO]}\)\% of variance with
-\(\Delta\ell = \textrm{[TODO]}\). The remaining DeSurv factors
-contributed minimal survival signal, indicating that survival-relevant
-information was not diffusely distributed across factors. This result
-directly illustrates the misalignment between variance and prognosis
-anticipated by sufficient dimension reduction theory (9) and observed
-empirically in tumor purity analyses (12): the factors that explain the
-most transcriptomic variation need not be the factors most associated
-with patient outcomes. The observed pattern in PDAC, where the
-highest-variance factor shows minimal survival association while other
-factors show partial overlap between variance and prognosis, is
-consistent with the intermediate regime between the primary and mixed
-simulation scenarios, where DeSurv's advantage was largest.
+survival (SI Appendix, Fig. \ref{fig:varsurvival}). The NMF factor
+explaining the largest proportion of transcriptional variance
+contributed little to survival, consistent with its enrichment for
+exocrine and composition-driven programs. In contrast, DeSurv
+concentrated survival signal into a single factor that explained
+substantially more survival association despite accounting for a smaller
+fraction of expression variance. Specifically, the highest-variance NMF
+factor explained \(\textrm{[TODO]}\)\% of expression variance but
+contributed \(\Delta\ell = \textrm{[TODO]}\) to survival, whereas the
+DeSurv factor with the largest survival contribution explained
+\(\textrm{[TODO]}\)\% of variance with \(\Delta\ell = \textrm{[TODO]}\).
+The remaining DeSurv factors contributed minimal survival signal,
+indicating that survival-relevant information was not diffusely
+distributed across factors. This result directly illustrates the
+misalignment between variance and prognosis anticipated by sufficient
+dimension reduction theory (9) and observed empirically in tumor purity
+analyses (12): the factors that explain the most transcriptomic
+variation need not be the factors most associated with patient outcomes.
+The observed pattern in PDAC, where the highest-variance factor shows
+minimal survival association while other factors show partial overlap
+between variance and prognosis, is consistent with the intermediate
+regime between the primary and mixed simulation scenarios, where
+DeSurv's advantage was largest.
 
 To further characterize how the learned factor structure differs between
 DeSurv and standard NMF, we examined the correspondence between factors
-derived from the two methods (Fig. \ref{fig:bio}D). Tumor-intrinsic
+derived from the two methods (Fig. \ref{fig:bio}C). Tumor-intrinsic
 structure was largely preserved, with one DeSurv factor showing strong
 correspondence to the classical tumor-associated NMF factor. The
 microenvironmental factor identified by standard NMF mapped primarily to
@@ -493,7 +494,7 @@ deprioritizing patterns of variation that contribute little to survival.
 
 }
 
-\caption{Survival supervision reorganizes the learned factor structure relative to standard NMF in PDAC training data (TCGA and CPTAC). Both methods are compared at factorization rank $k = 3$, selected by DeSurv's Bayesian optimization; standard NMF at independently selected ranks is shown in SI Appendix. (A) Correlation of DeSurv factor gene rankings with established PDAC gene programs. (B) Corresponding correlations for standard NMF factors. Asterisks indicate significant correlations after multiple testing correction; only gene programs with $|r| > 0.2$ shown. (C) Fraction of expression variance explained versus survival contribution for each factor, quantified by the change in partial log-likelihood from univariate Cox models. (D) Pairwise Spearman correlation between NMF and DeSurv factor loadings ($W$ columns), showing which biological programs are preserved, reorganized, or suppressed under survival supervision. \label{fig:bio}}\label{fig:fig-bio}
+\caption{Survival supervision reorganizes the learned factor structure relative to standard NMF in PDAC training data (TCGA and CPTAC). Both methods are compared at factorization rank $k = 3$, selected by DeSurv's Bayesian optimization; standard NMF at independently selected ranks is shown in SI Appendix. (A) Correlation of DeSurv factor gene rankings with established PDAC gene programs. (B) Corresponding correlations for standard NMF factors. Asterisks indicate significant correlations after multiple testing correction; only gene programs with $|r| > 0.2$ shown. (C) Pairwise Spearman correlation between NMF and DeSurv factor loadings ($W$ columns), showing which biological programs are preserved, reorganized, or suppressed under survival supervision. \label{fig:bio}}\label{fig:fig-bio}
 \end{figure*}
 
 \subsection*{Survival-aligned programs generalize across independent
@@ -881,7 +882,7 @@ are available at github.com/ayoung31/DeSurv-paper.
 ## DeSurv git branch: main
 ## DeSurv git commit: 370c88aa9a89e0c71507fbb161d226c7e2e4c61f
 ## Paper git branch: main
-## Paper git commit: 8e08fe9cdfac42b04688064381fd32e25a0e6444
+## Paper git commit: 7829bcd63f8698e7210a705133040b4e93529c4b
 \end{verbatim}
 
 \phantomsection\label{refs}

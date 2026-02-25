@@ -23,7 +23,7 @@ exact production BO-selected values (lambda=0.349, nu=0.056, ntop=270).
 
 ---
 
-## What Jen Jen Has Already Read
+## What Naim Has Already Read
 
 ### Document 1 — Original (`synthesis.md`)
 
@@ -63,7 +63,7 @@ its adjusted validation further?
 
 ---
 
-## What Jen Jen Has NOT Yet Read
+## What Naim Has NOT Yet Read
 
 ### Document 3 — Amber Optimal (`synthesis_amber_optimal.md`)
 
