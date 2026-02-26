@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  25 FEB 2026 19:05
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  25 FEB 2026 20:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -613,59 +613,64 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <6> on input line 245.
 [3]
-</work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cutpoint-km-1.pdf, id=55, 722.7pt x 1011.78pt>
+</work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-k3-k7-nesting-1.pdf, id=56, 505.89pt x 252.945pt>
+File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-k3-k7-nesting-1.pdf Graphic file (type pdf)
+<use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-k3-k7-nesting-1.pdf>
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-k3-k7-nesting-1.pdf  used on input line 356.
+(pdftex.def)             Requested size: 469.75502pt x 234.88133pt.
+</work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cutpoint-km-1.pdf, id=57, 722.7pt x 1011.78pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cutpoint-km-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cutpoint-km-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cutpoint-km-1.pdf  used on input line 348.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cutpoint-km-1.pdf  used on input line 382.
 (pdftex.def)             Requested size: 469.75502pt x 657.66464pt.
 
-LaTeX Warning: Float too large for page by 67.73463pt on input line 349.
+LaTeX Warning: Float too large for page by 67.73463pt on input line 383.
 
-</work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-subtype-overlap-1.pdf, id=56, 578.16pt x 361.35pt>
+</work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-subtype-overlap-1.pdf, id=58, 578.16pt x 361.35pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-subtype-overlap-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-subtype-overlap-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-subtype-overlap-1.pdf  used on input line 370.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-subtype-overlap-1.pdf  used on input line 404.
 (pdftex.def)             Requested size: 469.75502pt x 293.59616pt.
-</work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sc-1.pdf, id=57, 469.755pt x 325.215pt>
+[4]
+</work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sc-1.pdf, id=68, 469.755pt x 325.215pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sc-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sc-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sc-1.pdf  used on input line 389.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sc-1.pdf  used on input line 423.
 (pdftex.def)             Requested size: 469.75386pt x 578.206pt.
-</work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-1.pdf, id=59, 289.08pt x 252.945pt>
+</work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-1.pdf, id=70, 289.08pt x 252.945pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-1.pdf  used on input line 410.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-1.pdf  used on input line 444.
 (pdftex.def)             Requested size: 289.07928pt x 252.94438pt.
-[4]
-</work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-corr-1.pdf, id=71, 361.35pt x 252.945pt>
+</work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-corr-1.pdf, id=72, 361.35pt x 252.945pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-corr-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-corr-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-corr-1.pdf  used on input line 436.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-corr-1.pdf  used on input line 470.
 (pdftex.def)             Requested size: 361.34912pt x 252.94438pt.
-</work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-forest-1.pdf, id=73, 361.35pt x 252.945pt>
+</work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-forest-1.pdf, id=74, 361.35pt x 252.945pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-forest-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-forest-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-forest-1.pdf  used on input line 458.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-forest-1.pdf  used on input line 492.
 (pdftex.def)             Requested size: 361.34912pt x 252.94438pt.
-[5] [6 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sim-null-mixed-1.pdf>] [7 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cindex-by-k-1.pdf>] [8 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cutpoint-km-1.pdf>] [9 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-subtype-overlap-1.pdf>] [10 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sc-1.pdf>] [11 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-1.pdf> </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-corr-1.pdf>] [12 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-forest-1.pdf>] (./supplement.aux)
+[5] [6 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sim-null-mixed-1.pdf>] [7 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cindex-by-k-1.pdf>] [8 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-k3-k7-nesting-1.pdf>] [9 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cutpoint-km-1.pdf>] [10 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-subtype-overlap-1.pdf>] [11 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sc-1.pdf>] [12 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-1.pdf> </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-corr-1.pdf>] [13 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-forest-1.pdf>] (./supplement.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 14933 strings out of 469471
- 242534 string characters out of 5467057
- 706630 words of memory out of 5000000
- 43179 multiletter control sequences out of 15000+600000
- 672872 words of font info for 143 fonts, out of 8000000 for 9000
+ 14955 strings out of 469471
+ 243684 string characters out of 5467057
+ 708015 words of memory out of 5000000
+ 43192 multiletter control sequences out of 15000+600000
+ 673121 words of font info for 146 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  89i,11n,93p,1643b,461s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on supplement.pdf (12 pages, 7925574 bytes).
+Output written on supplement.pdf (13 pages, 8065501 bytes).
 PDF statistics:
- 264 PDF objects out of 1000 (max. 8388607)
- 196 compressed objects within 2 object streams
- 35 named destinations out of 1000 (max. 500000)
- 22654 words of extra memory for PDF output out of 24883 (max. 10000000)
+ 284 PDF objects out of 1000 (max. 8388607)
+ 211 compressed objects within 3 object streams
+ 38 named destinations out of 1000 (max. 500000)
+ 22667 words of extra memory for PDF output out of 24883 (max. 10000000)
 

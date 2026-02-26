@@ -128,7 +128,7 @@ library(ggplot2)
 tar_load(fig_gene_overlap_heatmap_desurv_tcgacptac)
 tar_load(fig_gene_overlap_heatmap_std_desurvk_tcgacptac)
 tar_load(fig_median_survival_desurv_tcgacptac)
-tar_load(fig_median_survival_std_elbowk_tcgacptac)
+tar_load(fig_median_survival_std_desurvk_tcgacptac)
 
 # -------------------------
 # Global styling
@@ -146,12 +146,18 @@ theme_pnas <- theme_classic(base_size = base_size) +
 # -------------------------
 # Helper: stack KM plot + risk table
 # -------------------------
+km_text_size        <- base_size - 3   # axis labels and tick numbers in KM panels
+risk_title_size     <- 5               # "Number at risk" label
+
 stack_surv <- function(surv_obj, keep_legend = FALSE) {
   p <- surv_obj$plot +
     theme_pnas +
     theme(
       legend.position = if (keep_legend) "bottom" else "none",
       axis.title.x = element_blank(),
+      axis.title.y = element_text(size = km_text_size),
+      axis.text.x  = element_text(size = km_text_size),
+      axis.text.y  = element_text(size = km_text_size),
       plot.margin = margin(6, 10, 2, 6)
     )
   t <- surv_obj$table +
@@ -159,8 +165,9 @@ stack_surv <- function(surv_obj, keep_legend = FALSE) {
     theme(
       legend.position = "none",
       axis.title.y = element_blank(),
-      axis.text.x  = element_text(size = base_size - 1),
-      axis.text.y  = element_text(size = base_size - 1),
+      axis.text.x  = element_text(size = km_text_size),
+      axis.text.y  = element_text(size = km_text_size),
+      plot.title   = element_text(size = risk_title_size),
       plot.margin  = margin(2, 10, 6, 6)
     ) +
     labs(x = "Time (months)")
@@ -174,10 +181,8 @@ plot_4a    <- fig_gene_overlap_heatmap_desurv_tcgacptac$plot
 plot_4b    <- fig_gene_overlap_heatmap_std_desurvk_tcgacptac$plot
 legend_4ab <- fig_gene_overlap_heatmap_desurv_tcgacptac$legend
 
-aligned_ab <- cowplot::align_plots(plot_4a, plot_4b, align = "hv", axis = "tblr")
-
 left_block <- plot_grid(
-  aligned_ab[[1]], aligned_ab[[2]], cowplot::ggdraw(legend_4ab),
+  cowplot::ggdraw(plot_4a), cowplot::ggdraw(plot_4b), cowplot::ggdraw(legend_4ab),
   ncol = 3, labels = c("A", "B", ""),
   rel_widths = c(2.5, 2.5, 0.5)
 )
@@ -186,7 +191,7 @@ left_block <- plot_grid(
 # Panels C and D (KM curves) - stacked vertically on right
 # -------------------------
 med_desurv <- fig_median_survival_desurv_tcgacptac
-med_std    <- fig_median_survival_std_elbowk_tcgacptac
+med_std    <- fig_median_survival_std_desurvk_tcgacptac
 
 km_c <- stack_surv(med_desurv, keep_legend = FALSE)
 km_d <- stack_surv(med_std,    keep_legend = FALSE)
@@ -236,11 +241,13 @@ When validation samples were pooled and stratified using the cross-validated opt
 
 ## Factorization rank K=3 is robustly confirmed across supervision strength and gene-projection settings {.unnumbered}
 
+The 1-SE model selection rule chose $k = 3$ over the global Bayesian optimization maximum ($k = 7$; CV C-index $0.655$ versus $0.647$ for $k = 3$; margin $0.0025$ C-index units). Without this rule, DeSurv would have selected $k = 7$ at $\alpha = 0.33$---the same rank independently favored by standard NMF under cross-validated concordance at $\alpha = 0$. The parsimony of the DeSurv solution relative to standard NMF therefore reflects a deliberate methodological choice encoded in the 1-SE rule, not an intrinsic property of survival supervision. Whether this preference is empirically warranted requires evaluating whether the additional complexity of $k = 7$ translates to improved generalization.
+
 Bayesian optimization selected $k = 3$ and $\alpha = 0.334$ as the primary model configuration, but whether this reflects a stable solution or a fragile local optimum required further evaluation. To assess robustness, we conducted an exhaustive sensitivity analysis across $K \in \{2, 3, 5, 7, 9\}$ and $\alpha \in \{0, 0.25, 0.35, 0.55, 0.75, 0.85, 0.95\}$ (35 combinations), holding all remaining hyperparameters fixed at the production-optimal values ($\lambda = 0.349$, $\nu = 0.056$, ntop$= 270$, 100 initializations). For each fit, we identified the factor most correlated with the production K$=3$ Factor 1 and assessed its survival association in 570 independent validation patients across four external cohorts, using stratified Cox regression with and without adjustment for PurIST and DeCAF classifiers.
 
 With the production-optimal gene-projection setting (ntop$=270$), K$=3$ validated adjustedly at 5 of 7 supervision-strength values, including $\alpha = 0.55$ where it achieved adjusted HR $= 0.81$ ($p = 0.003$) --- nearly identical to the production fit ($p = 0.004$). K$=5$ at $\alpha = 0.55$ provided independent corroboration at higher factor-program fidelity (Spearman H-score correlation = 0.903 vs. K$=3$'s 0.855; adjusted $p = 0.019$), confirming the iCAF biology is recoverable by a higher-rank model. In contrast, K$=7$ --- which had appeared to achieve adjusted significance ($p = 0.019$) in a parallel analysis using all 1,970 genes in the projection --- completely failed with ntop$=270$ (adjusted $p = 0.676$), establishing that the earlier K$=7$ advantage was an artifact of the all-genes projection rather than an intrinsic property of the 7-factor solution.
 
-To isolate the contribution of gene focusing, we repeated the analysis with all genes retained (ntop$=\text{NULL}$) while keeping $\lambda$ and $\nu$ at their optimal values. With all genes, K$=3$ at $\alpha = 0.55$ reached only adjusted $p = 0.097$, failing to reproduce the production result, and only 5 of 35 combinations achieved adjusted $p < 0.05$ --- compared with 16 of 35 with ntop$=270$. Substituting $\lambda = 0.349$ for $\lambda = 0.300$ within the all-genes setting shifted the pattern of validated combinations but left the overall count unchanged (5/35), confirming that regularization tuning alone cannot reproduce the adjusted signal without gene focusing. These analyses establish ntop$=270$ as the critical hyperparameter: focusing the projection onto the 270 most factor-characteristic genes concentrates the survival signal, suppresses noise from the remaining genes, and prevents overfitting at high supervision weights. Full K $\times$ $\alpha$ adjusted p-value tables are provided in the Supplementary (Tables S1--S3).
+To isolate the contribution of gene focusing, we repeated the analysis with all genes retained (ntop$=\text{NULL}$) while keeping $\lambda$ and $\nu$ at their optimal values. With all genes, K$=3$ at $\alpha = 0.55$ reached only adjusted $p = 0.097$, failing to reproduce the production result, and only 5 of 35 combinations achieved adjusted $p < 0.05$ --- compared with 16 of 35 with ntop$=270$. Substituting $\lambda = 0.349$ for $\lambda = 0.300$ within the all-genes setting shifted the pattern of validated combinations but left the overall count unchanged (5/35), confirming that regularization tuning alone cannot reproduce the adjusted signal without gene focusing. These analyses establish ntop$=270$ as the critical hyperparameter: focusing the projection onto the 270 most factor-characteristic genes concentrates the survival signal, suppresses noise from the remaining genes, and prevents overfitting at high supervision weights. Full K $\times$ $\alpha$ adjusted p-value tables are provided in the Supplementary (Tables S1--S3). Taken together, these results provide empirical justification for the 1-SE rule's parsimony preference: $k = 7$, which achieved the highest training CV C-index, completely failed adjusted external validation ($p = 0.676$), while $k = 3$ validated robustly ($p = 0.003$). The simpler model not only passed the 1-SE threshold---it generalized better.
 
 ## A PDAC-trained program retains prognostic signal in bladder cancer {.unnumbered}
 

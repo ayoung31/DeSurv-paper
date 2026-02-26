@@ -1263,9 +1263,86 @@ COMMON_DESURV_RUN_TARGETS <- list(
       fit
     }
   ),
-  
-  
-  
+
+  # --- CV-based cutpoint selection for std NMF (DeSurv k) model ---
+  tar_target(
+    std_desurvk_cv_cutpoint_result,
+    run_cv_grid_point_std_nmf(
+      data = tar_data_filtered,
+      k = bo_bundle_selected$params_best$k,
+      nrun = 30,
+      nfolds = 5,
+      seed = 123
+    ),
+    resources = tar_resources(
+      crew = tar_resources_crew(controller = "med_mem")
+    ),
+    cue = tar_cue(mode = "never")
+  ),
+
+  tar_target(
+    std_desurvk_cutpoint_eval,
+    evaluate_cutpoint_zscores(
+      std_desurvk_cv_cutpoint_result,
+      z_grid = seq(-2.0, 2.0, by = 0.2)
+    )
+  ),
+
+  tar_target(
+    std_desurvk_cutpoint_summary,
+    {
+      std_desurvk_cutpoint_eval |>
+        dplyr::group_by(z_cutpoint) |>
+        dplyr::summarise(
+          mean_cindex_dichot = mean(cindex_dichot, na.rm = TRUE),
+          se_cindex_dichot = sd(cindex_dichot, na.rm = TRUE) / sqrt(sum(!is.na(cindex_dichot))),
+          mean_abs_logrank_z = mean(abs(logrank_z), na.rm = TRUE),
+          se_abs_logrank_z = sd(abs(logrank_z), na.rm = TRUE) / sqrt(sum(!is.na(logrank_z))),
+          .groups = "drop"
+        )
+    }
+  ),
+
+  tar_target(
+    std_desurvk_optimal_z_cutpoint,
+    {
+      std_desurvk_cutpoint_summary |>
+        dplyr::slice_max(mean_abs_logrank_z, n = 1, with_ties = FALSE) |>
+        dplyr::pull(z_cutpoint)
+    }
+  ),
+
+  tar_target(
+    std_desurvk_optimal_z_cutpoint_cindex,
+    {
+      std_desurvk_cutpoint_summary |>
+        dplyr::slice_max(mean_cindex_dichot, n = 1, with_ties = FALSE) |>
+        dplyr::pull(z_cutpoint)
+    }
+  ),
+
+  tar_target(
+    std_desurvk_lp_stats,
+    {
+      lp <- compute_lp(
+        fit_std_desurvk$W,
+        fit_std_desurvk$beta,
+        tar_data_filtered$ex,
+        NULL
+      )
+      lp_mean <- mean(lp, na.rm = TRUE)
+      lp_sd <- sd(lp, na.rm = TRUE)
+      list(
+        lp_mean = lp_mean,
+        lp_sd = lp_sd,
+        optimal_z_cutpoint = std_desurvk_optimal_z_cutpoint,
+        cutpoint_abs = std_desurvk_optimal_z_cutpoint * lp_sd + lp_mean,
+        optimal_z_cutpoint_cindex = std_desurvk_optimal_z_cutpoint_cindex,
+        cutpoint_abs_cindex = std_desurvk_optimal_z_cutpoint_cindex * lp_sd + lp_mean
+      )
+    }
+  ),
+
   run_bundle_target,
   run_bundles_target,
   tar_target(
@@ -2368,7 +2445,8 @@ FIGURE_TARGETS <- list(
       browser()
       result = make_gene_overlap_heatmap(tar_fit_desurv,tar_tops_desurv$top_genes,top_genes,
                                     factor_labels = FIGURE_CONFIGS$heatmap_factor_labels[[bo_label]],
-                                    title = "DeSurv")
+                                    title = "DeSurv",
+                                    fontsize_row = 5)
       save_plot_pdf(
         result$plot,
         file.path(
@@ -2475,7 +2553,8 @@ FIGURE_TARGETS <- list(
                                     tar_tops_std_desurvk$top_genes,
                                     top_genes,
                                     factor_labels = FIGURE_CONFIGS$heatmap_factor_labels_std[[bo_label]],
-                                    title = "NMF")
+                                    title = "NMF",
+                                    fontsize_row = 5)
       save_plot_pdf(
         result$plot,
         file.path(
@@ -2768,20 +2847,7 @@ FIGURE_VAL_TARGETS <- list(
   ),
   tar_target(
     fig_median_survival_std_desurvk,
-    {
-      nmf_var <- build_variance_survival_df(
-        X = tar_data_filtered$ex,
-        scores = fit_std_desurvk$W,
-        loadings = fit_std_desurvk$H,
-        time = tar_data_filtered$sampInfo$time,
-        event = tar_data_filtered$sampInfo$event,
-        method = "Std NMF"
-      )
-      
-      nmf_fac = nmf_var$factor[which.max(nmf_var$delta_loglik)]
-
-      splot_median(data_val_filtered,fit_std_desurvk,nmf_fac)
-    }
+    splot_cutpoint(data_val_filtered, fit_std_desurvk, std_desurvk_lp_stats, ntop = NULL)
   ),
   tar_target(
     fig_median_survival_std_elbowk,

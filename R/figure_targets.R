@@ -659,7 +659,7 @@ make_ora_dotplots = function(ora_analysis){
   p1
 }
 
-make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref, factor_labels = NULL, title = NULL){
+make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref, factor_labels = NULL, title = NULL, fontsize_row = 6){
 
   if (is.null(top_genes_ref) || !length(top_genes_ref)) {
     stop("Reference gene signatures are missing.")
@@ -768,6 +768,8 @@ make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref, factor_lab
     color = my_colors,
     breaks = seq(-0.5, 0.5, length.out = 101),
     fontsize = 6,
+    fontsize_row = fontsize_row,
+    fontsize_col = fontsize_row,
     silent = TRUE,
     fontsize_number = 20,
     treeheight_row = 0,
