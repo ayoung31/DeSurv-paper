@@ -3,6 +3,7 @@ suppressPackageStartupMessages({
   library(ggplot2)
   library(purrr)
   library(tibble)
+  library(tidyr)
 })
 
 sim_method_colors <- c(
@@ -162,6 +163,119 @@ plot_sim_metric_box <- function(results, metric, title, ylab, base_size = 12) {
   
 }
 
+extract_matched_factor_beta <- function(lfm) {
+  # Returns learned_beta for the learned factor with the highest precision
+  # against the first true lethal program (marker-only set).
+  if (is.null(lfm) || !inherits(lfm, "data.frame") || !nrow(lfm)) {
+    return(NA_real_)
+  }
+  pf <- lfm$per_factor_stats[[1]]
+  if (is.null(pf) || !inherits(pf, "data.frame") || !nrow(pf)) {
+    return(NA_real_)
+  }
+  idx <- which.max(pf$precision)
+  if (!length(idx)) return(NA_real_)
+  pf$learned_beta[idx]
+}
+
+plot_mixed_precision_breakdown <- function(results, base_size = 12) {
+  # Side-by-side comparison of survival-gene precision vs marker-only precision
+  # for DeSurv and NMF in the mixed scenario.
+  # Requires both lethal_factor_metrics and marker_only_lethal_factor_metrics columns.
+  if (!"marker_only_lethal_factor_metrics" %in% names(results)) {
+    return(NULL)
+  }
+  plot_data <- results %>%
+    dplyr::mutate(
+      `Survival gene set` = purrr::map_dbl(
+        lethal_factor_metrics,
+        mean_lethal_metric,
+        metric = "best_precision"
+      ),
+      `Marker genes only` = purrr::map_dbl(
+        marker_only_lethal_factor_metrics,
+        mean_lethal_metric,
+        metric = "best_precision"
+      )
+    ) %>%
+    tidyr::pivot_longer(
+      cols = c("Survival gene set", "Marker genes only"),
+      names_to = "precision_type",
+      values_to = "precision_value"
+    ) %>%
+    dplyr::mutate(
+      precision_type = factor(
+        precision_type,
+        levels = c("Marker genes only", "Survival gene set")
+      )
+    ) %>%
+    dplyr::filter(!is.na(precision_value), !is.na(method))
+
+  if (!nrow(plot_data)) return(NULL)
+
+  ggplot2::ggplot(
+    plot_data,
+    ggplot2::aes(x = method, y = precision_value, fill = method)
+  ) +
+    ggplot2::geom_boxplot(width = 0.55, outlier.shape = NA, alpha = 0.85) +
+    ggplot2::geom_jitter(
+      ggplot2::aes(color = method),
+      width = 0.15,
+      size = 0.8,
+      alpha = 0.35
+    ) +
+    ggplot2::facet_wrap(~ precision_type) +
+    ggplot2::scale_fill_manual(values = sim_method_colors) +
+    ggplot2::scale_color_manual(values = sim_method_colors, guide = "none") +
+    ggplot2::labs(
+      title = "Precision by gene set definition",
+      x = NULL,
+      y = "Precision",
+      fill = "Method"
+    ) +
+    sim_pub_theme(base_size = base_size)
+}
+
+plot_matched_factor_beta <- function(results, base_size = 12) {
+  # Boxplot of |learned_beta| for the matched factor (highest marker overlap)
+  # in DeSurv vs NMF.  Uses marker_only_lethal_factor_metrics to identify
+  # the matched factor, confirming that supervision amplifies the marker program.
+  if (!"marker_only_lethal_factor_metrics" %in% names(results)) {
+    return(NULL)
+  }
+  plot_data <- results %>%
+    dplyr::mutate(
+      matched_beta = purrr::map_dbl(
+        marker_only_lethal_factor_metrics,
+        extract_matched_factor_beta
+      )
+    ) %>%
+    dplyr::filter(!is.na(matched_beta), !is.na(method))
+
+  if (!nrow(plot_data)) return(NULL)
+
+  ggplot2::ggplot(
+    plot_data,
+    ggplot2::aes(x = method, y = abs(matched_beta), fill = method)
+  ) +
+    ggplot2::geom_boxplot(width = 0.55, outlier.shape = NA, alpha = 0.85) +
+    ggplot2::geom_jitter(
+      ggplot2::aes(color = method),
+      width = 0.15,
+      size = 0.8,
+      alpha = 0.35
+    ) +
+    ggplot2::scale_fill_manual(values = sim_method_colors) +
+    ggplot2::scale_color_manual(values = sim_method_colors, guide = "none") +
+    ggplot2::labs(
+      title = "Matched factor |\u03b2|",
+      x = NULL,
+      y = expression("|" * beta * "|" ~ "(matched factor)"),
+      fill = "Method"
+    ) +
+    sim_pub_theme(base_size = base_size)
+}
+
 build_sim_figs <- function(sim_results_table,
                            analysis_id_base = NULL,
                            scenario_id = NULL,
@@ -172,7 +286,12 @@ build_sim_figs <- function(sim_results_table,
     scenario_id = scenario_id
   )
 
-  list(
+  is_mixed <- !is.null(scenario_id) &&
+    normalize_scenario_id(scenario_id) == "R_mixed"
+  has_marker_only <- "marker_only_lethal_factor_metrics" %in%
+    names(plot_data$results)
+
+  result <- list(
     k_hist = plot_sim_k_hist(
       plot_data$k_plot_data,
       plot_data$true_k_tbl,
@@ -195,6 +314,19 @@ build_sim_figs <- function(sim_results_table,
     analysis_id = analysis_id_base,
     scenario_id = scenario_id
   )
+
+  if (is_mixed && has_marker_only) {
+    result$precision_breakdown <- plot_mixed_precision_breakdown(
+      plot_data$results,
+      base_size = base_size
+    )
+    result$matched_beta_box <- plot_matched_factor_beta(
+      plot_data$results,
+      base_size = base_size
+    )
+  }
+
+  result
 }
 
 save_sim_plot <- function(plot, path, width = 6.5, height = 4.5) {

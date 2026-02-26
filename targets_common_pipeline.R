@@ -546,7 +546,8 @@ COMMON_DESURV_RUN_TARGETS <- list(
     },
     resources = tar_resources(
       crew = tar_resources_crew(controller = "med_mem")
-    )
+    ),
+    cue = tar_cue(mode = "never")
   ),
   tar_target(
     desurv_consensus_init,
@@ -899,7 +900,8 @@ COMMON_DESURV_RUN_TARGETS <- list(
     },
     resources = tar_resources(
       crew = tar_resources_crew(controller = "med_mem")
-    )
+    ),
+    cue = tar_cue(mode = "never")
   ),
 
   tar_target(
@@ -992,7 +994,8 @@ COMMON_DESURV_RUN_TARGETS <- list(
     },
     resources = tar_resources(
       crew = tar_resources_crew(controller = "med_mem")
-    )
+    ),
+    cue = tar_cue(mode = "never")
   ),
   tar_target(
     desurv_consensus_init_elbowk,

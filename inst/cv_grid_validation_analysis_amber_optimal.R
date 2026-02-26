@@ -361,4 +361,31 @@ for (nm in names(master_rows)) {
     r$km_hi, r$km_lo, r$km_p))
 }
 
+# ---- Save outputs ----------------------------------------------------------------
+OUT_RDS <- "results/cv_grid"
+dir.create(OUT_RDS, showWarnings = FALSE, recursive = TRUE)
+saveRDS(val_p_adj_matrix, file.path(OUT_RDS, "adj_p_270_matrix.rds"))
+saveRDS(val_p_matrix,     file.path(OUT_RDS, "unadj_p_270_matrix.rds"))
+saveRDS(hcor_matrix,      file.path(OUT_RDS, "hcor_270_matrix.rds"))
+master_df_270 <- do.call(rbind, lapply(names(master_rows), function(nm) {
+  r <- master_rows[[nm]]
+  data.frame(
+    nm       = nm,
+    k        = r$k,
+    alpha    = r$alpha,
+    best_f   = r$best_f,
+    hcor     = r$hcor,
+    gene_ov  = r$gene_ov,
+    hr_t     = r$hr_t,    p_t     = r$p_t,
+    hr_t_adj = r$hr_t_adj, p_t_adj = r$p_t_adj, lrt_p_t = r$lrt_p_t,
+    hr_v     = r$hr_v,    p_v     = r$p_v,
+    hr_v_adj = r$hr_v_adj, p_v_adj = r$p_v_adj, lrt_p_v = r$lrt_p_v,
+    km_hi    = r$km_hi,   km_lo   = r$km_lo,   km_p    = r$km_p,
+    stringsAsFactors = FALSE
+  )
+}))
+saveRDS(master_df_270, file.path(OUT_RDS, "master_rows_270.rds"))
+cat(sprintf("\nOutputs saved to %s/\n", OUT_RDS))
+cat("  adj_p_270_matrix.rds\n  unadj_p_270_matrix.rds\n  hcor_270_matrix.rds\n  master_rows_270.rds\n")
+
 cat("\nDone.\n")

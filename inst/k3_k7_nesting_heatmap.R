@@ -129,3 +129,34 @@ p <- ggplot(cor_long, aes(x = K7_factor, y = K3_factor, fill = spearman_r)) +
 out_path <- file.path(OUT_DIR, "k3_k7_factor_correlation_heatmap.pdf")
 ggsave(out_path, p, width = 7, height = 3.5)
 cat(sprintf("\nSaved heatmap to: %s\n", out_path))
+
+# ---- Save correlation matrix for use in manuscript Rmd ----
+rds_dir <- "results/cv_grid"
+dir.create(rds_dir, showWarnings = FALSE, recursive = TRUE)
+saveRDS(cor_mat, file.path(rds_dir, "k3_k7_cor_mat.rds"))
+cat(sprintf("Saved correlation matrix to: %s/k3_k7_cor_mat.rds\n", rds_dir))
+
+# Derive and save scalar summaries for use in manuscript prose
+# (These replace the k3_k7_summary.rds bootstrap values)
+k3_f1_row    <- cor_mat["K3_F1", ]
+k3_f2_row    <- cor_mat["K3_F2", ]
+k3_f3_row    <- cor_mat["K3_F3", ]
+k3f1_best_k7 <- names(which.max(k3_f1_row))
+k3f2_best_k7 <- names(which.max(k3_f2_row))
+# K3_F3: range of correlations excluding the two best-match K7 factors
+k3f3_other <- k3_f3_row[setdiff(names(k3_f3_row), c(k3f1_best_k7, k3f2_best_k7))]
+# K7_F4: correlations with all K3 factors (if F4 exists)
+k7f4_col <- if ("K7_F4" %in% colnames(cor_mat)) cor_mat[, "K7_F4"] else rep(NA_real_, 3)
+
+k3_k7_summary <- list(
+  k3f1_best_r    = unname(k3_f1_row[k3f1_best_k7]),
+  k3f1_best_k7   = k3f1_best_k7,
+  k3f2_best_r    = unname(k3_f2_row[k3f2_best_k7]),
+  k3f2_best_k7   = k3f2_best_k7,
+  k3f3_range_min = min(k3f3_other, na.rm = TRUE),
+  k3f3_range_max = max(k3f3_other, na.rm = TRUE),
+  k7f4_range_min = min(k7f4_col, na.rm = TRUE),
+  k7f4_range_max = max(k7f4_col, na.rm = TRUE)
+)
+saveRDS(k3_k7_summary, file.path(rds_dir, "k3_k7_summary.rds"))
+cat(sprintf("Saved k3_k7_summary.rds\n"))

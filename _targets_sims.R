@@ -1272,6 +1272,19 @@ summarize_simulation_results <- function(result_list) {
     ),
     compute_simulation_survival_metrics
   )
+  # Marker-only metrics: evaluate precision against truth$marker_sets directly,
+  # ignoring survival_gene_sets.  In the mixed scenario this is the 150-gene
+  # factor-specific marker set (not the 300-gene survival set), enabling
+  # a mechanistic breakdown of DeSurv's advantage.
+  marker_only_metrics <- purrr::pmap(
+    list(
+      fit       = result_tbl$fit,
+      processed = result_tbl$processed,
+      truth     = result_tbl$truth,
+      params    = result_tbl$params
+    ),
+    compute_simulation_marker_metrics
+  )
   summary_tbl <- tibble::tibble(
     scenario_id = result_tbl$scenario_id,
     scenario = result_tbl$scenario,
@@ -1332,6 +1345,13 @@ summarize_simulation_results <- function(result_list) {
   summary_tbl$marker_ari <- purrr::map_dbl(
     survival_metrics,
     ~ .x$marker_ari %||% NA_real_
+  )
+  # Marker-only precision metrics (against truth$marker_sets, not survival_gene_sets)
+  summary_tbl$marker_only_lethal_factor_metrics <- purrr::map(
+    marker_only_metrics, "lethal_factor_metrics"
+  )
+  summary_tbl$marker_only_ari <- purrr::map_dbl(
+    marker_only_metrics, ~ .x$marker_ari %||% NA_real_
   )
   summary_tbl$marker_recall_all <- purrr::map2_dbl(
     result_tbl$truth,

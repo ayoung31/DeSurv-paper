@@ -12,24 +12,24 @@ author:
     affiliation: a,c
 address:
   - code: a
-    address: University of North Carolina at Chapel Hill, Biostatistics, Street, City, State, Zip
+    address: Department of Biostatistics, University of North Carolina at Chapel Hill, Chapel Hill, NC 27599, USA
   - code: b
-    address: Stony Brook University, Street, City, State, Zip
+    address: Department of Biomedical Informatics, Stony Brook University, Stony Brook, NY 11794, USA
 
 corresponding_author:
   code: 2
   text: "To whom correspondence should be addressed. E-mail: ayoung31@live.unc.edu"
 
 # For footer text
-lead_author_surname: Anonymous
+lead_author_surname: Young
 
 
 author_contributions: |
-  Please provide details of author contributions here.
+  A.M.Y. and N.U.R. conceived and designed the study; A.M.Y. developed the DeSurv method, implemented the software, performed all analyses, and generated figures; A.Y. and D.L. contributed to methodological development and analytic tools; A.M.Y. and N.U.R. wrote the manuscript; all authors reviewed and approved the final manuscript.
 
 ## Remove this if not required
 conflict_of_interest: |
-  Please declare any conflict of interest here.
+  The authors declare no competing interests.
 
 abstract: |
   Molecular subtyping in cancer is an ongoing problem that relies on the identification of robust and replicable gene signatures. While transcriptomic profiling has revealed recurrent gene expression patterns in various types of cancer, the prognostic value of these signatures is typically evaluated in retrospect. This is due to the reliance on unsupervised learning methods for identifying cell-type-specific signals and clustering patients into molecular subtypes. Here we present a Survival-driven Deconvolution tool (DeSurv) that integrates bulk RNA-sequencing data with patient survival information to identify cell-type-enriched gene signatures associated with prognosis. Applying DeSurv to various cohorts in pancreatic cancer, we uncover prognostic and biologically interpretable subtypes that reflect the complex interactions between stroma, tumor, and immune cells in the tumor microenvironment. Our approach highlights the value of using patient outcomes during gene signature discovery.
