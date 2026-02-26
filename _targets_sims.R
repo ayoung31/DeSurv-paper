@@ -176,18 +176,18 @@ SIM_FIXED_PARAMS <- list(
 )
 
 SIM_ANALYSIS_SPECS <- list(
-  list(
-    analysis_id = "fixed",
-    label = "Fixed parameters",
-    mode = "fixed",
-    params = SIM_FIXED_PARAMS
-  ),
-  list(
-    analysis_id = "fixed_alpha0",
-    label = "Fixed NMF",
-    mode = "fixed",
-    params = modifyList(SIM_FIXED_PARAMS, list(alpha = 0))
-  ),
+  # list(
+  #   analysis_id = "fixed",
+  #   label = "Fixed parameters",
+  #   mode = "fixed",
+  #   params = SIM_FIXED_PARAMS
+  # ),
+  # list(
+  #   analysis_id = "fixed_alpha0",
+  #   label = "Fixed NMF",
+  #   mode = "fixed",
+  #   params = modifyList(SIM_FIXED_PARAMS, list(alpha = 0))
+  # ),
   list(
     analysis_id = "bo",
     label = "Bayesian optimization",

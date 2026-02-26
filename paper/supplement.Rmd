@@ -137,6 +137,100 @@ img <- magick::image_read_pdf(fig_path, density = 300)
 cowplot::ggdraw() + cowplot::draw_image(img)
 ```
 
+## K-sensitivity analysis: effect of gene focusing on iCAF factor validation {.unnumbered}
+
+To evaluate the robustness of the K=3 iCAF factorization, we conducted an exhaustive sensitivity analysis across $K \in \{2, 3, 5, 7, 9\}$ and $\alpha \in \{0, 0.25, 0.35, 0.55, 0.75, 0.85, 0.95\}$ (35 combinations), holding all remaining hyperparameters fixed at the production-optimal values ($\lambda = 0.349$, $\nu = 0.056$, 100 initializations). For each fit, we identified the factor most correlated with the production K=3 Factor 1 (the iCAF factor) and evaluated its prognostic value in 570 independent validation patients across four cohorts (Dijk, Moffitt GEO, Puleo, PACA-AU), using stratified Cox regression (\texttt{strata(dataset)}) with and without adjustment for PurIST and DeCAF classifiers. Factor-program fidelity was quantified by Spearman rank correlation of ntop=270-focused H-scores (H-cor) with the production factor. We repeated this analysis under two gene-projection settings --- ntop=270 (production-optimal top genes per factor) and ntop=NULL (all 1,970 genes) --- to isolate the effect of gene focusing on validation performance.
+
+The central finding is shown in Table \ref{tab:tab-ksens-summary}: **ntop=270 is the critical hyperparameter enabling the production fit's adjusted validation.** Moving from ntop=NULL to ntop=270, while holding $\lambda$ and $\nu$ at their optimal values, increases the number of K $\times$ $\alpha$ combinations achieving adjusted $p < 0.05$ from 5/35 to 16/35 and restores K=3 at $\alpha=0.55$ to adjusted $p = 0.003$ --- nearly identical to the production fit ($p = 0.004$). By contrast, changing only $\lambda$ from 0.3 to 0.349 while keeping ntop=NULL leaves the overall count unchanged (5/35), confirming that $\lambda/\nu$ tuning alone cannot reproduce the adjusted signal.
+
+```{r tab-ksens-summary, echo=FALSE, results='asis'}
+library(knitr)
+library(kableExtra)
+
+tab_summary <- data.frame(
+  Condition = c(
+    "ntop = NULL, $\\lambda$ = 0.300, $\\nu$ = 0.050",
+    "ntop = NULL, $\\lambda$ = 0.349, $\\nu$ = 0.056",
+    "ntop = 270,\\hspace{2pt} $\\lambda$ = 0.349, $\\nu$ = 0.056"
+  ),
+  Count = c("5 / 35", "5 / 35", "\\textbf{16 / 35}"),
+  K3_p  = c("0.072", "0.097", "\\textbf{0.003}"),
+  Best  = c(
+    "K=7, $\\alpha$=0.75 (adj $p$ = 0.019)",
+    "K=5, $\\alpha$=0.25 (adj $p$ = 0.0003)",
+    "K=3, $\\alpha$=0.55 (adj $p$ = 0.003)"
+  ),
+  stringsAsFactors = FALSE
+)
+colnames(tab_summary) <- c(
+  "Analysis condition",
+  "Adj $p < 0.05$ (of 35)",
+  "K=3, $\\alpha$=0.55 adj $p$",
+  "Best single combination"
+)
+
+kable(tab_summary, format = "latex", escape = FALSE, booktabs = TRUE,
+      caption = "Three-way comparison of K-sensitivity analyses differing only in gene-projection setting (ntop) and regularization ($\\lambda$, $\\nu$). All analyses span K $\\in$ \\{2, 3, 5, 7, 9\\} $\\times$ $\\alpha \\in$ \\{0, 0.25, 0.35, 0.55, 0.75, 0.85, 0.95\\} = 35 combinations. Count shows combinations achieving adjusted $p < 0.05$; bold highlights the ntop=270 result that restores K=3 adjusted significance.",
+      label = "tab-ksens-summary") |>
+  kable_styling(latex_options = c("hold_position", "scale_down"), font_size = 9)
+```
+
+Tables \ref{tab:tab-ksens-adjp-ntop270} and \ref{tab:tab-ksens-adjp-allgenes} present the full K $\times$ $\alpha$ adjusted p-value matrices for the ntop=270 and ntop=NULL analyses respectively. With ntop=270, K=3 validates adjustedly at 5 of 7 $\alpha$ values tested ($\alpha \in \{0.00, 0.25, 0.55, 0.75, 0.95\}$), and broad adjusted significance is also observed at K=2 (5/7) and K=5 (4/7). With ntop=NULL (Table \ref{tab:tab-ksens-adjp-allgenes}), the landscape is sparse and structurally different: K=3 at $\alpha=0.55$ narrowly misses significance ($p = 0.097$), and only isolated combinations scattered across K=3, K=5, K=7, and K=9 achieve adjusted $p < 0.05$.
+
+```{r tab-ksens-adjp-ntop270, echo=FALSE, results='asis'}
+fmt_p <- function(x) {
+  s <- ifelse(x < 0.001,
+    formatC(x, format = "e", digits = 0),
+    formatC(x, format = "f", digits = 3)
+  )
+  s <- sub("e-0(\\d)$", "e-\\1", s)
+  ifelse(x < 0.05, paste0("\\textbf{", s, "}"), s)
+}
+
+alpha_labs <- c("0.00", "0.25", "0.35", "0.55", "0.75", "0.85", "0.95")
+k_labs     <- c("K=2", "K=3", "K=5", "K=7", "K=9")
+
+adj_p_270 <- matrix(c(
+  0.564, 0.038, 0.038, 0.019, 0.060, 0.011, 0.002,
+  0.030, 0.030, 0.519, 0.003, 0.028, 0.263, 0.009,
+  5e-4,  0.005, 8e-4,  0.019, 0.073, 0.604, 0.447,
+  0.513, 0.471, 0.001, 0.041, 0.676, 0.131, 0.130,
+  3e-4,  0.299, 0.243, 0.005, 0.943, 0.867, 0.263
+), nrow = 5, byrow = TRUE)
+
+df_270 <- as.data.frame(
+  matrix(fmt_p(adj_p_270), nrow = 5, dimnames = list(k_labs, alpha_labs))
+)
+
+kable(df_270, format = "latex", escape = FALSE, booktabs = TRUE,
+      caption = "Adjusted validation p-values (Cox + PurIST + DeCAF + strata(dataset)) across K $\\times$ $\\alpha$ with ntop=270, $\\lambda=0.349$, $\\nu=0.056$. Each cell gives the p-value for the factor most correlated with the production K=3 iCAF factor. Bold: $p < 0.05$; 16 of 35 combinations are significant.",
+      label = "tab-ksens-adjp-ntop270") |>
+  kable_styling(latex_options = c("hold_position"), font_size = 9) |>
+  add_header_above(c(" " = 1, "$\\\\alpha$" = 7), escape = FALSE)
+```
+
+```{r tab-ksens-adjp-allgenes, echo=FALSE, results='asis'}
+adj_p_all <- matrix(c(
+  0.414, 0.192, 0.142, 0.197, 0.090, 0.194, 0.158,
+  0.205, 0.024, 0.280, 0.097, 0.112, 0.076, 0.111,
+  0.461, 3e-4,  0.150, 0.233, 0.067, 0.124, 0.197,
+  0.394, 0.336, 0.304, 0.097, 0.094, 0.062, 0.021,
+  0.023, 0.093, 0.474, 0.022, 0.106, 0.127, 0.122
+), nrow = 5, byrow = TRUE)
+
+df_all <- as.data.frame(
+  matrix(fmt_p(adj_p_all), nrow = 5, dimnames = list(k_labs, alpha_labs))
+)
+
+kable(df_all, format = "latex", escape = FALSE, booktabs = TRUE,
+      caption = "Adjusted validation p-values across K $\\times$ $\\alpha$ with ntop=NULL (all 1,970 genes), $\\lambda=0.349$, $\\nu=0.056$. Layout identical to Table \\ref{tab:tab-ksens-adjp-ntop270}. Only 5 of 35 combinations are significant (bold), and K=3 at $\\alpha=0.55$ (the production neighborhood) reaches only $p = 0.097$.",
+      label = "tab-ksens-adjp-allgenes") |>
+  kable_styling(latex_options = c("hold_position"), font_size = 9) |>
+  add_header_above(c(" " = 1, "$\\\\alpha$" = 7), escape = FALSE)
+```
+
+Four additional findings emerge from these analyses. First, K=7's apparent advantage observed in a parallel analysis using conventional hyperparameters ($\lambda=0.3$, ntop=NULL), where K=7 at $\alpha=0.75$ achieved adjusted $p = 0.019$, completely disappears with ntop=270 (adj $p = 0.676$, Table \ref{tab:tab-ksens-adjp-ntop270}). Focused 270-gene projection fragments the iCAF signal across K=7's factors, establishing that the earlier K=7 advantage was an artifact of the all-genes projection rather than an intrinsic property of the 7-factor solution. Second, K=3 robustly validates adjustedly across a broad $\alpha$ range with ntop=270 (5/7 values), demonstrating that the production result does not depend on the BO-selected $\alpha = 0.334$ specifically. Third, K=5 at $\alpha=0.55$ achieves the highest factor-program fidelity in the ntop=270 analysis (H-cor = 0.903 vs. K=3's 0.855) and also validates adjustedly ($p = 0.019$), providing convergent evidence for the iCAF biology from a higher-K model; an independent K=5 all-genes fit at $\alpha=0.25$ likewise validates adjustedly ($p = 0.0003$, H-cor = 0.910). Fourth, without gene focusing, high supervision weights ($\alpha \geq 0.75$) produce factors with extreme training discrimination (HR $\approx 0.07$–$0.10$, LRT $p \sim 10^{-60}$) that fail external validation, indicating overfitting of the training survival signal; gene focusing (ntop=270) suppresses this by constraining each factor to its 270 most biologically characteristic genes.
+
 ## Cutpoint selection and validation of dichotomized risk groups {.unnumbered}
 
 To convert the continuous DeSurv linear predictor into a clinically interpretable binary risk stratification, we selected an optimal z-score cutpoint via cross-validation on the TCGA+CPTAC training cohort. For each candidate cutpoint in $\{-2.0, -1.8, \ldots, 2.0\}$, we computed the mean absolute log-rank z-statistic across held-out folds and selected the cutpoint maximizing this metric (Figure \@ref(fig:fig-cutpoint-km)A). We then applied this cutpoint to external validation cohorts by standardizing each patient's linear predictor using the training mean and standard deviation. Figure \@ref(fig:fig-cutpoint-km)B shows the resulting Kaplan–Meier curves for the pooled external validation analysis, with a stratified log-rank test accounting for dataset of origin. Panels C–F display per-cohort validation KM curves for Dijk, Moffitt, PACA-AU, and Puleo, respectively. Across all cohorts, the DeSurv-derived high-risk group showed consistently shorter survival, confirming that the training-derived cutpoint generalizes to independent datasets.

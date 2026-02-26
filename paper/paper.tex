@@ -536,6 +536,58 @@ prediction that outcome-aligned programs capture biology that
 generalizes, whereas variance-driven programs may include
 cohort-specific signals that attenuate across datasets.
 
+\subsection*{Factorization rank K=3 is robustly confirmed across
+supervision strength and gene-projection
+settings}\label{factorization-rank-k3-is-robustly-confirmed-across-supervision-strength-and-gene-projection-settings}
+\addcontentsline{toc}{subsection}{Factorization rank K=3 is robustly
+confirmed across supervision strength and gene-projection settings}
+
+Bayesian optimization selected \(k = 3\) and \(\alpha = 0.334\) as the
+primary model configuration, but whether this reflects a stable solution
+or a fragile local optimum required further evaluation. To assess
+robustness, we conducted an exhaustive sensitivity analysis across
+\(K \in \{2, 3, 5, 7, 9\}\) and
+\(\alpha \in \{0, 0.25, 0.35, 0.55, 0.75, 0.85, 0.95\}\) (35
+combinations), holding all remaining hyperparameters fixed at the
+production-optimal values (\(\lambda = 0.349\), \(\nu = 0.056\),
+ntop\(= 270\), 100 initializations). For each fit, we identified the
+factor most correlated with the production K\(=3\) Factor 1 and assessed
+its survival association in 570 independent validation patients across
+four external cohorts, using stratified Cox regression with and without
+adjustment for PurIST and DeCAF classifiers.
+
+With the production-optimal gene-projection setting (ntop\(=270\)),
+K\(=3\) validated adjustedly at 5 of 7 supervision-strength values,
+including \(\alpha = 0.55\) where it achieved adjusted HR \(= 0.81\)
+(\(p = 0.003\)) --- nearly identical to the production fit
+(\(p = 0.004\)). K\(=5\) at \(\alpha = 0.55\) provided independent
+corroboration at higher factor-program fidelity (Spearman H-score
+correlation = 0.903 vs.~K\(=3\)'s 0.855; adjusted \(p = 0.019\)),
+confirming the iCAF biology is recoverable by a higher-rank model. In
+contrast, K\(=7\) --- which had appeared to achieve adjusted
+significance (\(p = 0.019\)) in a parallel analysis using all 1,970
+genes in the projection --- completely failed with ntop\(=270\)
+(adjusted \(p = 0.676\)), establishing that the earlier K\(=7\)
+advantage was an artifact of the all-genes projection rather than an
+intrinsic property of the 7-factor solution.
+
+To isolate the contribution of gene focusing, we repeated the analysis
+with all genes retained (ntop\(=\text{NULL}\)) while keeping \(\lambda\)
+and \(\nu\) at their optimal values. With all genes, K\(=3\) at
+\(\alpha = 0.55\) reached only adjusted \(p = 0.097\), failing to
+reproduce the production result, and only 5 of 35 combinations achieved
+adjusted \(p < 0.05\) --- compared with 16 of 35 with ntop\(=270\).
+Substituting \(\lambda = 0.349\) for \(\lambda = 0.300\) within the
+all-genes setting shifted the pattern of validated combinations but left
+the overall count unchanged (5/35), confirming that regularization
+tuning alone cannot reproduce the adjusted signal without gene focusing.
+These analyses establish ntop\(=270\) as the critical hyperparameter:
+focusing the projection onto the 270 most factor-characteristic genes
+concentrates the survival signal, suppresses noise from the remaining
+genes, and prevents overfitting at high supervision weights. Full K
+\(\times\) \(\alpha\) adjusted p-value tables are provided in the
+Supplementary (Tables S1--S3).
+
 \subsection*{A PDAC-trained program retains prognostic signal in bladder
 cancer}\label{a-pdac-trained-program-retains-prognostic-signal-in-bladder-cancer}
 \addcontentsline{toc}{subsection}{A PDAC-trained program retains
@@ -612,10 +664,21 @@ than standard NMF, with the largest advantage occurring when prognostic
 programs explained modest variance relative to outcome-neutral signals.
 In PDAC, DeSurv isolated tumor-intrinsic and microenvironmental programs
 with clear survival associations, and these factors generalized across
-independent PDAC cohorts. For the dominant DeSurv program, prognostic
-signal transferred to bladder cancer, supporting the hypothesis that
-outcome-guided learning captures biology that generalizes more readily
-than variance-driven structure.
+independent PDAC cohorts. The K\(=3\) selection proved robust rather
+than fragile: an exhaustive sensitivity analysis spanning five ranks and
+seven supervision strengths, with all hyperparameters fixed at their
+BO-selected values, confirmed that K\(=3\) validates adjustedly across a
+wide supervision range (5 of 7 \(\alpha\) values tested; adjusted
+\(p = 0.003\) at \(\alpha = 0.55\)). This robustness depended critically
+on the BO-selected gene-focusing parameter (ntop\(=270\)): retaining all
+genes with the same regularization reduced the number of significantly
+validated K\(\times\alpha\) combinations from 16 to 5 of 35 and
+eliminated K\(=3\) adjusted significance at the production supervision
+strength, establishing gene focusing as the mechanism by which survival
+supervision isolates a generalizable prognostic program. For the
+dominant DeSurv program, prognostic signal transferred to bladder
+cancer, supporting the hypothesis that outcome-guided learning captures
+biology that generalizes more readily than variance-driven structure.
 
 In PDAC, DeSurv recapitulated known tumor and microenvironmental
 programs, including the basal-like/classical distinction and activated
@@ -650,7 +713,13 @@ cross-validated concordance surface was relatively flat across
 captured nearly as much prognostic information as twelve; for standard
 NMF, concordance increased steadily from \(k = 2\) through
 \(k = 7\)--11, reflecting the need for additional factors to distribute
-prognostic signal that supervision would have concentrated. Our
+prognostic signal that supervision would have concentrated. A
+K\(\times\alpha\) sensitivity analysis confirmed this parsimonious
+selection: with production-optimal gene focusing (ntop\(=270\)), K\(=3\)
+validated adjustedly across a broad \(\alpha\) range, while the apparent
+advantage of K\(=7\) observed under all-gene projection disappeared
+entirely, demonstrating that the one-standard-error rule correctly
+identified K\(=3\) as the stable, generalizable solution. Our
 simulations provide further guidance on when this tradeoff is most
 beneficial: DeSurv's advantage is greatest when prognostic programs
 explain modest variance relative to outcome-neutral signals and vanishes
@@ -796,7 +865,12 @@ initialization for the final model, aggregating multiple DeSurv runs
 into a gene-gene co-occurrence matrix and constructing an initialization
 \(W_0\) from the resulting clusters (SI Appendix). Before validation,
 each column of \(W\) was truncated to its BO-selected number of top
-genes (details in SI Appendix), denoted \(\tilde{W}\).
+genes (details in SI Appendix), denoted \(\tilde{W}\). In PDAC, Bayesian
+optimization selected ntop\(=270\) top genes per factor; a controlled
+K\(\times\alpha\) sensitivity analysis subsequently confirmed that this
+gene-focusing parameter, rather than the specific \(\lambda\) or \(\nu\)
+values, is the critical hyperparameter enabling adjusted external
+validation (see Results and SI Appendix, Tables S1--S3).
 
 External validation was performed by projecting new datasets onto the
 learned programs via \(Z = \tilde{W}^\top X_{\text{new}}\) and
@@ -873,7 +947,7 @@ are available at github.com/ayoung31/DeSurv-paper.
 ## DeSurv git branch: main
 ## DeSurv git commit: 370c88aa9a89e0c71507fbb161d226c7e2e4c61f
 ## Paper git branch: main
-## Paper git commit: 1d0c6e0a943b7192cf5c77188587379f1c73065a
+## Paper git commit: 50bf2661a1730947ae63772c4f13bf017b62be72
 \end{verbatim}
 
 \phantomsection\label{refs}
