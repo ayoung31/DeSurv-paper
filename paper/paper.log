@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  26 FEB 2026 12:49
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  27 FEB 2026 11:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1105,17 +1105,17 @@ LaTeX Font Info:    Font shape `T1/phv/b/n' will be
 
 Underfull \vbox (badness 1496) has occurred while \output is active []
 
-Package mdframed Info: mdframed works in twoside mode on input line 199.
+Package mdframed Info: mdframed works in twoside mode on input line 200.
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 9.49997pt on input line 199.
+(Font)              scaled to size 9.49997pt on input line 200.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 9.49997pt on input line 199.
+(Font)              scaled to size 9.49997pt on input line 200.
 Package mdframed Info: mdframed inside float 
- mdframed uses option nobreak mdframed on input line 199.
+ mdframed uses option nobreak mdframed on input line 200.
 Package mdframed Info: mdframed inside a box 
- mdframed uses option nobreak mdframed on input line 199.
+ mdframed uses option nobreak mdframed on input line 200.
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 5.69998pt on input line 199.
+(Font)              scaled to size 5.69998pt on input line 200.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
 (Font)              scaled to size 6.64998pt on input line 218.
 LaTeX Font Info:    Trying to load font information for T1+bch on input line 218.
@@ -1129,33 +1129,33 @@ File: mt-bch.cfg 2007/03/03 v1.5 microtype config. file: Bitstream Charter (RS)
 ]
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
-(hyperref)                be the same. Added a new anchor on input line 264.
+(hyperref)                be the same. Added a new anchor on input line 265.
 
 <../figures/model_schematic_final.pdf, id=88, 578.16pt x 505.89pt>
 File: ../figures/model_schematic_final.pdf Graphic file (type pdf)
 <use ../figures/model_schematic_final.pdf>
-Package pdftex.def Info: ../figures/model_schematic_final.pdf  used on input line 278.
+Package pdftex.def Info: ../figures/model_schematic_final.pdf  used on input line 279.
 (pdftex.def)             Requested size: 505.69467pt x 433.62885pt.
 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf, id=92, 433.62pt x 397.485pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf  used on input line 338.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf  used on input line 339.
 (pdftex.def)             Requested size: 433.63878pt x 397.49614pt.
 LaTeX Font Info:    Font shape `T1/phv/m/it' in size <7> not available
-(Font)              Font shape `T1/phv/m/sl' tried instead on input line 378.
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 365.
 LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
-(Font)              scaled to size 6.64998pt on input line 378.
+(Font)              scaled to size 6.64998pt on input line 365.
 [2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf, id=104, 469.755pt x 216.81pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf  used on input line 399.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf  used on input line 400.
 (pdftex.def)             Requested size: 505.69374pt x 233.39702pt.
 
-LaTeX Warning: Reference `fig:varsurvival' on page 3 undefined on input line 466.
+LaTeX Warning: Reference `fig:varsurvival' on page 3 undefined on input line 467.
 
 
-LaTeX Warning: Reference `fig:corr' on page 3 undefined on input line 494.
+LaTeX Warning: Reference `fig:corr' on page 3 undefined on input line 495.
 
 
 Underfull \vbox (badness 3623) has occurred while \output is active []
@@ -1164,13 +1164,13 @@ Underfull \vbox (badness 3623) has occurred while \output is active []
 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf, id=116, 469.755pt x 325.215pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf  used on input line 510.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf  used on input line 511.
 (pdftex.def)             Requested size: 505.69357pt x 505.929pt.
 
-LaTeX Warning: Reference `fig:forest' on page 4 undefined on input line 541.
+LaTeX Warning: Reference `fig:forest' on page 4 undefined on input line 542.
 
 
-Underfull \hbox (badness 2181) in paragraph at lines 588--602
+Underfull \hbox (badness 2181) in paragraph at lines 589--603
 []\T1/lmr/m/n/9 (+20) With the production-optimal gene-projection set-ting
  []
 
@@ -1178,16 +1178,16 @@ Underfull \hbox (badness 2181) in paragraph at lines 588--602
 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf, id=129, 469.755pt x 325.215pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf  used on input line 671.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1.pdf  used on input line 672.
 (pdftex.def)             Requested size: 505.69374pt x 350.09555pt.
 
-Underfull \vbox (badness 3623) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [5]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [6]
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 981.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 982.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -1196,142 +1196,142 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 
-Overfull \hbox (17.39314pt too wide) in paragraph at lines 987--987
+Overfull \hbox (17.39314pt too wide) in paragraph at lines 988--988
 []\T1/lmtt/m/n/8 ## DeSurv git commit: 370c88aa9a89e0c71507fbb161d226c7e2e4c61f[] 
  []
 
 
-Overfull \hbox (13.15114pt too wide) in paragraph at lines 987--987
-[]\T1/lmtt/m/n/8 ## Paper git commit: a3779c0d3a0e2e80a452008a455780823e38be5a[] 
+Overfull \hbox (13.14114pt too wide) in paragraph at lines 988--988
+[]\T1/lmtt/m/n/8 ## Paper git commit: 4f09064e7fe901a7d97ff38e0cdb445eb680d29f[] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 992--996
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 998--1003
+Underfull \hbox (badness 10000) in paragraph at lines 993--997
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1005--1008
+Underfull \hbox (badness 10000) in paragraph at lines 999--1004
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1010--1014
+Underfull \hbox (badness 10000) in paragraph at lines 1006--1009
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1016--1020
+Underfull \hbox (badness 10000) in paragraph at lines 1011--1015
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1022--1027
+Underfull \hbox (badness 10000) in paragraph at lines 1017--1021
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1029--1034
+Underfull \hbox (badness 10000) in paragraph at lines 1023--1028
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1036--1040
+Underfull \hbox (badness 10000) in paragraph at lines 1030--1035
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1042--1045
+Underfull \hbox (badness 10000) in paragraph at lines 1037--1041
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1047--1052
+Underfull \hbox (badness 10000) in paragraph at lines 1043--1046
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1054--1058
+Underfull \hbox (badness 10000) in paragraph at lines 1048--1053
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1060--1063
+Underfull \hbox (badness 10000) in paragraph at lines 1055--1059
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1065--1069
+Underfull \hbox (badness 10000) in paragraph at lines 1061--1064
 
  []
 
 [7]
-Underfull \hbox (badness 10000) in paragraph at lines 1071--1075
+Underfull \hbox (badness 10000) in paragraph at lines 1066--1070
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1077--1081
+Underfull \hbox (badness 10000) in paragraph at lines 1072--1076
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1083--1088
+Underfull \hbox (badness 10000) in paragraph at lines 1078--1082
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1090--1093
+Underfull \hbox (badness 10000) in paragraph at lines 1084--1089
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1095--1100
+Underfull \hbox (badness 10000) in paragraph at lines 1091--1094
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1102--1106
+Underfull \hbox (badness 10000) in paragraph at lines 1096--1101
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1108--1113
+Underfull \hbox (badness 10000) in paragraph at lines 1103--1107
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1115--1120
+Underfull \hbox (badness 10000) in paragraph at lines 1109--1114
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1122--1127
+Underfull \hbox (badness 10000) in paragraph at lines 1116--1121
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1129--1133
+Underfull \hbox (badness 10000) in paragraph at lines 1123--1128
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1135--1140
+Underfull \hbox (badness 10000) in paragraph at lines 1130--1134
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1142--1147
+Underfull \hbox (badness 10000) in paragraph at lines 1136--1141
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1149--1153
+Underfull \hbox (badness 10000) in paragraph at lines 1143--1148
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1150--1154
 
  []
 
@@ -1353,13 +1353,13 @@ Package rerunfilecheck Info: File `paper.out' has not changed.
 Here is how much of TeX's memory you used:
  30911 strings out of 469471
  578982 string characters out of 5467057
- 1031697 words of memory out of 5000000
+ 1032915 words of memory out of 5000000
  58518 multiletter control sequences out of 15000+600000
  726571 words of font info for 319 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 117i,15n,121p,1425b,1115s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 117i,14n,121p,1425b,1115s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on paper.pdf (13 pages, 624735 bytes).
+Output written on paper.pdf (13 pages, 624962 bytes).
 PDF statistics:
  395 PDF objects out of 1000 (max. 8388607)
  311 compressed objects within 4 object streams

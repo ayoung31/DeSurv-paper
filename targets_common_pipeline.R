@@ -2846,7 +2846,9 @@ FIGURE_VAL_TARGETS <- list(
   ),
   tar_target(
     fig_median_survival_desurv,
-    splot_cutpoint(data_val_filtered, tar_fit_desurv, desurv_lp_stats, tar_ntop_value)
+    {
+      splot_cutpoint(data_val_filtered, tar_fit_desurv, desurv_lp_stats, tar_ntop_value)
+    }
   ),
   tar_target(
     fig_median_survival_std_desurvk,

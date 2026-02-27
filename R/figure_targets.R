@@ -2492,6 +2492,8 @@ splot_median = function(data_val_filtered,tar_fit_desurv,factor){
   lr_test = survdiff(Surv(time,event)~factor,data=df)
   p_val = 1 - pchisq(lr_test$chisq, df = 1)
   p_label = if (p_val < 0.001) "Log-rank p < 0.001" else sprintf("Log-rank p = %.3f", p_val)
+  
+  label = paste0(hr_label,"\n",p_label)
 
   x_max = max(df$time, na.rm = TRUE)
 
@@ -2501,31 +2503,25 @@ splot_median = function(data_val_filtered,tar_fit_desurv,factor){
                      break.time.by = 25,
                      legend.labs=c('Low','High'),
                      risk.table.y.text=TRUE,
-                     fontsize=2.5,
+                     # fontsize=2.5,
                      censor.size=2,
-                     font.main=12)
+                     font.main=12,
+                     tables.theme = theme(axis.text = element_text(size=10)))
   splot$plot = splot$plot +
     ggplot2::annotate(
       "text",
       x     = x_max * 0.98,
-      y     = 0.92,
+      y     = 0.9,
       hjust = 1,
       size  = 2.5,
-      label = hr_label
-    ) +
-    ggplot2::annotate(
-      "text",
-      x     = x_max * 0.98,
-      y     = 0.85,
-      hjust = 1,
-      size  = 2.5,
-      label = p_label
-    )
+      label = label
+    ) 
 
   splot
 }
 
 splot_cutpoint = function(data_val_filtered, tar_fit_desurv, lp_stats, ntop = NULL) {
+
   lp_mean <- lp_stats$lp_mean
   lp_sd   <- lp_stats$lp_sd
   z_cut   <- lp_stats$optimal_z_cutpoint
@@ -2560,6 +2556,8 @@ splot_cutpoint = function(data_val_filtered, tar_fit_desurv, lp_stats, ntop = NU
   lr_test <- survdiff(Surv(time, event) ~ factor, data = df)
   p_val   <- 1 - pchisq(lr_test$chisq, df = 1)
   p_label <- if (p_val < 0.001) "Log-rank p < 0.001" else sprintf("Log-rank p = %.3f", p_val)
+  
+  label = paste0(hr_label,"\n",p_label)
 
   x_max <- max(df$time, na.rm = TRUE)
 
@@ -2571,24 +2569,20 @@ splot_cutpoint = function(data_val_filtered, tar_fit_desurv, lp_stats, ntop = NU
                       risk.table.y.text = TRUE,
                       fontsize = 2.5,
                       censor.size = 2,
-                      font.main = 12)
+                      font.legend = 8,
+                      font.tickslab=8,
+                      font.x=10,
+                      font.y=10,
+                      tables.theme = theme_classic(base_size = 10))
   splot$plot <- splot$plot +
     ggplot2::annotate(
       "text",
       x     = x_max * 0.98,
-      y     = 0.97,
+      y     = 0.9,
       hjust = 1,
-      size  = 2.5,
-      label = hr_label
-    ) +
-    ggplot2::annotate(
-      "text",
-      x     = x_max * 0.98,
-      y     = 0.78,
-      hjust = 1,
-      size  = 2.5,
-      label = p_label
-    )
+      size  = 1.8,
+      label = label
+    ) 
 
   splot
 }

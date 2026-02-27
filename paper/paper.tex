@@ -160,18 +160,19 @@ Information, or anywhere else in the manuscript.}
 
 Predicting which cancer patients will respond to therapy or progress
 rapidly requires identifying the transcriptional signatures that drive
-clinical outcomes (1). Yet in bulk RNA-sequencing, which currently
-provides the large clinically annotated cohorts required for survival
-modeling, the observed expression profile of each sample reflects
-contributions from malignant cells, cancer-associated fibroblasts,
-immune infiltrates, and other microenvironmental components (2).
+clinical outcomes (1). Bulk RNA-sequencing remains the primary source of
+the large, clinically annotated cohorts required for such survival
+modeling, but each expression profile is a composite of malignant cells,
+cancer-associated fibroblasts, immune infiltrates, and other
+microenvironmental components (2). As a result, these signatures may be
+diluted or obscured by variation in cellular composition across samples.
 Nonnegative matrix factorization (NMF) has been instrumental in
 resolving this mixture into additive, interpretable gene programs
 corresponding to recognizable cell types or transcriptional states
-(3--5), yielding important biological insights including the
-identification of basal-like and classical tumor programs in pancreatic
-ductal adenocarcinoma (PDAC) (1, 4) and compartment-specific
-deconvolution across 33 cancer types (5).
+(3--5). This approach has yielded important biological insights,
+including the identification of basal-like and classical tumor programs
+in pancreatic ductal adenocarcinoma (PDAC) (1, 4) and
+compartment-specific deconvolution across 33 cancer types (5).
 
 However, the standard approach discovers these programs through
 unsupervised factorization and only then evaluates their clinical
@@ -179,23 +180,23 @@ relevance retrospectively (6, 7). Because unsupervised NMF minimizes
 reconstruction error, its factors tend to be dominated by the
 highest-variance patterns in the data, which may reflect tissue
 composition or other outcome-neutral sources rather than prognostic
-biology (8, 9). In PDAC, exocrine and tissue-composition signals
-dominate expression variance but contribute little to survival
-prediction, while lower-variance basal-like and activated stromal
-programs carry the strongest prognostic associations (4, 10, 11);
-programs that are prognostically relevant but explain modest variance
-can be diluted across multiple factors or missed entirely. This
-misalignment between variance and prognosis extends beyond PDAC: tumor
-purity alone accounts for a large fraction of expression variation
-across cancer types (12), yet the objective optimized during
-unsupervised discovery (reconstruction error) differs fundamentally from
-the criterion used during evaluation (survival association) (9).
-Identifying the prognostically relevant subset then requires extensive
-downstream filtering that is ad hoc, cohort-specific, and difficult to
-reproduce (13). Over a decade of PDAC subtyping efforts proposed between
-two and six subtypes (13, 14), ultimately converging on a robust
-basal/classical dichotomy only after extensive retrospective evaluation
-across independent cohorts (1, 7, 10).
+biology (8, 9). In PDAC, exocrine and tissue-composition signals reflect
+low tumor purity rather than cancer cell-intrinsic programs and carry
+little prognostic value (10, 11). Although less prevalent in bulk
+tissue, the tumor-intrinsic basal-like and activated stromal programs
+carry the strongest survival associations (4), yet risk being diluted or
+missed entirely when decomposition prioritizes explaining maximal
+variance in expression. This misalignment between variance and prognosis
+extends beyond PDAC: tumor purity alone accounts for a large fraction of
+expression variation across cancer types (12), yet the objective
+optimized during unsupervised discovery (reconstruction error) differs
+fundamentally from the criterion used during evaluation (survival
+association) (9). Identifying the prognostically relevant subset then
+requires extensive downstream filtering that is ad hoc, cohort-specific,
+and difficult to reproduce (13). Over a decade of PDAC subtyping efforts
+proposed between two and six subtypes (13, 14), ultimately converging on
+a robust basal/classical dichotomy only after extensive retrospective
+evaluation across independent cohorts (1, 7, 10).
 
 Whether incorporating survival information during factorization improves
 generalizability, or risks overfitting to cohort-specific outcome
@@ -983,7 +984,7 @@ are available at github.com/ayoung31/DeSurv-paper.
 ## DeSurv git branch: main
 ## DeSurv git commit: 370c88aa9a89e0c71507fbb161d226c7e2e4c61f
 ## Paper git branch: main
-## Paper git commit: a3779c0d3a0e2e80a452008a455780823e38be5a
+## Paper git commit: 4f09064e7fe901a7d97ff38e0cdb445eb680d29f
 \end{verbatim}
 
 \phantomsection\label{refs}
