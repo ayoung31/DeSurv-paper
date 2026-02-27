@@ -118,19 +118,19 @@ plot_sim_k_hist <- function(k_plot_data, true_k_tbl, base_size = 12) {
       linewidth = 0.2
     ) +
     ggplot2::geom_vline(
-      data = true_k_tbl,
-    ggplot2::aes(xintercept = true_k),
-    color = "black",
-    linetype = "dashed",
-    linewidth = 0.4
-  ) +
+      xintercept = if (nrow(true_k_tbl)) true_k_tbl$true_k[[1]] else NA_real_,
+      color = "black",
+      linetype = "dashed",
+      linewidth = 0.4
+    ) +
     ggplot2::facet_grid(~ method) +
-    ggplot2::scale_fill_manual(values = sim_method_colors, guide = "none") +
+    ggplot2::scale_fill_manual(values = sim_method_colors) +
     ggplot2::scale_x_continuous(breaks = sort(unique(k_plot_data$k))) +
     ggplot2::labs(
       title = "Selected k distribution",
       x = "Selected k",
-      y = "Count"
+      y = "Count",
+      fill = "Method"
     ) +
     sim_pub_theme(base_size = base_size)
 }

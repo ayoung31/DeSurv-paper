@@ -2329,7 +2329,6 @@ FIGURE_TARGETS <- list(
   tar_target(
     fig_bo_cvalpha,
     {
-      browser()
       p = make_bo_best_observed_alpha_plot(bo_history_path = desurv_bo_history,
                                      bo_results = desurv_bo_results,
                                      method_label = "DeSurv")
@@ -2445,7 +2444,6 @@ FIGURE_TARGETS <- list(
   tar_target(
     fig_gene_overlap_heatmap_desurv,
     {
-      browser()
       result = make_gene_overlap_heatmap(tar_fit_desurv,tar_tops_desurv$top_genes,top_genes,
                                     factor_labels = FIGURE_CONFIGS$heatmap_factor_labels[[bo_label]],
                                     title = "DeSurv",
@@ -2849,6 +2847,11 @@ FIGURE_VAL_TARGETS <- list(
     {
       splot_cutpoint(data_val_filtered, tar_fit_desurv, desurv_lp_stats, tar_ntop_value)
     }
+  ),
+  tar_target(
+    fig_cindex_cutpoint_survival_desurv,
+    splot_cutpoint(data_val_filtered, tar_fit_desurv, desurv_lp_stats, tar_ntop_value,
+                   cutpoint_field = "optimal_z_cutpoint_cindex")
   ),
   tar_target(
     fig_median_survival_std_desurvk,

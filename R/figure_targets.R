@@ -546,20 +546,6 @@ make_nmf_metric_plot <- function(fit_std, metric) {
     ggplot2::theme_minimal(base_size = 9) +
     ggplot2::theme(panel.grid.minor.x = ggplot2::element_blank()) +
     ggplot2::scale_x_continuous(breaks = seq(2, 12, by = 2))
-
-  if (metric == "silhouette") {
-    # Show legend for 3 distance-metric curves; use a palette distinct from
-    # the single-line color used in the cophenetic/residuals panels.
-    p <- p +
-      ggplot2::scale_color_brewer(palette = "Set2") +
-      ggplot2::theme(
-        legend.position = "bottom",
-        legend.title    = ggplot2::element_blank(),
-        legend.text     = ggplot2::element_text(size = 7)
-      )
-  } else {
-    p <- p + ggplot2::theme(legend.position = "none")
-  }
   p
 }
 
@@ -2511,7 +2497,7 @@ splot_median = function(data_val_filtered,tar_fit_desurv,factor){
     ggplot2::annotate(
       "text",
       x     = x_max * 0.98,
-      y     = 0.9,
+      y     = 0.85,
       hjust = 1,
       size  = 2.5,
       label = label
@@ -2520,11 +2506,12 @@ splot_median = function(data_val_filtered,tar_fit_desurv,factor){
   splot
 }
 
-splot_cutpoint = function(data_val_filtered, tar_fit_desurv, lp_stats, ntop = NULL) {
+splot_cutpoint = function(data_val_filtered, tar_fit_desurv, lp_stats, ntop = NULL,
+                         cutpoint_field = "optimal_z_cutpoint") {
 
   lp_mean <- lp_stats$lp_mean
   lp_sd   <- lp_stats$lp_sd
-  z_cut   <- lp_stats$optimal_z_cutpoint
+  z_cut   <- lp_stats[[cutpoint_field]]
 
   df <- list()
   for (i in seq_along(data_val_filtered)) {

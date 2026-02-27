@@ -48,7 +48,7 @@ nmf_sim_median    <- round(median(cindex_dat$cindex[cindex_dat$method == "NMF"],
 delta_sim_cindex  <- round(desurv_sim_median - nmf_sim_median, 3)
 
 # ── Variance vs survival statistics for PDAC training data ───────────────────
-tar_load(fig_variation_explained_tcgacptac)
+tar_load_raw("fig_variation_explained_tcgacptac")
 var_surv_dat   <- fig_variation_explained_tcgacptac$data
 nmf_vs         <- var_surv_dat[var_surv_dat$method == "NMF", ]
 desurv_vs      <- var_surv_dat[var_surv_dat$method == "DeSurv", ]
@@ -60,7 +60,7 @@ desurv_maxsurv_pct  <- round(desurv_maxsurv$variance_explained * 100, 1)
 desurv_maxsurv_dl   <- round(desurv_maxsurv$delta_loglik, 1)
 
 # ── Pooled PDAC validation statistics ────────────────────────────────────────
-tar_load(val_latent_desurv_tcgacptac)
+tar_load_raw("val_latent_desurv_tcgacptac")
 pool_dfs <- lapply(val_latent_desurv_tcgacptac, function(entry) {
   surv <- entry$survival
   if (is.null(surv) || !all(c("time", "event") %in% names(surv))) return(NULL)
@@ -110,10 +110,11 @@ To further evaluate rank recovery under controlled conditions, we conducted simu
 
 ```{r fig-bo, fig.width = 6, fig.height= 5.5, fig.cap = "(A--D) Analyses based on pancreatic ductal adenocarcinoma (PDAC) gene expression data from TCGA and CPTAC cohorts. (A--C) Standard unsupervised rank selection heuristics yield inconsistent guidance for selecting the factorization rank $k$. (A) Reconstruction residuals as a function of $k$. (B) Cophenetic correlation coefficient as a function of $k$. (C) Mean silhouette width across multiple distance metrics as a function of $k$. (D) Gaussian process predicted mean cross-validated concordance index (C-index) from Bayesian optimization over the joint space of factorization rank ($k$) and supervision strength ($\\alpha$). (E) Simulation studies with known rank ($k = 3$): distribution of selected $k$ values across repeated replicates for DeSurv versus standard NMF with post hoc Cox modeling ($\\alpha = 0$). \\label{fig:bo}", fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
 
-tar_load(fig_bo_heat_tcgacptac)
-tar_load(fig_residuals_tcgacptac)
-tar_load(fig_cophenetic_tcgacptac)
-tar_load(fig_silhouette_tcgacptac)
+tar_load_raw("fig_bo_heat_tcgacptac")
+tar_load_raw("fig_residuals_tcgacptac")
+tar_load_raw("fig_cophenetic_tcgacptac")
+tar_load_raw("fig_silhouette_tcgacptac")
+tar_load_raw("fit_std_tcgacptac")
 
 fig_bo_heat_tcgacptac = set_fig_font(fig_bo_heat_tcgacptac, size = 10)
 fig_residuals_tcgacptac = set_fig_font(fig_residuals_tcgacptac, size = 10)
@@ -121,11 +122,21 @@ fig_cophenetic_tcgacptac = set_fig_font(fig_cophenetic_tcgacptac, size = 10)
 fig_silhouette_tcgacptac = set_fig_font(fig_silhouette_tcgacptac, size = 10)
 
 # upper = plot_grid(fig_bo_cvk_tcgacptac,fig_bo_cvalpha_tcgacptac,labels=c("A","B"))
-upper = plot_grid(fig_residuals_tcgacptac,
-                  fig_cophenetic_tcgacptac,
-                  fig_silhouette_tcgacptac,
-                  ncol = 3,
-                  labels = c("A","B","C"))
+legend_plot <- plot(fit_std_tcgacptac) + ggplot2::theme(legend.position = "bottom")
+legend_grob = ggplotGrob(legend_plot)
+
+legend = legend_grob$grobs[
+    sapply(legend_grob$grobs, function(x) x$name) == "guide-box"
+][[1]]
+
+upper_panels = plot_grid(
+  fig_residuals_tcgacptac  + ggplot2::theme(legend.position = "none"),
+  fig_cophenetic_tcgacptac + ggplot2::theme(legend.position = "none"),
+  fig_silhouette_tcgacptac + ggplot2::theme(legend.position = "none"),
+  ncol = 3,
+  labels = c("A","B","C")
+)
+upper = plot_grid(upper_panels, legend, nrow = 2, rel_heights = c(1, 0.15))
 
 k_hist = plot_grid(alt_plots$k_hist,NULL,nrow=2,rel_heights = c(4,1))
 
@@ -173,10 +184,10 @@ To further characterize how the learned factor structure differs between DeSurv 
 library(cowplot)
 library(ggplot2)
 
-tar_load(fig_gene_overlap_heatmap_desurv_tcgacptac)
-tar_load(fig_gene_overlap_heatmap_std_desurvk_tcgacptac)
-tar_load(fig_median_survival_desurv_tcgacptac)
-tar_load(fig_median_survival_std_desurvk_tcgacptac)
+tar_load_raw("fig_gene_overlap_heatmap_desurv_tcgacptac")
+tar_load_raw("fig_gene_overlap_heatmap_std_desurvk_tcgacptac")
+tar_load_raw("fig_median_survival_desurv_tcgacptac")
+tar_load_raw("fig_median_survival_std_desurvk_tcgacptac")
 
 # -------------------------
 # Global styling
@@ -355,48 +366,33 @@ To isolate the contribution of gene focusing, we repeated the analysis with all 
 ## A PDAC-trained program retains prognostic signal in bladder cancer {.unnumbered}
 
 ```{r bladder-precompute, echo=FALSE, message=FALSE, warning=FALSE}
-# Load bladder data and compute survival stats for inline text.
-# (The fig-bladder chunk below re-uses these variables for the figure.)
-tar_load_raw("raw_data_bladder_nobcg")
-tar_load(tar_data_filtered_tcgacptac)
-tar_load(tar_fit_desurv_tcgacptac)
-data_bladder_pre = readRDS(raw_data_bladder_nobcg)
-rownames(data_bladder_pre$ex) = data_bladder_pre$featInfo
-data_bladder_pre$sampInfo$time  = data_bladder_pre$sampInfo$os
-data_bladder_pre$sampInfo$event = data_bladder_pre$sampInfo$censOS
-data_bladder_pre$samp_keeps = which(data_bladder_pre$sampInfo$Consensus != "NE-like")
-nobcg_idx_pre <- which(data_bladder_pre$clinical$Intravesical.BCG.administered == "N")
-data_bladder_pre$samp_keeps = intersect(data_bladder_pre$samp_keeps, nobcg_idx_pre)
-data_bladder_pre$sampInfo$dataset = "bladder"
-data_b_pre = preprocess_validation_data(data_bladder_pre,
-  genes = rownames(tar_data_filtered_tcgacptac$ex),
-  method_trans_train = 'rank', dataname = "bladder",
-  zero_fill_missing = TRUE)
-keeps_pre   = intersect(rownames(data_b_pre$ex), rownames(tar_fit_desurv_tcgacptac$W))
-X_pre       = data_b_pre$ex[keeps_pre, ]
-W_pre       = tar_fit_desurv_tcgacptac$W[keeps_pre, ]
-dsv_var_pre = build_variance_survival_df(
-  X = tar_data_filtered_tcgacptac$ex,
-  scores   = tar_fit_desurv_tcgacptac$W,
-  loadings = tar_fit_desurv_tcgacptac$H,
-  time  = tar_data_filtered_tcgacptac$sampInfo$time,
-  event = tar_data_filtered_tcgacptac$sampInfo$event,
-  method = "DeSurv")
-dsv_fac_pre  = dsv_var_pre$factor[which.max(dsv_var_pre$delta_loglik)]
-scores_pre   = t(X_pre) %*% W_pre
-df_bl        = data_b_pre$sampInfo
-df_bl$scores = scores_pre[, dsv_fac_pre]
-med_bl       = median(df_bl$scores)
-df_bl$factor = (df_bl$scores > med_bl) * 1L
-n_bl         = nrow(df_bl)
-n_bl_events  = sum(df_bl$event, na.rm = TRUE)
-cox_bl       = coxph(Surv(time, event) ~ factor, data = df_bl)
-cox_bl_s     = summary(cox_bl)
-hr_bl        = round(cox_bl_s$coefficients[, "exp(coef)"], 2)
-ci_bl_lo     = round(cox_bl_s$conf.int[, "lower .95"], 2)
-ci_bl_hi     = round(cox_bl_s$conf.int[, "upper .95"], 2)
-lr_bl        = survdiff(Surv(time, event) ~ factor, data = df_bl)
-p_bl         = signif(1 - pchisq(lr_bl$chisq, df = 1), 2)
+# Load bladder_nobcg model targets and compute inline stats from held-out test split.
+tar_load_raw("data_val_filtered_bladder_nobcg")
+tar_load_raw("desurv_lp_stats_bladder_nobcg")
+tar_load_raw("tar_fit_desurv_bladder_nobcg")
+tar_load_raw("tar_ntop_value_bladder_nobcg")
+
+# Replicate splot_cutpoint logic to get df_bl for inline text stats.
+df_list_bl <- lapply(data_val_filtered_bladder_nobcg, function(dat) {
+  keep   <- intersect(rownames(dat$ex), rownames(tar_fit_desurv_bladder_nobcg$W))
+  W      <- tar_fit_desurv_bladder_nobcg$W[keep, , drop = FALSE]
+  X      <- dat$ex[keep, , drop = FALSE]
+  lp_val <- compute_lp(W, tar_fit_desurv_bladder_nobcg$beta, X, ntop = tar_ntop_value_bladder_nobcg)
+  z_val  <- (lp_val - desurv_lp_stats_bladder_nobcg$lp_mean) / desurv_lp_stats_bladder_nobcg$lp_sd
+  sdf        <- dat$sampInfo
+  sdf$factor <- as.integer(z_val > desurv_lp_stats_bladder_nobcg$optimal_z_cutpoint)
+  sdf
+})
+df_bl       <- do.call("rbind", df_list_bl)
+n_bl        <- nrow(df_bl)
+n_bl_events <- sum(df_bl$event, na.rm = TRUE)
+cox_bl      <- coxph(Surv(time, event) ~ factor, data = df_bl)
+cox_bl_s    <- summary(cox_bl)
+hr_bl       <- round(cox_bl_s$coefficients[, "exp(coef)"], 2)
+ci_bl_lo    <- round(cox_bl_s$conf.int[, "lower .95"], 2)
+ci_bl_hi    <- round(cox_bl_s$conf.int[, "upper .95"], 2)
+lr_bl       <- survdiff(Surv(time, event) ~ factor, data = df_bl)
+p_bl        <- signif(1 - pchisq(lr_bl$chisq, df = 1), 2)
 ```
 
 A PDAC-trained DeSurv program retains prognostic relevance in bladder cancer, consistent with shared basal-like transcriptional biology across epithelial cancers.
@@ -419,7 +415,7 @@ splot_bl <- ggsurvplot(sfit_bl, data = df_bl, risk.table = TRUE,
            xlab = "Time (months)",
            palette = c("violetred2","turquoise4"),
            break.time.by = 5,
-           legend.labs = c('Low (< median)', 'High (\u2265 median)'),
+           legend.labs = c('Low', 'High'),
            risk.table.y.text = FALSE,
            censor.size = 2,
            font.main = 10)

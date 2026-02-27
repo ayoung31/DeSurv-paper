@@ -122,15 +122,15 @@ SIMULATION_SCENARIOS <- list(
     seed_offset = SIM_GLOBAL_SEED,
     overrides = list()
   ),
-  list(
-    scenario_id = "R0k6",
-    scenario = "R0",
-    description = "R0 scenario with k = 6",
-    replicates = SIM_DATASETS_PER_SCENARIO,
-    seed_offset = SIM_GLOBAL_SEED + 4000L,
-    overrides = list(K = 6L,
-                     beta = c(2.0,-1.5,1.0,0,0,0))
-  ),
+  # list(
+  #   scenario_id = "R0k6",
+  #   scenario = "R0",
+  #   description = "R0 scenario with k = 6",
+  #   replicates = SIM_DATASETS_PER_SCENARIO,
+  #   seed_offset = SIM_GLOBAL_SEED + 4000L,
+  #   overrides = list(K = 6L,
+  #                    beta = c(2.0,-1.5,1.0,0,0,0))
+  # ),
   list(
     scenario_id = "R00_null",
     scenario = "R00",
