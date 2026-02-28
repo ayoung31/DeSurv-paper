@@ -48,7 +48,7 @@ nmf_sim_median    <- round(median(cindex_dat$cindex[cindex_dat$method == "NMF"],
 delta_sim_cindex  <- round(desurv_sim_median - nmf_sim_median, 3)
 
 # ── Variance vs survival statistics for PDAC training data ───────────────────
-tar_load_raw("fig_variation_explained_tcgacptac")
+tar_load(fig_variation_explained_tcgacptac)
 var_surv_dat   <- fig_variation_explained_tcgacptac$data
 nmf_vs         <- var_surv_dat[var_surv_dat$method == "NMF", ]
 desurv_vs      <- var_surv_dat[var_surv_dat$method == "DeSurv", ]
@@ -60,7 +60,7 @@ desurv_maxsurv_pct  <- round(desurv_maxsurv$variance_explained * 100, 1)
 desurv_maxsurv_dl   <- round(desurv_maxsurv$delta_loglik, 1)
 
 # ── Pooled PDAC validation statistics ────────────────────────────────────────
-tar_load_raw("val_latent_desurv_tcgacptac")
+tar_load(val_latent_desurv_tcgacptac)
 pool_dfs <- lapply(val_latent_desurv_tcgacptac, function(entry) {
   surv <- entry$survival
   if (is.null(surv) || !all(c("time", "event") %in% names(surv))) return(NULL)
@@ -110,11 +110,11 @@ To further evaluate rank recovery under controlled conditions, we conducted simu
 
 ```{r fig-bo, fig.width = 6, fig.height= 5.5, fig.cap = "(A--D) Analyses based on pancreatic ductal adenocarcinoma (PDAC) gene expression data from TCGA and CPTAC cohorts. (A--C) Standard unsupervised rank selection heuristics yield inconsistent guidance for selecting the factorization rank $k$. (A) Reconstruction residuals as a function of $k$. (B) Cophenetic correlation coefficient as a function of $k$. (C) Mean silhouette width across multiple distance metrics as a function of $k$. (D) Gaussian process predicted mean cross-validated concordance index (C-index) from Bayesian optimization over the joint space of factorization rank ($k$) and supervision strength ($\\alpha$). (E) Simulation studies with known rank ($k = 3$): distribution of selected $k$ values across repeated replicates for DeSurv versus standard NMF with post hoc Cox modeling ($\\alpha = 0$). \\label{fig:bo}", fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
 
-tar_load_raw("fig_bo_heat_tcgacptac")
-tar_load_raw("fig_residuals_tcgacptac")
-tar_load_raw("fig_cophenetic_tcgacptac")
-tar_load_raw("fig_silhouette_tcgacptac")
-tar_load_raw("fit_std_tcgacptac")
+tar_load(fig_bo_heat_tcgacptac)
+tar_load(fig_residuals_tcgacptac)
+tar_load(fig_cophenetic_tcgacptac)
+tar_load(fig_silhouette_tcgacptac)
+tar_load(fit_std_tcgacptac)
 
 fig_bo_heat_tcgacptac = set_fig_font(fig_bo_heat_tcgacptac, size = 10)
 fig_residuals_tcgacptac = set_fig_font(fig_residuals_tcgacptac, size = 10)
@@ -184,10 +184,10 @@ To further characterize how the learned factor structure differs between DeSurv 
 library(cowplot)
 library(ggplot2)
 
-tar_load_raw("fig_gene_overlap_heatmap_desurv_tcgacptac")
-tar_load_raw("fig_gene_overlap_heatmap_std_desurvk_tcgacptac")
-tar_load_raw("fig_median_survival_desurv_tcgacptac")
-tar_load_raw("fig_median_survival_std_desurvk_tcgacptac")
+tar_load(fig_gene_overlap_heatmap_desurv_tcgacptac)
+tar_load(fig_gene_overlap_heatmap_std_desurvk_tcgacptac)
+tar_load(fig_median_survival_desurv_tcgacptac)
+tar_load(fig_median_survival_std_desurvk_tcgacptac)
 
 # -------------------------
 # Global styling
@@ -367,10 +367,10 @@ To isolate the contribution of gene focusing, we repeated the analysis with all 
 
 ```{r bladder-precompute, echo=FALSE, message=FALSE, warning=FALSE}
 # Load bladder_nobcg model targets and compute inline stats from held-out test split.
-tar_load_raw("data_val_filtered_bladder_nobcg")
-tar_load_raw("desurv_lp_stats_bladder_nobcg")
-tar_load_raw("tar_fit_desurv_bladder_nobcg")
-tar_load_raw("tar_ntop_value_bladder_nobcg")
+tar_load(data_val_filtered_bladder_nobcg)
+tar_load(desurv_lp_stats_bladder_nobcg)
+tar_load(tar_fit_desurv_bladder_nobcg)
+tar_load(tar_ntop_value_bladder_nobcg)
 
 # Replicate splot_cutpoint logic to get df_bl for inline text stats.
 df_list_bl <- lapply(data_val_filtered_bladder_nobcg, function(dat) {
@@ -407,8 +407,11 @@ Together, these results suggest that survival supervision separates variance-dom
 
 ```{r fig-bladder, fig.cap="Survival-associated factor structure in bladder cancer and cross-cancer transfer from PDAC. (A) Fraction of expression variance explained versus survival contribution (change in Cox partial log-likelihood) for each factor in bladder cancer, comparing DeSurv and standard NMF. (B) Kaplan--Meier curves for bladder cancer samples stratified by median split of projected factor scores from a PDAC-trained DeSurv model, with numbers at risk shown below. \\label{fig:bladder}", fig.env='figure*', fig.pos='t', out.width='\\textwidth'}
 # Data and stats already computed in bladder-precompute chunk (df_bl, n_bl, etc.)
-tar_load_raw("fig_variation_explained_bladder_nobcg")
+tar_load(fig_variation_explained_bladder_nobcg)
 fig_variation_explained_bladder_nobcg <- set_fig_font(fig_variation_explained_bladder_nobcg, size = 10)
+
+tar_load(fig_cindex_cutpoint_survival_desurv_bladder_nobcg)
+km_bladder <- stack_surv(fig_cindex_cutpoint_survival_desurv_bladder_nobcg, "", keep_legend = TRUE)
 
 sfit_bl <- survfit(Surv(time, event) ~ factor, data = df_bl)
 splot_bl <- ggsurvplot(sfit_bl, data = df_bl, risk.table = TRUE,
@@ -424,5 +427,5 @@ splot_bl$plot  <- set_fig_font(splot_bl$plot,  size = 10)
 splot_bl$table <- set_fig_font(splot_bl$table, size = 10)
 
 splot2 <- plot_grid(splot_bl$plot, splot_bl$table, nrow = 2, rel_heights = c(3, 1))
-plot_grid(fig_variation_explained_bladder_nobcg, splot2, ncol = 2, labels = c("A", "B"))
+plot_grid(fig_variation_explained_bladder_nobcg, km_bladder, ncol = 2, labels = c("A", "B"))
 ```

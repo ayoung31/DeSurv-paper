@@ -2547,11 +2547,17 @@ splot_cutpoint = function(data_val_filtered, tar_fit_desurv, lp_stats, ntop = NU
   label = paste0(hr_label,"\n",p_label)
 
   x_max <- max(df$time, na.rm = TRUE)
+  
+  if(x_max < 30){
+    breaks = 5
+  }else{
+    breaks = 25
+  }
 
   splot <- ggsurvplot(sfit, data = df, risk.table = TRUE,
                       xlab = "Time (months)",
                       palette = c("violetred2", "turquoise4"),
-                      break.time.by = 25,
+                      break.time.by = breaks,
                       legend.labs = c("Low", "High"),
                       risk.table.y.text = TRUE,
                       fontsize = 2.5,
@@ -2565,7 +2571,7 @@ splot_cutpoint = function(data_val_filtered, tar_fit_desurv, lp_stats, ntop = NU
     ggplot2::annotate(
       "text",
       x     = x_max * 0.98,
-      y     = 0.9,
+      y     = 0.85,
       hjust = 1,
       size  = 1.8,
       label = label
