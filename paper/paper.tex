@@ -194,9 +194,9 @@ fundamentally from the criterion used during evaluation (survival
 association) (9). Identifying the prognostically relevant subset then
 requires extensive downstream filtering that is ad hoc, cohort-specific,
 and difficult to reproduce (13). Over a decade of PDAC subtyping efforts
-proposed between two and six subtypes (13, 14), ultimately converging on
-a robust basal/classical dichotomy only after extensive retrospective
-evaluation across independent cohorts (1, 7, 10).
+proposed between two and six subtypes (1, 4, 13, 14), ultimately
+converging on a robust basal/classical dichotomy only after extensive
+retrospective evaluation across independent cohorts (10).
 
 Whether incorporating survival information during factorization improves
 generalizability, or risks overfitting to cohort-specific outcome
@@ -428,16 +428,16 @@ NMF at independently selected ranks (\(k = 5\) via elbow detection,
 presented in the SI Appendix.
 
 DeSurv produced a factorization that concentrated survival signal into a
-single factor (D1) combining classical tumor programs with an activated
-iCAF microenvironmental signature (Fig. \ref{fig:bio}A) --- consistent
-with the known co-occurrence of classical tumor identity and
-iCAF-enriched stroma in PDAC {[}REF{]} and with evidence that iCAF
-activation is independently associated with patient outcomes {[}REF{]}.
-A second factor (D2) captured an activated immune-stromal
-microenvironment. A third factor (D3) was enriched for basal-like tumor
-programs but, as discussed below, contributed minimally to survival in
-conditional analysis, reflecting both the absorption of residual
-exocrine-compositional variation and the concentration of the
+single factor (D1) integrating classical tumor programs with a restCAF
+(iCAF-like) stromal signature (Fig. \ref{fig:bio}A). This mirrors
+observations that survival stratification in PDAC is strongest when
+tumor-intrinsic and CAF subtypes are considered jointly, with classical
+tumors in a restCAF/iCAF microenvironment demonstrating the most
+favorable outcomes (11). A second factor (D2) captured an activated
+immune-stromal microenvironment. A third factor (D3) was enriched for
+basal-like tumor programs but, as discussed below, contributed minimally
+to survival in conditional analysis, reflecting both the absorption of
+residual exocrine-compositional variation and the concentration of the
 prognostically relevant tumor-stroma contrast within D1. Notably, no
 DeSurv factor showed a significant positive correlation with
 exocrine-associated gene programs (DECODER Exocrine, Collisson Exocrine,
@@ -464,47 +464,46 @@ states that DeSurv separates.
 
 We quantified these differences by contrasting the conditional fraction
 of expression variance explained by each factor with its survival
-contribution (SI Appendix, Fig. \ref{fig:varsurvival}). A striking
-pattern emerged: all three NMF factors contributed negligibly to
-survival despite spanning a range of conditional variance, while DeSurv
-concentrated nearly all survival signal into D1. Specifically, the
-DeSurv factor with the largest survival contribution explained \(7\)\%
-of variance with \(\Delta\ell = 66.4\), while the highest-variance NMF
-factor explained \(23.9\)\% of expression variance but contributed only
+contribution (SI Appendix, Fig. S7). A striking pattern emerged: all
+three NMF factors contributed negligibly to survival despite spanning a
+range of conditional variance, while DeSurv concentrated nearly all
+survival signal into D1. Specifically, the DeSurv factor with the
+largest survival contribution explained \(7\)\% of variance with
+\(\Delta\ell = 66.4\), while the highest-variance NMF factor explained
+\(23.9\)\% of expression variance but contributed only
 \(\Delta\ell = 0.1\) to survival. Notably, the highest-variance DeSurv
 factor (D3, \textasciitilde30\% of conditional variance) also
 contributed minimally to survival. This apparent paradox --- given the
-well-established prognostic role of basal-like biology in PDAC {[}REF{]}
---- reflects two features of the factorization: D3 absorbs residual
-exocrine-compositional variation alongside basal-like programs (see
-factor correspondence below), diluting its prognostic specificity; and
-the survival-relevant contrast between classical and basal-like biology
-is already captured by D1's iCAF-classical co-program, leaving D3's
-conditional contribution minimal. This result directly illustrates the
-misalignment between variance and prognosis anticipated by sufficient
-dimension reduction theory (9) and observed empirically in tumor purity
-analyses (12): the factors that explain the most transcriptomic
-variation need not be the factors most associated with patient outcomes.
-The observed pattern in PDAC is consistent with the intermediate regime
-between the primary and mixed simulation scenarios, where DeSurv's
-advantage was largest.
+well-established prognostic role of basal-like biology in PDAC (10,
+\textbf{moffit2015virtual?}) --- reflects two features of the
+factorization: D3 absorbs residual exocrine-compositional variation
+alongside basal-like programs (see factor correspondence below),
+diluting its prognostic specificity; and the survival-relevant contrast
+between classical and basal-like biology is already captured by D1's
+iCAF-classical co-program, leaving D3's conditional contribution
+minimal. This result directly illustrates the misalignment between
+variance and prognosis anticipated by sufficient dimension reduction
+theory (9) and observed empirically in tumor purity analyses (12): the
+factors that explain the most transcriptomic variation need not be the
+factors most associated with patient outcomes. The observed pattern in
+PDAC is consistent with the intermediate regime between the primary and
+mixed simulation scenarios, where DeSurv's advantage was largest.
 
 To further characterize how the learned factor structure differs between
 DeSurv and standard NMF, we examined the W-matrix gene loading
 correspondence between factors derived from the two methods (SI
-Appendix, Fig. \ref{fig:corr}). NMF's classical-associated factor (N1)
-showed the strongest correspondence with DeSurv's basal-like factor
-(D3), and NMF's composite microenvironmental factor (N3) mapped
-primarily to DeSurv's microenvironmental factor (D2). The exocrine-like
-NMF factor (N2) did not correspond strongly to any single DeSurv factor;
-its signal was weakly absorbed into D3, consistent with D3's high
-conditional variance and low survival contribution described above.
-Together, these results demonstrate that DeSurv selectively preserves
-biologically distinct tumor and microenvironmental structure while
-reorganizing variance-dominant but prognostically inert variation ---
-including exocrine-compositional signal --- into a high-variance,
-low-survival factor rather than allocating dedicated model capacity to
-it.
+Appendix, Fig. S8). NMF's classical-associated factor (N1) showed the
+strongest correspondence with DeSurv's basal-like factor (D3), and NMF's
+composite microenvironmental factor (N3) mapped primarily to DeSurv's
+microenvironmental factor (D2). The exocrine-like NMF factor (N2) did
+not correspond strongly to any single DeSurv factor; its signal was
+weakly absorbed into D3, consistent with D3's high conditional variance
+and low survival contribution described above. Together, these results
+demonstrate that DeSurv selectively preserves biologically distinct
+tumor and microenvironmental structure while reorganizing
+variance-dominant but prognostically inert variation --- including
+exocrine-compositional signal --- into a high-variance, low-survival
+factor rather than allocating dedicated model capacity to it.
 
 \begin{figure*}[t]
 
@@ -538,12 +537,11 @@ independent PDAC cohorts (\(n = 616\)), the DeSurv-derived factor
 exhibited consistent survival effects, with hazard ratio estimates
 showing limited variability and predominantly protective associations
 (pooled HR \(1.78\); 95\% CI \(1.48\)--\(2.13\);
-\(P = \ensuremath{4.4\times 10^{-10}}\); Supplementary Fig.
-\ref{fig:forest}). In contrast, the NMF factor identified by the same
-criterion showed greater heterogeneity across datasets and weaker
-survival associations, consistent with the expectation that
-variance-driven programs capture cohort-specific variation that does not
-transfer.
+\(P = \ensuremath{4.4\times 10^{-10}}\); SI Appendix, Fig. S9). In
+contrast, the NMF factor identified by the same criterion showed greater
+heterogeneity across datasets and weaker survival associations,
+consistent with the expectation that variance-driven programs capture
+cohort-specific variation that does not transfer.
 
 When validation samples were pooled and stratified using the
 cross-validated optimal cutpoint applied to the DeSurv linear predictor,
@@ -984,7 +982,7 @@ are available at github.com/ayoung31/DeSurv-paper.
 ## DeSurv git branch: main
 ## DeSurv git commit: 370c88aa9a89e0c71507fbb161d226c7e2e4c61f
 ## Paper git branch: main
-## Paper git commit: 044257d5c32bc2728b83936698548ee2912cae61
+## Paper git commit: a5db7f9666c208c97c4d2fc3abd0ac4b9a24144a
 \end{verbatim}
 
 \phantomsection\label{refs}
@@ -1068,11 +1066,11 @@ analysis of tumour purity. \emph{Nature Communications} 6:8971.}
 Molecular subtypes of pancreatic cancer. \emph{Nature reviews
 Gastroenterology \& hepatology} 16(4):207--220.}
 
-\bibitem[\citeproctext]{ref-Schwarzova2023}
+\bibitem[\citeproctext]{ref-bailey2016genomic}
 \CSLLeftMargin{14. }%
-\CSLRightInline{Schwarzová L, Bouchal P, Brychtová S, Hrstka R (2023)
-Stroma-rich bladder cancers: Biological features, clinical relevance,
-and therapeutic targeting. \emph{Cancers} 15(5):1503.}
+\CSLRightInline{Bailey P, et al. (2016) Genomic analyses identify
+molecular subtypes of pancreatic cancer. \emph{Nature}
+531(7592):47--52.}
 
 \bibitem[\citeproctext]{ref-bair2006supervised}
 \CSLLeftMargin{15. }%

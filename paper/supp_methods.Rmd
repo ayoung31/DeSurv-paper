@@ -882,7 +882,7 @@ where $\ell(\cdot)$ denotes the Cox partial log-likelihood evaluated at the
 maximum partial likelihood estimates. Larger $\Delta\ell_j$ indicates a greater
 marginal contribution of factor $j$ to survival prediction given all other
 factors. These two quantities are plotted against each other in
-SI Appendix, Fig.\ \ref{fig:varsurvival}.
+SI Appendix, Fig.\ S7.
 
 \subsection{Factor Correspondence Analysis}
 
