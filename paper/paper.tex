@@ -161,9 +161,17 @@ transcriptional programs in heterogeneous tumors.
 
 % If your first paragraph (i.e. with the \dropcap) contains a list environment (quote, quotation, theorem, definition, enumerate, itemize...), the line after the list may have some extra indentation. If this is the case, add \parshape=0 to the end of the list environment.
 
-\acknow{Please include your acknowledgments here, set in a single
-paragraph. Please do not include any acknowledgments in the Supporting
-Information, or anywhere else in the manuscript.}
+\acknow{This work was supported by the National Cancer Institute grants
+U01 CA274298, P50 CA257911, and T32 CA106209 (A.M.Y.). Training data
+were obtained from the Cancer Genome Atlas (TCGA) Research Network
+(\url{https://www.cancer.gov/tcga}) and the Clinical Proteomic Tumor
+Analysis Consortium (CPTAC). External validation data were obtained from
+the Gene Expression Omnibus (GSE71729, Moffitt et al.; accessed via NCBI
+GEO), ArrayExpress (E-MTAB-6134, Puleo et al.; E-MTAB-6830, Dijk et al.;
+accessed via EMBL-EBI), and the International Cancer Genome Consortium
+data portal (PACA-AU; EGA study EGAS00001000154). We thank the patients
+and research teams who contributed samples and clinical data to these
+resources.}
 
 Predicting which cancer patients will respond to therapy or progress
 rapidly requires identifying the transcriptional signatures that drive
@@ -323,18 +331,19 @@ heuristics (Fig. \ref{fig:bo}D). Model selection followed the
 one-standard-error rule: we selected the smallest \(k\) whose predicted
 performance lay within one standard error of the maximum, yielding a
 parsimonious choice. Bayesian optimization selected \(k = 3\) and
-\(\alpha = 0.3339356\) (C-index \(0.655\); 1-SE rule; \(n = 273\)
-patients, \(139\) events).
+\(\alpha = 0.334\) (C-index \(0.655\); 1-SE rule; \(n = 273\) patients,
+\(139\) events).
 
 To further evaluate rank recovery under controlled conditions, we
 conducted simulation studies in which the true underlying rank was known
-(\(k = 3\)). DeSurv consistently selected the correct rank, producing a
-concentrated distribution of selected \(k\) values centered at the true
-value (Fig. \ref{fig:bo}E). In contrast, standard NMF followed by post
-hoc Cox modeling (\(\alpha = 0\)) exhibited substantially greater
-variability and a systematic tendency toward under-selection. These
-results support the prediction that incorporating outcome information
-into model selection improves recovery of the true factorization rank.
+(\(k = 3\)). DeSurv selected the true rank (\(k = 3\)) more frequently
+than standard NMF and avoided the systematic under-selection seen in the
+unsupervised baseline, though variability across replicates remained
+(Fig. \ref{fig:bo}E). In contrast, standard NMF followed by post hoc Cox
+modeling (\(\alpha = 0\)) showed a dominant tendency to under-select,
+concentrating near \(k = 2\). These results support the prediction that
+incorporating outcome information into model selection improves recovery
+of the true factorization rank.
 
 \begin{figure*}[t]
 
@@ -421,26 +430,25 @@ To directly test whether survival supervision reorganizes the learned
 factor structure, as predicted by the simulation results above, we
 examined the overlap between factor-specific gene rankings and
 established PDAC gene programs (Fig. \ref{fig:bio}A-B). Bayesian
-optimization selected \(k = 3\) and \(\alpha = 0.3339356\) for DeSurv in
-the PDAC training cohorts (TCGA and CPTAC). To enable a direct
-comparison of how each method organizes the same number of factors, we
-also fit standard NMF at the same rank (\(k = 3\)); results for standard
-NMF at independently selected ranks (\(k = 5\) via elbow detection,
-\(k = 7\) via cross-validated concordance at \(\alpha = 0\)) are
-presented in the SI Appendix. We note that standard NMF at \(k = 5\)
-achieves comparable external validation performance to DeSurv at
-\(k = 3\); the DeSurv advantage lies in parsimony --- recovering
-equivalent prognostic generalization with fewer, more interpretable
-factors --- rather than in raw concordance at each method's unrestricted
-optimum.
+optimization selected \(k = 3\) and \(\alpha = 0.334\) for DeSurv in the
+PDAC training cohorts (TCGA and CPTAC). To enable a direct comparison of
+how each method organizes the same number of factors, we also fit
+standard NMF at the same rank (\(k = 3\)); results for standard NMF at
+independently selected ranks (\(k = 5\) via elbow detection, \(k = 7\)
+via cross-validated concordance at \(\alpha = 0\)) are presented in the
+SI Appendix. We note that standard NMF at \(k = 5\) achieves comparable
+external validation performance to DeSurv at \(k = 3\); the DeSurv
+advantage lies in parsimony --- recovering equivalent prognostic
+generalization with fewer, more interpretable factors --- rather than in
+raw concordance at each method's unrestricted optimum.
 
 DeSurv produced a factorization that concentrated survival signal into a
-single factor (D1) integrating classical tumor programs with a restCAF
-(iCAF-like) stromal signature (Fig. \ref{fig:bio}A). This mirrors
+single factor (D1) integrating classical tumor programs with an
+iCAF-associated stromal signature (Fig. \ref{fig:bio}A). This mirrors
 observations that survival stratification in PDAC is strongest when
 tumor-intrinsic and CAF subtypes are considered jointly, with classical
-tumors in a restCAF/iCAF microenvironment demonstrating the most
-favorable outcomes (11). A second factor (D2) captured an activated
+tumors in an iCAF microenvironment demonstrating the most favorable
+outcomes (11, 23). A second factor (D2) captured an activated
 immune-stromal microenvironment. A third factor (D3) was enriched for
 basal-like tumor programs but, as discussed below, contributed minimally
 to survival in conditional analysis, reflecting both the absorption of
@@ -538,25 +546,28 @@ dataset by projecting the gene programs learned in the training cohort
 (\(Z = W^\top X_{\text{new}}\)), yielding a continuous score for each
 factor per sample.
 
-For each method, we focused on the factor showing the largest increase
-in Cox model log partial likelihood in the training data. Across 5
-independent PDAC cohorts (\(n = 616\)), the DeSurv-derived factor
-exhibited consistent survival effects, with hazard ratio estimates
-showing limited variability and predominantly protective associations
-(pooled HR \(1.78\); 95\% CI \(1.48\)--\(2.13\);
-\(P = \ensuremath{4.4\times 10^{-10}}\); SI Appendix, Fig. S9). In
-contrast, the NMF factor identified by the same criterion showed greater
-heterogeneity across datasets and weaker survival associations,
-consistent with the expectation that variance-driven programs capture
-cohort-specific variation that does not transfer.
+For each method (both fit at \(k = 3\), the DeSurv BO-selected rank;
+external validation C-index for NMF at independently selected ranks is
+summarized in SI Appendix, Table S4), we focused on the factor showing
+the largest increase in Cox model log partial likelihood in the training
+data. Across 5 independent PDAC cohorts (\(n = 616\)), the
+DeSurv-derived factor exhibited consistent survival effects, with hazard
+ratio estimates showing limited variability and predominantly protective
+associations (continuous risk score model: pooled HR \(1.78\); 95\% CI
+\(1.48\)--\(2.13\); \(P = \ensuremath{4.4\times 10^{-10}}\); SI
+Appendix, Fig. S9). In contrast, the NMF factor identified by the same
+criterion showed greater heterogeneity across datasets and weaker
+survival associations, consistent with the expectation that
+variance-driven programs capture cohort-specific variation that does not
+transfer.
 
 When validation samples were pooled and stratified using the
 cross-validated optimal cutpoint applied to the DeSurv linear predictor,
-clear separation of survival trajectories was observed (Fig.
-\ref{fig:bio}C). The same procedure applied to NMF yielded weaker
-survival stratification (Fig. \ref{fig:bio}D). These results support the
-prediction that outcome-aligned programs capture biology that
-generalizes, whereas variance-driven programs may include
+clear separation of survival trajectories was observed (dichotomized
+high/low groups, Fig. \ref{fig:bio}C). The same procedure applied to NMF
+yielded weaker survival stratification (Fig. \ref{fig:bio}D). These
+results support the prediction that outcome-aligned programs capture
+biology that generalizes, whereas variance-driven programs may include
 cohort-specific signals that attenuate across datasets.
 
 \subsection*{Factorization rank K=3 is robustly confirmed across
@@ -568,8 +579,8 @@ confirmed across supervision strength and gene-projection settings}
 The 1-SE model selection rule chose \(k = 3\) over the global Bayesian
 optimization maximum (\(k = 7\); CV C-index \(0.655\) versus \(0.646\)
 for \(k = 3\); margin \(0.009\) C-index units). Without this rule,
-DeSurv would have selected \(k = 7\) at \(\alpha = 0.3339356\)---the
-same rank independently favored by standard NMF under cross-validated
+DeSurv would have selected \(k = 7\) at \(\alpha = 0.334\)---the same
+rank independently favored by standard NMF under cross-validated
 concordance at \(\alpha = 0\). The parsimony of the DeSurv solution
 relative to standard NMF therefore reflects a deliberate methodological
 choice encoded in the 1-SE rule, not an intrinsic property of survival
@@ -577,19 +588,21 @@ supervision. Whether this preference is empirically warranted requires
 evaluating whether the additional complexity of \(k = 7\) translates to
 improved generalization.
 
-Bayesian optimization selected \(k = 3\) and \(\alpha = 0.3339356\) as
-the primary model configuration, but whether this reflects a stable
-solution or a fragile local optimum required further evaluation. To
-assess robustness, we conducted an exhaustive sensitivity analysis
-across \(K \in \{2, 3, 5, 7, 9\}\) and
+Bayesian optimization selected \(k = 3\) and \(\alpha = 0.334\) as the
+primary model configuration, but whether this reflects a stable solution
+or a fragile local optimum required further evaluation. To assess
+robustness, we conducted an exhaustive sensitivity analysis across
+\(K \in \{2, 3, 5, 7, 9\}\) and
 \(\alpha \in \{0, 0.25, 0.35, 0.55, 0.75, 0.85, 0.95\}\) (35
 combinations), holding all remaining hyperparameters fixed at the
 production-optimal values (\(\lambda = 0.349\), \(\nu = 0.056\),
 ntop\(= 270\), 100 initializations). For each fit, we identified the
 factor most correlated with the production K\(=3\) Factor 1 and assessed
-its survival association in 616 independent validation patients across 4
-external cohorts, using stratified Cox regression with and without
-adjustment for PurIST and DeCAF classifiers.
+its survival association in 570 independent validation patients across 4
+external cohorts (PACA-AU array and RNA-seq are treated as a single
+cohort here; the generalization analysis above counts them separately,
+yielding \(n = 616\) across 5 datasets), using stratified Cox regression
+with and without adjustment for PurIST and DeCAF classifiers.
 
 With the production-optimal gene-projection setting (ntop\(=270\)),
 K\(=3\) validated adjustedly at 5 of 7 supervision-strength values,
@@ -669,7 +682,7 @@ recapitulated known tumor and microenvironmental programs, including the
 basal-like/classical distinction and activated versus normal stromal
 states. The methodological contribution lies not in the identity of
 these programs---which have been established through virtual
-microdissection (4), experimental microdissection (23), and unsupervised
+microdissection (4), experimental microdissection (24), and unsupervised
 deconvolution (5)---but in how they are recovered. DeSurv discovers
 these programs de novo, without requiring pre-specified signatures or
 post hoc filtering, and directly quantifies their survival associations
@@ -753,7 +766,7 @@ More broadly, the principle instantiated by DeSurv---that outcome-guided
 dimensionality reduction targets different subspaces than
 variance-driven reduction---extends beyond cancer genomics. Sufficient
 dimension reduction theory (9) and the information bottleneck framework
-(24) both predict that supervised compression retains outcome-relevant
+(25) both predict that supervised compression retains outcome-relevant
 structure while discarding nuisance variation. DeSurv realizes this
 principle within the specific constraints of NMF deconvolution, where
 nonnegativity preserves biological interpretability and the
@@ -924,7 +937,7 @@ are available at github.com/ayoung31/DeSurv-paper.
 ## DeSurv git branch: main
 ## DeSurv git commit: 370c88aa9a89e0c71507fbb161d226c7e2e4c61f
 ## Paper git branch: main
-## Paper git commit: 942f14db88bd8ac8179f0f3bd1540910dbb66ed1
+## Paper git commit: 11cf830d5c14cca1a36e410fda7073890789f038
 \end{verbatim}
 
 \phantomsection\label{refs}
@@ -1065,15 +1078,21 @@ consortium (CPTAC): Connecting genomic alterations to cancer biology
 with proteomics: The NCI clinical proteomic tumor analysis consortium.
 \emph{Cancer Discov} 3:1108--1112.}
 
-\bibitem[\citeproctext]{ref-Maurer2019}
+\bibitem[\citeproctext]{ref-elyada2019cross}
 \CSLLeftMargin{23. }%
+\CSLRightInline{Elyada E, et al. (2019) Cross-species single-cell
+analysis of pancreatic ductal adenocarcinoma reveals antigen-presenting
+cancer-associated fibroblasts. \emph{Cancer Discovery} 9(8):1102--1123.}
+
+\bibitem[\citeproctext]{ref-Maurer2019}
+\CSLLeftMargin{24. }%
 \CSLRightInline{Maurer C, et al. (2019)
 \href{https://doi.org/10.1136/gutjnl-2018-317706}{Experimental
 microdissection enables functional harmonisation of pancreatic cancer
 subtypes}. \emph{Gut} 68(6):1034--1043.}
 
 \bibitem[\citeproctext]{ref-tishby1999information}
-\CSLLeftMargin{24. }%
+\CSLLeftMargin{25. }%
 \CSLRightInline{Tishby N, Pereira FC, Bialek W (1999) The information
 bottleneck method. \emph{Proceedings of the 37th Annual Allerton
 Conference on Communication, Control, and Computing}:368--377.}
