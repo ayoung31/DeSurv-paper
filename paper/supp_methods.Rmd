@@ -643,7 +643,7 @@ and local minima than the program matrix \(W\)
 
 In DeSurv, survival supervision enters through the projection $Z = W^\top X$ in the partial log-likelihood, so that the gradient of the DeSurv loss with respect to the programs is
 \[
-\nabla \mathcal{L} = (1-\alpha) \nabla_W \mathcal{L}_{\mathrm{Cox}}(W,H) - \alpha\nabla_W \mathcal{L}_{\mathrm{Cox}}(W,\beta),
+\nabla \mathcal{L} = (1-\alpha) \nabla_W \mathcal{L}_{\mathrm{NMF}}(W,H) - \alpha\nabla_W \mathcal{L}_{\mathrm{Cox}}(W,\beta),
 \]
 and therefore the update rule for $W$ as in Equation~\ref{eqn:W_update} relies on both the reconstruction term and the supervision term. As such, the gene-program definitions are directly shaped by their association with survival. This mechanism amplifies
 genes aligned with the hazard gradient and suppresses those that dilute
@@ -855,7 +855,7 @@ Reference gene programs included classical and basal-like tumor cell signatures
 from Moffitt et al.\ \cite{moffitt2015virtual}; iCAF and myCAF
 cancer-associated fibroblast signatures from Elyada et al.\
 \cite{elyada2019cross}; activated (proCAF) and resting (restCAF) fibroblast
-programs from the deCAF study [CITE]; SCISSORS PDAC subtypes [CITE]; tumor,
+programs from the deCAF study \cite{peng2024determination}; SCISSORS PDAC subtypes \cite{leary2023s}; tumor,
 stromal, and immune compartment signatures from DECODER \cite{peng2019novo};
 and classical and basal-like subtype classifiers from PurIST
 \cite{rashid2020purity}. Programs from Bailey et al.\ \cite{Bailey2016},
