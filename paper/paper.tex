@@ -120,21 +120,28 @@ analysis |  semi-supervised learning |  tumor
 deconvolution |  pancreatic cancer  } 
 
 \begin{abstract}
-Molecular subtyping in cancer is an ongoing problem that relies on the
-identification of robust and replicable gene signatures. While
-transcriptomic profiling has revealed recurrent gene expression patterns
-in various types of cancer, the prognostic value of these signatures is
-typically evaluated in retrospect. This is due to the reliance on
-unsupervised learning methods for identifying cell-type-specific signals
-and clustering patients into molecular subtypes. Here we present a
-Survival-driven Deconvolution tool (DeSurv) that integrates bulk
-RNA-sequencing data with patient survival information to identify
-cell-type-enriched gene signatures associated with prognosis. Applying
-DeSurv to various cohorts in pancreatic cancer, we uncover prognostic
-and biologically interpretable subtypes that reflect the complex
-interactions between stroma, tumor, and immune cells in the tumor
-microenvironment. Our approach highlights the value of using patient
-outcomes during gene signature discovery.
+Bulk tumor transcriptomes reflect a mixture of malignant cells and
+microenvironmental components, and the gene programs that explain the
+most expression variance need not be the programs most associated with
+patient outcomes. Standard nonnegative matrix factorization (NMF)
+discovers latent structure by minimizing reconstruction error, which may
+be dominated by variance-dominant but prognostically neutral signals
+such as tissue composition. Here we present DeSurv, a
+survival-supervised deconvolution framework that jointly integrates NMF
+with Cox proportional hazards modeling, directing gene programs toward
+outcome-relevant structure during discovery rather than only in post hoc
+evaluation. In simulations with known latent structure, DeSurv more
+reliably recovers the true factorization rank and the identity of
+prognostic gene programs than standard NMF, with the largest advantage
+when variance and prognosis diverge. In pancreatic ductal adenocarcinoma
+(PDAC), DeSurv concentrates survival signal into a parsimonious set of
+factors aligned with known tumor and microenvironmental programs while
+suppressing variance-dominant exocrine-compositional signals. These
+survival-aligned factors generalize across independent PDAC cohorts with
+consistent hazard ratios and clearer survival separation than their
+unsupervised counterparts. These results support survival supervision as
+a principled approach for discovering interpretable, outcome-aligned
+transcriptional programs in heterogeneous tumors.
 \end{abstract}
 
 \dates{This manuscript was compiled on \today}
@@ -172,7 +179,7 @@ corresponding to recognizable cell types or transcriptional states
 (3--5). This approach has yielded important biological insights,
 including the identification of basal-like and classical tumor programs
 in pancreatic ductal adenocarcinoma (PDAC) (1, 4) and
-compartment-specific deconvolution across 33 cancer types (5).
+compartment-specific deconvolution in pancreatic cancer (5).
 
 However, the standard approach discovers these programs through
 unsupervised factorization and only then evaluates their clinical
@@ -239,7 +246,7 @@ through \(H\) (18, 19). Hyperparameters, including factorization rank
 \(k\) and \(\alpha\), are jointly selected via cross-validated
 concordance (Methods).
 
-We evaluate DeSurv in three settings that test the predictions above.
+We evaluate DeSurv in two settings that test the predictions above.
 First, in simulations with known latent structure and survival
 associations, we show that DeSurv recovers the true factorization rank
 and the identity of prognostic programs more reliably than standard NMF,
@@ -252,11 +259,7 @@ content) and concentrates survival association into a smaller set of
 biologically interpretable factors aligned with known tumor and
 microenvironmental programs. These survival-aligned factors generalize
 across independent PDAC cohorts with consistent hazard ratios and
-clearer survival separation than their unsupervised counterparts. Third,
-we show that a PDAC-trained DeSurv factor retains prognostic signal when
-projected into bladder cancer samples, consistent with prior reports
-that basal-like transcriptional structure generalizes across epithelial
-cancers (20, 21).
+clearer survival separation than their unsupervised counterparts.
 
 \section*{Results}\label{results}
 \addcontentsline{toc}{section}{Results}
@@ -270,9 +273,8 @@ likelihood (Fig. \ref{fig:schema}; Methods). The survival gradient acts
 on the gene program matrix \(W\) but not on the sample loadings \(H\),
 directing gene programs toward outcome-relevant structure while
 preserving interpretability of sample loadings as mixture coefficients
-(3, 17). We evaluated DeSurv in three settings: controlled simulations,
-PDAC cohort analysis with external validation, and cross-cancer
-transfer.
+(3, 17). We evaluated DeSurv in two settings: controlled simulations and
+PDAC cohort analysis with external validation.
 
 \begin{figure*}[t]
 
@@ -292,8 +294,8 @@ Before examining DeSurv's performance across the three evaluation
 settings described above, we address a prerequisite question using both
 PDAC expression data and controlled simulations: whether incorporating
 clinical outcomes clarifies the well-documented instability of
-unsupervised rank selection heuristics (6, 22). Using gene expression
-data from the PDAC training cohorts (TCGA (23) and CPTAC (24); Methods),
+unsupervised rank selection heuristics (6, 20). Using gene expression
+data from the PDAC training cohorts (TCGA (21) and CPTAC (22); Methods),
 we first evaluated commonly used unsupervised criteria across a range of
 candidate ranks.
 
@@ -373,8 +375,8 @@ precision, indicating that variance-driven factorization failed to
 concentrate on the genes that actually drove survival. This result
 supports the prediction that outcome-guided learning recovers prognostic
 programs more reliably when variance and prognosis diverge. Across 100
-replicates, DeSurv achieved median C-index \(0.837\) versus \(0.725\)
-for standard NMF (\(\Delta = 0.112\); \(p = 3{,}000\) genes, \(n = 200\)
+replicates, DeSurv achieved median C-index \(0.842\) versus \(0.769\)
+for standard NMF (\(\Delta = 0.073\); \(p = 3{,}000\) genes, \(n = 200\)
 samples, true \(k = 3\)).
 
 To verify that these gains reflect genuine signal recovery rather than
@@ -425,7 +427,12 @@ comparison of how each method organizes the same number of factors, we
 also fit standard NMF at the same rank (\(k = 3\)); results for standard
 NMF at independently selected ranks (\(k = 5\) via elbow detection,
 \(k = 7\) via cross-validated concordance at \(\alpha = 0\)) are
-presented in the SI Appendix.
+presented in the SI Appendix. We note that standard NMF at \(k = 5\)
+achieves comparable external validation performance to DeSurv at
+\(k = 3\); the DeSurv advantage lies in parsimony --- recovering
+equivalent prognostic generalization with fewer, more interpretable
+factors --- rather than in raw concordance at each method's unrestricted
+optimum.
 
 DeSurv produced a factorization that concentrated survival signal into a
 single factor (D1) integrating classical tumor programs with a restCAF
@@ -474,20 +481,20 @@ largest survival contribution explained \(7\)\% of variance with
 \(\Delta\ell = 0.1\) to survival. Notably, the highest-variance DeSurv
 factor (D3, \textasciitilde30\% of conditional variance) also
 contributed minimally to survival. This apparent paradox --- given the
-well-established prognostic role of basal-like biology in PDAC (10,
-\textbf{moffit2015virtual?}) --- reflects two features of the
-factorization: D3 absorbs residual exocrine-compositional variation
-alongside basal-like programs (see factor correspondence below),
-diluting its prognostic specificity; and the survival-relevant contrast
-between classical and basal-like biology is already captured by D1's
-iCAF-classical co-program, leaving D3's conditional contribution
-minimal. This result directly illustrates the misalignment between
-variance and prognosis anticipated by sufficient dimension reduction
-theory (9) and observed empirically in tumor purity analyses (12): the
-factors that explain the most transcriptomic variation need not be the
-factors most associated with patient outcomes. The observed pattern in
-PDAC is consistent with the intermediate regime between the primary and
-mixed simulation scenarios, where DeSurv's advantage was largest.
+well-established prognostic role of basal-like biology in PDAC (4, 10)
+--- reflects two features of the factorization: D3 absorbs residual
+exocrine-compositional variation alongside basal-like programs (see
+factor correspondence below), diluting its prognostic specificity; and
+the survival-relevant contrast between classical and basal-like biology
+is already captured by D1's iCAF-classical co-program, leaving D3's
+conditional contribution minimal. This result directly illustrates the
+misalignment between variance and prognosis anticipated by sufficient
+dimension reduction theory (9) and observed empirically in tumor purity
+analyses (12): the factors that explain the most transcriptomic
+variation need not be the factors most associated with patient outcomes.
+The observed pattern in PDAC is consistent with the intermediate regime
+between the primary and mixed simulation scenarios, where DeSurv's
+advantage was largest.
 
 To further characterize how the learned factor structure differs between
 DeSurv and standard NMF, we examined the W-matrix gene loading
@@ -621,59 +628,6 @@ failed adjusted external validation (\(p = 0.676\)), while \(k = 3\)
 validated robustly (\(p = 0.003\)). The simpler model not only passed
 the 1-SE threshold---it generalized better.
 
-\subsection*{A PDAC-trained program retains prognostic signal in bladder
-cancer}\label{a-pdac-trained-program-retains-prognostic-signal-in-bladder-cancer}
-\addcontentsline{toc}{subsection}{A PDAC-trained program retains
-prognostic signal in bladder cancer}
-
-A PDAC-trained DeSurv program retains prognostic relevance in bladder
-cancer, consistent with shared basal-like transcriptional biology across
-epithelial cancers.
-
-Finally, we tested whether the misalignment between variance and
-prognosis extends beyond PDAC and whether survival-aligned programs
-transfer across cancer types, a prediction motivated by prior evidence
-that basal-like transcriptional structure generalizes across epithelial
-cancers (20, 21). We first applied both standard NMF and DeSurv to an
-independent bladder cancer cohort and evaluated factor structure and
-survival association (Fig. \ref{fig:bladder}A). We then asked whether
-the DeSurv model trained in PDAC retains prognostic relevance when
-projected to bladder cancer samples (Fig. \ref{fig:bladder}B).
-
-In bladder cancer, standard NMF again organized the learned factor
-structure primarily around variance-dominant patterns (Fig.
-\ref{fig:bladder}A). As in PDAC, NMF factors explained substantial
-fractions of expression variance but contributed little to survival,
-replicating the misalignment between variance and prognosis observed in
-PDAC.
-
-Separately, we projected the DeSurv model trained in PDAC directly onto
-bladder cancer samples to test cross-cancer transfer. The
-survival-aligned factor retained prognostic relevance in the external
-cohort (Fig. \ref{fig:bladder}B). Kaplan-Meier analysis based on a
-median split of projected factor scores demonstrated clear separation of
-survival curves, despite differences in tissue context and
-transcriptional background (\(n = 51\), \(34\) events; log-rank
-\(P = 0.68\); HR \(0.66\); 95\% CI \(0.09\)--\(4.81\)). This finding
-suggests that survival supervision captures cross-cancer biology that
-unsupervised methods may distribute across multiple outcome-neutral
-factors.
-
-Together, these results suggest that survival supervision separates
-variance-dominant from survival-relevant structure and that this
-separation can transfer across cancer types, providing initial evidence
-that outcome-guided dimension reduction targets different subspaces than
-variance-driven reduction.
-
-\begin{figure*}[t]
-
-{\centering \includegraphics[width=\textwidth]{/work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bladder-1} 
-
-}
-
-\caption{Survival-associated factor structure in bladder cancer and cross-cancer transfer from PDAC. (A) Fraction of expression variance explained versus survival contribution (change in Cox partial log-likelihood) for each factor in bladder cancer, comparing DeSurv and standard NMF. (B) Kaplan--Meier curves for bladder cancer samples stratified by median split of projected factor scores from a PDAC-trained DeSurv model, with numbers at risk shown below. \label{fig:bladder}}\label{fig:fig-bladder}
-\end{figure*}
-
 \section*{Discussion}\label{discussion}
 \addcontentsline{toc}{section}{Discussion}
 
@@ -710,63 +664,53 @@ genes with the same regularization reduced the number of significantly
 validated K\(\times\alpha\) combinations from 18 to 5 of 35 and
 eliminated K\(=3\) adjusted significance at the production supervision
 strength, establishing gene focusing as the mechanism by which survival
-supervision isolates a generalizable prognostic program. For the
-dominant DeSurv program, prognostic signal transferred to bladder
-cancer, supporting the hypothesis that outcome-guided learning captures
-biology that generalizes more readily than variance-driven structure.
-
-In PDAC, DeSurv recapitulated known tumor and microenvironmental
-programs, including the basal-like/classical distinction and activated
-versus normal stromal states. The methodological contribution lies not
-in the identity of these programs---which have been established through
-virtual microdissection (4), experimental microdissection (25), and
-unsupervised deconvolution (5)---but in how they are recovered. DeSurv
-discovers these programs de novo, without requiring pre-specified
-signatures or post hoc filtering, and directly quantifies their survival
-associations during the factorization. The resulting factors align with
-the consensus that has emerged from over a decade of PDAC subtyping
-efforts (1, 4, 7, 13), but are identified through a single optimization
-rather than iterative retrospective evaluation. The cross-cancer
-transfer result, in which a PDAC-trained factor stratified bladder
-cancer survival, is consistent with prior evidence that basal-like
-transcriptional programs are shared across epithelial cancers (20, 21)
-and suggests that survival supervision captures this shared biology more
-directly than variance-driven approaches.
-
-The semi-supervised design of DeSurv reflects a deliberate balance
-between biological completeness and clinical relevance. The
-reconstruction term (weight \(1-\alpha\)) penalizes deviation from the
-observed expression data; the survival term (weight \(\alpha\)) directs
-gene programs toward outcome-relevant structure. This balance interacts
-with rank selection: survival supervision enables parsimonious
-factorizations by concentrating prognostic signal into fewer factors, so
-that the one-standard-error rule applied to cross-validated concordance
-selects smaller ranks than would be chosen by unsupervised criteria or
-by optimizing concordance without supervision. In PDAC, the
-cross-validated concordance surface was relatively flat across
-\(k = 3\)--12 for DeSurv, indicating that three supervised factors
-captured nearly as much prognostic information as twelve; for standard
-NMF, concordance increased steadily from \(k = 2\) through
-\(k = 7\)--11, reflecting the need for additional factors to distribute
-prognostic signal that supervision would have concentrated. A
-K\(\times\alpha\) sensitivity analysis confirmed this parsimonious
-selection: with production-optimal gene focusing (ntop\(=270\)), K\(=3\)
-validated adjustedly across a broad \(\alpha\) range, while the apparent
-advantage of K\(=7\) observed under all-gene projection disappeared
-entirely, demonstrating that the one-standard-error rule correctly
-identified K\(=3\) as the stable, generalizable solution. Our
-simulations provide further guidance on when this tradeoff is most
-beneficial: DeSurv's advantage is greatest when prognostic programs
-explain modest variance relative to outcome-neutral signals and vanishes
-under null conditions where no survival signal exists. DeSurv is
-therefore not intended to replace unsupervised NMF in all settings. When
-the goal is exploratory discovery without clinical endpoints, when
-survival data is sparse or unreliable, or when the application requires
-comprehensive biological characterization rather than prognostic
-stratification, unsupervised methods remain appropriate. The \(\alpha\)
-parameter, tuned via Bayesian optimization, lets the data determine the
-appropriate balance for a given cancer type and cohort size, and the
-\(\alpha = 0\) endpoint recovers standard NMF as a special case.
+supervision isolates a generalizable prognostic program. In PDAC, DeSurv
+recapitulated known tumor and microenvironmental programs, including the
+basal-like/classical distinction and activated versus normal stromal
+states. The methodological contribution lies not in the identity of
+these programs---which have been established through virtual
+microdissection (4), experimental microdissection (23), and unsupervised
+deconvolution (5)---but in how they are recovered. DeSurv discovers
+these programs de novo, without requiring pre-specified signatures or
+post hoc filtering, and directly quantifies their survival associations
+during the factorization. The resulting factors align with the consensus
+that has emerged from over a decade of PDAC subtyping efforts (1, 4, 7,
+13), but are identified through a single optimization rather than
+iterative retrospective evaluation. The semi-supervised design of DeSurv
+reflects a deliberate balance between biological completeness and
+clinical relevance. The reconstruction term (weight \(1-\alpha\))
+penalizes deviation from the observed expression data; the survival term
+(weight \(\alpha\)) directs gene programs toward outcome-relevant
+structure. This balance interacts with rank selection: survival
+supervision enables parsimonious factorizations by concentrating
+prognostic signal into fewer factors, so that the one-standard-error
+rule applied to cross-validated concordance selects smaller ranks than
+would be chosen by unsupervised criteria or by optimizing concordance
+without supervision. In PDAC, the cross-validated concordance surface
+was relatively flat across \(k = 3\)--12 for DeSurv, indicating that
+three supervised factors captured nearly as much prognostic information
+as twelve; for standard NMF, concordance increased steadily from
+\(k = 2\) through \(k = 7\)--11, reflecting the need for additional
+factors to distribute prognostic signal that supervision would have
+concentrated. A K\(\times\alpha\) sensitivity analysis confirmed this
+parsimonious selection: with production-optimal gene focusing
+(ntop\(=270\)), K\(=3\) validated adjustedly across a broad \(\alpha\)
+range, while the apparent advantage of K\(=7\) observed under all-gene
+projection disappeared entirely, demonstrating that the
+one-standard-error rule correctly identified K\(=3\) as the stable,
+generalizable solution. Our simulations provide further guidance on when
+this tradeoff is most beneficial: DeSurv's advantage is greatest when
+prognostic programs explain modest variance relative to outcome-neutral
+signals and vanishes under null conditions where no survival signal
+exists. DeSurv is therefore not intended to replace unsupervised NMF in
+all settings. When the goal is exploratory discovery without clinical
+endpoints, when survival data is sparse or unreliable, or when the
+application requires comprehensive biological characterization rather
+than prognostic stratification, unsupervised methods remain appropriate.
+The \(\alpha\) parameter, tuned via Bayesian optimization, lets the data
+determine the appropriate balance for a given cancer type and cohort
+size, and the \(\alpha = 0\) endpoint recovers standard NMF as a special
+case.
 
 Several limitations should be noted. First, DeSurv assumes Cox
 proportional hazards, which may not hold in settings where treatment
@@ -778,10 +722,10 @@ cross-validated concordance exceeds that of standard NMF and may limit
 scalability to very large cohorts or rapid iterative analyses; however,
 hyperparameter selection is performed once per dataset and the final
 model can then be applied to arbitrarily many validation cohorts by
-projection. Third, while the cross-cancer transfer result is
-encouraging, we tested only one transfer pair (PDAC to bladder), and
-broader benchmarking across cancer types is needed to establish
-generality. Fourth, DeSurv's convergence guarantee (SI Appendix) applies
+projection. Third, DeSurv was applied here only to PDAC, and broader
+benchmarking across cancer types is needed to establish generality of
+the variance-prognosis divergence pattern and of survival supervision as
+a remedy. Fourth, DeSurv's convergence guarantee (SI Appendix) applies
 to an idealized algorithm; the implementation includes practical
 modifications (backtracking, gradient clamping) that depart from the
 theoretical analysis, though empirically these do not affect convergence
@@ -809,21 +753,21 @@ More broadly, the principle instantiated by DeSurv---that outcome-guided
 dimensionality reduction targets different subspaces than
 variance-driven reduction---extends beyond cancer genomics. Sufficient
 dimension reduction theory (9) and the information bottleneck framework
-(26) both predict that supervised compression retains outcome-relevant
+(24) both predict that supervised compression retains outcome-relevant
 structure while discarding nuisance variation. DeSurv realizes this
 principle within the specific constraints of NMF deconvolution, where
 nonnegativity preserves biological interpretability and the
 factorization structure enables single-sample scoring. The success of
-this approach in PDAC and bladder cancer suggests that analogous
-frameworks may be valuable in other settings where high-dimensional
-measurements contain both signal and nuisance variation---including
-multi-omics integration, spatial transcriptomics, and electronic health
-records. Extending DeSurv to these domains, and to alternative outcome
-models beyond Cox regression, is a natural next step. As single-cell
-cohorts with clinical annotation grow in size, direct survival modeling
-at cellular resolution may complement deconvolution-based approaches,
-though the cohort sizes required for stable survival analysis remain
-available primarily in bulk expression data.
+this approach in PDAC suggests that analogous frameworks may be valuable
+in other settings where high-dimensional measurements contain both
+signal and nuisance variation---including multi-omics integration,
+spatial transcriptomics, and electronic health records. Extending DeSurv
+to these domains, and to alternative outcome models beyond Cox
+regression, is a natural next step. As single-cell cohorts with clinical
+annotation grow in size, direct survival modeling at cellular resolution
+may complement deconvolution-based approaches, though the cohort sizes
+required for stable survival analysis remain available primarily in bulk
+expression data.
 
 \section*{Materials and methods}\label{materials-and-methods}
 \addcontentsline{toc}{section}{Materials and methods}
@@ -950,18 +894,16 @@ partially overlap.
 \subsection{Real-world datasets}\label{real-world-datasets}
 
 We analyzed publicly available RNA-seq and microarray cohorts of
-pancreatic ductal adenocarcinoma (PDAC) and bladder cancer with
-corresponding overall survival outcomes. Gene expression matrices were
-converted to TPM, log-transformed, and filtered to remove low-expression
-genes. Survival times and censoring indicators were taken from the
-associated clinical annotations. Of the seven PDAC cohorts we
-considered, two were used for training (TCGA and CPTAC) and the rest
-were used for external validation (Dijk, Moffitt, PACA, Puleo). The
-bladder cohort was split into training and validation cohorts via a
-70/30 split. To harmonize differences in scale across cohorts, filtered
-gene expression data was within-subject rank transformed before model
-training. More details about the datasets can be found in the SI
-Appendix.
+pancreatic ductal adenocarcinoma (PDAC) with corresponding overall
+survival outcomes. Gene expression matrices were converted to TPM,
+log-transformed, and filtered to remove low-expression genes. Survival
+times and censoring indicators were taken from the associated clinical
+annotations. Of the seven PDAC cohorts we considered, two were used for
+training (TCGA and CPTAC) and the rest were used for external validation
+(Dijk, Moffitt, PACA, Puleo). To harmonize differences in scale across
+cohorts, filtered gene expression data was within-subject rank
+transformed before model training. More details about the datasets can
+be found in the SI Appendix.
 
 \subsection{Software and availability}\label{software-and-availability}
 
@@ -982,7 +924,7 @@ are available at github.com/ayoung31/DeSurv-paper.
 ## DeSurv git branch: main
 ## DeSurv git commit: 370c88aa9a89e0c71507fbb161d226c7e2e4c61f
 ## Paper git branch: main
-## Paper git commit: a5db7f9666c208c97c4d2fc3abd0ac4b9a24144a
+## Paper git commit: 24397d11ea164cc998496b5eb737e55248893630
 \end{verbatim}
 
 \phantomsection\label{refs}
@@ -1103,49 +1045,35 @@ preprint arXiv:200803776}.}
 factorization supervised for survival data analysis. PhD thesis
 (Institut Pasteur Paris; CEA).}
 
-\bibitem[\citeproctext]{ref-damrauer2014intrinsic}
-\CSLLeftMargin{20. }%
-\CSLRightInline{Damrauer JS, et al. (2014) Intrinsic subtypes of
-high-grade bladder cancer reflect the hallmarks of breast cancer
-biology. \emph{Proceedings of the National Academy of Sciences}
-111(8):3110--3115.}
-
-\bibitem[\citeproctext]{ref-Hoadley2018}
-\CSLLeftMargin{21. }%
-\CSLRightInline{Hoadley KA, Yau C, et al. (2018)
-\href{https://doi.org/10.1016/j.cell.2018.03.022}{Cell-of-origin
-patterns dominate the molecular classification of 10,000 tumors from 33
-types of cancer}. \emph{Cell} 173(2):291--304.}
-
 \bibitem[\citeproctext]{ref-frigyesi2008nmf}
-\CSLLeftMargin{22. }%
+\CSLLeftMargin{20. }%
 \CSLRightInline{Frigyesi A, Höglund M (2008) Non-negative matrix
 factorization for the analysis of complex gene expression data:
 Identification of clinically relevant tumor subtypes. \emph{Cancer
 Informatics} 6:275--292.}
 
 \bibitem[\citeproctext]{ref-tomczak2015review}
-\CSLLeftMargin{23. }%
+\CSLLeftMargin{21. }%
 \CSLRightInline{Tomczak K, Czerwińska P, Wiznerowicz M (2015) Review the
 cancer genome atlas (TCGA): An immeasurable source of knowledge.
 \emph{Contemporary Oncology/Wsp{ó}{ł}czesna Onkologia} 2015(1):68--77.}
 
 \bibitem[\citeproctext]{ref-ellis2013clinical}
-\CSLLeftMargin{24. }%
+\CSLLeftMargin{22. }%
 \CSLRightInline{Ellis M, et al. (2013) Clinical proteomic tumor analysis
 consortium (CPTAC): Connecting genomic alterations to cancer biology
 with proteomics: The NCI clinical proteomic tumor analysis consortium.
 \emph{Cancer Discov} 3:1108--1112.}
 
 \bibitem[\citeproctext]{ref-Maurer2019}
-\CSLLeftMargin{25. }%
+\CSLLeftMargin{23. }%
 \CSLRightInline{Maurer C, et al. (2019)
 \href{https://doi.org/10.1136/gutjnl-2018-317706}{Experimental
 microdissection enables functional harmonisation of pancreatic cancer
 subtypes}. \emph{Gut} 68(6):1034--1043.}
 
 \bibitem[\citeproctext]{ref-tishby1999information}
-\CSLLeftMargin{26. }%
+\CSLLeftMargin{24. }%
 \CSLRightInline{Tishby N, Pereira FC, Bialek W (1999) The information
 bottleneck method. \emph{Proceedings of the 37th Annual Allerton
 Conference on Communication, Control, and Computing}:368--377.}

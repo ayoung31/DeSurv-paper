@@ -2528,7 +2528,20 @@ FIGURE_TARGETS <- list(
       result
     }
   ),
-  
+  tar_target(
+    fig_gene_overlap_heatmap_desurv_alpha0,
+    {
+      result = make_gene_overlap_heatmap(
+        tar_fit_desurv_alpha0,
+        tar_tops_desurv_alpha0$top_genes,
+        top_genes
+      )
+      save_plot_pdf(result$plot, file.path(FIGURE_CONFIGS$panel_dir,
+        sprintf("fig_gene_overlap_heatmap_desurv_alpha0_%s.pdf", bo_label)))
+      result
+    }
+  ),
+
   tar_target(
     fig_dotplots_std_desurvk,
     {

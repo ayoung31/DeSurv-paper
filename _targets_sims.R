@@ -101,7 +101,7 @@ tar_option_set(
 
 
 SIM_DESURV_BO_BOUNDS <- list(
-  k_grid = list(lower = 2L, upper = 12L, type = "integer"),
+  k_grid = list(lower = 2L, upper = 6L, type = "integer"),
   alpha_grid = list(lower = 0, upper = .95, type = "continuous"),
   lambda_grid = list(lower = 1e-2, upper = 1e2, scale = "log10"),
   nu_grid = list(lower = 0, upper = 1, type = "continuous")

@@ -15,7 +15,7 @@ Generated: 2026-03-02
 | [#9](#9-standard-nmf-at-k5-outperforms-desurv-k3-in-external-validation) | Standard NMF K=5 outperforms DeSurv K=3 in external validation | ❌ Open — not addressed |
 | [#8](#8-clarify-k-selection-for-standard-nmf-in-external-validation) | Clarify K selection for standard NMF in external validation | ❌ Open — not addressed |
 | [#7](#7-connect-variance-vs-survival-plot-back-to-simulation-scenarios) | Connect variance-vs-survival plot back to simulation scenarios | ❌ Open — not addressed |
-| [#5](#5-characterize-standard-nmf-factors-at-independently-selected-k) | Characterize standard NMF factors at K=5 and K=7 for supplement | ⚠️ Discussed, not implemented |
+| [#5](#5-characterize-standard-nmf-factors-at-independently-selected-k) | Characterize standard NMF factors at K=5 and K=7 for supplement | ✅ Resolved — fully implemented |
 | [#4](#4-clarify-k-selection-for-standard-nmf-comparison-section-4) | Clarify K selection for standard NMF comparison (Section 4) | ✅ Resolved (decision made, disclosure needed in text) |
 | [#2](#2-mixed-scenario-investigate-desurv-marker-vs-background-gene-effects) | Mixed scenario: marker vs background gene survival effects | ✅ Resolved — fully implemented |
 | [#1](#1-clarify-survclust-model) | Clarify survClust model | ✅ Resolved — questions answered |
@@ -201,7 +201,13 @@ Fig 4C shows that the highest-variance NMF factor has minimal survival associati
 
 ### #5: Characterize standard NMF factors at independently-selected K (K=5 and K=7) for supplement
 
-**Status: ⚠️ Discussed but not implemented**
+**Status: ✅ Resolved — fully implemented**
+
+Added new supplement section "Standard NMF factor structure at independently selected rank" including:
+- `fig_gene_overlap_heatmap_desurv_alpha0` pipeline target added to `targets_common_pipeline.R`
+- K=5 (elbow) and K=7 (BO α=0) heatmap figures shown in supplement
+- C-index comparison table across all four methods and cohorts
+- Closing paragraph tying back to parsimony claim and mixed simulation scenario
 
 **Comment from @naimurashid** raises additional question: K=5 (elbow, purely unsupervised) vs K=7 (BO at α=0, CV C-index) represent different "standard NMF" baselines. Both should likely be shown.
 

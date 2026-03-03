@@ -759,9 +759,9 @@ make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref, factor_lab
     silent = TRUE,
     fontsize_number = 20,
     treeheight_row = 0,
-    show_colnames = TRUE,
-    main = title
+    show_colnames = TRUE
   )
+  if (!is.null(title)) ph_args$main <- title
 
   # Render without legend for the main plot
   ph <- do.call(pheatmap::pheatmap, c(ph_args, list(legend = FALSE)))
