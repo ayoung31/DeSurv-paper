@@ -465,28 +465,19 @@ fig_hr_forest_tcgacptac +
 
 ## Standard NMF factor structure at independently selected rank {.unnumbered}
 
-Throughout the main text, both DeSurv and standard NMF were fit at the same rank ($k = 3$), enabling a controlled comparison of how survival supervision reorganizes factor structure. When each method selects its own rank independently, standard NMF chooses $k = 5$ via residual elbow detection or $k = 7$ via Bayesian optimization with $\alpha = 0$, while supervised DeSurv BO selects $k = 3$. We examine here the gene program structure at elbow-selected $k = 5$ for both NMF and DeSurv (Fig. S\ref{fig:fig-k5-heatmap-comparison}), and the NMF $k = 7$ structure to illustrate additional fragmentation when supervision is absent (Fig. S\ref{fig:fig-nmf-k7-heatmap}).
+Throughout the main text, both DeSurv and standard NMF were fit at the same rank ($k = 3$), enabling a controlled comparison of how survival supervision reorganizes factor structure. When each method selects its own rank independently, standard NMF chooses $k = 5$ via residual elbow detection or $k = 7$ via Bayesian optimization with $\alpha = 0$, while supervised DeSurv BO selects $k = 3$. We examine here the gene program structure at elbow-selected $k = 5$ for standard NMF (Fig. S\ref{fig:fig-nmf-k5-heatmap}), and the NMF $k = 7$ structure to illustrate additional fragmentation when supervision is absent (Fig. S\ref{fig:fig-nmf-k7-heatmap}).
 
-At elbow-selected $k = 5$, the three core programs from $k = 3$ are recovered in both methods (Fig. S\ref{fig:fig-k5-heatmap-comparison}). In standard NMF (panel A), two additional factors emerge with strong overlap with Exocrine-like and NorpCAF signatures, capturing transcriptional variance not aligned with survival outcomes. DeSurv at $k = 5$ (panel B) likewise recovers the three survival-relevant programs from $k = 3$, while the two additional factors absorb residual background-variance structure without contributing to cross-validated concordance. Supervised BO therefore selects $k = 3$ over $k = 5$, confirming that the $k = 3$ solution is the most parsimonious rank at which survival-relevant biology is captured and the extra factors are biologically redundant.
+At elbow-selected $k = 5$, the three core programs from $k = 3$ are recovered by standard NMF (Fig. S\ref{fig:fig-nmf-k5-heatmap}). Two additional factors emerge with strong overlap with Exocrine-like and NorpCAF signatures, capturing transcriptional variance not aligned with survival outcomes. These biologically redundant factors explain why supervised BO selects $k = 3$ rather than $k = 5$: the additional rank adds no prognostically relevant structure.
 
-```{r fig-k5-heatmap-comparison, fig.width = 11, fig.height = 5, fig.cap = "Gene program overlap heatmaps at elbow-selected rank $k = 5$. Each cell shows the number of top genes from a given factor (rows) overlapping established PDAC gene programs (columns). (A) Standard NMF at $k = 5$: the three core programs from $k = 3$ are recovered with two additional exocrine-compositional factors. (B) DeSurv at $k = 5$: survival-relevant programs remain concentrated in coherent factors; the two additional factors absorb residual background variance without improving cross-validated concordance, explaining why supervised BO selects $k = 3$ rather than $k = 5$. \\label{fig:fig-k5-heatmap-comparison}", fig.env='figure*', fig.pos='t', out.width='\\textwidth'}
+```{r fig-nmf-k5-heatmap, fig.width = 6, fig.height = 5, fig.cap = "Gene program overlap heatmap for standard NMF at elbow-selected rank $k = 5$. Each cell shows the number of top genes from a given factor (rows) overlapping established PDAC gene programs (columns). The three core programs from $k = 3$ are recovered; two additional factors overlap Exocrine-like and NorpCAF signatures, capturing transcriptional variance not aligned with survival outcomes. \\label{fig:fig-nmf-k5-heatmap}", fig.env='figure', fig.pos='t'}
 library(cowplot)
 tar_load(fig_gene_overlap_heatmap_std_elbowk_tcgacptac)
-tar_load(fig_gene_overlap_heatmap_desurv_elbowk_tcgacptac)
 
-panel_a <- cowplot::plot_grid(
+cowplot::plot_grid(
   fig_gene_overlap_heatmap_std_elbowk_tcgacptac$plot,
   cowplot::ggdraw(fig_gene_overlap_heatmap_std_elbowk_tcgacptac$legend),
   ncol = 2, rel_widths = c(4, 1)
 )
-
-panel_b <- cowplot::plot_grid(
-  fig_gene_overlap_heatmap_desurv_elbowk_tcgacptac$plot,
-  cowplot::ggdraw(fig_gene_overlap_heatmap_desurv_elbowk_tcgacptac$legend),
-  ncol = 2, rel_widths = c(4, 1)
-)
-
-cowplot::plot_grid(panel_a, panel_b, ncol = 2, labels = c("A", "B"))
 ```
 
 At BO-selected $k = 7$ under $\alpha = 0$ (Fig. S\ref{fig:fig-nmf-k7-heatmap}), standard NMF shows increased fragmentation relative to $k = 5$: multiple factors partially overlap the same PDAC gene signatures, and no new biologically coherent program emerges beyond those present at $k = 3$. A supervised DeSurv equivalent at $k = 7$ is not shown because supervised BO selects $k = 3$, not $k = 7$; the relationship between the production $k = 3$ DeSurv model and a $k = 7$ supervised DeSurv fit ($\alpha = 0.35$) is characterized by the factor-nesting analysis (Fig. S\ref{fig:k3-k7-nesting}), which demonstrates that the $k = 7$ solution fragments rather than extends the $k = 3$ structure.
@@ -506,7 +497,6 @@ library(dplyr)
 library(knitr)
 tar_load(val_cindex_desurv_tcgacptac)
 tar_load(val_cindex_std_desurvk_tcgacptac)
-tar_load(val_cindex_desurv_elbowk_tcgacptac)
 tar_load(val_cindex_std_elbowk_tcgacptac)
 tar_load(val_cindex_desurv_alpha0_tcgacptac)
 
@@ -518,7 +508,6 @@ fmt_cindex <- function(tbl, col_name) {
 
 cindex_wide <- fmt_cindex(val_cindex_desurv_tcgacptac, "DeSurv (K=3)") %>%
   dplyr::left_join(fmt_cindex(val_cindex_std_desurvk_tcgacptac, "Std NMF (K=3)"), by = "dataset") %>%
-  dplyr::left_join(fmt_cindex(val_cindex_desurv_elbowk_tcgacptac, "DeSurv (K=5, elbow)"), by = "dataset") %>%
   dplyr::left_join(fmt_cindex(val_cindex_std_elbowk_tcgacptac, "Std NMF (K=5, elbow)"), by = "dataset") %>%
   dplyr::left_join(fmt_cindex(val_cindex_desurv_alpha0_tcgacptac, "Std NMF (K=7, BO $\\alpha$=0)"), by = "dataset") %>%
   dplyr::mutate(dplyr::across(where(is.numeric), ~ round(.x, 3))) %>%
@@ -526,23 +515,21 @@ cindex_wide <- fmt_cindex(val_cindex_desurv_tcgacptac, "DeSurv (K=3)") %>%
 
 knitr::kable(
   cindex_wide,
-  caption = "External validation C-index by method and cohort. DeSurv and standard NMF are compared at the BO-selected rank ($k = 3$), elbow-selected rank ($k = 5$), and NMF BO-selected rank ($k = 7$, $\\alpha = 0$). Higher values indicate better discrimination.",
+  caption = "External validation C-index by method and cohort. DeSurv at BO-selected rank ($k = 3$) is compared with standard NMF at matched rank ($k = 3$), elbow-selected rank ($k = 5$), and BO-selected rank ($k = 7$, $\\alpha = 0$). Higher values indicate better discrimination.",
   booktabs = TRUE,
   linesep = "",
   escape = FALSE
 )
 ```
 
-At elbow-selected $k = 5$, DeSurv maintains competitive external validation C-index relative to DeSurv at $k = 3$ (Table S\ref{tab:tab-cindex-comparison}), confirming that the additional factors do not capture independent survival signal. The extra NMF factors at $k = 5$ likewise provide no systematic concordance advantage over NMF at $k = 3$. At NMF BO-selected $k = 7$, fragmentation further erodes any benefit from the additional factors. Collectively, these results demonstrate that survival supervision not only reorganizes factor content but also yields a more parsimonious factorization: DeSurv concentrates prognostically relevant signal into fewer factors rather than distributing variance across biology-neutral components, consistent with the mixed simulation scenario described earlier in this supplement (Fig. \ref{fig:fig-sim-mixed}).
+Standard NMF at elbow-selected $k = 5$ provides no systematic concordance advantage over NMF at $k = 3$ (Table S\ref{tab:tab-cindex-comparison}), and at BO-selected $k = 7$, fragmentation further erodes any benefit from the additional factors. DeSurv at $k = 3$ maintains the strongest external concordance across cohorts, demonstrating that survival supervision yields a more parsimonious factorization: prognostically relevant signal is concentrated into fewer factors rather than distributed across biology-neutral components, consistent with the mixed simulation scenario described earlier in this supplement (Fig. \ref{fig:fig-sim-mixed}).
 
-The variance--survival decomposition at $k = 5$ (Fig. S\ref{fig:varsurvival-k5}) confirms that this pattern is not specific to the $k = 3$ solution. At elbow-selected $k = 5$, DeSurv again concentrates survival signal into a single dominant factor while assigning the remaining four factors to programs with negligible survival contribution. Standard NMF at $k = 5$ continues to distribute survival contribution negligibly across all factors. The two factors that are new relative to $k = 3$ (D4 and D5 for DeSurv; N4 and N5 for NMF) contribute minimally to survival in both methods, confirming that the additional rank captures background transcriptional variance rather than independent prognostic programs. The persistence of the variance--prognosis dissociation across ranks further reinforces the conclusion that supervised BO correctly identifies $k = 3$ as the most parsimonious rank at which survival-relevant biology is concentrated.
+The variance--survival decomposition at $k = 5$ (Fig. S\ref{fig:varsurvival-k5}) confirms that elbow selection does not recover additional prognostic structure. At $k = 5$, standard NMF continues to distribute survival contribution negligibly across all factors; the two factors new relative to $k = 3$ (N4 and N5) contribute minimally, confirming that the additional rank captures background transcriptional variance rather than independent prognostic programs.
 
-```{r fig-varsurvival-k5, fig.width = 4.5, fig.height = 3.5, fig.cap = "Fraction of expression variance explained versus Type III partial likelihood contribution for each factor at elbow-selected $k = 5$. Each point represents one factor; DeSurv factors (blue) and standard NMF factors (red) are labeled D1--D5 and N1--N5 respectively. Survival contribution is quantified as the reduction in Cox partial log-likelihood when each factor is removed from the full $k$-factor model. The qualitative pattern from $k = 3$ (Fig. S\\ref{fig:varsurvival}) is preserved: DeSurv concentrates survival signal into one factor while additional factors absorb variance without prognosis. \\label{fig:varsurvival-k5}", fig.env='figure', fig.pos='t'}
+```{r fig-varsurvival-k5, fig.width = 4.5, fig.height = 3.5, fig.cap = "Fraction of expression variance explained versus Type III partial likelihood contribution for each standard NMF factor at elbow-selected $k = 5$. Each point represents one factor, labeled N1--N5. Survival contribution is quantified as the reduction in Cox partial log-likelihood when each factor is removed from the full model. The two factors new relative to $k = 3$ (N4, N5) contribute negligibly to survival, confirming that elbow selection recovers no additional prognostic structure. \\label{fig:varsurvival-k5}", fig.env='figure', fig.pos='t'}
 library(survival)
 library(dplyr)
 library(ggrepel)
-tar_load(tar_fit_desurv_elbowk_tcgacptac)
-tar_fit_desurv_elbowk=tar_fit_desurv_elbowk_tcgacptac
 tar_load(fit_std_elbowk_tcgacptac)
 fit_std_elbowk=fit_std_elbowk_tcgacptac
 tar_load(tar_data_filtered_elbowk_tcgacptac)
@@ -592,25 +579,15 @@ df_nmf <- dplyr::left_join(
   by = "factor"
 ) |> dplyr::mutate(method = "NMF", factor_label = paste0("N", factor))
 
-df_desurv <- dplyr::left_join(
-  compute_variance_explained_inline(X, tar_fit_desurv_elbowk$W, tar_fit_desurv_elbowk$H),
-  compute_survival_explained_inline(X, tar_fit_desurv_elbowk$W, time, event),
-  by = "factor"
-) |> dplyr::mutate(method = "DeSurv", factor_label = paste0("D", factor))
-
-df_plot <- dplyr::bind_rows(df_nmf, df_desurv)
-
-ggplot2::ggplot(df_plot, ggplot2::aes(x = variance_explained, y = delta_loglik,
-                                       label = factor_label, color = method)) +
-  ggplot2::geom_point(size = 4) +
+ggplot2::ggplot(df_nmf, ggplot2::aes(x = variance_explained, y = delta_loglik,
+                                      label = factor_label)) +
+  ggplot2::geom_point(size = 4, color = "red") +
   ggrepel::geom_text_repel(size = 4, max.overlaps = Inf, box.padding = 0.4,
                             point.padding = 0.3, segment.size = 0.3) +
-  ggplot2::scale_color_manual(values = c("NMF" = "red", "DeSurv" = "blue")) +
   ggplot2::scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
   ggplot2::labs(
     x = "Conditional variance explained\n(semi-partial R\u00b2)",
-    y = expression(atop(Delta ~ "partial log-likelihood", "(full vs. k-1 factor model)")),
-    color = "Method"
+    y = expression(atop(Delta ~ "partial log-likelihood", "(full vs. k-1 factor model)"))
   ) +
   ggplot2::theme_classic(base_size = 10)
 ```
