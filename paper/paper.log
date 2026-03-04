@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  3 MAR 2026 11:56
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  4 MAR 2026 09:04
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -934,31 +934,31 @@ Package: pnasresearcharticle 2018/05/06 v1.3 PNAS two column research article st
 ) (./paper.aux)
 \openout1 = `paper.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 150.
-LaTeX Font Info:    ... okay on input line 150.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 150.
-LaTeX Font Info:    ... okay on input line 150.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 150.
-LaTeX Font Info:    ... okay on input line 150.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 150.
-LaTeX Font Info:    ... okay on input line 150.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 150.
-LaTeX Font Info:    ... okay on input line 150.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 150.
-LaTeX Font Info:    ... okay on input line 150.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 150.
-LaTeX Font Info:    ... okay on input line 150.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 150.
-LaTeX Font Info:    ... okay on input line 150.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 150.
-LaTeX Font Info:    ... okay on input line 150.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 152.
+LaTeX Font Info:    ... okay on input line 152.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 152.
+LaTeX Font Info:    ... okay on input line 152.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 152.
+LaTeX Font Info:    ... okay on input line 152.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 152.
+LaTeX Font Info:    ... okay on input line 152.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 152.
+LaTeX Font Info:    ... okay on input line 152.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 152.
+LaTeX Font Info:    ... okay on input line 152.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 152.
+LaTeX Font Info:    ... okay on input line 152.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 152.
+LaTeX Font Info:    ... okay on input line 152.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 152.
+LaTeX Font Info:    ... okay on input line 152.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
-Package hyperref Info: Link coloring ON on input line 150.
+Package hyperref Info: Link coloring ON on input line 152.
 (./paper.out) (./paper.out)
 \@outlinefile=\write4
 \openout4 = `paper.out'.
@@ -1010,17 +1010,17 @@ Package newfloat Info: `sidecap' package detected.
 
 Package sidecap Warning: Package `ragged2e' not found -- expect bad formatting.
 
-LaTeX Info: Redefining \microtypecontext on input line 150.
-Package microtype Info: Applying patch `item' on input line 150.
-Package microtype Info: Applying patch `toc' on input line 150.
+LaTeX Info: Redefining \microtypecontext on input line 152.
+Package microtype Info: Applying patch `item' on input line 152.
+Package microtype Info: Applying patch `toc' on input line 152.
 
-Package microtype Warning: Unable to apply patch `eqnum' on input line 150.
+Package microtype Warning: Unable to apply patch `eqnum' on input line 152.
 
 
-Package microtype Warning: Unable to apply patch `footnote' on input line 150.
+Package microtype Warning: Unable to apply patch `footnote' on input line 152.
 
-Package microtype Info: Applying patch `verbatim' on input line 150.
-LaTeX Info: Redefining \microtypesetup on input line 150.
+Package microtype Info: Applying patch `verbatim' on input line 152.
+LaTeX Info: Redefining \microtypesetup on input line 152.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
@@ -1034,91 +1034,91 @@ Package microtype Info: No adjustment of character kerning.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-cmr.cfg
 File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman (RS)
 )
-LaTeX Font Info:    Trying to load font information for T1+lmss on input line 158.
+LaTeX Font Info:    Trying to load font information for T1+lmss on input line 160.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/t1lmss.fd
 File: t1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Font shape `T1/lmss/b/n' in size <9> not available
-(Font)              Font shape `T1/lmss/bx/n' tried instead on input line 158.
+(Font)              Font shape `T1/lmss/bx/n' tried instead on input line 160.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `lmss' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `T1/lmss/b/n' in size <22> not available
-(Font)              Font shape `T1/lmss/bx/n' tried instead on input line 158.
-LaTeX Font Info:    Trying to load font information for T1+phv on input line 158.
+(Font)              Font shape `T1/lmss/bx/n' tried instead on input line 160.
+LaTeX Font Info:    Trying to load font information for T1+phv on input line 160.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/psnfss/t1phv.fd
 File: t1phv.fd 2020/03/25 scalable font definitions for T1/phv.
 )
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 8.54997pt on input line 158.
+(Font)              scaled to size 8.54997pt on input line 160.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `phv' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 8.54997pt on input line 158.
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 158.
+(Font)              scaled to size 8.54997pt on input line 160.
+LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 160.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 158.
+LaTeX Font Info:    Trying to load font information for OML+lmm on input line 160.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 158.
+LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 160.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 158.
+LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 160.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 158.
+(Font)              <9> on input line 160.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 158.
+(Font)              <6> on input line 160.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 158.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 158.
+(Font)              <5> on input line 160.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 160.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 158.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 160.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 5.69998pt on input line 158.
+(Font)              scaled to size 5.69998pt on input line 160.
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 6.64998pt on input line 158.
+(Font)              scaled to size 6.64998pt on input line 160.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 158.
+(Font)              <7> on input line 160.
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 4.74998pt on input line 158.
+(Font)              scaled to size 4.74998pt on input line 160.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 7.59998pt on input line 160.
+(Font)              scaled to size 7.59998pt on input line 162.
 
 Underfull \vbox (badness 1264) has occurred while \output is active []
 
-Package mdframed Info: mdframed works in twoside mode on input line 215.
+Package mdframed Info: mdframed works in twoside mode on input line 217.
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 9.49997pt on input line 215.
+(Font)              scaled to size 9.49997pt on input line 217.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 9.49997pt on input line 215.
+(Font)              scaled to size 9.49997pt on input line 217.
 Package mdframed Info: mdframed inside float 
- mdframed uses option nobreak mdframed on input line 215.
+ mdframed uses option nobreak mdframed on input line 217.
 Package mdframed Info: mdframed inside a box 
- mdframed uses option nobreak mdframed on input line 215.
+ mdframed uses option nobreak mdframed on input line 217.
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 5.69998pt on input line 215.
+(Font)              scaled to size 5.69998pt on input line 217.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 6.64998pt on input line 233.
-LaTeX Font Info:    Trying to load font information for T1+bch on input line 233.
+(Font)              scaled to size 6.64998pt on input line 235.
+LaTeX Font Info:    Trying to load font information for T1+bch on input line 235.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/psnfss/t1bch.fd
 File: t1bch.fd 2004/10/18 font definitions for T1/bch.
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-bch.cfg
@@ -1129,39 +1129,39 @@ File: mt-bch.cfg 2007/03/03 v1.5 microtype config. file: Bitstream Charter (RS)
 ]
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
-(hyperref)                be the same. Added a new anchor on input line 276.
+(hyperref)                be the same. Added a new anchor on input line 286.
 
 <../figures/model_schematic_final.pdf, id=84, 578.16pt x 505.89pt>
 File: ../figures/model_schematic_final.pdf Graphic file (type pdf)
 <use ../figures/model_schematic_final.pdf>
-Package pdftex.def Info: ../figures/model_schematic_final.pdf  used on input line 289.
+Package pdftex.def Info: ../figures/model_schematic_final.pdf  used on input line 299.
 (pdftex.def)             Requested size: 505.69467pt x 433.62885pt.
 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf, id=88, 433.62pt x 397.485pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf  used on input line 350.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bo-1.pdf  used on input line 360.
 (pdftex.def)             Requested size: 433.63878pt x 397.49614pt.
 LaTeX Font Info:    Font shape `T1/phv/m/it' in size <7> not available
-(Font)              Font shape `T1/phv/m/sl' tried instead on input line 376.
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 387.
 LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
-(Font)              scaled to size 6.64998pt on input line 376.
+(Font)              scaled to size 6.64998pt on input line 387.
 [2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf, id=100, 469.755pt x 216.81pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf  used on input line 411.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-sim-ntop-scenarios-1.pdf  used on input line 422.
 (pdftex.def)             Requested size: 505.69374pt x 233.39702pt.
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Underfull \vbox (badness 3623) has occurred while \output is active []
 
 [3]
 </work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf, id=111, 469.755pt x 325.215pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf  used on input line 525.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/paper_files/figure-latex/fig-bio-1.pdf  used on input line 534.
 (pdftex.def)             Requested size: 505.69357pt x 433.65201pt.
 
-Underfull \hbox (badness 2181) in paragraph at lines 607--621
+Underfull \hbox (badness 2181) in paragraph at lines 614--629
 []\T1/lmr/m/n/9 (+20) With the production-optimal gene-projection set-ting
  []
 
@@ -1169,17 +1169,14 @@ Underfull \hbox (badness 2181) in paragraph at lines 607--621
 Underfull \vbox (badness 3623) has occurred while \output is active []
 
 [4]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Underfull \vbox (badness 3623) has occurred while \output is active []
 
 [5] [6]
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 7.59998pt on input line 928.
+(Font)              scaled to size 7.59998pt on input line 953.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 928.
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 935.
+(Font)              <8> on input line 953.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 960.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -1188,57 +1185,37 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 
-Overfull \hbox (17.39314pt too wide) in paragraph at lines 941--941
+Overfull \hbox (17.39314pt too wide) in paragraph at lines 966--966
 []\T1/lmtt/m/n/8 ## DeSurv git commit: 370c88aa9a89e0c71507fbb161d226c7e2e4c61f[] 
  []
 
 
-Overfull \hbox (13.14714pt too wide) in paragraph at lines 941--941
-[]\T1/lmtt/m/n/8 ## Paper git commit: 11cf830d5c14cca1a36e410fda7073890789f038[] 
+Overfull \hbox (13.15114pt too wide) in paragraph at lines 966--966
+[]\T1/lmtt/m/n/8 ## Paper git commit: f41abd5ec7df80ead0eb41ed402a737d54250a9e[] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 946--950
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 952--957
+Underfull \hbox (badness 10000) in paragraph at lines 971--975
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 959--962
+Underfull \hbox (badness 10000) in paragraph at lines 977--982
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 964--968
+Underfull \hbox (badness 10000) in paragraph at lines 984--987
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 970--974
+Underfull \hbox (badness 10000) in paragraph at lines 989--993
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 976--981
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 983--988
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 990--994
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 996--999
+Underfull \hbox (badness 10000) in paragraph at lines 995--999
 
  []
 
@@ -1248,42 +1225,42 @@ Underfull \hbox (badness 10000) in paragraph at lines 1001--1006
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1008--1012
+Underfull \hbox (badness 10000) in paragraph at lines 1008--1013
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1014--1017
+Underfull \hbox (badness 10000) in paragraph at lines 1015--1019
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1019--1023
+Underfull \hbox (badness 10000) in paragraph at lines 1021--1024
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1025--1029
+Underfull \hbox (badness 10000) in paragraph at lines 1026--1031
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1031--1035
+Underfull \hbox (badness 10000) in paragraph at lines 1033--1037
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1037--1042
+Underfull \hbox (badness 10000) in paragraph at lines 1039--1042
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1044--1047
+Underfull \hbox (badness 10000) in paragraph at lines 1044--1048
 
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 1049--1054
+[7]
+Underfull \hbox (badness 10000) in paragraph at lines 1050--1054
 
  []
 
@@ -1293,35 +1270,67 @@ Underfull \hbox (badness 10000) in paragraph at lines 1056--1060
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1062--1067
+Underfull \hbox (badness 10000) in paragraph at lines 1062--1066
 
  []
 
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[7]
-Underfull \hbox (badness 10000) in paragraph at lines 1069--1073
+Underfull \hbox (badness 10000) in paragraph at lines 1068--1072
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1075--1080
+Underfull \hbox (badness 10000) in paragraph at lines 1074--1078
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1082--1086
+Underfull \hbox (badness 10000) in paragraph at lines 1080--1085
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1088--1093
+Underfull \hbox (badness 10000) in paragraph at lines 1087--1090
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1095--1099
+Underfull \hbox (badness 10000) in paragraph at lines 1092--1097
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1099--1103
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1105--1110
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1112--1116
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1118--1123
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1125--1129
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1131--1136
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1138--1142
 
  []
 
@@ -1335,21 +1344,21 @@ LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
 Package rerunfilecheck Info: File `paper.out' has not changed.
-(rerunfilecheck)             Checksum: 0669DD8DBD5F64E0006D291444747DD0;3992.
+(rerunfilecheck)             Checksum: 2DDAAD160C28AE1852254D1B8C5CCF03;4010.
  ) 
 Here is how much of TeX's memory you used:
- 30911 strings out of 469471
- 578133 string characters out of 5467057
- 1040563 words of memory out of 5000000
- 58511 multiletter control sequences out of 15000+600000
- 730660 words of font info for 329 fonts, out of 8000000 for 9000
+ 30923 strings out of 469471
+ 578566 string characters out of 5467057
+ 1033292 words of memory out of 5000000
+ 58520 multiletter control sequences out of 15000+600000
+ 730777 words of font info for 327 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  117i,14n,121p,1425b,1115s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on paper.pdf (12 pages, 591581 bytes).
+Output written on paper.pdf (12 pages, 594257 bytes).
 PDF statistics:
- 366 PDF objects out of 1000 (max. 8388607)
- 288 compressed objects within 3 object streams
- 51 named destinations out of 1000 (max. 500000)
+ 369 PDF objects out of 1000 (max. 8388607)
+ 291 compressed objects within 3 object streams
+ 54 named destinations out of 1000 (max. 500000)
  73889 words of extra memory for PDF output out of 74296 (max. 10000000)
 
