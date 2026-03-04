@@ -10,10 +10,10 @@ targets_figure_configs <- function() {
       val_key = "tcgacptac"
     ),
     heatmap_factor_labels = list(
-      tcgacptac = c("D1 (Classical/iCAF-associated)", "D2 (Microenvironmental)", "D3 (Basal-like-associated)")
+      tcgacptac = c("D1 Classical/iCAF", "D2 Microenviron.", "D3 Basal-like")
     ),
     heatmap_factor_labels_std = list(
-      tcgacptac = c("N1 (Classical-associated)", "N2 (Exocrine-like)", "N3 (Microenvironmental)")
+      tcgacptac = c("N1 Classical", "N2 Exocrine-like", "N3 Microenviron.")
     ),
     sc_data_paths = list(
       all = "data/derv/Elyada_umap.Rds",

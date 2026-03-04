@@ -2619,9 +2619,10 @@ FIGURE_TARGETS <- list(
         geom_text_repel(
           size = 4,
           max.overlaps = Inf,
-          box.padding = 0.4,
-          point.padding = 0.3,
-          segment.size = 0.3
+          box.padding = 0.6,
+          point.padding = 0.4,
+          segment.size = 0.3,
+          force = 2
         ) +
         scale_color_manual(
           values = c(
@@ -2818,10 +2819,15 @@ FIGURE_VAL_TARGETS <- list(
       df_select = df #%>% filter(
         # (factor==nmf_fac & method=="NMF") | (factor==desurv_fac & method=="DeSurv"))
       pd <- position_dodge(width = 0.6)
-      
+
       df_select$label <- sprintf("%.2f (%.2f–%.2f)", df_select$HR, df_select$lower, df_select$upper)
-      
-      ggplot(df_select, aes(x = HR, y = as.factor(factor),color=dataset,group=dataset)) +
+      df_select$factor_name <- dplyr::case_when(
+        df_select$method == "DeSurv" ~ paste0("D", df_select$factor),
+        df_select$method == "NMF"    ~ paste0("N", df_select$factor),
+        TRUE                         ~ as.character(df_select$factor)
+      )
+
+      ggplot(df_select, aes(x = HR, y = factor_name, color=dataset, group=dataset)) +
         geom_vline(xintercept = 1, linetype = "dashed",
                    linewidth = 0.5, color = "grey60") +
         geom_errorbarh(
@@ -2851,8 +2857,8 @@ FIGURE_VAL_TARGETS <- list(
         coord_cartesian(xlim = c(min(df_select$lower), max(df_select$upper) * 1.4)) +
         labs(
           x = "Hazard ratio (95% CI)",
-          y = "Factor label"
-        )+facet_wrap(~method)
+          y = NULL
+        ) + facet_wrap(~method)
     }
   ),
   tar_target(

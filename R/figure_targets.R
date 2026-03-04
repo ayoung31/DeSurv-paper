@@ -546,6 +546,12 @@ make_nmf_metric_plot <- function(fit_std, metric) {
     ggplot2::theme_minimal(base_size = 9) +
     ggplot2::theme(panel.grid.minor.x = ggplot2::element_blank()) +
     ggplot2::scale_x_continuous(breaks = seq(2, 12, by = 2))
+  if (metric == "residuals") {
+    p <- p + ggplot2::scale_y_continuous(
+      labels = scales::label_number(scale = 1e-10, accuracy = 0.1),
+      name = expression("Reconstruction error" ~ (x10^10))
+    )
+  }
   p
 }
 

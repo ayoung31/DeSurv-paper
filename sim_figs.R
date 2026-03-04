@@ -129,7 +129,7 @@ plot_sim_k_hist <- function(k_plot_data, true_k_tbl, base_size = 12) {
     ggplot2::labs(
       title = "Selected k distribution",
       x = "Selected k",
-      y = "Count",
+      y = "Proportion",
       fill = "Method"
     ) +
     sim_pub_theme(base_size = base_size)
@@ -233,7 +233,11 @@ plot_mixed_precision_breakdown <- function(results, base_size = 12) {
       y = "Precision",
       fill = "Method"
     ) +
-    sim_pub_theme(base_size = base_size)
+    sim_pub_theme(base_size = base_size) +
+    ggplot2::theme(
+      plot.clip = "off",
+      plot.margin = ggplot2::margin(t = 5, r = 20, b = 5, l = 5, unit = "pt")
+    )
 }
 
 plot_matched_factor_beta <- function(results, base_size = 12) {

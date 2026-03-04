@@ -1957,7 +1957,11 @@ plot_cindex_by_k <- function(cv_grid_summary,
       dplyr::mutate(panel = factor(panel, levels = c("Training (CV)", "Validation (External)")))
 
     ntop_label <- ifelse(is.na(ntop_i), "ALL", as.character(ntop_i))
-    subtitle <- sprintf("ntop = %s, \u03bb = %.3f, \u03bd = %.3f", ntop_label, lambda_i, nu_i)
+    subtitle <- bquote(
+      n[top] == .(ntop_label) * "," ~
+      lambda == .(lambda_i) * "," ~
+      xi == .(nu_i)
+    )
 
     plots[[i]] <- ggplot2::ggplot(
       df_all, ggplot2::aes(x = k, y = cindex, color = method, fill = method, group = method)

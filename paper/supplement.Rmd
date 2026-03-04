@@ -113,17 +113,20 @@ for (i in seeds) {
 
 lossit <- dplyr::bind_rows(iters) |> dplyr::filter(iter < 5000)
 
+seed_labels <- setNames(paste0("Init ", seq_along(seeds)), as.character(seeds))
+
 lossit = lossit %>%
   group_by(init) %>%
   arrange(iter) %>%
   mutate(
     rel_delta_loss = lossit / dplyr::first(lossit),
     rel_delta_sloss = slossit / dplyr::first(slossit),
-    rel_delta_nloss = nlossit / dplyr::first(nlossit)
+    rel_delta_nloss = nlossit / dplyr::first(nlossit),
+    init_label = seed_labels[as.character(init)]
   ) %>%
   filter(!is.na(rel_delta_loss))
 
-ggplot2::ggplot(lossit, ggplot2::aes(y = rel_delta_loss, x = iter, color = as.factor(init))) +
+ggplot2::ggplot(lossit, ggplot2::aes(y = rel_delta_loss, x = iter, color = init_label)) +
   ggplot2::geom_line(linewidth = 0.8) +
   ggplot2::theme_minimal(base_size = 10) +
   ggplot2::labs(x = "Iteration", y = "Loss normalized to initial value", color = "Initialization")
@@ -177,7 +180,11 @@ null_row <- plot_grid(
 # Mixed row 1: C-index and precision breakdown (2-facet panel)
 mixed_cindex <- mixed_plots$cindex_box +
   labs(title = NULL) +
-  scale_y_continuous(limits = c(0.3, 1))
+  scale_y_continuous(limits = c(0.3, 1)) +
+  ggplot2::theme(
+    plot.clip = "off",
+    plot.margin = ggplot2::margin(t = 5, r = 20, b = 5, l = 5, unit = "pt")
+  )
 mixed_cindex$data$scenario_id <- "Mixed scenario"
 
 mixed_prec_breakdown <- if (!is.null(mixed_plots$precision_breakdown)) {
@@ -448,7 +455,7 @@ theme_pnas <- theme_classic(base_size = base_size) +
     legend.box.margin = margin(0, 0, 0, 0)
   )
 fig_hr_forest_tcgacptac +
-  scale_y_discrete(
+  scale_color_discrete(
     labels = c(
       "Puleo_array"       = "Puleo",
       "Dijk"              = "Dijk",
@@ -460,7 +467,8 @@ fig_hr_forest_tcgacptac +
   theme_pnas +
   theme(
     legend.position = "bottom",
-    axis.title.y = element_blank()
+    axis.title.y = element_blank(),
+    plot.margin = margin(6, 20, 6, 6)
   )
 ```
 

@@ -300,7 +300,7 @@ PDAC cohort analysis with external validation.
 
 }
 
-\caption{Overview of the DeSurv framework. (A) DeSurv jointly optimizes NMF reconstruction ($X \approx WH$) and Cox proportional hazards likelihood. The gene program matrix $W$ is shared between objectives: factor scores $Z = W^\top X$ serve as covariates in the Cox model with coefficients $\beta$. A supervision parameter $\alpha$ controls the balance between reconstruction fidelity ($\alpha = 0$, standard NMF) and survival prediction ($\alpha > 0$). (B) The factorization rank ($k$), supervision strength ($\alpha$), and regularization ($\lambda$) are selected via Bayesian optimization over cross-validated concordance index. \label{fig:schema}}\label{fig:fig-schema}
+\caption{Overview of the DeSurv framework. (A) DeSurv jointly optimizes NMF reconstruction ($X \approx WH$) and Cox proportional hazards likelihood. The gene program matrix $W$ is shared between objectives: factor scores $Z = W^\top X$ serve as covariates in the Cox model with coefficients $\beta$. A supervision parameter $\alpha \in [0,1)$ controls the balance between reconstruction fidelity ($\alpha = 0$, standard NMF) and survival prediction ($\alpha$ close to 1). (B) The factorization rank ($k$), supervision strength ($\alpha$), and regularization ($\lambda$) are selected via Bayesian optimization over cross-validated concordance index. \label{fig:schema}}\label{fig:fig-schema}
 \end{figure*}
 
 \subsection*{Survival supervision clarifies NMF rank
@@ -535,7 +535,7 @@ factor rather than allocating dedicated model capacity to it.
 
 }
 
-\caption{Survival-informed factorization reorganizes transcriptional structure and generalizes to independent datasets. (A) Correlation of DeSurv factor gene rankings with established pancreatic ductal adenocarcinoma (PDAC) gene programs. DeSurv isolates tumor-intrinsic classical and basal-like programs and resolves an activated immune--stromal microenvironment, while exocrine-associated expression does not dominate any factor. (B) Corresponding correlations for standard NMF. NMF recovers variance-dominant structure, including an exocrine-associated factor opposing immune and stromal signatures, a classical tumor factor, and a composite microenvironmental factor. Asterisks indicate significant correlations after multiple testing correction. Only gene lists with correlation > 0.2 included in A and B. (C) Kaplan--Meier curves for pooled validation samples stratified into high and low groups using the cross-validated optimal cutpoint applied to the DeSurv linear predictor. Clear separation of survival trajectories indicates robust out-of-sample prognostic performance. (D) Corresponding analysis for the NMF-derived factor selected using the same survival-based criterion, showing weaker discrimination between risk groups. \label{fig:bio}}\label{fig:fig-bio}
+\caption{DeSurv reorganizes transcriptional structure and generalizes to held-out cohorts. (A--B) Spearman correlations between factor gene rankings and established PDAC gene programs for DeSurv (A) and standard NMF (B). Asterisks denote significance after multiple testing correction; only correlations $> 0.2$ shown. (C--D) Kaplan--Meier curves for pooled external validation samples stratified by the cross-validated optimal cutpoint for the DeSurv linear predictor (C) and the analogous NMF-derived factor (D). \label{fig:bio}}\label{fig:fig-bio}
 \end{figure*}
 
 \subsection*{Survival-aligned programs generalize across independent
@@ -962,7 +962,7 @@ github.com/ayoung31/DeSurv-paper.
 ## DeSurv git branch: main
 ## DeSurv git commit: 370c88aa9a89e0c71507fbb161d226c7e2e4c61f
 ## Paper git branch: main
-## Paper git commit: f41abd5ec7df80ead0eb41ed402a737d54250a9e
+## Paper git commit: 23311b203c4d4ccaef97cc6ed714789087621900
 \end{verbatim}
 
 \phantomsection\label{refs}
