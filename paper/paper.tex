@@ -73,15 +73,21 @@ interpretable cancer subtypes}
 
 \author[a,1,2]{Amber M. Young}
 \author[b]{Alisa Yurovsky}
+\author[c,d]{Xianlu Laura Peng}
 \author[a]{Didong Li}
-\author[a,c]{Naim U. Rashid}
+\author[c,d,e]{Jen Jen Yeh}
+\author[a,d]{Naim U. Rashid}
 
   \affil[a]{Department of Biostatistics, University of North Carolina at
 Chapel Hill, Chapel Hill, NC 27599, USA}
   \affil[b]{Department of Biomedical Informatics, Stony Brook
 University, Stony Brook, NY 11794, USA}
-  \affil[c]{Lineberger Comprehensive Cancer Center, University of North
+  \affil[c]{Department of Pharmacology, University of North Carolina at
+Chapel Hill, Chapel Hill, NC 27599, USA}
+  \affil[d]{Lineberger Comprehensive Cancer Center, University of North
 Carolina at Chapel Hill, Chapel Hill, NC 27599, USA}
+  \affil[e]{Department of Surgery, University of North Carolina at
+Chapel Hill, Chapel Hill, NC 27599, USA}
 
 
 % Please give the surname of the lead author for the running footer
@@ -106,8 +112,10 @@ drivers of disease progression.}
 \authorcontributions{A.M.Y. and N.U.R. conceived and designed the study;
 A.M.Y. developed the DeSurv method, implemented the software, performed
 all analyses, and generated figures; A.Y. and D.L. contributed to
-methodological development and analytic tools; A.M.Y. and N.U.R. wrote
-the manuscript; all authors reviewed and approved the final manuscript.}
+methodological development and analytic tools; X.L.P. and J.J.Y.
+contributed to biological interpretation and PDAC domain expertise;
+A.M.Y. and N.U.R. wrote the manuscript; all authors reviewed and
+approved the final manuscript.}
 
 \authordeclaration{The authors declare no competing interests.}
 
@@ -574,7 +582,7 @@ DeSurv linear predictor produced clear separation of survival
 trajectories (pooled validation HR \(= 1.93\), 95\% CI
 \(1.55\)--\(2.41\), \(P < 0.001\); Fig. \ref{fig:bio}C). The same
 procedure applied to NMF yielded weaker stratification (HR \(= 1.48\),
-95\% CI \(1.04\)--\(2.10\), \(P = 0.027\); Fig. \ref{fig:bio}D).
+95\% CI \(1.04\)--\(2.1\), \(P = 0.027\); Fig. \ref{fig:bio}D).
 
 \subsection*{Factorization rank K=3 is robustly confirmed across
 supervision strength and gene-projection
@@ -661,8 +669,8 @@ suppressing variance-dominant but outcome-neutral structure. This
 reorganization produces a more parsimonious representation of
 prognostically relevant biology: in PDAC, DeSurv achieved the same
 cross-validated concordance with three factors that standard NMF
-required seven to eight factors to match, and across the range of tested
-ranks DeSurv attained a higher concordance than standard NMF. The
+required seven to eight factors to approach, and across the range of
+tested ranks DeSurv attained a higher concordance than standard NMF. The
 advantage is most pronounced at low factorization ranks, where standard
 NMF allocates its limited representational capacity across
 variance-dominant but prognostically inert programs --- including
@@ -962,7 +970,7 @@ github.com/ayoung31/DeSurv-paper.
 ## DeSurv git branch: main
 ## DeSurv git commit: 370c88aa9a89e0c71507fbb161d226c7e2e4c61f
 ## Paper git branch: main
-## Paper git commit: 23311b203c4d4ccaef97cc6ed714789087621900
+## Paper git commit: 72078df24e7b168853b63a5e3fbb11900505609e
 \end{verbatim}
 
 \phantomsection\label{refs}

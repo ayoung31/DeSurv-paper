@@ -205,6 +205,32 @@ tar_load(fig_gene_overlap_heatmap_std_desurvk_tcgacptac)
 tar_load(fig_median_survival_desurv_tcgacptac)
 tar_load(fig_median_survival_std_desurvk_tcgacptac)
 
+# ── Extract dichotomized KM HR/CI/p from figure annotation ───────────────────
+km_extract_label <- function(splot_obj) {
+  for (layer in splot_obj$plot$layers) {
+    # annotate() stores fixed aesthetics in aes_params in most ggplot2 versions
+    lbl <- tryCatch(layer$aes_params$label, error = function(e) NULL)
+    if (!is.null(lbl) && length(lbl) > 0 && grepl("HR", lbl[1], fixed = TRUE)) return(lbl[1])
+    # Fallback: try data$label (some ggplot2 versions store it here)
+    lbl <- tryCatch({
+      d <- layer$data
+      if (is.function(d)) d <- tryCatch(d(data.frame()), error = function(e) NULL)
+      if (is.data.frame(d) && "label" %in% names(d)) d$label[1] else NULL
+    }, error = function(e) NULL)
+    if (!is.null(lbl) && length(lbl) > 0 && grepl("HR", lbl[1], fixed = TRUE)) return(lbl[1])
+  }
+  NULL
+}
+km_parse_stats <- function(lbl) {
+  if (is.null(lbl)) return(list(hr = NA, ci_lo = NA, ci_hi = NA, p_lt = TRUE, p_val = NA))
+  nums  <- as.numeric(regmatches(lbl, gregexpr("[0-9]+\\.[0-9]+", lbl))[[1]])
+  p_lt  <- grepl("< 0.001", lbl, fixed = TRUE)
+  p_val <- if (!p_lt) as.numeric(sub(".*p = ([0-9.]+).*", "\\1", lbl)) else NA_real_
+  list(hr = nums[1], ci_lo = nums[2], ci_hi = nums[3], p_lt = p_lt, p_val = p_val)
+}
+km_desurv <- km_parse_stats(km_extract_label(fig_median_survival_desurv_tcgacptac))
+km_nmf    <- km_parse_stats(km_extract_label(fig_median_survival_std_desurvk_tcgacptac))
+
 # -------------------------
 # Global styling
 # -------------------------
@@ -322,7 +348,7 @@ Having shown that DeSurv reorganizes the learned factor structure in the trainin
 
 For each method, both fit at $k = 3$ (the DeSurv BO-selected rank), we focused on the factor showing the largest increase in Cox model log partial likelihood in the training data. External validation C-index for NMF at independently selected ranks is summarized in SI Appendix, Table S4. Across `r n_val_cohorts` independent PDAC cohorts ($n = `r n_val_total`$), the DeSurv-derived factor exhibited consistent survival effects, with hazard ratio estimates showing limited variability and predominantly protective associations (continuous risk score model: pooled HR $`r hr_pool`$; 95% CI $`r ci_pool_lo`$--$`r ci_pool_hi`$; $P = `r p_pool`$; SI Appendix, Fig. S9). In contrast, the NMF factor identified by the same criterion showed greater heterogeneity across datasets and weaker survival associations, suggesting that variance-driven programs may capture cohort-specific variation that does not transfer as reliably.
 
-To assess clinical interpretability of these continuous associations, we dichotomized validation samples into high- and low-risk groups using independently optimized cross-validated cutpoints for each method. The DeSurv linear predictor produced clear separation of survival trajectories (pooled validation HR $= 1.93$, 95% CI $1.55$--$2.41$, $P < 0.001$; Fig. \ref{fig:bio}C). The same procedure applied to NMF yielded weaker stratification (HR $= 1.48$, 95% CI $1.04$--$2.10$, $P = 0.027$; Fig. \ref{fig:bio}D).
+To assess clinical interpretability of these continuous associations, we dichotomized validation samples into high- and low-risk groups using independently optimized cross-validated cutpoints for each method. The DeSurv linear predictor produced clear separation of survival trajectories (pooled validation HR $= `r km_desurv$hr`$, 95% CI $`r km_desurv$ci_lo`$--$`r km_desurv$ci_hi`$, $P `r if(km_desurv$p_lt) "< 0.001" else paste0("= ", km_desurv$p_val)`$; Fig. \ref{fig:bio}C). The same procedure applied to NMF yielded weaker stratification (HR $= `r km_nmf$hr`$, 95% CI $`r km_nmf$ci_lo`$--$`r km_nmf$ci_hi`$, $P `r if(km_nmf$p_lt) "< 0.001" else paste0("= ", km_nmf$p_val)`$; Fig. \ref{fig:bio}D).
 
 
 ## Factorization rank K=3 is robustly confirmed across supervision strength and gene-projection settings {.unnumbered}
