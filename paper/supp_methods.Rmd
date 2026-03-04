@@ -17,6 +17,7 @@ header-includes:
 - \DeclareMathOperator\diag{diag}
 - \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 - \renewcommand{\algorithmicensure}{\textbf{Output:}}
+bibliography: references_30102025.bib
 output: pdf_document
 ---
 
@@ -30,12 +31,12 @@ $X \approx WH$ with $W \in \mathbb{R}_{\ge 0}^{p \times k}$ and
 $H \in \mathbb{R}_{\ge 0}^{k \times n}$, and links the shared program matrix
 $W$ to survival via an elastic-net–penalized Cox model.
 
-Let $y \in \mathbb{R}^n_{\ge 0}$ be the observed survival times,
+Let $y \in \mathbb{R}^n_{> 0}$ be the observed survival times,
 $\delta \in \{0,1\}^n$ the event indicators, and
 $Z = W^\top X \in \mathbb{R}^{k \times n}$ the sample-wise program
 loadings. We write $Z_i$ for the $i$th column of $Z$, and
 $n_{\text{event}} = \sum_{i=1}^n \delta_i$. For convenience we recall the
-DeSurv loss from Equation~\ref{eqn:desurv} in the main text and rewrite it as
+DeSurv loss from Equation~1 in the main text and rewrite it as
 \begin{align}
   \mathcal{L}(W,H,\beta) &=\nonumber \\
   &(1-\alpha)\left(\frac{1}{2np}\lVert X - WH \rVert_F^2 + \frac{\lambda_H}{2nk} \lVert H \rVert_F^2\right) \nonumber \\
@@ -77,7 +78,7 @@ fixed.
 \caption{DeSurv block coordinate descent}
 \label{alg:desurv}
     \begin{algorithmic}[1]
-        \Require $X \in \mathbb{R}_{\geq 0}^{p \times n}$, survival times $y \in \mathbb{R}^n_{\geq 0}$, event indicators $\delta \in \{0,1\}^{n}$, tolerance $tol$, maximum iterations $maxit$, supervision parameter $\alpha$, rank $k$, penalties $\lambda_H$, $\lambda$, and $\xi$
+        \Require $X \in \mathbb{R}_{\geq 0}^{p \times n}$, survival times $y \in \mathbb{R}^n_{> 0}$, event indicators $\delta \in \{0,1\}^{n}$, tolerance $tol$, maximum iterations $maxit$, supervision parameter $\alpha$, rank $k$, penalties $\lambda_H$, $\lambda$, and $\xi$
         \Ensure Fitted DeSurv parameters $(W,H,\beta)$
 
         \State Initialize $W^{(0)}, H^{(0)}$ with positive entries (e.g., $W^{(0)},H^{(0)} \sim \mathrm{Uniform}(0,\max X)$)
@@ -162,8 +163,8 @@ where $x_i$ denotes the $i$th column of $X$.
 
 We define the gradient-balancing factor
 \begin{equation}
-\label{eq:supp-delta}
-\delta^{(t)}
+\label{eq:supp-zeta}
+\zeta^{(t)}
 =
 \frac{
   \left\lVert (1-\alpha) \nabla_W \mathcal{L}_{\mathrm{NMF}}(W^{(t)},H^{(t+1)}) \right\rVert_F^2
@@ -171,9 +172,9 @@ We define the gradient-balancing factor
   \left\lVert \alpha \nabla_W \mathcal{L}_{Cox}(W^{(t)},\beta^{(t)}) \right\rVert_F^2
 },
 \end{equation}
-and clip $\delta^{(t)}$ to avoid extreme values:
-$\delta^{(t)} \leftarrow \min(\delta^{(t)}, \delta_{\max})$
-with $\delta_{\max} = 10^6$ in all experiments.
+and clip $\zeta^{(t)}$ to avoid extreme values:
+$\zeta^{(t)} \leftarrow \min(\zeta^{(t)}, \zeta_{\max})$
+with $\zeta_{\max} = 10^6$ in all experiments.
 
 The multiplicative factor for $W$ is then
 \begin{equation}
@@ -181,7 +182,7 @@ R^{(t)}
 =
 \frac{
   \frac{(1-\alpha)}{np} X H^{(t+1)\top}
-  +\frac{2\alpha}{n_{\mathrm{event}}}\,\delta^{(t)}\,\nabla_W \ell(W^{(t)},\beta^{(t)})
+  +\frac{2\alpha}{n_{\mathrm{event}}}\,\zeta^{(t)}\,\nabla_W \ell(W^{(t)},\beta^{(t)})
 }{
   \frac{(1-\alpha)}{np} W^{(t)} H^{(t+1)}H^{(t+1)\top}
   +\varepsilon_W
@@ -303,7 +304,7 @@ The W update can be derived directly from the projected coordinate descent updat
 
 Recall that the overall loss function is
 \begin{align}
-    \mathcal{L}(W,H,\beta) = \frac{(1-\alpha)}{2np} ||X - WH||^2_F - \frac{2 \alpha}{n_{event}} \ell(W,\beta) + \lambda(\xi||\beta||_1 + \frac{(1-\xi)}{2},
+    \mathcal{L}(W,H,\beta) = \frac{(1-\alpha)}{2np} ||X - WH||^2_F - \frac{2 \alpha}{n_{event}} \ell(W,\beta) + \lambda\left(\xi\|\beta\|_1 + \frac{(1-\xi)}{2}\|\beta\|_2^2\right)
 \end{align}
 where $\ell(W,\beta)$ is the log-partial likelihood for the Cox model. Let $\nabla_W \ell$ represent the derivative of $\ell(W,\beta)$ with respect to $W$. Then the derivative of the overall loss with respect to $W$ is
 
@@ -364,7 +365,7 @@ The feasible set is
 \textbf{Assumption 1 (Regularity and parameter space).}
 We assume:
 \begin{enumerate}[label=(\roman*)]
-  \item The data $X \in \mathbb{R}_{\ge 0}^{p\times n}$, $y \in \mathbb{R}^n$, and $\delta \in \{0,1\}^n$ are fixed and bounded.
+  \item The data $X \in \mathbb{R}_{\ge 0}^{p\times n}$, $y \in \mathbb{R}^n_{>0}$, and $\delta \in \{0,1\}^n$ are fixed and bounded.
   \item The hyperparameters satisfy $\lambda_H > 0$, $\lambda>0$, $\alpha \in [0,1)$, and $\xi \in [0,1]$.
   \item The initial iterate $\theta^{(0)} = (W^{(0)},H^{(0)},\beta^{(0)})$ lies in $\Theta$ and satisfies $W^{(0)},H^{(0)} > 0$ elementwise.
 \end{enumerate}
@@ -529,7 +530,9 @@ conditions.
 convex in $W$ (sum of a quadratic term and a negative Cox partial
 log-likelihood in a linear predictor). The hybrid multiplicative step with
 backtracking can be viewed as a projected gradient-like update onto the
-nonnegative orthant. Under mild conditions on the search direction and step
+nonnegative orthant: as shown in the derivation above, the multiplicative
+direction is equivalent to a negative gradient step with the adaptive step
+size of Seung et al., projected onto the nonnegative orthant. Under mild conditions on the search direction and step
 sizes, any limit point of such a projected gradient scheme is a KKT point for
 the constrained subproblem; see, for example, [@tseng2001convergence; @grippo2000convergence].
 If $W^*$ did not satisfy the KKT conditions, there would be a feasible
@@ -714,7 +717,7 @@ $\hat{\eta}_i$:
     \State \textbf{end loop over $r$}
     \State Compute average c-index across initializations:
     $
-    \hat{c}_{(f)} = \frac{1}{r}\sum_{r=1}^R\hat{c}_{(f)r}
+    \hat{c}_{(f)} = \frac{1}{R}\sum_{r=1}^R\hat{c}_{(f)r}
     $
 \EndFor
 \State \textbf{end loop over $f$}
@@ -798,18 +801,6 @@ missing time, or missing event indicator) were removed. Gene filtering and
 normalization followed the training configuration (ngene and within-sample rank
 transformation) to mitigate platform effects; validation data were restricted
 to the training gene set and transformed in the same way.
-
-\subsection{Bladder Datasets}
-
-Bladder analyses used the IMVigor210 cohort with overall survival and clinical
-annotations [@mariathasan2018tgfbeta]. We performed an internal train/validation
-split (80/20), stratified by event status, and used the held-out split for
-evaluation. Sample identifiers and gene features were aligned to the provided
-gene symbols, and consensus molecular subtype labels were used to exclude
-NE-like tumors prior to model fitting. Samples with
-invalid survival outcomes were removed. Gene filtering and normalization
-followed the training configuration, and the validation split was restricted to
-the same gene set and transformation used during training.
 
 
 \subsection{Survival Analysis}
@@ -895,4 +886,4 @@ $W_{\text{NMF}}$ and the DeSurv gene program matrix $W_{\text{DeSurv}}$,
 restricted to genes present in both models. Spearman correlation was used to
 capture monotone correspondence in gene loading ranks while remaining robust
 to scale differences between the two methods. Results are displayed as a
-heatmap with NMF factors as rows and DeSurv factors as columns (Fig.\ \ref{fig:bio}C).
+heatmap with NMF factors as rows and DeSurv factors as columns (main text, Fig.\ 4C).
