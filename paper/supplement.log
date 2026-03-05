@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  4 MAR 2026 13:25
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  5 MAR 2026 08:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -476,7 +476,7 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 28
 File: bkm-pdftex.def 2023-12-10 v1.31 bookmark driver for pdfTeX and luaTeX (HO)
 \BKM@id=\count337
 ))
-LaTeX Font Info:    Trying to load font information for T1+lmr on input line 93.
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 95.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
@@ -485,36 +485,36 @@ File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
 ) (./supplement.aux)
 \openout1 = `supplement.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 95.
+LaTeX Font Info:    ... okay on input line 95.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 95.
+LaTeX Font Info:    ... okay on input line 95.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 95.
+LaTeX Font Info:    ... okay on input line 95.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 95.
+LaTeX Font Info:    ... okay on input line 95.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 95.
+LaTeX Font Info:    ... okay on input line 95.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 95.
+LaTeX Font Info:    ... okay on input line 95.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 95.
+LaTeX Font Info:    ... okay on input line 95.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 95.
+LaTeX Font Info:    ... okay on input line 95.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 95.
+LaTeX Font Info:    ... okay on input line 95.
 Package microtype Info: Patching varwidth to enable character protrusion.
 \MT@vwid@leftmargin=\dimen266
 \MT@vwid@rightmargin=\dimen267
-LaTeX Info: Redefining \microtypecontext on input line 93.
-Package microtype Info: Applying patch `item' on input line 93.
-Package microtype Info: Applying patch `toc' on input line 93.
-Package microtype Info: Applying patch `eqnum' on input line 93.
+LaTeX Info: Redefining \microtypecontext on input line 95.
+Package microtype Info: Applying patch `item' on input line 95.
+Package microtype Info: Applying patch `toc' on input line 95.
+Package microtype Info: Applying patch `eqnum' on input line 95.
 
-Package microtype Warning: Unable to apply patch `footnote' on input line 93.
+Package microtype Warning: Unable to apply patch `footnote' on input line 95.
 
-Package microtype Info: Applying patch `verbatim' on input line 93.
-LaTeX Info: Redefining \microtypesetup on input line 93.
+Package microtype Info: Applying patch `verbatim' on input line 95.
+LaTeX Info: Redefining \microtypesetup on input line 95.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using protrusion set `basicmath'.
@@ -567,36 +567,36 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package hyperref Info: Link coloring OFF on input line 93.
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 102.
+Package hyperref Info: Link coloring OFF on input line 95.
+LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 104.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 102.
+LaTeX Font Info:    Trying to load font information for OML+lmm on input line 104.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 102.
+LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 104.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 102.
+LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 104.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 102.
+(Font)              <10> on input line 104.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 102.
+(Font)              <7> on input line 104.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 102.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 102.
+(Font)              <5> on input line 104.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 104.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 102.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 104.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msb.cfg
@@ -605,7 +605,7 @@ File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-converge-1.pdf, id=5, 433.62pt x 289.08pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-converge-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-converge-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-converge-1.pdf  used on input line 111.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-converge-1.pdf  used on input line 113.
 (pdftex.def)             Requested size: 469.7781pt x 289.09251pt.
 [1{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}
 
@@ -613,79 +613,79 @@ Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_
 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sim-null-mixed-1.pdf, id=31, 469.755pt x 578.16pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sim-null-mixed-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sim-null-mixed-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sim-null-mixed-1.pdf  used on input line 188.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sim-null-mixed-1.pdf  used on input line 190.
 (pdftex.def)             Requested size: 469.75386pt x 578.18504pt.
 
-LaTeX Warning: Float too large for page by 48.25504pt on input line 189.
+LaTeX Warning: Float too large for page by 48.25504pt on input line 191.
 
 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cindex-by-k-1.pdf, id=33, 722.7pt x 722.7pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cindex-by-k-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cindex-by-k-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cindex-by-k-1.pdf  used on input line 220.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cindex-by-k-1.pdf  used on input line 222.
 (pdftex.def)             Requested size: 469.75502pt x 469.76045pt.
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 238.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 240.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 ) [2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 274.
+(Font)              <9> on input line 276.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 274.
+(Font)              <6> on input line 276.
 [3]
 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/k3-k7-nesting-1.pdf, id=66, 505.89pt x 252.945pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/k3-k7-nesting-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/k3-k7-nesting-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/k3-k7-nesting-1.pdf  used on input line 388.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/k3-k7-nesting-1.pdf  used on input line 390.
 (pdftex.def)             Requested size: 469.75502pt x 234.88133pt.
 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cutpoint-km-1.pdf, id=69, 722.7pt x 1011.78pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cutpoint-km-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cutpoint-km-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cutpoint-km-1.pdf  used on input line 414.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cutpoint-km-1.pdf  used on input line 416.
 (pdftex.def)             Requested size: 469.75502pt x 657.66464pt.
 
-LaTeX Warning: Float too large for page by 67.73463pt on input line 415.
+LaTeX Warning: Float too large for page by 67.73463pt on input line 417.
 
 [4]
 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-subtype-overlap-1.pdf, id=81, 578.16pt x 361.35pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-subtype-overlap-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-subtype-overlap-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-subtype-overlap-1.pdf  used on input line 436.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-subtype-overlap-1.pdf  used on input line 438.
 (pdftex.def)             Requested size: 469.75502pt x 293.59616pt.
 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-1.pdf, id=83, 289.08pt x 252.945pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-1.pdf  used on input line 463.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-1.pdf  used on input line 465.
 (pdftex.def)             Requested size: 289.07928pt x 252.94438pt.
 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-corr-1.pdf, id=86, 361.35pt x 252.945pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-corr-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-corr-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-corr-1.pdf  used on input line 494.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-corr-1.pdf  used on input line 496.
 (pdftex.def)             Requested size: 361.34912pt x 252.94438pt.
 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-forest-1.pdf, id=88, 361.35pt x 252.945pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-forest-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-forest-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-forest-1.pdf  used on input line 516.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-forest-1.pdf  used on input line 518.
 (pdftex.def)             Requested size: 361.34912pt x 252.94438pt.
 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-nmf-k5-heatmap-1.pdf, id=92, 433.62pt x 361.35pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-nmf-k5-heatmap-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-nmf-k5-heatmap-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-nmf-k5-heatmap-1.pdf  used on input line 550.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-nmf-k5-heatmap-1.pdf  used on input line 552.
 (pdftex.def)             Requested size: 433.61894pt x 361.34912pt.
 [5]
 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-nmf-k7-heatmap-1.pdf, id=108, 433.62pt x 361.35pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-nmf-k7-heatmap-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-nmf-k7-heatmap-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-nmf-k7-heatmap-1.pdf  used on input line 574.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-nmf-k7-heatmap-1.pdf  used on input line 576.
 (pdftex.def)             Requested size: 433.61894pt x 361.34912pt.
 
-Overfull \hbox (8.80353pt too wide) in paragraph at lines 627--627
+Overfull \hbox (8.80353pt too wide) in paragraph at lines 629--629
 []|\T1/lmr/m/n/10 (-20) Moffitt_GEO_array|  
  []
 
 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-k5-1.pdf, id=114, 325.215pt x 252.945pt>
 File: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-k5-1.pdf Graphic file (type pdf)
 <use /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-k5-1.pdf>
-Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-k5-1.pdf  used on input line 656.
+Package pdftex.def Info: /work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-k5-1.pdf  used on input line 657.
 (pdftex.def)             Requested size: 325.2142pt x 252.94438pt.
 [6] [7 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sim-null-mixed-1.pdf>] [8 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cindex-by-k-1.pdf>] [9 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/k3-k7-nesting-1.pdf>] [10 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cutpoint-km-1.pdf>] [11 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-subtype-overlap-1.pdf>] [12 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-1.pdf> </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-corr-1.pdf>] [13 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-forest-1.pdf>] [14 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-nmf-k5-heatmap-1.pdf>] [15 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-nmf-k7-heatmap-1.pdf>] [16 </work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-k5-1.pdf>] (./supplement.aux)
  ***********
@@ -694,15 +694,15 @@ L3 programming layer <2026-01-19>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 15170 strings out of 469471
- 248373 string characters out of 5467057
- 715397 words of memory out of 5000000
+ 15174 strings out of 469471
+ 248417 string characters out of 5467057
+ 715405 words of memory out of 5000000
  43359 multiletter control sequences out of 15000+600000
- 689281 words of font info for 166 fonts, out of 8000000 for 9000
+ 689447 words of font info for 168 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  89i,15n,93p,1293b,460s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on supplement.pdf (16 pages, 1645399 bytes).
+Output written on supplement.pdf (16 pages, 1645257 bytes).
 PDF statistics:
  342 PDF objects out of 1000 (max. 8388607)
  257 compressed objects within 3 object streams
