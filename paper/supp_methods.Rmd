@@ -877,7 +877,7 @@ SI Appendix, Fig.\ S7.
 
 \subsection{Factor Correspondence Analysis}
 
-To assess which biological programs are preserved, reorganized, or suppressed
+To assess which biological programs are preserved, altered, or suppressed
 under survival supervision, we quantified the pairwise correspondence between
 NMF and DeSurv factor loadings. For each pair of factors
 $(j_{\text{NMF}},\, j_{\text{DeSurv}})$, we computed the Spearman rank
