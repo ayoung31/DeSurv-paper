@@ -790,6 +790,7 @@ same gene set and transformations before prediction and clustering.
 Dataset-specific inclusion and preprocessing steps were as follows. For
 TCGA-PAAD, we excluded samples lacking tumor grade and mapped features to gene
 symbols. For CPTAC, we retained samples annotated as PDAC by histology. For
+Dijk, all 90 samples passed quality-control filters and were retained. For
 Moffitt, only primary tumor specimens were kept. For PACA-AU array and RNA-seq,
 we retained primary PDAC tumors and
 collapsed duplicated gene symbols by median; the RNA-seq cohort received a
@@ -802,6 +803,47 @@ normalization followed the training configuration (ngene and within-sample rank
 transformation) to mitigate platform effects; validation data were restricted
 to the training gene set and transformed in the same way.
 
+Table~\ref{tab:cohorts} summarizes the cohorts, platforms, sample sizes after
+quality control, and patient-level metadata used in this study. Overall survival
+time and event indicators were available for all cohorts. PurIST
+\cite{rashid2020purity} and DeCAF \cite{peng2024determination} molecular
+classifications, applied to bulk expression data as described in those
+references, were used as covariates in the covariate-adjusted sensitivity
+analysis (SI Appendix, Table~S2). Gene expression data and molecular
+classifications for the validation cohorts were originally compiled for the
+DeCAF study \cite{peng2024determination}; training data were obtained directly
+from GDC.
+
+\begin{table}[ht]
+\centering
+\caption{Summary of PDAC cohorts used in this study. $N$ denotes the number of
+samples after all quality-control filters (histology, survival validity,
+dataset-specific exclusions). Patient-level metadata: OS = overall survival
+(time and event indicator); PurIST = tumor subtype classification
+\cite{rashid2020purity}; DeCAF = CAF subtype classification
+\cite{peng2024determination}. Expression data and molecular classifications
+for the validation cohorts were originally compiled for the DeCAF study
+\cite{peng2024determination}.}
+\label{tab:cohorts}
+\small
+\begin{tabular}{llrllll}
+\toprule
+Cohort & Platform & $N$ & Role & Accession & Metadata & Reference \\
+\midrule
+TCGA-PAAD        & RNA-seq    & 144 & Training   & GDC (TCGA-PAAD) & OS, PurIST, DeCAF & \cite{raphael2017integrated} \\
+CPTAC            & RNA-seq    & 129 & Training   & GDC (CPTAC-3)    & OS, PurIST, DeCAF & \cite{ellis2013clinical} \\
+\addlinespace
+Dijk             & RNA-seq    &  90 & Validation & E-MTAB-6830      & OS, PurIST, DeCAF & \cite{dijk2020unsupervised} \\
+Moffitt          & Microarray & 123 & Validation & GSE71729         & OS, PurIST, DeCAF & \cite{moffitt2015virtual} \\
+PACA-AU (array)  & Microarray &  63 & Validation & ICGC (PACA-AU)   & OS, PurIST, DeCAF & \cite{zhao2018gene} \\
+PACA-AU (RNA-seq) & RNA-seq   &  52 & Validation & ICGC (PACA-AU)   & OS, PurIST, DeCAF & \cite{zhao2018gene} \\
+Puleo            & Microarray & 288 & Validation & E-MTAB-6134      & OS, PurIST, DeCAF & \cite{puleo2018stratification} \\
+\addlinespace
+\multicolumn{2}{l}{\textit{Training total}} & 273 & & & & \\
+\multicolumn{2}{l}{\textit{Validation total}} & 616 & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Survival Analysis}
 
