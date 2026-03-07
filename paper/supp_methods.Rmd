@@ -899,12 +899,15 @@ factors.
 \subsection{Variance and Survival Contribution per Factor}
 
 For each factor $j \in \{1, \ldots, k\}$, we quantified two quantities to assess
-the alignment between expression variance and prognostic relevance. The fraction
-of expression variance explained by factor $j$ was computed as:
-$$V_j = \frac{\| W_{\cdot j}\, H_{j \cdot} \|_F^2}{\| X \|_F^2}$$
-where $W_{\cdot j}$ is the $j$-th column of $W$ and $H_{j \cdot}$ is the $j$-th
-row of $H$, so $W_{\cdot j} H_{j \cdot}$ is the rank-1 approximation contributed
-by factor $j$.
+the alignment between expression variance and prognostic relevance. The
+conditional variance explained by factor $j$ was quantified as the semi-partial
+$R^2$:
+$$V_j = \frac{\mathrm{RSS}_{-j} - \mathrm{RSS}_{\text{full}}}{\|X\|_F^2},$$
+where $\mathrm{RSS}_{\text{full}} = \|X - WH\|_F^2$ is the residual sum of
+squares from the full $k$-factor reconstruction and
+$\mathrm{RSS}_{-j} = \|X - W_{-j}H_{-j}\|_F^2$ is the residual from the
+$(k-1)$-factor reconstruction omitting factor $j$. This measures the incremental
+fraction of total variance accounted for by factor $j$ given all other factors.
 
 The survival contribution of factor $j$ was quantified as the Type III partial
 likelihood increment: the reduction in Cox partial log-likelihood when factor $j$
