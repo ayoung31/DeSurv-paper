@@ -432,7 +432,7 @@ extract_gp_curve_k <- function(bo_results, ci_level = 0.95) {
   )
 }
 
-extract_gp_curve <- function(bo_results,params, ci_level = 0.95) {
+extract_gp_curve <- function(bo_results,ci_level = 0.95) {
   if (!is.numeric(ci_level) || length(ci_level) != 1 || ci_level <= 0 || ci_level >= 1) {
     stop("ci_level must be a single numeric value between 0 and 1.")
   }
@@ -444,10 +444,9 @@ extract_gp_curve <- function(bo_results,params, ci_level = 0.95) {
   if (is.null(param_names)) {
     stop("GP design matrix has no column names.")
   }
-  selected = params
   best_per_k = expand.grid(k_grid = 2:12,alpha_grid = seq(0,1,.1),
-                          lambda_grid = selected$lambda,nu_grid = selected$nu,
-                          ntop = selected$ntop)
+                          lambda_grid = seq(.1,1,.1),nu_grid = seq(0,1,.1),
+                          ntop = seq(50,300,10))
   
   newdata_actual <- best_per_k[, param_names, drop = FALSE]
   newdata_scaled <- normalize_gp_params(newdata_actual, bounds)
@@ -464,10 +463,30 @@ extract_gp_curve <- function(bo_results,params, ci_level = 0.95) {
   tibble::tibble(
     k = best_per_k$k_grid,
     alpha = best_per_k$alpha_grid,
+    lambda = best_per_k$lambda_grid,
+    nu = best_per_k$nu_grid,
+    ntop = best_per_k$ntop,
     mean = preds$mean,
     lower = preds$mean - z_value * preds$sd,
     upper = preds$mean + z_value * preds$sd
   )
+}
+
+select_1se_from_gp_curve <- function(curve) {
+  curve_kse <- curve %>%
+    group_by(k) %>%
+    filter(mean >= lower[which.max(mean)]) %>%
+    arrange(alpha, desc(mean)) %>%
+    slice_head(n = 1) %>%
+    ungroup()
+
+  best <- curve %>% slice_max(mean, n = 1, with_ties = FALSE)
+  thresh <- best$lower
+
+  curve_kse %>%
+    filter(mean >= thresh) %>%
+    arrange(k, alpha, desc(mean)) %>%
+    slice_head(n = 1)
 }
 
 make_gp_curve_plot_k <- function(curve_df, label) {

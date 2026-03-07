@@ -85,11 +85,9 @@ COMMON_DESURV_BO_TARGETS <- list(
   tar_target(
     tar_params_best,
     {
-      params <- standardize_bo_params(desurv_bo_results$overall_best$params)
-      if (!is.null(tar_k_selection$k_selected)) {
-        params$k <- tar_k_selection$k_selected
-      }
-      params
+      curve  <- extract_gp_curve(desurv_bo_results, ci_level = 0.9)
+      choice <- select_1se_from_gp_curve(curve)
+      as.list(choice[, c("k", "alpha", "lambda", "nu", "ntop")])
     }
   ),
   
@@ -239,10 +237,9 @@ COMMON_DESURV_BO_TARGETS <- list(
   tar_target(
     tar_params_best_alpha0,
     {
-      params <- standardize_bo_params(desurv_bo_results_alpha0$overall_best$params)
-      if (!is.null(tar_k_selection_alpha0$k_selected)) {
-        params$k <- tar_k_selection_alpha0$k_selected
-      }
+      curve  <- extract_gp_curve(desurv_bo_results_alpha0, ci_level = 0.9)
+      choice <- select_1se_from_gp_curve(curve)
+      params <- as.list(choice[, c("k", "alpha", "lambda", "nu", "ntop")])
       params$alpha <- 0
       params
     }
@@ -378,8 +375,9 @@ COMMON_DESURV_BO_TARGETS <- list(
   tar_target(
     tar_params_best_elbowk,
     {
-      params <- standardize_bo_params(desurv_bo_results_elbowk$overall_best$params)
-      params
+      curve  <- extract_gp_curve(desurv_bo_results_elbowk, ci_level = 0.9)
+      choice <- select_1se_from_gp_curve(curve %>% filter(k == std_nmf_selected_k))
+      as.list(choice[, c("k", "alpha", "lambda", "nu", "ntop")])
     }
   ),
   
@@ -546,8 +544,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
     },
     resources = tar_resources(
       crew = tar_resources_crew(controller = "med_mem")
-    ),
-    cue = tar_cue(mode = "never")
+    )
   ),
   tar_target(
     desurv_consensus_init,
@@ -612,8 +609,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
     ),
     resources = tar_resources(
       crew = tar_resources_crew(controller = "med_mem")
-    ),
-    cue = tar_cue(mode = "never")
+    )
   ),
 
   tar_target(
@@ -900,8 +896,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
     },
     resources = tar_resources(
       crew = tar_resources_crew(controller = "med_mem")
-    ),
-    cue = tar_cue(mode = "never")
+    )
   ),
 
   tar_target(
@@ -994,8 +989,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
     },
     resources = tar_resources(
       crew = tar_resources_crew(controller = "med_mem")
-    ),
-    cue = tar_cue(mode = "never")
+    )
   ),
   tar_target(
     desurv_consensus_init_elbowk,
@@ -1279,8 +1273,7 @@ COMMON_DESURV_RUN_TARGETS <- list(
     ),
     resources = tar_resources(
       crew = tar_resources_crew(controller = "med_mem")
-    ),
-    cue = tar_cue(mode = "never")
+    )
   ),
 
   tar_target(
@@ -2347,15 +2340,19 @@ FIGURE_TARGETS <- list(
   tar_target(
     fig_bo_heat,
     {
-      curve = extract_gp_curve(desurv_bo_results,tar_params_best)
-      ggplot(curve, aes(x = k, y = alpha, fill = mean)) +
+      curve = extract_gp_curve(desurv_bo_results,ci_level=.9)
+      curve_best = curve %>% group_by(k,alpha) %>% slice_max(order_by = mean)
+      ggplot(curve_best, aes(x = k, y = alpha, fill = mean)) +
         geom_tile(color = NA) +
+        geom_text(aes(label = round(mean,2),
+                      color = mean < median(mean)))+
         scale_x_continuous(
           breaks = function(x) seq(2,12, by = 1)
         ) +
         scale_fill_viridis_c(
           name = "CV C-index",
           option = "D",
+          labels = scales::label_number(accuracy = 0.01),
           guide = guide_colorbar(
             barheight = unit(3, "cm"),
             barwidth  = unit(0.4, "cm")
@@ -2376,7 +2373,8 @@ FIGURE_TARGETS <- list(
           axis.text  = element_text(color = "black"),
           legend.title = element_text(face = "bold"),
           legend.text  = element_text(color = "black")
-        )
+        )+
+        scale_color_manual(values = c("black", "white"), guide = "none")
     }
   ),
   
