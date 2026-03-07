@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  5 MAR 2026 08:56
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  7 MAR 2026 15:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -605,29 +605,85 @@ pdfTeX warning (ext4): destination with the same identifier (name{equation.16}) 
 <to be read again> 
                    \relax 
 l.767 ...ictors \(\hat{\eta}_i\): \begin{equation}
-                                                   [9] [10] [11]
+                                                   [9] [10]
 
-LaTeX Warning: Citation `moffitt2015virtual' on page 12 undefined on input line 937.
-
-
-LaTeX Warning: Citation `elyada2019cross' on page 12 undefined on input line 939.
+LaTeX Warning: Citation `rashid2020purity' on page 11 undefined on input line 897.
 
 
-LaTeX Warning: Citation `peng2024determination' on page 12 undefined on input line 940.
+LaTeX Warning: Citation `peng2024determination' on page 11 undefined on input line 898.
 
 
-LaTeX Warning: Citation `leary2023s' on page 12 undefined on input line 941.
+LaTeX Warning: Citation `peng2024determination' on page 11 undefined on input line 903.
 
 
-LaTeX Warning: Citation `peng2019novo' on page 12 undefined on input line 942.
+LaTeX Warning: Citation `rashid2020purity' on page 11 undefined on input line 915.
 
 
-LaTeX Warning: Citation `rashid2020purity' on page 12 undefined on input line 943.
+LaTeX Warning: Citation `peng2024determination' on page 11 undefined on input line 915.
 
 
-LaTeX Warning: Citation `Bailey2016' on page 12 undefined on input line 944.
+LaTeX Warning: Citation `peng2024determination' on page 11 undefined on input line 915.
 
-[12] [13] (./supp_methods.aux)
+
+LaTeX Warning: Citation `rashid2020purity' on page 11 undefined on input line 915.
+
+
+LaTeX Warning: Citation `peng2024determination' on page 11 undefined on input line 915.
+
+
+LaTeX Warning: Citation `peng2024determination' on page 11 undefined on input line 915.
+
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <9> on input line 918.
+
+LaTeX Warning: Citation `raphael2017integrated' on page 11 undefined on input line 922.
+
+
+LaTeX Warning: Citation `ellis2013clinical' on page 11 undefined on input line 923.
+
+
+LaTeX Warning: Citation `dijk2020unsupervised' on page 11 undefined on input line 925.
+
+
+LaTeX Warning: Citation `moffitt2015virtual' on page 11 undefined on input line 926.
+
+
+LaTeX Warning: Citation `zhao2018gene' on page 11 undefined on input line 927.
+
+
+LaTeX Warning: Citation `zhao2018gene' on page 11 undefined on input line 928.
+
+
+LaTeX Warning: Citation `puleo2018stratification' on page 11 undefined on input line 929.
+
+
+Overfull \hbox (15.48294pt too wide) in paragraph at lines 918--935
+ [][] 
+ []
+
+[11]
+
+LaTeX Warning: Citation `moffitt2015virtual' on page 12 undefined on input line 981.
+
+
+LaTeX Warning: Citation `elyada2019cross' on page 12 undefined on input line 983.
+
+
+LaTeX Warning: Citation `peng2024determination' on page 12 undefined on input line 984.
+
+
+LaTeX Warning: Citation `leary2023s' on page 12 undefined on input line 985.
+
+
+LaTeX Warning: Citation `peng2019novo' on page 12 undefined on input line 986.
+
+
+LaTeX Warning: Citation `rashid2020purity' on page 12 undefined on input line 987.
+
+
+LaTeX Warning: Citation `Bailey2016' on page 12 undefined on input line 988.
+
+[12] [13] [14] (./supp_methods.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
@@ -637,18 +693,18 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 14528 strings out of 469471
- 229292 string characters out of 5467057
- 684027 words of memory out of 5000000
- 42683 multiletter control sequences out of 15000+600000
- 704192 words of font info for 185 fonts, out of 8000000 for 9000
+ 14588 strings out of 469471
+ 230104 string characters out of 5467057
+ 684558 words of memory out of 5000000
+ 42710 multiletter control sequences out of 15000+600000
+ 722552 words of font info for 206 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  89i,10n,93p,1009b,647s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb>
-Output written on supp_methods.pdf (13 pages, 327627 bytes).
+</nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb>
+Output written on supp_methods.pdf (14 pages, 400794 bytes).
 PDF statistics:
- 338 PDF objects out of 1000 (max. 8388607)
- 281 compressed objects within 3 object streams
- 88 named destinations out of 1000 (max. 500000)
- 41113 words of extra memory for PDF output out of 42996 (max. 10000000)
+ 364 PDF objects out of 1000 (max. 8388607)
+ 298 compressed objects within 3 object streams
+ 90 named destinations out of 1000 (max. 500000)
+ 51353 words of extra memory for PDF output out of 51595 (max. 10000000)
 
