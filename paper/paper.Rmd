@@ -1,5 +1,5 @@
 ---
-title: Survival-guided matrix factorization reveals prognostic transcriptional programs in pancreatic cancer
+title: Survival-guided matrix factorization identifies reproducible prognostic programs in pancreatic cancer
   # Use letters for affiliations, numbers to show equal authorship (if applicable) and to indicate the corresponding author
 author:
   - name: Amber M. Young
