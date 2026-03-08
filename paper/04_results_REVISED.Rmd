@@ -269,6 +269,112 @@ For DeSurv, we evaluated D1 (the classical--iCAF co-program with the largest tra
 
 To assess clinical interpretability of these continuous associations, we dichotomized validation samples into high- and low-risk groups using method-specific cutpoints, each independently optimized via cross-validation on the training data. The DeSurv linear predictor separated survival trajectories in the pooled validation cohort (HR $= `r km_desurv$hr`$, 95% CI $`r km_desurv$ci_lo`$--$`r km_desurv$ci_hi`$, $P `r if(km_desurv$p_lt) "< 0.001" else paste0("= ", km_desurv$p_val)`$; Fig. \ref{fig:bio}C). The same procedure applied to NMF yielded weaker stratification (HR $= `r km_nmf$hr`$, 95% CI $`r km_nmf$ci_lo`$--$`r km_nmf$ci_hi`$, $P `r if(km_nmf$p_lt) "< 0.001" else paste0("= ", km_nmf$p_val)`$; Fig. \ref{fig:bio}D). Together, these results indicate that incorporating survival information during factorization yields gene programs with more transportable prognostic associations than the standard discover-then-evaluate approach.
 
+```{r fig-val, fig.cap="Survival-aligned programs generalize across independent PDAC cohorts. (A) Forest plot of per-cohort hazard ratios (95\\% CIs) for the latent factor most predictive of survival in the training data. DeSurv (blue) shows more consistent associations across cohorts than standard NMF (red). (B--C) Kaplan--Meier curves for pooled external validation samples stratified by the cross-validated optimal cutpoint: DeSurv linear predictor (B) and standard NMF (C). \\label{fig:val}", fig.env='figure*', fig.pos='t', out.height= "6in", out.width='\\textwidth'}
+
+library(cowplot)
+library(ggplot2)
+
+# ── Panel A: forest plot (promoted from supplement) ──
+tar_load(fig_hr_forest_tcgacptac)
+
+base_size <- 8
+theme_pnas <- theme_classic(base_size = base_size) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    plot.margin = margin(6, 10, 6, 15),
+    legend.box.margin = margin(0, 0, 0, 0),
+    legend.spacing.x = unit(6, "pt"),
+    legend.key.width = unit(12, "pt")
+  )
+
+plot_forest <- fig_hr_forest_tcgacptac +
+  scale_color_discrete(
+    labels = c(
+      "Puleo_array"       = "Puleo",
+      "Dijk"              = "Dijk",
+      "PACA_AU_seq"       = "PACA seq",
+      "PACA_AU_array"     = "PACA array",
+      "Moffitt_GEO_array" = "Moffitt"
+    )
+  ) +
+  theme_pnas +
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = base_size),
+    legend.title = element_text(size = base_size)
+  )
+
+# ── Panels B-C: KM curves (moved from old fig-bio) ──
+tar_load(fig_median_survival_desurv_tcgacptac)
+tar_load(fig_median_survival_std_desurvk_tcgacptac)
+
+km_text_size    <- base_size - 3
+risk_title_size <- 5
+
+stack_surv <- function(surv_obj, title, keep_legend = FALSE) {
+  p <- surv_obj$plot +
+    theme_pnas +
+    theme(
+      legend.position = if (keep_legend) "bottom" else "none",
+      axis.title.x = element_blank(),
+      axis.title.y = element_text(size = km_text_size),
+      axis.text.x  = element_text(size = km_text_size),
+      axis.text.y  = element_text(size = km_text_size),
+      plot.margin  = margin(10, 10, 2, 10),
+      plot.title   = element_text(size = risk_title_size + 3)
+    ) +
+    labs(title = title)
+
+  t <- surv_obj$table +
+    theme_pnas +
+    theme(
+      legend.position = "none",
+      axis.title.y = element_blank(),
+      axis.text.x  = element_text(size = km_text_size),
+      axis.text.y  = element_text(size = km_text_size),
+      text = element_text(size = km_text_size),
+      axis.title.x = element_text(size = km_text_size),
+      plot.title   = element_text(size = risk_title_size),
+      plot.margin  = margin(10, 10, 6, 10)
+    ) +
+    labs(x = "Time (months)")
+  t$layers[[1]]$aes_params$size <- km_text_size / ggplot2::.pt
+  plot_grid(p, t, ncol = 1, rel_heights = c(2.5, 1.5), align = "v", axis = "lr")
+}
+
+km_b <- stack_surv(fig_median_survival_desurv_tcgacptac, "DeSurv")
+km_c <- stack_surv(fig_median_survival_std_desurvk_tcgacptac, "NMF")
+
+# Shared KM legend
+legend_plot <- ggplot(
+  data.frame(x = 1:2, y = 1:2,
+             group = factor(c("Low", "High"), levels = c("Low", "High"))),
+  aes(x = x, y = y, colour = group)
+) +
+  geom_line() +
+  scale_colour_manual(values = c("Low" = "violetred2", "High" = "turquoise4"),
+                      name = "Risk group") +
+  theme_pnas +
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = km_text_size),
+        legend.title = element_text(size = km_text_size)) +
+  guides(colour = guide_legend(nrow = 1))
+
+legend_grob <- ggplotGrob(legend_plot)
+km_legend <- legend_grob$grobs[
+  sapply(legend_grob$grobs, function(x) x$name) == "guide-box"
+][[1]]
+
+km_block <- plot_grid(
+  km_b, km_c, ggdraw(km_legend),
+  nrow = 3, labels = c("B", "C", ""),
+  label_size = 12, rel_heights = c(5, 5, 1)
+)
+
+# ── Full figure: forest (left) + KM curves (right) ──
+plot_grid(plot_forest, km_block, ncol = 2, rel_widths = c(1.2, 1))
+```
+
 
 ## Factorization rank K=3 is robust across supervision settings {.unnumbered}
 
