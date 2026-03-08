@@ -158,42 +158,24 @@ Standard NMF diagnostics yielded inconsistent guidance (Fig. \ref{fig:bo}A-C). R
 
 Because the goal is prognostic factorization, DeSurv selects $k$ using the criterion that directly measures prognostic performance: cross-validated concordance index (C-index), optimized jointly with supervision strength $\alpha$. The resulting C-index surface identified a coherent region of high performance (Fig. \ref{fig:bo}D). Model selection followed the one-standard-error rule (Methods): we selected the smallest $k$ whose predicted performance lay within one standard error of the maximum, yielding a parsimonious choice. Applying the 1-SE rule to the Bayesian optimization surface selected $k = `r tar_read(tar_k_selection_tcgacptac)$k_selected`$ and $\alpha = `r round(tar_read(tar_params_best_tcgacptac)$alpha, 3)`$ (peak C-index $`r round(tar_read(tar_k_selection_tcgacptac)$best_mean, 3)`$; $n = `r ncol(tar_read(tar_data_filtered_tcgacptac)$ex)`$ patients, $`r sum(tar_read(tar_data_filtered_tcgacptac)$sampInfo$event)`$ events). Survival-supervised model selection thus resolves the rank ambiguity that unsupervised heuristics leave open, yielding a single parsimonious factorization for downstream evaluation.
 
-```{r fig-bo, fig.width = 6, fig.height= 5.5, fig.cap = "(A--D) Analyses based on pancreatic ductal adenocarcinoma (PDAC) gene expression data from TCGA and CPTAC cohorts. (A--C) Standard unsupervised rank selection heuristics yield inconsistent guidance for selecting the factorization rank $k$. (A) Reconstruction residuals as a function of $k$. (B) Cophenetic correlation coefficient as a function of $k$. (C) Mean silhouette width across multiple distance metrics as a function of $k$. (D) Gaussian process predicted mean cross-validated concordance index (C-index) from Bayesian optimization over the joint space of factorization rank ($k$) and supervision strength ($\\alpha$). (E) Simulation studies with known rank ($k = 3$): distribution of selected $k$ values across repeated replicates for DeSurv versus standard NMF with post hoc Cox modeling ($\\alpha = 0$). \\label{fig:bo}", fig.env='figure*', fig.pos='t', out.height= "5.5in", out.width="6in"}
+```{r fig-sim, fig.width = 6.5, fig.height = 6, fig.cap = "Simulation studies and model selection. (A) Test-set concordance index across 100 simulation replicates ($p = 3{,}000$ genes, $n = 200$ samples, true $k = 3$) comparing DeSurv to standard NMF ($\\alpha = 0$). (B) Precision (fraction of top-weighted genes in a learned factor overlapping a true prognostic program) across replicates. (C) Distribution of selected $k$ values for DeSurv versus standard NMF. (D) Gaussian process predicted mean cross-validated C-index from Bayesian optimization over factorization rank ($k$) and supervision strength ($\\alpha$) in PDAC training data (TCGA + CPTAC). \\label{fig:sim}", fig.env='figure*', fig.pos='t', out.height= "6in", out.width="6.5in"}
 
 tar_load(fig_bo_heat_tcgacptac)
-tar_load(fig_residuals_tcgacptac)
-tar_load(fig_cophenetic_tcgacptac)
-tar_load(fig_silhouette_tcgacptac)
-tar_load(fit_std_tcgacptac)
-
 fig_bo_heat_tcgacptac = set_fig_font(fig_bo_heat_tcgacptac, size = 10)
-fig_residuals_tcgacptac = set_fig_font(fig_residuals_tcgacptac, size = 10)
-fig_cophenetic_tcgacptac = set_fig_font(fig_cophenetic_tcgacptac, size = 10)
-fig_silhouette_tcgacptac = set_fig_font(fig_silhouette_tcgacptac, size = 10)
 
-# upper = plot_grid(fig_bo_cvk_tcgacptac,fig_bo_cvalpha_tcgacptac,labels=c("A","B"))
-legend_plot <- plot(fit_std_tcgacptac) + ggplot2::theme(legend.position = "bottom")
-legend_grob = ggplotGrob(legend_plot)
-
-legend = legend_grob$grobs[
-    sapply(legend_grob$grobs, function(x) x$name) == "guide-box"
-][[1]]
-
-upper_panels = plot_grid(
-  fig_residuals_tcgacptac  + ggplot2::theme(legend.position = "none"),
-  fig_cophenetic_tcgacptac + ggplot2::theme(legend.position = "none"),
-  fig_silhouette_tcgacptac + ggplot2::theme(legend.position = "none"),
-  ncol = 3,
-  labels = c("A","B","C")
+upper = plot_grid(
+  alt_plots$cindex_box + labs(title = NULL) + scale_y_continuous(limits = c(.5, 1)),
+  alt_plots$precision_box + labs(title = NULL),
+  ncol = 2, labels = c("A", "B")
 )
-upper = plot_grid(upper_panels, legend, nrow = 2, rel_heights = c(1, 0.15))
 
-k_hist = plot_grid(alt_plots$k_hist,NULL,nrow=2,rel_heights = c(4,1))
+lower = plot_grid(
+  alt_plots$k_hist,
+  fig_bo_heat_tcgacptac,
+  ncol = 2, labels = c("C", "D")
+)
 
-lower = plot_grid(fig_bo_heat_tcgacptac,
-                  k_hist,ncol=2,labels=c("D","E"),rel_widths = c(3,2))
-
-plot_grid(upper,lower,nrow=2,rel_heights = c(2,3))
+plot_grid(upper, lower, nrow = 2)
 
 ```
 
@@ -206,13 +188,6 @@ In the primary scenario, where prognostic programs explained low variance relati
 
 To verify that these gains reflect genuine signal recovery rather than overfitting, we repeated the analysis under a null scenario ($\beta = 0$) and a mixed scenario with partial overlap between variance-dominant and prognostic structure (SI Appendix, Fig. S2). DeSurv's benefit scaled with the degree of divergence between variance and prognosis: largest in the primary scenario ($\Delta = `r delta_sim_cindex`$), attenuated when variance and prognosis partially overlapped ($\Delta = `r delta_mixed_cindex`$, paired Wilcoxon $P = `r mixed_wilcox_p`$), and absent when no survival signal existed, where both methods yielded C-index near 0.5. DeSurv also recovered the true rank ($k = 3$) more frequently than standard NMF, which systematically under-selected near $k = 2$ (Fig. \ref{fig:bo}E).
 
-```{r fig-sim-ntop-scenarios, fig.width = 6.5, fig.height = 3, fig.cap = "Performance comparison between DeSurv and standard NMF ($\\alpha = 0$) in the primary simulation scenario ($p = 3{,}000$ genes, $n = 200$ samples, true $k = 3$, 100 replicates), where prognostic programs explain low variance relative to outcome-neutral programs. Both methods were tuned via Bayesian optimization over cross-validated concordance index. (A) Test-set concordance index across simulation replicates. (B) Precision (fraction of top-weighted genes in a learned factor that overlap with a true prognostic program's gene set) across simulation replicates. Each point represents one replicate. \\label{fig:sim}", fig.env='figure*', fig.pos='t', out.width='\\textwidth'}
-
-
-
-plot_grid(alt_plots$cindex_box + labs(title=NULL) + scale_y_continuous(limits=c(.5,1)),
-          alt_plots$precision_box + labs(title=NULL),ncol=2,labels=c("A","B"))
-```
 
 
 
