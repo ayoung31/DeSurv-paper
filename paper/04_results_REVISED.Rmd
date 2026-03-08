@@ -2,16 +2,19 @@
 <!-- All R code chunks are preserved from 04_results.Rmd -->
 <!-- Prose revisions: bolded one-sentence summaries, prediction-validation transitions -->
 
-<!-- SI Appendix figure numbering (supplement.Rmd order):
-     S1  fig-converge       convergence trajectories
-     S2  fig-sim-null-mixed null and mixed simulation scenarios
-     S3  fig-cindex-by-k    C-index vs K sensitivity
-     S4  fig-k3-k7-nesting  K=3 vs K=7 factor correspondence
-     S5  fig-cutpoint-km    cutpoint selection and KM curves
-     S6  fig-subtype-overlap subtype composition of risk groups
-     S7  fig-varsurvival    variance explained vs survival contribution
-     S8  fig-corr           NMF vs DeSurv factor W-matrix correspondence
-     S9  fig-forest         per-cohort hazard ratio forest plot
+<!-- SI Appendix figure numbering (supplement.Rmd order, post-reorganization):
+     S1  fig-converge        convergence trajectories
+     S2  fig-sim-null-mixed  null and mixed simulation scenarios
+     S3  fig-cindex-by-k     C-index vs K sensitivity
+     S4  fig-nmf-diagnostics standard NMF rank selection heuristics (demoted from old Fig 2A-C)
+     S5  fig-k3-k7-nesting   K=3 vs K=7 factor correspondence
+     S6  fig-cutpoint-km     cutpoint selection and KM curves
+     S7  fig-subtype-overlap subtype composition of risk groups
+     S8  fig-nmf-k5-heatmap  NMF gene overlap at k=5
+     S9  fig-nmf-k7-heatmap  NMF gene overlap at k=7
+     S10 fig-varsurvival-k5  variance-survival at k=5
+     Note: Former S7 (variance-survival), S8 (W-corr), S9 (forest) are now
+           main text Fig 3C-D and Fig 4A respectively.
 -->
 
 ```{r setup}
