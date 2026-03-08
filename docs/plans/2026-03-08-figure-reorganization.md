@@ -1,7 +1,7 @@
 # Figure Reorganization Plan for PNAS Submission
 
 **Date:** 2026-03-08
-**Status:** Proposed — awaiting PI approval before implementation
+**Status:** Implemented (2026-03-08) — on `figure-reorg` branch, pending render verification
 **PNAS constraint:** Maximum 4 main-text figures
 
 ---
@@ -232,4 +232,5 @@ The abstract currently says "SI Appendix" nowhere, so no changes needed. But ver
 ## Decision log
 
 - **2026-03-08**: Plan drafted. Awaiting PI review.
+- **2026-03-08**: Implemented on `figure-reorg` branch. All Rmd source changes complete. Render verification pending (requires targets store on student's machine).
 - Previous analysis in `NARRATIVE_DECISIONS.md` (Decision 5) independently identified S7 and S9 as promotion candidates.
