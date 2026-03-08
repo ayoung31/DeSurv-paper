@@ -1296,7 +1296,7 @@ plot_km_training <- function(grid_fit_entry, cv_grid_data) {
 #' @param val_ds Single validation dataset with $ex, $sampInfo
 #' @param ds_name Character dataset name for title
 #' @return ggsurvplot object (KM plot with risk table and annotations)
-plot_km_validation <- function(grid_fit_entry, val_ds, ds_name) {
+plot_km_validation <- function(grid_fit_entry, val_ds, ds_name, xlim = NULL) {
   fit <- grid_fit_entry$fit
   if (is.null(fit)) return(NULL)
 
@@ -1379,8 +1379,8 @@ plot_km_validation <- function(grid_fit_entry, val_ds, ds_name) {
   title <- sprintf("Validation KM (%s): k=%d, alpha=%.2f, ntop=%s",
                     ds_name, grid_fit_entry$k, grid_fit_entry$alpha, ntop_label)
 
-  ggsurv <- survminer::ggsurvplot(
-    sfit,
+  surv_args <- list(
+    fit = sfit,
     data = df,
     risk.table = TRUE,
     pval = FALSE,
@@ -1389,6 +1389,12 @@ plot_km_validation <- function(grid_fit_entry, val_ds, ds_name) {
     palette = c("#2166AC", "#B2182B"),
     ggtheme = ggplot2::theme_bw(base_size = 10)
   )
+  if (!is.null(xlim)) {
+    surv_args$xlim <- xlim
+    brks <- pretty(xlim)
+    surv_args$break.time.by <- brks[2] - brks[1]
+  }
+  ggsurv <- do.call(survminer::ggsurvplot, surv_args)
   ggsurv$plot <- ggsurv$plot +
     ggplot2::annotate("text", x = Inf, y = 0.95, label = annot,
                       hjust = 1.1, vjust = 1, size = 3)

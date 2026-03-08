@@ -441,7 +441,11 @@ library(cowplot)
 tar_load(fig_desurv_std_correlation_tcgacptac)
 cowplot::plot_grid(
   fig_desurv_std_correlation_tcgacptac$plot,
-  cowplot::ggdraw(fig_desurv_std_correlation_tcgacptac$legend),
+  cowplot::plot_grid(
+    NULL,
+    cowplot::ggdraw(fig_desurv_std_correlation_tcgacptac$legend),
+    nrow = 2, rel_heights = c(0.08, 0.92)
+  ),
   ncol = 2, rel_widths = c(4, 1)
 )
 ```

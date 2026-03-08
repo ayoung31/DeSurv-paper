@@ -2654,7 +2654,10 @@ FIGURE_TARGETS <- list(
         show_colnames = TRUE,
         show_rownames = TRUE,
         fontsize = 7,
-        breaks = seq(-1, 1, length.out = 101),
+        fontsize_number = 7,
+        breaks = seq(-0.5, 1, length.out = 101),
+        display_numbers = TRUE,
+        number_format = "%.2f",
         main = "NMF (rows) vs. DeSurv (cols)",
         silent = TRUE
       )
