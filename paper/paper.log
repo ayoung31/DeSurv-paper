@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  7 MAR 2026 15:46
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  8 MAR 2026 21:00
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1158,26 +1158,21 @@ Underfull \vbox (badness 3623) has occurred while \output is active []
 
 [4] [5]
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 7.59998pt on input line 827.
+(Font)              scaled to size 7.59998pt on input line 833.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 827.
+(Font)              <8> on input line 833.
 
-Underfull \hbox (badness 10000) in paragraph at lines 837--841
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 843--848
+Underfull \hbox (badness 10000) in paragraph at lines 843--847
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 850--853
+Underfull \hbox (badness 10000) in paragraph at lines 849--854
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 855--859
+Underfull \hbox (badness 10000) in paragraph at lines 856--859
 
  []
 
@@ -1187,42 +1182,42 @@ Underfull \hbox (badness 10000) in paragraph at lines 861--865
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 867--872
+Underfull \hbox (badness 10000) in paragraph at lines 867--871
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 874--879
+Underfull \hbox (badness 10000) in paragraph at lines 873--878
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 881--885
+Underfull \hbox (badness 10000) in paragraph at lines 880--885
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 887--890
+Underfull \hbox (badness 10000) in paragraph at lines 887--891
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 892--897
+Underfull \hbox (badness 10000) in paragraph at lines 893--896
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 899--905
+Underfull \hbox (badness 10000) in paragraph at lines 898--903
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 907--910
+Underfull \hbox (badness 10000) in paragraph at lines 905--911
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 912--916
+Underfull \hbox (badness 10000) in paragraph at lines 913--916
 
  []
 
@@ -1242,17 +1237,17 @@ Underfull \hbox (badness 10000) in paragraph at lines 930--934
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 936--941
+Underfull \hbox (badness 10000) in paragraph at lines 936--940
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 943--946
+Underfull \hbox (badness 10000) in paragraph at lines 942--947
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 948--953
+Underfull \hbox (badness 10000) in paragraph at lines 949--952
 
  []
 
@@ -1260,27 +1255,27 @@ Underfull \hbox (badness 10000) in paragraph at lines 948--953
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [6]
-Underfull \hbox (badness 10000) in paragraph at lines 955--959
+Underfull \hbox (badness 10000) in paragraph at lines 954--959
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 961--966
+Underfull \hbox (badness 10000) in paragraph at lines 961--965
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 968--972
+Underfull \hbox (badness 10000) in paragraph at lines 967--972
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 974--979
+Underfull \hbox (badness 10000) in paragraph at lines 974--978
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 981--985
+Underfull \hbox (badness 10000) in paragraph at lines 980--985
 
  []
 
@@ -1290,7 +1285,12 @@ Underfull \hbox (badness 10000) in paragraph at lines 987--991
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 993--998
+Underfull \hbox (badness 10000) in paragraph at lines 993--997
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 999--1004
 
  []
 
@@ -1315,7 +1315,7 @@ Here is how much of TeX's memory you used:
  36 hyphenation exceptions out of 8191
  117i,14n,121p,1046b,1115s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb>
-Output written on paper.pdf (11 pages, 565131 bytes).
+Output written on paper.pdf (11 pages, 566319 bytes).
 PDF statistics:
  365 PDF objects out of 1000 (max. 8388607)
  290 compressed objects within 3 object streams

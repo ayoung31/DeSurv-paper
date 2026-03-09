@@ -68,8 +68,8 @@
 
 \templatetype{pnasresearcharticle}  % Choose template
 
-\title{Survival-guided matrix factorization reveals prognostic
-transcriptional programs in pancreatic cancer}
+\title{Survival-guided matrix factorization identifies reproducible
+prognostic programs in pancreatic cancer}
 
 \author[a,1,2]{Amber M. Young}
 \author[b]{Alisa Yurovsky}
@@ -562,21 +562,21 @@ classifiers, providing empirical support for the 1-SE rule.
 \section*{Discussion}\label{discussion}
 \addcontentsline{toc}{section}{Discussion}
 
-Aligning the discovery objective with the evaluation criterion,
+Aligning the discovery objective with the evaluation criterion ---
 incorporating survival outcomes directly into NMF factorization rather
-than assessing them retrospectively, produces a different and more
-prognostically transportable factor structure in PDAC. DeSurv
-concentrates prognostic signal into fewer, more interpretable gene
-programs that generalize across independent cohorts without retraining.
-More broadly, the principle that outcome-guided dimensionality reduction
-targets different subspaces than variance-driven reduction extends
-beyond cancer genomics: sufficient dimension reduction theory (9) and
-the information bottleneck framework (25) both predict that supervised
-compression retains outcome-relevant structure while discarding nuisance
-variation. DeSurv implements this principle within the specific
-constraints of NMF deconvolution, where nonnegativity preserves
-biological interpretability and the factorization structure enables
-single-sample scoring by projection.
+than assessing them retrospectively --- reorganizes the transcriptional
+landscape of PDAC in a clinically meaningful way. DeSurv concentrates
+prognostic signal into fewer, more interpretable gene programs that
+generalize across independent cohorts without retraining. More broadly,
+the principle that outcome-guided dimensionality reduction targets
+different subspaces than variance-driven reduction extends beyond cancer
+genomics: sufficient dimension reduction theory (9) and the information
+bottleneck framework (25) both predict that supervised compression
+retains outcome-relevant structure while discarding nuisance variation.
+DeSurv implements this principle within the specific constraints of NMF
+deconvolution, where nonnegativity preserves biological interpretability
+and the factorization structure enables single-sample scoring by
+projection.
 
 In PDAC, the factor structure produced by survival supervision is
 biologically informative. The factor with the largest survival
@@ -796,16 +796,22 @@ partially overlap.
 
 We analyzed publicly available RNA-seq and microarray cohorts of
 pancreatic ductal adenocarcinoma (PDAC) with corresponding overall
-survival outcomes. Gene expression matrices were converted to TPM,
-log-transformed, and filtered to remove low-expression genes. Survival
-times and censoring indicators were taken from the associated clinical
-annotations. Of the seven PDAC cohorts we considered, two were used for
-training (TCGA and CPTAC) and five were used for external validation
-(Dijk, Moffitt, PACA-AU array, PACA-AU RNA-seq, and Puleo). To harmonize
-differences in scale across cohorts, filtered gene expression data were
-within-subject rank transformed before model training (ranks are
-inherently nonnegative, preserving NMF compatibility). More details
-about the datasets can be found in the SI Appendix.
+survival outcomes. Gene expression matrices were converted to TPM and
+log\textsubscript{2}-transformed (log\textsubscript{2}(TPM + 1)). For
+each training cohort separately, genes were ranked by mean expression
+and by variance independently; the top 3,000 genes with the lowest sum
+of these two ranks were retained, selecting genes that are both highly
+expressed and highly variable; the intersection across training cohorts
+yielded 1,970 genes used for all analyses. Validation datasets were
+restricted to this same gene set. Survival times and censoring
+indicators were taken from the associated clinical annotations. Of the
+seven PDAC cohorts we considered, two were used for training (TCGA and
+CPTAC) and five were used for external validation (Dijk, Moffitt,
+PACA-AU array, PACA-AU RNA-seq, and Puleo). To harmonize differences in
+scale across cohorts, filtered gene expression data were within-subject
+rank transformed before model training (ranks are inherently
+nonnegative, preserving NMF compatibility). More details about the
+datasets can be found in the SI Appendix.
 
 \subsection{Data, Materials, and Software
 Availability}\label{data-materials-and-software-availability}
