@@ -20,7 +20,7 @@ The DeSurv manuscript employs a **prediction-validation** narrative structure. T
 
 | # | Prediction | Statistical/Biological Basis | Validation Figure |
 |---|-----------|------------------------------|-------------------|
-| P1 | Variance-dominant factors need not be prognostically relevant | Aran et al. 2015: ~47% of subtyping genes correlate with purity; Bair & Tibshirani 2006: "no guarantee principal components will be associated with survival" | Fig 3D |
+| P1 | Variance-dominant factors need not be prognostically relevant | Aran et al. 2015: ~47% of subtyping genes correlate with purity; Bair & Tibshirani 2006: "no guarantee principal components will be associated with survival" | Fig 3C |
 | P2 | Supervision should concentrate survival signal into fewer factors | Cook & Forzani 2008: response-guided subspaces target outcome-relevant directions; information bottleneck (Tishby et al. 1999) | Fig 3A-B |
 | P3 | Supervision should improve cross-cohort generalization | Sufficient dimension reduction theory: outcome-aligned subspaces are more portable; survClust (Arora et al.): 97% vs 68% accuracy | Fig 4 |
 | P4 | Supervision should resolve rank selection ambiguity | Frigyesi & Hoglund 2008: cophenetic correlation can overfit; outcome-driven criterion replaces heuristic disagreement | Fig 2D |
@@ -149,14 +149,14 @@ Each results subsection opens by referencing the corresponding introduction pred
 |-------|---------|----------------|
 | A | DeSurv factor-program heatmap | Shows survival-aligned structure (immune-stromal, basal-like) |
 | B | NMF factor-program heatmap | Shows variance-dominant structure (exocrine axis) |
-| C | W-matrix correlation (DeSurv vs NMF) | Shows reorganization, not replacement (promoted from old S8) |
-| D | Variance vs survival contribution | **THE PUNCHLINE:** programs explaining the most variance explain the least survival (promoted from old S7) |
+| C | Variance vs survival contribution | **THE PUNCHLINE:** programs explaining the most variance explain the least survival (promoted from old S7) |
+| D | W-matrix correlation (DeSurv vs NMF) | Shows reorganization, not replacement (promoted from old S8) |
 
 **What reader should take away:** DeSurv doesn't just predict better --- it **restructures latent programs** to isolate survival-relevant biology from variance-dominant noise. The exocrine factor dominates variance but contributes nothing to survival.
 
-**Prediction-validation link:** P1 predicted this disconnect; P2 predicted that supervision would concentrate survival signal. Panel D confirms P1; panels A-B confirm P2; panel C shows the structural relationship between the two decompositions.
+**Prediction-validation link:** P1 predicted this disconnect; P2 predicted that supervision would concentrate survival signal. Panel C confirms P1; panels A-B confirm P2; panel D shows the structural relationship between the two decompositions.
 
-**Accessibility annotation to add:** Label axes on Panel D as "Expression variance explained (%)" vs. "Survival association (concordance index)." Add factor annotations directly on the plot ("Exocrine," "Basal-like," "Activated TME").
+**Accessibility annotation to add:** Label axes on Panel C as "Expression variance explained (%)" vs. "Survival association (concordance index)." Add factor annotations directly on the plot ("Exocrine," "Basal-like," "Activated TME").
 
 ---
 

@@ -198,14 +198,14 @@ To verify that these gains reflect genuine signal recovery rather than overfitti
 
 Bayesian optimization selected $k = `r tar_read(tar_k_selection_tcgacptac)$k_selected`$ and $\alpha = `r round(tar_read(tar_params_best_tcgacptac)$alpha, 3)`$ for DeSurv in the PDAC training cohorts (TCGA and CPTAC). To compare the factor structures produced with and without survival supervision at the same dimensionality, we fit standard NMF at DeSurv's BO-selected rank ($k = `r tar_read(tar_k_selection_tcgacptac)$k_selected`$) and examined the overlap between each method's factor-specific gene rankings and established PDAC gene programs (Fig. \ref{fig:pdac}A--B). Matching ranks ensures that differences in factor content reflect the presence or absence of survival supervision rather than differences in model complexity; whether NMF's performance improves at higher ranks is evaluated in the sensitivity analysis below and in SI Appendix, Table S4. We first describe the biological identity of each method's factors, then ask whether these structural differences correspond to differences in survival contribution.
 
-We refer to the three DeSurv factors as D1--D3 and the three NMF factors as N1--N3. In the DeSurv factorization, D1 correlated with both classical tumor programs and an iCAF-associated stromal signature, D2 with activated immune-stromal programs, and D3 with basal-like tumor programs (Fig. \ref{fig:pdac}A). The co-occurrence of classical and iCAF signatures within a single factor is consistent with evidence that survival stratification in PDAC improves when tumor-intrinsic and CAF subtypes are considered jointly [@peng2024determination; @elyada2019cross]. No DeSurv factor showed a significant positive correlation with exocrine-associated gene programs (DECODER Exocrine, Collisson Exocrine, Bailey ADEX; Fig. \ref{fig:pdac}A). The survival contributions of these factors and their relationship to expression variance are quantified below (Fig. \ref{fig:pdac}D).
+We refer to the three DeSurv factors as D1--D3 and the three NMF factors as N1--N3. In the DeSurv factorization, D1 correlated with both classical tumor programs and an iCAF-associated (restCAF) stromal signature, D2 with activated immune-stromal programs, and D3 with basal-like tumor programs (Fig. \ref{fig:pdac}A). The co-occurrence of classical and iCAF signatures within a single factor is consistent with evidence that survival stratification in PDAC improves when tumor-intrinsic and CAF subtypes are considered jointly [@peng2024determination; @elyada2019cross]. No DeSurv factor showed a significant positive correlation with exocrine-associated gene programs (DECODER Exocrine, Collisson Exocrine, Bailey ADEX; Fig. \ref{fig:pdac}A). The survival contributions of these factors and their relationship to expression variance are quantified below (Fig. \ref{fig:pdac}C).
 
 Standard NMF produced a different factor organization (Fig. \ref{fig:pdac}B). One factor (N2) was strongly and significantly correlated with exocrine-associated gene programs and negatively correlated with immune and stromal signatures (Fig. \ref{fig:pdac}B). A second factor (N1) correlated with classical tumor identity (Fig. \ref{fig:pdac}B), while a third (N3) correlated with immune, fibroblast, and extracellular matrix-related programs (including Puleo Desmoplastic, SCISSORS panCAF and myCAF, Maurer Immune and ECM, and DECODER Activated Stroma), aggregating these into a single factor rather than separating them as DeSurv does (D1 and D2; Fig. \ref{fig:pdac}A). At $k = 3$, NMF thus devotes one of its three factors to exocrine-associated variation, leaving two factors to capture all tumor-intrinsic and microenvironmental programs. Whether these structural differences correspond to differences in prognostic information is quantified next.
 
-We quantified per-factor survival contribution using two metrics (Fig. \ref{fig:pdac}D; SI Methods). For each factor, we computed the conditional variance explained (semi-partial $R^2$: the incremental fraction of total variance accounted for by that factor given all other factors), and its survival contribution, measured as the change in Cox partial log-likelihood ($\Delta\ell$) when that factor is dropped from a $k$-factor Cox model. All three NMF factors had negligible $\Delta\ell$ despite spanning a range of variance, while DeSurv concentrated nearly all survival contribution into D1. Specifically, D1 explained $`r desurv_maxsurv_pct`$% of variance with $\Delta\ell = `r desurv_maxsurv_dl`$, while the highest-variance NMF factor explained $`r nmf_maxvar_pct`$% of expression variance but contributed only $\Delta\ell = `r nmf_maxvar_dl`$ to survival. The highest-variance DeSurv factor (D3, $`r desurv_maxvar_pct`$% of variance) also contributed minimally to survival after accounting for D1. Thus, in PDAC the highest-variance factors are not the most prognostic, consistent with tumor purity analyses across cancer types [@aran2015systematic].
+We quantified per-factor survival contribution using two metrics (Fig. \ref{fig:pdac}C; SI Methods). For each factor, we computed the conditional variance explained (semi-partial $R^2$: the incremental fraction of total variance accounted for by that factor given all other factors), and its survival contribution, measured as the change in Cox partial log-likelihood ($\Delta\ell$) when that factor is dropped from a $k$-factor Cox model. All three NMF factors had negligible $\Delta\ell$ despite spanning a range of variance, while DeSurv concentrated nearly all survival contribution into D1. Specifically, D1 explained $`r desurv_maxsurv_pct`$% of variance with $\Delta\ell = `r desurv_maxsurv_dl`$, while the highest-variance NMF factor explained $`r nmf_maxvar_pct`$% of expression variance but contributed only $\Delta\ell = `r nmf_maxvar_dl`$ to survival. The highest-variance DeSurv factor (D3, $`r desurv_maxvar_pct`$% of variance) also contributed minimally to survival after accounting for D1. Thus, in PDAC the highest-variance factors are not the most prognostic, consistent with tumor purity analyses across cancer types [@aran2015systematic].
 
-To further characterize how the two factorizations relate, we examined pairwise W-matrix gene loading correlations (Fig. \ref{fig:pdac}C). NMF's classical-associated factor (N1) showed the strongest correspondence with DeSurv's basal-like factor (D3), and NMF's microenvironmental factor (N3) mapped primarily to DeSurv's D2. NMF's exocrine-associated factor (N2) did not correspond strongly to any single DeSurv factor, with its strongest (though weak) correlation to D3, consistent with D3's high variance and low survival contribution. Together, the two methods share overlapping tumor and microenvironmental structure but differ in how exocrine-associated variation is represented: NMF dedicates a factor to it, whereas DeSurv does not. The key quantitative difference is that DeSurv concentrates survival contribution into a single factor ($\Delta\ell = `r desurv_maxsurv_dl`$), whereas no NMF factor achieves comparable survival contribution at the same rank. Whether this translates to improved generalization across independent cohorts is tested below.
-```{r fig-pdac, fig.cap="Survival supervision produces different factor structures in PDAC. (A--B) Spearman correlations between factor gene rankings and established PDAC gene programs for DeSurv (A) and standard NMF (B) at $k = 3$. Asterisks denote significance after multiple testing correction; only correlations $> 0.2$ shown. (C) Pairwise correspondence between NMF and DeSurv factors, measured by Spearman rank correlation of W-matrix gene loadings across all genes. (D) Fraction of expression variance explained versus survival contribution ($\\Delta$ Cox partial log-likelihood upon factor removal) for each factor. DeSurv concentrates survival signal into D1 while the highest-variance NMF factor (N2, exocrine-associated) contributes negligibly to survival. \\label{fig:pdac}", fig.env='figure*', fig.pos='t', out.height= "7in", out.width='\\textwidth'}
+To further characterize how the two factorizations relate, we examined pairwise W-matrix gene loading correlations (Fig. \ref{fig:pdac}D). NMF's classical-associated factor (N1) showed the strongest correspondence with DeSurv's basal-like factor (D3), and NMF's microenvironmental factor (N3) mapped primarily to DeSurv's D2. NMF's exocrine-associated factor (N2) did not correspond strongly to any single DeSurv factor, with its strongest (though weak) correlation to D3, consistent with D3's high variance and low survival contribution. Together, the two methods share overlapping tumor and microenvironmental structure but differ in how exocrine-associated variation is represented: NMF dedicates a factor to it, whereas DeSurv does not. The key quantitative difference is that DeSurv concentrates survival contribution into a single factor ($\Delta\ell = `r desurv_maxsurv_dl`$), whereas no NMF factor achieves comparable survival contribution at the same rank. Whether this translates to improved generalization across independent cohorts is tested below.
+```{r fig-pdac, fig.cap="Survival supervision produces different factor structures in PDAC. (A--B) Spearman correlations between factor gene rankings and established PDAC gene programs for DeSurv (A) and standard NMF (B) at $k = 3$. Asterisks denote significance after multiple testing correction; only correlations $> 0.2$ shown. (C) Fraction of expression variance explained versus survival contribution ($\\Delta$ Cox partial log-likelihood upon factor removal) for each factor. DeSurv concentrates survival signal into D1 while the highest-variance NMF factor (N2, exocrine-associated) contributes negligibly to survival. (D) Pairwise correspondence between NMF and DeSurv factors, measured by Spearman rank correlation of W-matrix gene loadings across all genes. \\label{fig:pdac}", fig.env='figure*', fig.pos='t', out.height= "7in", out.width='\\textwidth'}
 
 library(cowplot)
 library(ggplot2)
@@ -214,11 +214,11 @@ library(ggplot2)
 tar_load(fig_gene_overlap_heatmap_desurv_tcgacptac)
 tar_load(fig_gene_overlap_heatmap_std_desurvk_tcgacptac)
 
-# Panel C: W-matrix correlation (promoted from supplement)
-tar_load(fig_desurv_std_correlation_tcgacptac)
-
-# Panel D: variance vs survival (promoted from supplement)
+# Panel C: variance vs survival (promoted from supplement)
 tar_load(fig_variation_explained_tcgacptac)
+
+# Panel D: W-matrix correlation (promoted from supplement)
+tar_load(fig_desurv_std_correlation_tcgacptac)
 
 # ── Panels A-B: heatmaps with shared legend ──
 plot_3a <- fig_gene_overlap_heatmap_desurv_tcgacptac$plot
@@ -234,8 +234,17 @@ top_row <- plot_grid(
   label_size = 12, rel_widths = c(2.5, 2.5, 0.6)
 )
 
-# ── Panel C: W-matrix correlation ──
-plot_3c <- plot_grid(
+# ── Panel C: variance vs survival scatterplot ──
+plot_3c <- set_fig_font(fig_variation_explained_tcgacptac, size = 10) +
+  theme(
+    legend.position    = c(1, 0.5),
+    legend.justification = c(1, 0),
+    legend.background  = element_rect(color = "black"),
+    axis.title         = element_text(size = 8)
+  )
+
+# ── Panel D: W-matrix correlation ──
+plot_3d <- plot_grid(
   fig_desurv_std_correlation_tcgacptac$plot,
   plot_grid(
     NULL,
@@ -244,15 +253,6 @@ plot_3c <- plot_grid(
   ),
   ncol = 2, rel_widths = c(4, 1)
 )
-
-# ── Panel D: variance vs survival scatterplot ──
-plot_3d <- set_fig_font(fig_variation_explained_tcgacptac, size = 10) +
-  theme(
-    legend.position    = c(1, 0.5),
-    legend.justification = c(1, 0),
-    legend.background  = element_rect(color = "black"),
-    axis.title         = element_text(size = 8)
-  )
 
 bottom_row <- plot_grid(
   plot_3c, plot_3d,
