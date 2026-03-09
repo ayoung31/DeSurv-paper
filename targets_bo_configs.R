@@ -46,7 +46,7 @@ targets_bo_configs <- function() {
         nu_grid = list(lower = 0, upper = 1, type = "continuous")
       ),
       ngene_config = c(3000),
-      ntop_config = c(50,300),
+      ntop_config = c(3000),
       lambdaw_config = c(0),
       lambdah_config = c(0),
       ninit = 30,
@@ -67,7 +67,7 @@ targets_bo_configs <- function() {
       desurv_parallel_grid = TRUE,
       desurv_ncores_grid = 30
     ),
-    # 
+    #
     # cptac = list(
     #   data_mode = "external",
     #   data_loader = "load_data",
@@ -114,7 +114,7 @@ targets_bo_configs <- function() {
         nu_grid = list(lower = 0, upper = 1, type = "continuous")
       ),
       ngene_config = c(3000),
-      ntop_config = c(50,300),
+      ntop_config = c(3000),
       lambdaw_config = c(0),
       lambdah_config = c(0),
       ninit = 30,
@@ -135,7 +135,7 @@ targets_bo_configs <- function() {
       desurv_parallel_grid = TRUE,
       desurv_ncores_grid = 30
     ),
-# 
+#
 #     bladdereasy = list(
 #       data_mode = "split",
 #       data_loader = "load_data_bladder_vig",

@@ -444,13 +444,15 @@ extract_gp_curve <- function(bo_results,ci_level = 0.95) {
   if (is.null(param_names)) {
     stop("GP design matrix has no column names.")
   }
-  best_per_k = expand.grid(k_grid = 2:12,alpha_grid = seq(0,1,.1),
-                          lambda_grid = seq(.1,1,.1),nu_grid = seq(0,1,.1),
-                          ntop = seq(50,300,10))
-  
+  ntop_tuned <- "ntop" %in% param_names
+  ntop_vals <- if (ntop_tuned) seq(50, 300, 10) else NA_real_
+  best_per_k = expand.grid(k_grid = 2:12, alpha_grid = seq(0,1,.1),
+                           lambda_grid = seq(.1,1,.1), nu_grid = seq(0,1,.1),
+                           ntop = ntop_vals)
+
   newdata_actual <- best_per_k[, param_names, drop = FALSE]
   newdata_scaled <- normalize_gp_params(newdata_actual, bounds)
-  
+
   preds <- DiceKriging::predict(
     km_fit,
     newdata = newdata_scaled,
@@ -458,7 +460,7 @@ extract_gp_curve <- function(bo_results,ci_level = 0.95) {
     se.compute = TRUE,
     cov.compute = FALSE
   )
-  
+
   z_value <- stats::qnorm((1 + ci_level) / 2)
   tibble::tibble(
     k = best_per_k$k_grid,
@@ -476,7 +478,7 @@ select_1se_from_gp_curve <- function(curve) {
   curve_kse <- curve %>%
     group_by(k) %>%
     filter(mean >= lower[which.max(mean)]) %>%
-    arrange(alpha, desc(mean)) %>%
+    arrange(alpha, desc(lambda), desc(mean)) %>%
     slice_head(n = 1) %>%
     ungroup()
 
@@ -485,7 +487,7 @@ select_1se_from_gp_curve <- function(curve) {
 
   curve_kse %>%
     filter(mean >= thresh) %>%
-    arrange(k, alpha, desc(mean)) %>%
+    arrange(k, alpha, desc(lambda), desc(mean)) %>%
     slice_head(n = 1)
 }
 
