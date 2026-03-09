@@ -798,10 +798,15 @@ collapsed duplicated gene symbols by median; the RNA-seq cohort received a
 required no additional dataset-specific filtering beyond survival QC.
 
 Across cohorts, samples without valid survival outcomes (nonpositive time,
-missing time, or missing event indicator) were removed. Gene filtering and
-normalization followed the training configuration (ngene and within-sample rank
-transformation) to mitigate platform effects; validation data were restricted
-to the training gene set and transformed in the same way.
+missing time, or missing event indicator) were removed. All expression matrices
+were log$_2$-transformed (log$_2$(TPM + 1)) prior to gene selection. For each training cohort (TCGA-PAAD and CPTAC) separately, genes were ranked
+by mean expression and by variance independently; the 3,000 genes with the
+lowest sum of these two ranks were retained, selecting genes that are both
+highly expressed and highly variable.
+The intersection of these two gene sets yielded 1,970 genes used for model
+training. Validation datasets were restricted to this same 1,970-gene set.
+Within-sample rank transformation was applied to all datasets to mitigate
+platform effects, with validation data transformed identically to training.
 
 Table~\ref{tab:cohorts} summarizes the cohorts, platforms, sample sizes after
 quality control, and patient-level metadata used in this study. Overall survival
