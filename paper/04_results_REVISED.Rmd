@@ -134,6 +134,40 @@ if (file.exists(nmf_pool_rds)) {
   hr_pool_nmf <- ci_pool_lo_nmf <- ci_pool_hi_nmf <- p_pool_nmf <- "NA"
 }
 
+# ── Dichotomized KM stats for DeSurv and NMF (pooled validation) ──────────────
+tar_load(desurv_lp_stats_tcgacptac)
+tar_load(std_desurvk_lp_stats_tcgacptac)
+
+compute_km_stats <- function(pool_df, lp_stats) {
+  z_val <- (pool_df$risk_score - lp_stats$lp_mean) / lp_stats$lp_sd
+  pool_df$group <- ifelse(z_val > lp_stats$optimal_z_cutpoint, 1, 0)
+  hr_fit     <- coxph(Surv(time, event) ~ group, data = pool_df)
+  hr_summary <- summary(hr_fit)$conf.int
+  lr_test    <- survdiff(Surv(time, event) ~ group, data = pool_df)
+  p_val      <- 1 - pchisq(lr_test$chisq, df = 1)
+  list(
+    hr    = sprintf("%.2f", hr_summary[1, "exp(coef)"]),
+    ci_lo = sprintf("%.2f", hr_summary[1, "lower .95"]),
+    ci_hi = sprintf("%.2f", hr_summary[1, "upper .95"]),
+    p_val = sprintf("%.3f", p_val),
+    p_lt  = p_val < 0.001
+  )
+}
+
+km_desurv <- compute_km_stats(pool_df, desurv_lp_stats_tcgacptac)
+
+# Build NMF pooled df
+tar_load(val_latent_std_desurvk_tcgacptac)
+nmf_pool_dfs <- lapply(val_latent_std_desurvk_tcgacptac, function(entry) {
+  surv <- entry$survival
+  if (is.null(surv) || !all(c("time", "event") %in% names(surv))) return(NULL)
+  data.frame(time = surv$time, event = surv$event,
+             dataset = entry$dataset, risk_score = entry$risk_score)
+})
+nmf_pool_df <- dplyr::bind_rows(Filter(Negate(is.null), nmf_pool_dfs))
+nmf_pool_df <- nmf_pool_df[is.finite(nmf_pool_df$time) & is.finite(nmf_pool_df$risk_score), ]
+km_nmf <- compute_km_stats(nmf_pool_df, std_desurvk_lp_stats_tcgacptac)
+
 # ── K-selection C-index values from BO history ───────────────────────────────
 k_sel          <- tar_read(tar_k_selection_tcgacptac)
 k_best_cindex  <- round(k_sel$best_mean, 3)
