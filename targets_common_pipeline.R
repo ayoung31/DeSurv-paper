@@ -375,9 +375,26 @@ COMMON_DESURV_BO_TARGETS <- list(
   tar_target(
     tar_params_best_elbowk,
     {
-      curve  <- extract_gp_curve(desurv_bo_results_elbowk, ci_level = 0.9)
-      choice <- select_1se_from_gp_curve(curve %>% filter(k == std_nmf_selected_k))
-      as.list(choice[, c("k", "alpha", "lambda", "nu", "ntop")])
+      eval_se <- compute_bo_eval_se(
+        desurv_bo_results_elbowk$runs[[1]]$diagnostics
+      )
+      hist <- desurv_bo_results_elbowk$history %>%
+        dplyr::left_join(eval_se, by = intersect(
+          c("run_id", "eval_id"), names(desurv_bo_results_elbowk$history)
+        ))
+      hist <- hist %>% dplyr::filter(k_grid == std_nmf_selected_k)
+      best <- hist %>% dplyr::slice_max(order_by = mean_cindex, n = 1, with_ties = FALSE)
+      cutoff <- best$mean_cindex - best$c_se
+      selected <- hist %>%
+        dplyr::filter(mean_cindex >= cutoff) %>%
+        dplyr::slice_min(order_by = alpha_grid, n = 1, with_ties = FALSE)
+      list(
+        k     = selected$k_grid,
+        alpha  = selected$alpha_grid,
+        lambda = selected$lambda_grid,
+        nu     = selected$nu_grid,
+        ntop   = if ("ntop" %in% names(selected)) selected$ntop else NA_real_
+      )
     }
   ),
   
