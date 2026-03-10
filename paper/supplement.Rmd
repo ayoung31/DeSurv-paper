@@ -13,6 +13,9 @@ header-includes:
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE)
 library(targets)
+library(dplyr)
+library(ggplot2)
+library(cowplot)
 if (!exists("set_fig_font", inherits = TRUE)) {
   set_fig_font <- function(plot_obj, size = 10) {
     if (inherits(plot_obj, "ggplot")) {
@@ -239,13 +242,46 @@ To evaluate how the number of latent factors $k$ affects prognostic performance,
 Fig. \ref{fig:fig-cindex-by-k} shows the resulting C-index curves for both training (CV) and external validation (pooled across held-out cohorts), with shaded ribbons indicating $\pm 1$ standard error. In training, DeSurv consistently outperforms NMF across all $k$, confirming that survival supervision improves in-sample concordance. In external validation, DeSurv maintains a comparable or improved C-index relative to NMF, demonstrating that the supervised signal generalizes beyond the training data rather than reflecting overfitting to the survival labels.
 
 ```{r fig-cindex-by-k, fig.width = 10, fig.height = 10, fig.cap="Training (CV) and external validation C-index as a function of factorization rank $k$ for DeSurv (blue) and standard NMF (red, $\\alpha = 0$). Shaded ribbons show $\\pm 1$ SE. For each $k$, the best $\\alpha$ was selected by maximizing the mean CV C-index. Validation C-index is pooled across all external cohorts. (A) Results using $n_{\\text{top}} = 270$ top genes per factor ($\\lambda = 0.349$, $\\xi = 0.056$). (B) Results retaining all genes ($n_{\\text{top}} = \\text{ALL}$; $\\lambda = 0.349$, $\\xi = 0.056$).", fig.env='figure*', fig.pos='t', out.width='\\textwidth', echo=FALSE}
-library(magick)
-library(cowplot)
 # This figure is produced by the cv_grid pipeline (separate store);
 # read directly from the file output.
-fig_path <- "figures/cv_grid/cv_cindex_by_k_primary.pdf"
-img <- magick::image_read_pdf(fig_path, density = 300)
+# Use magick to render the PDF as a raster (avoids LaTeX path issues)
+img <- magick::image_read("figures/cv_grid/cv_cindex_by_k_primary.pdf", density = 300)
 cowplot::ggdraw() + cowplot::draw_image(img)
+```
+
+## Standard NMF rank selection heuristics {.unnumbered}
+
+Standard unsupervised rank selection criteria — reconstruction residuals, cophenetic correlation coefficient, and mean silhouette width — yielded inconsistent guidance for selecting the factorization rank $k$ in the PDAC training cohort (TCGA + CPTAC). Reconstruction residuals decreased smoothly without a clear elbow (Fig. \ref{fig:nmf-diagnostics}A). Cophenetic correlation fluctuated without a distinct transition point (Fig. \ref{fig:nmf-diagnostics}B). Mean silhouette width favored very low ranks that conflicted with other criteria (Fig. \ref{fig:nmf-diagnostics}C). These contradictions motivated the survival-supervised rank selection approach described in the main text.
+
+```{r fig-nmf-diagnostics, fig.width = 6, fig.height = 3.5, fig.cap = "Standard unsupervised NMF rank selection heuristics for the PDAC training cohort (TCGA + CPTAC). (A) Reconstruction residuals as a function of factorization rank $k$. (B) Cophenetic correlation coefficient as a function of $k$. (C) Mean silhouette width across multiple distance metrics as a function of $k$. These criteria yield inconsistent guidance, motivating the survival-supervised model selection approach (main text Fig. 2D). \\label{fig:nmf-diagnostics}", fig.env='figure*', fig.pos='t', out.height= "3.5in", out.width='\\textwidth'}
+library(cowplot)
+library(ggplot2)
+
+tar_load(fig_residuals_tcgacptac)
+tar_load(fig_cophenetic_tcgacptac)
+tar_load(fig_silhouette_tcgacptac)
+tar_load(fit_std_tcgacptac)
+
+fig_residuals_tcgacptac  <- set_fig_font(fig_residuals_tcgacptac, size = 10)
+fig_cophenetic_tcgacptac <- set_fig_font(fig_cophenetic_tcgacptac, size = 10)
+fig_silhouette_tcgacptac <- set_fig_font(fig_silhouette_tcgacptac, size = 10)
+
+# Shared legend from fit_std plot
+legend_plot <- plot(fit_std_tcgacptac) +
+  ggplot2::theme(legend.position = "bottom")
+legend_grob <- ggplotGrob(legend_plot)
+legend <- legend_grob$grobs[
+  sapply(legend_grob$grobs, function(x) x$name) == "guide-box"
+][[1]]
+
+panels <- plot_grid(
+  fig_residuals_tcgacptac  + theme(legend.position = "none"),
+  fig_cophenetic_tcgacptac + theme(legend.position = "none"),
+  fig_silhouette_tcgacptac + theme(legend.position = "none"),
+  ncol = 3, labels = c("A", "B", "C")
+)
+
+plot_grid(panels, legend, nrow = 2, rel_heights = c(1, 0.15))
 ```
 
 ## K-sensitivity analysis: effect of gene focusing on iCAF factor validation {.unnumbered}
@@ -339,9 +375,7 @@ The correspondence was partial but asymmetric (Fig. \ref{fig:k3-k7-nesting}). Tw
 
 This fragmentation pattern indicates that K=7 does not simply subdivide K=3 structure. Rather, it disperses one coherent K=3 prognostic program across multiple lower-signal components, consistent with the observed failure of K=7 to achieve adjusted significance in external cohorts (adjusted $P = `r formatC(k7_alpha75_p_270, format="f", digits=3)`$; see main text). 
 ```{r k3-k7-nesting, fig.width = 7, fig.height = 3.5, fig.cap = paste0("Factor correspondence between the production K=3 model and a K=7 DeSurv fit ($\\alpha = 0.35$, $n_{\\text{top}} = 270$), measured by Spearman rank correlation of W-matrix gene loadings across all genes. Two K=3 factors have clear K=7 counterparts (K3\\_F1 $\\to$ ", gsub("_", "\\\\_", k3f1_best_k7), ", $r = ", round(k3f1_best_r, 2), "$; K3\\_F2 $\\to$ ", gsub("_", "\\\\_", k3f2_best_k7), ", $r = ", round(k3f2_best_r, 2), "$), while K3\\_F3 is distributed broadly across four K=7 factors ($r = ", round(k3f3_range_min, 2), "$--$", round(k3f3_range_max, 2), "$), indicating fragmentation rather than nesting."), fig.env='figure*', fig.pos='t', out.width='\\textwidth', echo=FALSE}
-library(magick)
-library(cowplot)
-img <- magick::image_read_pdf("figures/cv_grid/k3_k7_factor_correlation_heatmap.pdf", density = 300)
+img <- magick::image_read("figures/cv_grid/k3_k7_factor_correlation_heatmap.pdf", density = 300)
 cowplot::ggdraw() + cowplot::draw_image(img)
 ```
 
@@ -350,29 +384,21 @@ cowplot::ggdraw() + cowplot::draw_image(img)
 To convert the continuous DeSurv linear predictor into a clinically interpretable binary risk stratification, we selected an optimal z-score cutpoint via cross-validation on the TCGA+CPTAC training cohort. For each candidate cutpoint in $\{-2.0, -1.8, \ldots, 2.0\}$, we computed the mean absolute log-rank z-statistic across held-out folds and selected the cutpoint maximizing this metric (Fig. \ref{fig:fig-cutpoint-km}A). We then applied this cutpoint to external validation cohorts by standardizing each patient's linear predictor using the training mean and standard deviation. Fig. \ref{fig:fig-cutpoint-km}B shows the resulting Kaplan–Meier curves for the pooled external validation analysis, with a stratified log-rank test accounting for dataset of origin. Panels C–F display per-cohort validation KM curves for Dijk, Moffitt, PACA-AU, and Puleo, respectively. Across all cohorts, the DeSurv-derived high-risk group showed consistently shorter survival, confirming that the training-derived cutpoint generalizes to independent datasets.
 
 ```{r fig-cutpoint-km, fig.width = 10, fig.height = 14, fig.cap = "Cutpoint selection and external validation of dichotomized risk groups. (A) Cross-validated mean absolute log-rank z-statistic as a function of z-score cutpoint; red dashed line indicates the selected optimum. (B) Pooled validation Kaplan--Meier curves (stratified log-rank test). (C--D) Per-cohort validation KM curves: (C) Dijk, (D) Moffitt. (E--F) Per-cohort validation KM curves: (E) PACA-AU, (F) Puleo.", fig.env='figure*', fig.pos='t', out.width='\\textwidth', echo=FALSE}
-library(cowplot)
-library(magick)
-
-# Load file targets to establish dependency chain
-tar_load(fig_cutpoint_curves_tcgacptac)
-tar_load(fig_val_km_dichot_tcgacptac)
+# Production model cutpoint and KM validation PDFs (direct paths)
+fig_dir <- normalizePath("figures")
+km_dir  <- file.path(fig_dir, "km_dichot")
 
 read_pdf_as_grob <- function(path) {
-  img <- magick::image_read_pdf(path, density = 300)
+  img <- magick::image_read(path, density = 300)
   cowplot::ggdraw() + cowplot::draw_image(img)
 }
 
-# fig_cutpoint_curves_tcgacptac is a character vector of file paths
-cutpoint_logrank_path <- grep("logrank", fig_cutpoint_curves_tcgacptac, value = TRUE)
-p_cutpoint <- read_pdf_as_grob(cutpoint_logrank_path)
-
-# fig_val_km_dichot_tcgacptac is a character vector of file paths
-km_paths <- fig_val_km_dichot_tcgacptac
-p_pooled  <- read_pdf_as_grob(grep("km_val_pooled_logrank", km_paths, value = TRUE))
-p_dijk    <- read_pdf_as_grob(grep("km_val_Dijk_logrank", km_paths, value = TRUE))
-p_moffitt <- read_pdf_as_grob(grep("km_val_Moffitt_GEO_array_logrank", km_paths, value = TRUE))
-p_paca    <- read_pdf_as_grob(grep("km_val_PACA_AU_logrank", km_paths, value = TRUE))
-p_puleo   <- read_pdf_as_grob(grep("km_val_Puleo_array_logrank", km_paths, value = TRUE))
+p_cutpoint <- read_pdf_as_grob(file.path(fig_dir, "cutpoint_curve_logrank_tcgacptac.pdf"))
+p_pooled   <- read_pdf_as_grob(file.path(km_dir, "km_val_pooled_logrank_tcgacptac.pdf"))
+p_dijk     <- read_pdf_as_grob(file.path(km_dir, "km_val_Dijk_logrank_tcgacptac.pdf"))
+p_moffitt  <- read_pdf_as_grob(file.path(km_dir, "km_val_Moffitt_GEO_array_logrank_tcgacptac.pdf"))
+p_paca     <- read_pdf_as_grob(file.path(km_dir, "km_val_PACA_AU_logrank_tcgacptac.pdf"))
+p_puleo    <- read_pdf_as_grob(file.path(km_dir, "km_val_Puleo_array_logrank_tcgacptac.pdf"))
 
 row1 <- plot_grid(
   p_cutpoint, p_pooled,
@@ -397,13 +423,8 @@ plot_grid(row1, row2, row3, nrow = 3, rel_heights = c(1, 1, 1))
 To assess whether the DeSurv-derived risk stratification captures biologically meaningful transcriptional programs, we examined the overlap between dichotomized risk groups (High vs Low) and two established PDAC molecular classifiers: PurIST (Basal-like vs Classical) and DeCAF (proCAF vs restCAF). Fig. \ref{fig:fig-subtype-overlap} shows the composition of each risk group across all pooled external validation cohorts, with Fisher's exact test P-values quantifying the association. The high-risk group was significantly enriched for Basal-like (PurIST) and proCAF (DeCAF) subtypes, consistent with the known poor prognosis of these molecular classes. This concordance confirms that DeSurv's survival-driven factorization recovers clinically relevant biology without requiring subtype labels during training.
 
 ```{r fig-subtype-overlap, fig.width = 8, fig.height = 5, fig.cap = "Subtype composition of DeSurv risk groups in pooled external validation cohorts. Stacked bar charts show the proportion of PurIST (left) and DeCAF (right) subtypes within Low and High risk groups defined by the log-rank-optimized cutpoint. Numbers indicate sample counts; Fisher's exact test P-values are shown above each panel.", fig.env='figure*', fig.pos='t', out.width='\\textwidth'}
-library(magick)
-library(cowplot)
-
-tar_load(fig_subtype_overlap_tcgacptac)
-
-overlap_path <- grep("subtype_overlap_pooled_logrank", fig_subtype_overlap_tcgacptac, value = TRUE)
-img <- magick::image_read_pdf(overlap_path, density = 300)
+# Direct path to pooled subtype overlap figure
+img <- magick::image_read("figures/km_dichot/subtype_overlap_pooled_logrank_tcgacptac.pdf", density = 300)
 cowplot::ggdraw() + cowplot::draw_image(img)
 ```
 
@@ -415,72 +436,6 @@ cowplot::ggdraw() + cowplot::draw_image(img)
 <!-- tar_load(fig_sc_plot_tcgacptac) -->
 <!-- fig_sc_plot_tcgacptac -->
 <!-- ``` -->
-
-## Variance explained versus survival contribution per factor {.unnumbered}
-
-For each factor learned by DeSurv and standard NMF at $k = 3$, we compared the conditional fraction of transcriptional variance explained (semi-partial $R^2$) with the Type III partial likelihood contribution to survival. All three NMF factors contributed negligibly to survival despite spanning a range of conditional variance from $\sim 10\%$ (N2, Exocrine-like) to $\sim 24\%$ (N1, N3). In contrast, DeSurv concentrated survival signal almost entirely into D1 ($\Delta\ell \approx 65$), while D3, despite explaining the greatest conditional variance of any factor ($\sim 30\%$), contributed minimally to survival. D3's combination of high variance and low survival contribution reflects its absorption of residual exocrine-compositional signal alongside basal-like tumor programs; the prognostically relevant tumor-stroma contrast is instead captured by D1's iCAF-classical co-program. Together, these patterns directly illustrate the misalignment between variance-dominant and prognosis-relevant signals in PDAC (Fig. \ref{fig:varsurvival}).
-
-```{r fig-varsurvival, fig.width = 4, fig.height = 3.5, fig.cap = "Fraction of expression variance explained versus Type III partial likelihood contribution for each factor ($k = 3$). Each point represents one factor; DeSurv factors (blue) and standard NMF factors (red) are labeled D1--D3 and N1--N3 respectively. Survival contribution is quantified as the reduction in Cox partial log-likelihood when each factor is removed from the full $k$-factor model (see SI Methods). \\label{fig:varsurvival}", fig.env='figure', fig.pos='t'}
-tar_load(fig_variation_explained_tcgacptac)
-fig_variation_explained_tcgacptac <- set_fig_font(fig_variation_explained_tcgacptac, size = 10)
-fig_variation_explained_tcgacptac +
-  theme(
-    legend.position    = c(1, 0.5),
-    legend.justification = c(1, 0),
-    legend.background  = element_rect(color = "black"),
-    axis.title         = element_text(size = 8)
-  )
-```
-
-## DeSurv and NMF factor correspondence {.unnumbered}
-
-Pairwise Spearman correlations of W-matrix gene loadings between DeSurv and standard NMF factors illustrate how the two factorizations relate. NMF's classical-associated factor (N1) shows the strongest gene-loading correspondence with DeSurv's basal-like factor (D3), while NMF's composite microenvironmental factor (N3) maps primarily to DeSurv's microenvironmental factor (D2). The exocrine-like NMF factor (N2) shows no strong one-to-one correspondence with any DeSurv factor; its signal is weakly absorbed into D3, contributing to D3's high conditional variance relative to its survival contribution (Fig. \ref{fig:varsurvival}). Together these correspondences confirm that DeSurv produces a different factor structure from NMF, with the prognostically relevant tumor-stroma axis concentrated in D1 and variance-dominant but outcome-neutral variation merged into D3 (Fig. \ref{fig:corr}).
-
-```{r fig-corr, fig.width = 5, fig.height = 3.5, fig.cap = "Pairwise correspondence between NMF and DeSurv factors, measured by Spearman rank correlation of W-matrix gene loadings across all genes. Tumor-intrinsic structure is preserved across methods, while variance-driven microenvironmental structure is redistributed under survival supervision; the exocrine-dominated NMF factor shows no strong one-to-one correspondence with any DeSurv factor. \\label{fig:corr}", fig.env='figure', fig.pos='t'}
-library(cowplot)
-tar_load(fig_desurv_std_correlation_tcgacptac)
-cowplot::plot_grid(
-  fig_desurv_std_correlation_tcgacptac$plot,
-  cowplot::plot_grid(
-    NULL,
-    cowplot::ggdraw(fig_desurv_std_correlation_tcgacptac$legend),
-    nrow = 2, rel_heights = c(0.08, 0.92)
-  ),
-  ncol = 2, rel_widths = c(4, 1)
-)
-```
-
-## Per-cohort hazard ratios for the most prognostic factor {.unnumbered}
-
-Hazard ratios for the factor with the largest training-data Cox partial log-likelihood improvement were estimated separately in each external validation cohort. DeSurv-derived factor hazard ratio estimates are more stable across cohorts than those from the corresponding standard NMF factor (Fig. \ref{fig:forest}).
-
-```{r fig-forest, fig.width = 5, fig.height = 3.5, fig.cap = "Forest plot summarizing per-cohort hazard ratios (HRs; 95\\% CIs) for the latent factor most predictive of survival in the training data, evaluated in held-out validation datasets. Estimates from DeSurv (blue) show more consistent associations across cohorts compared with standard NMF (red). \\label{fig:forest}", fig.env='figure', fig.pos='t'}
-library(cowplot)
-library(ggplot2)
-tar_load(fig_hr_forest_tcgacptac)
-base_size <- 10
-theme_pnas <- theme_classic(base_size = base_size) +
-  theme(
-    plot.margin = margin(6, 10, 6, 6),
-    legend.box.margin = margin(0, 0, 0, 0)
-  )
-fig_hr_forest_tcgacptac +
-  scale_color_discrete(
-    labels = c(
-      "Puleo_array"       = "Puleo",
-      "Dijk"              = "Dijk",
-      "PACA_AU_seq"       = "PACA seq",
-      "PACA_AU_array"     = "PACA array",
-      "Moffitt_GEO_array" = "Moffitt"
-    )
-  ) +
-  theme_pnas +
-  theme(
-    legend.position = "bottom",
-    axis.title.y = element_blank(),
-    plot.margin = margin(6, 20, 6, 6)
-  )
-```
 
 ## Standard NMF factor structure at independently selected rank {.unnumbered}
 
@@ -503,7 +458,10 @@ At BO-selected $k = 7$ under $\alpha = 0$ (Fig. \ref{fig:fig-nmf-k7-heatmap}), s
 
 ```{r fig-nmf-k7-heatmap, fig.width = 6, fig.height = 5, fig.cap = "Gene program overlap heatmap for standard NMF at $k = 7$ (BO-selected rank with $\\alpha = 0$). Compared with $k = 3$ and $k = 5$, the 7-factor solution shows increased fragmentation: multiple factors partially capture the same PDAC gene signatures and no new coherent biological program emerges. No supervised DeSurv equivalent at $k = 7$ is shown; the $k$-sensitivity and factor-nesting analyses (Fig. \\ref{fig:k3-k7-nesting}) characterize the corresponding supervised fit. \\label{fig:fig-nmf-k7-heatmap}", fig.env='figure', fig.pos='t'}
 library(cowplot)
-tar_load(fig_gene_overlap_heatmap_desurv_alpha0_tcgacptac)
+# This target lacks metadata; load directly from store objects
+fig_gene_overlap_heatmap_desurv_alpha0_tcgacptac <- readRDS(
+  file.path(tar_config_get("store"), "objects", "fig_gene_overlap_heatmap_desurv_alpha0_tcgacptac")
+)
 cowplot::plot_grid(
   fig_gene_overlap_heatmap_desurv_alpha0_tcgacptac$plot,
   cowplot::ggdraw(fig_gene_overlap_heatmap_desurv_alpha0_tcgacptac$legend),
