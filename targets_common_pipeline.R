@@ -2447,7 +2447,7 @@ FIGURE_TARGETS <- list(
       result = make_gene_overlap_heatmap(tar_fit_desurv,tar_tops_desurv$top_genes,top_genes,
                                     factor_labels = FIGURE_CONFIGS$heatmap_factor_labels[[bo_label]],
                                     title = "DeSurv",
-                                    fontsize_row = 5)
+                                    fontsize_row = 7)
       save_plot_pdf(
         result$plot,
         file.path(
@@ -2568,7 +2568,7 @@ FIGURE_TARGETS <- list(
                                     top_genes,
                                     factor_labels = FIGURE_CONFIGS$heatmap_factor_labels_std[[bo_label]],
                                     title = "NMF",
-                                    fontsize_row = 5)
+                                    fontsize_row = 7)
       save_plot_pdf(
         result$plot,
         file.path(
@@ -2653,8 +2653,9 @@ FIGURE_TARGETS <- list(
         cluster_cols = FALSE,
         show_colnames = TRUE,
         show_rownames = TRUE,
-        fontsize = 7,
-        fontsize_number = 7,
+        fontsize = 8,
+        fontsize_number = 8,
+        number_color = "black",
         breaks = seq(-0.5, 1, length.out = 101),
         display_numbers = TRUE,
         number_format = "%.2f",

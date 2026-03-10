@@ -1,11 +1,27 @@
 ---
+title: "Supplementary Results"
+subtitle: "Survival-guided matrix factorization identifies reproducible prognostic programs in pancreatic cancer"
+author: "Amber M. Young"
 output:
-  pdf_document: default
+  pdf_document:
+    toc: true
+    number_sections: true
+    fig_caption: true
   html_document: default
 header-includes:
   - \renewcommand{\thefigure}{S\arabic{figure}}
   - \renewcommand{\thetable}{S\arabic{table}}
 ---
+\newpage
+\phantomsection
+\addcontentsline{toc}{section}{List of Figures}
+\listoffigures
+\newpage
+\phantomsection
+\addcontentsline{toc}{section}{List of Tables}
+\listoftables
+\newpage
+
 <!-- PNAS CONVENTION: All supplementary figures should be labeled "Fig. S1", "Fig. S2", etc.
      not "Figure 1", "Figure 2". Tables should be "Table S1", etc.
      Internal scenario code names (R0_easy, R00_null, R_mixed) should be replaced with
@@ -101,11 +117,11 @@ n_genes_total    <- prod_sum$n_genes_total
 n_combinations   <- length(k_labs) * length(alpha_labs)
 ```
 
-## The DeSurv model shows consistent convergence and stability across restarts
+# The DeSurv model shows consistent convergence and stability across restarts
 
 Across datasets and initialization schemes, the DeSurv algorithm consistently converged to numerically stable solutions within the designated iteration budget. Warm-start strategies, in which solutions at $\alpha=0$ initialized supervised runs, substantially reduced variability across restarts and improved reproducibility. Fig. \ref{fig:fig-converge} shows representative loss trajectories demonstrating monotone decreases until convergence across restarts. Compared with naive random initialization, warm-starts produced tighter distributions of cross-validated C-index and partial likelihood, confirming stability of the optimization procedure.
 
-```{r fig-converge, fig.width = 6, fig.height= 4, fig.cap="Convergence of model across initializations." , fig.env='figure*', fig.pos='t', out.height= "4in", out.width='\\textwidth'}
+```{r fig-converge, fig.width = 5, fig.height= 3, fig.cap="Convergence of model across initializations." , fig.env='figure*', fig.pos='H', out.height= "3in", out.width='5in'}
 tar_load(desurv_seed_fits_tcgacptac)
 set.seed(147)
 seeds = sample(1:length(desurv_seed_fits_tcgacptac$fits),5,replace = FALSE)
@@ -144,7 +160,7 @@ ggplot2::ggplot(lossit, ggplot2::aes(y = rel_delta_loss, x = iter, color = init_
 ```
 
 
-## Simulation results under null and mixed scenarios {.unnumbered}
+# Simulation results under null and mixed scenarios 
 
 To characterize the operating characteristics of DeSurv across different signal regimes, we evaluated performance under three simulation scenarios. In the primary scenario (main text Fig. 3), prognostic programs explained low variance relative to outcome-neutral background signals, and survival depended on 150 factor-specific marker genes ($\beta_1 = 2$, $\beta_2 = \beta_3 = 0$). In the null scenario, survival times were generated independently of gene expression ($\beta = 0$), so no prognostic structure existed. In the mixed scenario, survival depended on 300 genes per lethal factor, of which 50% were factor-specific markers and 50% were background genes with loadings shared across all factors. All scenarios used $G = 3{,}000$ genes, $N = 200$ samples, $K = 3$ true factors, and identical gamma distribution parameters for the gene loading matrix $W$ (see Materials and Methods). Performance was evaluated using cross-validated concordance index (C-index), precision of recovered prognostic gene sets, and the distribution of selected ranks across simulation replicates.
 
@@ -235,7 +251,7 @@ if (!is.null(mixed_beta)) {
 ```
 
 
-## Cross-validated C-index across factorization rank {.unnumbered}
+# Cross-validated C-index across factorization rank 
 
 To evaluate how the number of latent factors $k$ affects prognostic performance, we performed an exhaustive grid search over $k \in \{2, 3, \ldots, 12\}$ and supervision strength $\alpha \in \{0, 0.05, \ldots, 0.95\}$ using 5-fold cross-validation on the TCGA+CPTAC training cohort. For each $k$, the best-performing $\alpha$ was selected by maximizing the mean CV C-index. The unsupervised NMF baseline ($\alpha = 0$) was evaluated at the same $k$ values for comparison. Results are shown for two gene-selection settings: $n_{\text{top}} = 270$ top genes per factor and $n_{\text{top}} = \text{ALL}$ (all genes retained), both at $\lambda = 0.349$ and $\xi = 0.056$.
 
@@ -249,7 +265,7 @@ img <- magick::image_read("figures/cv_grid/cv_cindex_by_k_primary.pdf", density 
 cowplot::ggdraw() + cowplot::draw_image(img)
 ```
 
-## Standard NMF rank selection heuristics {.unnumbered}
+# Standard NMF rank selection heuristics 
 
 Standard unsupervised rank selection criteria — reconstruction residuals, cophenetic correlation coefficient, and mean silhouette width — yielded inconsistent guidance for selecting the factorization rank $k$ in the PDAC training cohort (TCGA + CPTAC). Reconstruction residuals decreased smoothly without a clear elbow (Fig. \ref{fig:nmf-diagnostics}A). Cophenetic correlation fluctuated without a distinct transition point (Fig. \ref{fig:nmf-diagnostics}B). Mean silhouette width favored very low ranks that conflicted with other criteria (Fig. \ref{fig:nmf-diagnostics}C). These contradictions motivated the survival-supervised rank selection approach described in the main text.
 
@@ -284,7 +300,7 @@ panels <- plot_grid(
 plot_grid(panels, legend, nrow = 2, rel_heights = c(1, 0.15))
 ```
 
-## K-sensitivity analysis: effect of gene focusing on iCAF factor validation {.unnumbered}
+# K-sensitivity analysis: effect of gene focusing on iCAF factor validation 
 
 To evaluate the robustness of the K=3 iCAF factorization, we conducted an exhaustive sensitivity analysis across $K \in \{2, 3, 5, 7, 9\}$ and $\alpha \in \{0, 0.25, 0.35, 0.55, 0.75, 0.85, 0.95\}$ (`r n_combinations` combinations), holding all remaining hyperparameters fixed at the production-optimal values ($\lambda = 0.349$, $\xi = 0.056$, 100 initializations). For each fit, we identified the factor most correlated with the production K=3 D1 (the iCAF factor) and evaluated its prognostic value in `r n_val_total` independent validation patients across `r n_val_cohorts` cohorts (Dijk, Moffitt GEO, Puleo, PACA-AU), using stratified Cox regression (\texttt{strata(dataset)}) with and without adjustment for PurIST and DeCAF classifiers. Factor-program fidelity was quantified by Spearman rank correlation of $n_{\text{top}} = 270$-focused H-scores (H-cor) with the production factor. We repeated this analysis under two gene-projection settings, $n_{\text{top}} = 270$ (production-optimal top genes per factor) and $n_{\text{top}} = \text{NULL}$ (all 1,970 genes), to isolate the effect of gene focusing on validation performance.
 
@@ -367,7 +383,7 @@ kable(df_all, format = "latex", escape = FALSE, booktabs = TRUE,
 
 Four additional findings emerge from these analyses. First, K=7's apparent advantage observed in a parallel analysis using conventional hyperparameters ($\lambda=0.3$, $n_{\text{top}} = \text{NULL}$), where K=7 at $\alpha=0.75$ achieved adjusted $P = `r formatC(lam300_best_p, format="f", digits=3)`$, completely disappears with $n_{\text{top}} = 270$ (adj $P = `r formatC(k7_alpha75_p_270, format="f", digits=3)`$, Table \ref{tab:tab-ksens-adjp-ntop270}). Focused 270-gene projection fragments the iCAF signal across K=7's factors, indicating that the earlier K=7 advantage depended on the all-genes projection rather than reflecting an intrinsic property of the 7-factor solution. Second, K=3 achieves adjusted significance across a broad $\alpha$ range with $n_{\text{top}} = 270$ (`r n_k3_sig_270`/7 values), demonstrating that the production result does not depend on the BO-selected $\alpha = `r round(tar_read(tar_params_best_tcgacptac)$alpha, 3)`$ specifically. Third, K=5 at $\alpha=0.55$ achieves the highest factor-program fidelity in the $n_{\text{top}} = 270$ analysis (H-cor = `r round(hcor_k5_a55_270, 3)` vs. K=3's `r round(hcor_k3_a55_270, 3)`) and also achieves adjusted significance ($P = `r formatC(k5_alpha55_p_270, format="f", digits=3)`$), providing convergent evidence for the iCAF biology from a higher-K model; an independent K=5 all-genes fit at $\alpha=0.25$ likewise achieves adjusted significance ($P = `r formatC(k5_alpha25_p_all, format="f", digits=4)`$, H-cor = `r round(hcor_k5_a25_all, 3)`). Fourth, without gene focusing, high supervision weights ($\alpha \geq 0.75$) produce factors with extreme training discrimination (HR $\approx `r hr_overfit_min`$--$`r hr_overfit_max`$, LRT $P \sim `r formatC(lrt_overfit_min, format="e", digits=0)`$) that fail external validation, indicating overfitting of the training survival signal; gene focusing ($n_{\text{top}} = 270$) suppresses this by constraining each factor to its 270 most biologically characteristic genes.
 
-## K=3 factors are partially but asymmetrically nested within K=7 {.unnumbered}
+# K=3 factors are partially but asymmetrically nested within K=7 
 
 To assess whether the K=3 solution is simply a pruned version of the K=7 solution, we computed pairwise Spearman correlations between the W-matrix gene loadings of the production K=3 model and a K=7 DeSurv fit at $\alpha = 0.35$ (the nearest grid value to the BO-selected optimum at $\alpha = `r round(tar_read(tar_params_best_tcgacptac)$alpha, 3)`$), both using $n_{\text{top}} = 270$, $\lambda = 0.349$, $\xi = 0.056$.
 
@@ -379,7 +395,7 @@ img <- magick::image_read("figures/cv_grid/k3_k7_factor_correlation_heatmap.pdf"
 cowplot::ggdraw() + cowplot::draw_image(img)
 ```
 
-## Cutpoint selection and validation of dichotomized risk groups {.unnumbered}
+# Cutpoint selection and validation of dichotomized risk groups 
 
 To convert the continuous DeSurv linear predictor into a clinically interpretable binary risk stratification, we selected an optimal z-score cutpoint via cross-validation on the TCGA+CPTAC training cohort. For each candidate cutpoint in $\{-2.0, -1.8, \ldots, 2.0\}$, we computed the mean absolute log-rank z-statistic across held-out folds and selected the cutpoint maximizing this metric (Fig. \ref{fig:fig-cutpoint-km}A). We then applied this cutpoint to external validation cohorts by standardizing each patient's linear predictor using the training mean and standard deviation. Fig. \ref{fig:fig-cutpoint-km}B shows the resulting Kaplan–Meier curves for the pooled external validation analysis, with a stratified log-rank test accounting for dataset of origin. Panels C–F display per-cohort validation KM curves for Dijk, Moffitt, PACA-AU, and Puleo, respectively. Across all cohorts, the DeSurv-derived high-risk group showed consistently shorter survival, confirming that the training-derived cutpoint generalizes to independent datasets.
 
@@ -418,7 +434,7 @@ row3 <- plot_grid(
 plot_grid(row1, row2, row3, nrow = 3, rel_heights = c(1, 1, 1))
 ```
 
-## Overlap of DeSurv risk groups with known molecular subtypes {.unnumbered}
+# Overlap of DeSurv risk groups with known molecular subtypes 
 
 To assess whether the DeSurv-derived risk stratification captures biologically meaningful transcriptional programs, we examined the overlap between dichotomized risk groups (High vs Low) and two established PDAC molecular classifiers: PurIST (Basal-like vs Classical) and DeCAF (proCAF vs restCAF). Fig. \ref{fig:fig-subtype-overlap} shows the composition of each risk group across all pooled external validation cohorts, with Fisher's exact test P-values quantifying the association. The high-risk group was significantly enriched for Basal-like (PurIST) and proCAF (DeCAF) subtypes, consistent with the known poor prognosis of these molecular classes. This concordance confirms that DeSurv's survival-driven factorization recovers clinically relevant biology without requiring subtype labels during training.
 
@@ -437,7 +453,7 @@ cowplot::ggdraw() + cowplot::draw_image(img)
 <!-- fig_sc_plot_tcgacptac -->
 <!-- ``` -->
 
-## Standard NMF factor structure at independently selected rank {.unnumbered}
+# Standard NMF factor structure at independently selected rank 
 
 Throughout the main text, both DeSurv and standard NMF were fit at the same rank ($k = 3$), enabling a controlled comparison of the effect of survival supervision on factor structure. When each method selects its own rank independently, standard NMF chooses $k = 5$ via residual elbow detection or $k = 7$ via Bayesian optimization with $\alpha = 0$, while supervised DeSurv BO selects $k = 3$. We examine here the gene program structure at elbow-selected $k = 5$ for standard NMF (Fig. \ref{fig:fig-nmf-k5-heatmap}), and the NMF $k = 7$ structure to illustrate additional fragmentation when supervision is absent (Fig. \ref{fig:fig-nmf-k7-heatmap}).
 

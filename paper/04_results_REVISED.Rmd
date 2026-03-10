@@ -34,6 +34,7 @@ library(grid)
 library(viridis)
 library(ggplotify)
 library(NMF)
+library(gtable)
 
 
 tar_load(sim_figs_by_scenario)
@@ -187,18 +188,28 @@ Because the goal is prognostic factorization, DeSurv selects $k$ using the crite
 ```{r fig-sim, fig.width = 6.5, fig.height = 6, fig.cap = "Simulation studies and model selection. (A) Test-set concordance index across 100 simulation replicates ($p = 3{,}000$ genes, $n = 200$ samples, true $k = 3$) comparing DeSurv to standard NMF ($\\alpha = 0$). (B) Precision (fraction of top-weighted genes in a learned factor overlapping a true prognostic program) across replicates. (C) Distribution of selected $k$ values for DeSurv versus standard NMF. (D) Gaussian process predicted mean cross-validated C-index from Bayesian optimization over factorization rank ($k$) and supervision strength ($\\alpha$) in PDAC training data (TCGA + CPTAC). \\label{fig:sim}", fig.env='figure*', fig.pos='t', out.height= "6in", out.width="6.5in"}
 
 tar_load(fig_bo_heat_tcgacptac)
-fig_bo_heat_tcgacptac = set_fig_font(fig_bo_heat_tcgacptac, size = 10)
+fig_bo_heat_tcgacptac = set_fig_font(fig_bo_heat_tcgacptac, size = 10) +
+  guides(fill = guide_colorbar(barheight = unit(2, "cm"), barwidth = unit(0.3, "cm"))) +
+  theme(legend.title = element_text(size = 7), legend.text = element_text(size = 7))
+leg_grob = ggplotGrob(fig_bo_heat_tcgacptac)
+guide_idx <- which(leg_grob$layout$name == "guide-box-right")
+heat_legend <- leg_grob$grobs[[guide_idx]]
 
+fig_bo_heat_tcgacptac = fig_bo_heat_tcgacptac + theme(legend.position = "none")
 upper = plot_grid(
   alt_plots$cindex_box + labs(title = NULL) + scale_y_continuous(limits = c(.5, 1)),
   alt_plots$precision_box + labs(title = NULL),
-  ncol = 2, labels = c("A", "B")
+  NULL,
+  ncol = 3, labels = c("A", "B",""),
+  rel_widths = c(4,4,.8)
 )
 
 lower = plot_grid(
   alt_plots$k_hist,
   fig_bo_heat_tcgacptac,
-  ncol = 2, labels = c("C", "D")
+  heat_legend,
+  ncol = 3, labels = c("C", "D",""),
+  rel_widths = c(4,4,.8)
 )
 
 plot_grid(upper, lower, nrow = 2)
@@ -271,12 +282,37 @@ plot_3c <- set_fig_font(fig_variation_explained_tcgacptac, size = 10) +
   )
 
 # ── Panel D: W-matrix correlation ──
+legend_d <- ggplot(
+  data.frame(x = 0, y = seq(-0.5, 1, length.out = 100)),
+  aes(x = x, y = y, fill = y)
+) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu")))(100),
+    limits = c(-0.5, 1),
+    breaks = c(-0.4, 0, 0.4, 0.8),
+    name = "Spearman\ncorrelation"
+  ) +
+  guides(fill = guide_colorbar(
+    barwidth  = unit(0.3, "cm"),
+    barheight = unit(2, "cm"),
+    title.position = "top",
+    title.hjust = 0.5
+  )) +
+  theme_void() +
+  theme(
+    legend.position = "right",
+    legend.title = element_text(size = 6),
+    legend.text  = element_text(size = 6)
+  )
+legend_d_grob <- cowplot::get_legend(legend_d)
+
 plot_3d <- plot_grid(
   fig_desurv_std_correlation_tcgacptac$plot +
     theme(plot.margin = margin(2, 2, 2, 20)),
   plot_grid(
     NULL,
-    cowplot::ggdraw(fig_desurv_std_correlation_tcgacptac$legend),
+    cowplot::ggdraw(legend_d_grob),
     nrow = 2, rel_heights = c(0.08, 0.92)
   ),
   ncol = 2, rel_widths = c(4, 1)
@@ -343,7 +379,7 @@ cohort_cols <- c("Dijk" = "#F8766D", "Moffitt" = "#B79F00", "PACA array" = "#00B
 cohort_shapes <- c("Dijk" = 16, "Moffitt" = 16, "PACA array" = 16,
                    "PACA seq" = 16, "Puleo" = 16, "Pooled" = 18)
 cohort_sizes <- c("Dijk" = 2.2, "Moffitt" = 2.2, "PACA array" = 2.2,
-                  "PACA seq" = 2.2, "Puleo" = 2.2, "Pooled" = 4.5)
+                  "PACA seq" = 2.2, "Puleo" = 2.2, "Pooled" = 4)
 
 base_size <- 8
 dodge_w <- 0.6
@@ -385,6 +421,8 @@ make_forest_panel <- function(dat, title, highlight_level) {
       legend.position = "none",
       plot.title = element_text(face = "bold", size = 9, hjust = 0.5),
       axis.text.y = element_text(size = 8, face = "bold"),
+      axis.text.x = element_text(size = 8, face = "bold"),
+      axis.title.x = element_text(size = 9),
       plot.margin = margin(2, 6, 2, 4)
     )
 }
@@ -402,13 +440,14 @@ p_leg <- ggplot(all_data, aes(x = HR, y = factor_name, colour = dataset,
   guides(colour = guide_legend(nrow = 1, override.aes = list(size = 2.5)),
          shape = guide_legend(nrow = 1), size = guide_legend(nrow = 1)) +
   theme_void(base_size = base_size) +
-  theme(legend.position = "bottom", legend.text = element_text(size = 7))
-forest_legend <- cowplot::get_legend(p_leg)
+  theme(legend.position = "bottom", legend.text = element_text(size = 8))
+leg_grob = ggplotGrob(p_leg)
+forest_legend <- gtable::gtable_filter(leg_grob, "guide-box")
 
 plot_forest <- plot_grid(
   plot_grid(p_desurv, p_nmf, ncol = 2, align = "hv", axis = "tb"),
   forest_legend,
-  nrow = 2, rel_heights = c(10, 1)
+  nrow = 2, rel_heights = c(15, 1)
 )
 
 # ── Panels B-C: KM curves ──
@@ -424,8 +463,8 @@ theme_pnas <- theme_classic(base_size = base_size) +
     legend.key.width = unit(12, "pt")
   )
 
-km_text_size    <- base_size - 3
-risk_title_size <- 5
+km_text_size    <- base_size
+risk_title_size <- base_size
 
 stack_surv <- function(surv_obj, title, keep_legend = FALSE) {
   p <- surv_obj$plot +
@@ -437,7 +476,7 @@ stack_surv <- function(surv_obj, title, keep_legend = FALSE) {
       axis.text.x  = element_text(size = km_text_size),
       axis.text.y  = element_text(size = km_text_size),
       plot.margin  = margin(4, 10, 0, 10),
-      plot.title   = element_text(size = risk_title_size + 3)
+      plot.title   = element_text(size = 9)
     ) +
     labs(title = title)
 
@@ -488,7 +527,7 @@ km_block <- plot_grid(
 )
 
 # ── Full figure: forest (left) + KM curves (right) ──
-plot_grid(plot_forest, km_block, ncol = 2, rel_widths = c(1.2, 1),
+plot_grid(plot_forest, km_block, ncol = 2, rel_widths = c(1.4, 1),
           labels = c("A", ""), label_size = 12)
 ```
 

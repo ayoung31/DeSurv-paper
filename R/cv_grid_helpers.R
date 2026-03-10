@@ -1397,7 +1397,7 @@ plot_km_validation <- function(grid_fit_entry, val_ds, ds_name, xlim = NULL) {
   ggsurv <- do.call(survminer::ggsurvplot, surv_args)
   ggsurv$plot <- ggsurv$plot +
     ggplot2::annotate("text", x = Inf, y = 0.95, label = annot,
-                      hjust = 1.1, vjust = 1, size = 3)
+                      hjust = 1.1, vjust = 1, size = 4)
   ggsurv
 }
 

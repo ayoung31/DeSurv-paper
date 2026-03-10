@@ -674,7 +674,9 @@ make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref, factor_lab
   rename_map <- c(
     "SCISSORS_CAF_vs_peri_top25_Perivascular" = "SCISSORS_Perivascular",
     "SCISSORS_panCAF_vs_peri_top25_panCAF"    = "SCISSORS_panCAF",
-    "MSI_Immune"                              = "Moffitt_Immune"
+    "MSI_Immune"                              = "Moffitt_Immune",
+    "SCISSORS_iCAF"                           = "SCISSORS_restCAF",
+    "SCISSORS_myCAF"                          = "SCISSORS_proCAF"
   )
   to_rename <- names(temp) %in% names(rename_map)
   names(temp)[to_rename] <- rename_map[names(temp)[to_rename]]
@@ -688,7 +690,8 @@ make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref, factor_lab
     "SCISSORS_CAF_vs_peri_top25_myCAF",
     "SCISSORS_panCAF_vs_peri_top25_Perivascular",
     "PurISS.final_iCAF",
-    "PurISS.final_myCAF"
+    "PurISS.final_myCAF",
+    "Bailey_NotUnique"
   )
   ref_sigs <- temp[!names(temp) %in% drop]
 
@@ -785,7 +788,7 @@ make_gene_overlap_heatmap = function(fit_desurv, tops, top_genes_ref, factor_lab
       colors = my_colors,
       limits = c(-0.6, 0.6),
       breaks = c(-0.6, -0.3, 0, 0.3, 0.6),
-      name = "Spearman r"
+      name = "Spearman\ncorrelation"
     ) +
     ggplot2::guides(fill = ggplot2::guide_colorbar(
       barwidth  = ggplot2::unit(0.3, "cm"),
@@ -2579,7 +2582,7 @@ splot_cutpoint = function(data_val_filtered, tar_fit_desurv, lp_stats, ntop = NU
       x     = x_max * 0.98,
       y     = 0.85,
       hjust = 1,
-      size  = 1.8,
+      size  = 2.5,
       label = label
     ) 
 

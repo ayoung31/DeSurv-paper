@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  9 MAR 2026 15:22
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  10 MAR 2026 17:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -402,7 +402,7 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 28
 File: bkm-pdftex.def 2023-12-10 v1.31 bookmark driver for pdfTeX and luaTeX (HO)
 \BKM@id=\count330
 ))
-LaTeX Font Info:    Trying to load font information for T1+lmr on input line 119.
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 130.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
@@ -411,33 +411,33 @@ File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
 ) (./supp_methods.aux)
 \openout1 = `supp_methods.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 119.
-LaTeX Font Info:    ... okay on input line 119.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 119.
-LaTeX Font Info:    ... okay on input line 119.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 119.
-LaTeX Font Info:    ... okay on input line 119.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 119.
-LaTeX Font Info:    ... okay on input line 119.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 119.
-LaTeX Font Info:    ... okay on input line 119.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 119.
-LaTeX Font Info:    ... okay on input line 119.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 119.
-LaTeX Font Info:    ... okay on input line 119.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 119.
-LaTeX Font Info:    ... okay on input line 119.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 119.
-LaTeX Font Info:    ... okay on input line 119.
-LaTeX Info: Redefining \microtypecontext on input line 119.
-Package microtype Info: Applying patch `item' on input line 119.
-Package microtype Info: Applying patch `toc' on input line 119.
-Package microtype Info: Applying patch `eqnum' on input line 119.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Info: Redefining \microtypecontext on input line 130.
+Package microtype Info: Applying patch `item' on input line 130.
+Package microtype Info: Applying patch `toc' on input line 130.
+Package microtype Info: Applying patch `eqnum' on input line 130.
 
-Package microtype Warning: Unable to apply patch `footnote' on input line 119.
+Package microtype Warning: Unable to apply patch `footnote' on input line 130.
 
-Package microtype Info: Applying patch `verbatim' on input line 119.
-LaTeX Info: Redefining \microtypesetup on input line 119.
+Package microtype Info: Applying patch `verbatim' on input line 130.
+LaTeX Info: Redefining \microtypesetup on input line 130.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using protrusion set `basicmath'.
@@ -490,200 +490,205 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package hyperref Info: Link coloring OFF on input line 119.
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 123.
+Package hyperref Info: Link coloring OFF on input line 130.
+LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 132.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 123.
+LaTeX Font Info:    Trying to load font information for OML+lmm on input line 132.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 123.
+LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 132.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 123.
+LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 132.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 123.
+(Font)              <12> on input line 132.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 123.
+(Font)              <8> on input line 132.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 123.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 123.
+(Font)              <6> on input line 132.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 132.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 123.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 132.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
+) (./supp_methods.toc
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <10> on input line 3.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <7> on input line 3.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <5> on input line 3.
 )
-Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 172.
+\tf@toc=\write3
+\openout3 = `supp_methods.toc'.
+
 [1
 
-{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}]
+{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}]
+Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 188.
+[2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 202.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 202.
+(hyperref)                removing `math shift' on input line 218.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 224.
+(hyperref)                removing `math shift' on input line 218.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 224.
-
-[2]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 329.
+(hyperref)                removing `math shift' on input line 240.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\beta' on input line 329.
+(hyperref)                removing `math shift' on input line 240.
+
+[3]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 345.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 329.
-
-[3] [4]
-
-Package hyperref Warning: Suppressing empty link on input line 425.
-
-[5] [6] [7]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 669.
+(hyperref)                removing `\beta' on input line 345.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 669.
+(hyperref)                removing `math shift' on input line 345.
+
+[4] [5] [6] [7] [8]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 682.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 682.
 
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 713.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 713.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 713.
+(Font)              <14.4> on input line 726.
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 713.
+(hyperref)                removing `math shift' on input line 726.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 713.
+(hyperref)                removing `math shift' on input line 726.
 
-[8]
+[9]
 pdfTeX warning (ext4): destination with the same identifier (name{equation.16}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.767 ...ictors \(\hat{\eta}_i\): \begin{equation}
+l.779 ...ictors \(\hat{\eta}_i\): \begin{equation}
                                                   
 pdfTeX warning (ext4): destination with the same identifier (name{equation.16}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.767 ...ictors \(\hat{\eta}_i\): \begin{equation}
+l.779 ...ictors \(\hat{\eta}_i\): \begin{equation}
                                                   
 pdfTeX warning (ext4): destination with the same identifier (name{equation.16}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.767 ...ictors \(\hat{\eta}_i\): \begin{equation}
+l.779 ...ictors \(\hat{\eta}_i\): \begin{equation}
                                                   
 pdfTeX warning (ext4): destination with the same identifier (name{equation.16}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.767 ...ictors \(\hat{\eta}_i\): \begin{equation}
-                                                   [9] [10]
+l.779 ...ictors \(\hat{\eta}_i\): \begin{equation}
+                                                   [10] [11]
 
-LaTeX Warning: Citation `rashid2020purity' on page 11 undefined on input line 897.
-
-
-LaTeX Warning: Citation `peng2024determination' on page 11 undefined on input line 898.
+LaTeX Warning: Citation `rashid2020purity' on page 12 undefined on input line 915.
 
 
-LaTeX Warning: Citation `peng2024determination' on page 11 undefined on input line 903.
+LaTeX Warning: Citation `peng2024determination' on page 12 undefined on input line 916.
 
 
-LaTeX Warning: Citation `rashid2020purity' on page 11 undefined on input line 915.
+LaTeX Warning: Citation `peng2024determination' on page 12 undefined on input line 921.
 
 
-LaTeX Warning: Citation `peng2024determination' on page 11 undefined on input line 915.
+LaTeX Warning: Citation `rashid2020purity' on page 12 undefined on input line 933.
 
 
-LaTeX Warning: Citation `peng2024determination' on page 11 undefined on input line 915.
+LaTeX Warning: Citation `peng2024determination' on page 12 undefined on input line 933.
 
 
-LaTeX Warning: Citation `rashid2020purity' on page 11 undefined on input line 915.
+LaTeX Warning: Citation `peng2024determination' on page 12 undefined on input line 933.
 
 
-LaTeX Warning: Citation `peng2024determination' on page 11 undefined on input line 915.
+LaTeX Warning: Citation `rashid2020purity' on page 12 undefined on input line 933.
 
 
-LaTeX Warning: Citation `peng2024determination' on page 11 undefined on input line 915.
+LaTeX Warning: Citation `peng2024determination' on page 12 undefined on input line 933.
+
+
+LaTeX Warning: Citation `peng2024determination' on page 12 undefined on input line 933.
 
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 918.
+(Font)              <9> on input line 936.
 
-LaTeX Warning: Citation `raphael2017integrated' on page 11 undefined on input line 922.
-
-
-LaTeX Warning: Citation `ellis2013clinical' on page 11 undefined on input line 923.
+LaTeX Warning: Citation `raphael2017integrated' on page 12 undefined on input line 940.
 
 
-LaTeX Warning: Citation `dijk2020unsupervised' on page 11 undefined on input line 925.
+LaTeX Warning: Citation `ellis2013clinical' on page 12 undefined on input line 941.
 
 
-LaTeX Warning: Citation `moffitt2015virtual' on page 11 undefined on input line 926.
+LaTeX Warning: Citation `dijk2020unsupervised' on page 12 undefined on input line 943.
 
 
-LaTeX Warning: Citation `zhao2018gene' on page 11 undefined on input line 927.
+LaTeX Warning: Citation `moffitt2015virtual' on page 12 undefined on input line 944.
 
 
-LaTeX Warning: Citation `zhao2018gene' on page 11 undefined on input line 928.
+LaTeX Warning: Citation `zhao2018gene' on page 12 undefined on input line 945.
 
 
-LaTeX Warning: Citation `puleo2018stratification' on page 11 undefined on input line 929.
+LaTeX Warning: Citation `zhao2018gene' on page 12 undefined on input line 946.
 
 
-Overfull \hbox (15.48294pt too wide) in paragraph at lines 918--935
+LaTeX Warning: Citation `puleo2018stratification' on page 12 undefined on input line 947.
+
+
+Overfull \hbox (15.48294pt too wide) in paragraph at lines 936--953
  [][] 
  []
 
-[11]
+[12]
 
-LaTeX Warning: Citation `moffitt2015virtual' on page 12 undefined on input line 981.
-
-
-LaTeX Warning: Citation `elyada2019cross' on page 12 undefined on input line 983.
+LaTeX Warning: Citation `moffitt2015virtual' on page 13 undefined on input line 999.
 
 
-LaTeX Warning: Citation `peng2024determination' on page 12 undefined on input line 984.
+LaTeX Warning: Citation `elyada2019cross' on page 13 undefined on input line 1001.
 
 
-LaTeX Warning: Citation `leary2023s' on page 12 undefined on input line 985.
+LaTeX Warning: Citation `peng2024determination' on page 13 undefined on input line 1002.
 
 
-LaTeX Warning: Citation `peng2019novo' on page 12 undefined on input line 986.
+LaTeX Warning: Citation `leary2023s' on page 13 undefined on input line 1003.
 
 
-LaTeX Warning: Citation `rashid2020purity' on page 12 undefined on input line 987.
+LaTeX Warning: Citation `peng2019novo' on page 13 undefined on input line 1004.
 
 
-LaTeX Warning: Citation `Bailey2016' on page 12 undefined on input line 988.
+LaTeX Warning: Citation `rashid2020purity' on page 13 undefined on input line 1005.
 
-[12] [13] [14] (./supp_methods.aux)
+
+LaTeX Warning: Citation `Bailey2016' on page 13 undefined on input line 1006.
+
+[13] [14] [15
+
+] (./supp_methods.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
@@ -693,18 +698,18 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 14588 strings out of 469471
- 230104 string characters out of 5467057
- 684558 words of memory out of 5000000
- 42710 multiletter control sequences out of 15000+600000
- 722552 words of font info for 206 fonts, out of 8000000 for 9000
+ 14646 strings out of 469471
+ 230997 string characters out of 5467057
+ 684028 words of memory out of 5000000
+ 42739 multiletter control sequences out of 15000+600000
+ 739554 words of font info for 226 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  89i,10n,93p,1009b,647s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb>
-Output written on supp_methods.pdf (14 pages, 400794 bytes).
+</nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb>
+Output written on supp_methods.pdf (15 pages, 459530 bytes).
 PDF statistics:
- 364 PDF objects out of 1000 (max. 8388607)
- 298 compressed objects within 3 object streams
- 90 named destinations out of 1000 (max. 500000)
- 51353 words of extra memory for PDF output out of 51595 (max. 10000000)
+ 406 PDF objects out of 1000 (max. 8388607)
+ 334 compressed objects within 4 object streams
+ 93 named destinations out of 1000 (max. 500000)
+ 61601 words of extra memory for PDF output out of 61914 (max. 10000000)
 

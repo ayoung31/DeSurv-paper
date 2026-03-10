@@ -1,4 +1,7 @@
 ---
+title: "Supplementary Methods"
+subtitle: "Survival-guided matrix factorization identifies reproducible prognostic programs in pancreatic cancer"
+author: "Amber M. Young"
 header-includes:
 - \providecommand{\pandocbounded}[1]{#1}
 - \usepackage{booktabs}
@@ -18,13 +21,18 @@ header-includes:
 - \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 - \renewcommand{\algorithmicensure}{\textbf{Output:}}
 bibliography: references_30102025.bib
-output: pdf_document
+output:
+  pdf_document:
+    toc: true
+    number_sections: true
+    fig_caption: true
+  html_document: default
 ---
 
 
 
 
-\subsection{Model details}
+\section{Model details}
 Let $X \in \mathbb{R}_{\ge 0}^{p \times n}$ denote the nonnegative gene
 expression matrix with $p$ genes and $n$ subjects. DeSurv approximates
 $X \approx WH$ with $W \in \mathbb{R}_{\ge 0}^{p \times k}$ and
@@ -36,7 +44,7 @@ $\delta \in \{0,1\}^n$ the event indicators, and
 $Z = W^\top X \in \mathbb{R}^{k \times n}$ the sample-wise program
 loadings. We write $Z_i$ for the $i$th column of $Z$, and
 $n_{\text{event}} = \sum_{i=1}^n \delta_i$. For convenience we recall the
-DeSurv loss from Equation~1 in the main text and rewrite it as
+DeSurv loss from Equation 1 in the main text and rewrite it as
 \begin{align}
   \mathcal{L}(W,H,\beta) &=\nonumber \\
   &(1-\alpha)\left(\frac{1}{2np}\lVert X - WH \rVert_F^2 + \frac{\lambda_H}{2nk} \lVert H \rVert_F^2\right) \nonumber \\
@@ -66,10 +74,10 @@ The constants $1/(2np)$, $2/n_{\text{event}}$, and $1/(2nk)$ are chosen
 for numerical convenience and do not affect the minimizer.
 
 
-\subsection{Optimization Algorithm}
+\section{Optimization Algorithm}
 
-\subsubsection{Block coordinate descent scheme}
-Algorithm~\ref{alg:desurv} summarizes the block coordinate descent (BCD)
+\subsection{Block coordinate descent scheme}
+Algorithm \ref{alg:desurv} summarizes the block coordinate descent (BCD)
 scheme used to minimize $\mathcal{L}(W,H,\beta)$. At each outer iteration,
 we update $H$, then $W$, then $\beta$ while holding the other blocks
 fixed.
@@ -87,15 +95,15 @@ fixed.
         \State $eps = \infty$, $t = 0$
         \While{$eps \geq tol$ \textbf{and} $t < maxit$}
             \State \textbf{(H-update)} 
-            \State \hspace{0.5cm} Update $H^{(t+1)}$ from $H^{(t)}$ using the multiplicative rule in Eq.~\ref{eqn:Hupdate}, 
+            \State \hspace{0.5cm} Update $H^{(t+1)}$ from $H^{(t)}$ using the multiplicative rule in Eq. \ref{eqn:Hupdate}, 
             \State \hspace{0.5cm} holding $W^{(t)}$ and $\beta^{(t)}$ fixed.
             \State \textbf{(W-update)} 
-            \State \hspace{0.5cm} Update $W^{(t+1)}$ from $W^{(t)}$ using the hybrid multiplicative rule in Eq.~\ref{eqn:W_update},
+            \State \hspace{0.5cm} Update $W^{(t+1)}$ from $W^{(t)}$ using the hybrid multiplicative rule in Eq. \ref{eqn:W_update},
             \State \hspace{0.5cm} holding $H^{(t+1)}$ and $\beta^{(t)}$ fixed, and perform backtracking to ensure 
             \State \hspace{0.5cm} $\mathcal{L}$ does not increase.
             \State \textbf{($\beta$-update)}
             \State \hspace{0.5cm} Update $\beta^{(t+1)}$ from $\beta^{(t)}$ using a Newton-like step for the Cox loss
-            \State \hspace{0.5cm} (Eq.~\ref{eqn:beta_update}), holding $W^{(t+1)}$ and $H^{(t+1)}$ fixed.
+            \State \hspace{0.5cm} (Eq. \ref{eqn:beta_update}), holding $W^{(t+1)}$ and $H^{(t+1)}$ fixed.
             \State $lossNew = \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta^{(t+1)})$
             \State $eps = |lossNew - loss| / |loss|$
             \State $loss = lossNew$
@@ -105,7 +113,7 @@ fixed.
     \end{algorithmic}
 \end{algorithm}
 
-\subsubsection{Update for $H$}
+\subsection{Update for $H$}
 Conditional on $W$, the loss $\mathcal{L}(W,H,\beta)$ reduces to a strictly
 convex quadratic function of $H$. We adopt the standard NMF multiplicative
 update with $\ell_2$ penalty:
@@ -128,7 +136,7 @@ ensures that iterates remain in the interior of the nonnegative orthant, which
 simplifies the convergence analysis.
 
   
-\subsubsection{Update for $W$}
+\subsection{Update for $W$}
 For $W$, we construct a hybrid multiplicative update that balances the
 contributions of the NMF and Cox gradients. Let
 \[
@@ -241,7 +249,7 @@ The column normalization preserves both $WH$ and $W\beta$, and therefore
 leaves the loss $\mathcal{L}$ invariant up to numerical error. Backtracking
 guarantees that the accepted $W$ update does not increase $\mathcal{L}$.
 
-\subsubsection{Update for $\beta$} 
+\subsection{Update for $\beta$} 
 
 Conditional on $(W,H)$, the loss in $\beta$ reduces to a convex
 elastic-net–penalized Cox problem:
@@ -285,7 +293,7 @@ We iterate coordinate updates until the subproblem converges to numerical
 tolerance, yielding a minimizer in $\beta$ for the current $W$.
 
 
-\subsubsection{Normalization of W}
+\subsection{Normalization of W}
 
 After each accepted $W$ update, we normalize the columns of $W$ as
 $W \leftarrow W D^{-1}$, and adjust $H$ and $\beta$ as
@@ -299,7 +307,7 @@ prevents degeneracy in the scale-nonidentifiable factorization and keeps
 columns of $W$ comparable in magnitude and interpretable as gene programs.
 
 
-\subsubsection{Derivation of W update from projected coordinate descent}
+\subsection{Derivation of W update from projected coordinate descent}
 The W update can be derived directly from the projected coordinate descent update with a specific step size.
 
 Recall that the overall loss function is
@@ -339,17 +347,17 @@ Since $W \geq 0$ this is equivalent to
 which matches the multiplicative form used in the software implementation.
 
 
-\subsection{Convergence proof}
+\section{Convergence proof}
 
 We show that, under mild regularity conditions, the block coordinate descent
-(BCD) Algorithm~S\ref{alg:desurv} converges to a stationary point of the DeSurv
+(BCD) Algorithm S\ref{alg:desurv} converges to a stationary point of the DeSurv
 loss function
 \[
 \mathcal{L}(W,H,\beta).
 \]
 For clarity, we first analyze the algorithm \emph{without} the column
 normalization of $W$ inside the loop, and then argue in
-Section~\ref{subsec:conv_normalization} that the normalization step preserves
+Section \ref{subsec:conv_normalization} that the normalization step preserves
 stationarity of limit points.
 
 Throughout, let $\theta = (W,H,\beta)$ and denote
@@ -372,7 +380,7 @@ We assume:
 
 \textbf{Assumption 2 (Block updates).}
 At each outer iteration $t$, the three block updates in
-Algorithm~S\ref{alg:desurv} satisfy:
+Algorithm S\ref{alg:desurv} satisfy:
 \begin{enumerate}[label=(\roman*)]
   \item \emph{$H$-update.} For fixed $(W^{(t)},\beta^{(t)})$, the update
         $H^{(t)} \mapsto H^{(t+1)}$ is given by the multiplicative rule
@@ -385,7 +393,7 @@ Algorithm~S\ref{alg:desurv} satisfy:
         [@seung2001algorithms; @pascualmontano2006nonsmooth; @lin2007convergence].
   \item \emph{$W$-update.} For fixed $(H^{(t+1)},\beta^{(t)})$, the update
         $W^{(t)} \mapsto W^{(t+1)}$ is the hybrid multiplicative step
-        followed by backtracking as in Algorithm~S\ref{alg:backtrack}, producing
+        followed by backtracking as in Algorithm S\ref{alg:backtrack}, producing
         $W^{(t+1)}$ such that
         \[
           \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta^{(t)})
@@ -445,7 +453,7 @@ from $\theta^{(0)}\in\mathcal{S}_0$. \hfill$\square$
 
 \vspace{0.5em}
 \textbf{Lemma 2 (Monotone descent and existence of limit points).}
-Under Assumptions 1 and 2, Algorithm~S\ref{alg:desurv} (without $W$
+Under Assumptions 1 and 2, Algorithm S\ref{alg:desurv} (without $W$
 normalization) generates a sequence $\{\theta^{(t)}\}_{t\ge 0}\subset\mathcal{S}_0$
 such that
 \[
@@ -489,7 +497,7 @@ one limit point by the Bolzano--Weierstrass theorem. \hfill$\square$
 \vspace{0.5em}
 \textbf{Lemma 3 (Blockwise optimality of limit points).}
 Let $\theta^*=(W^*,H^*,\beta^*)$ be any limit point of $\{\theta^{(t)}\}$ under
-Assumptions~1–2. Then:
+Assumptions 1–2. Then:
 \begin{enumerate}[label=(\roman*)]
   \item $H^*$ satisfies the KKT conditions for
         \[
@@ -549,7 +557,7 @@ $\beta$-block given $(W^*,H^*)$ and hence satisfies its KKT conditions.
 \vspace{0.5em}
 \textbf{Theorem 1 (Convergence to a stationary point).}
 Under Assumptions 1 and 2, the sequence $\{\theta^{(t)}\}$ produced by
-Algorithm~S\ref{alg:desurv} (without $W$ normalization) satisfies:
+Algorithm S\ref{alg:desurv} (without $W$ normalization) satisfies:
 \begin{enumerate}[label=(\alph*)]
   \item The objective values $\{\mathcal{L}(\theta^{(t)})\}$ are monotonically
         nonincreasing and converge to a finite limit $\mathcal{L}^*$.
@@ -589,14 +597,14 @@ full problem: equivalently,
 \]
 which are precisely the KKT conditions for
 $\min_{\theta\in\Theta}\mathcal{L}(\theta)$.
-Hence every limit point of Algorithm~S\ref{alg:desurv} is stationary.
+Hence every limit point of Algorithm S\ref{alg:desurv} is stationary.
 \hfill$\square$
 
-\subsubsection{Effect of column normalization of $W$}
+\subsection{Effect of column normalization of $W$}
 \label{subsec:conv_normalization}
 
 The above analysis omits the column-normalization step for $W$ used in
-Algorithm~S\ref{alg:backtrack}. We briefly argue that this normalization does
+Algorithm S\ref{alg:backtrack}. We briefly argue that this normalization does
 not affect stationarity of limit points.
 
 Let $D$ be a diagonal matrix with strictly positive diagonal entries. The
@@ -623,15 +631,15 @@ of $\{\theta^{(t)}\}$ by such invertible diagonal scalings.
 Since the KKT conditions are expressed in terms of the gradients with respect
 to $WH$ and $W\beta$, and these quantities are invariant under the above
 scaling, stationarity is preserved under the transformation. Therefore
-Theorem~1 implies that every limit point of the \emph{normalized} algorithm is
+Theorem 1 implies that every limit point of the \emph{normalized} algorithm is
 also a stationary point of $\mathcal{L}$ (up to this scaling equivalence), which
 establishes convergence of the implementation used in practice.
 
-\subsubsection{Remark (Coxnet implementation)} 
+\subsection{Remark (Coxnet implementation)} 
 Our implementation updates the $\beta$ block using a Coxnet-style coordinate descent that relies on an approximate Hessian. Consequently, the formal optimality proof is established for an idealized version of the $\beta$ update that assumes exact second-order information. Nonetheless, in empirical applications the approximate update is numerically stable and yields a monotone decrease in the objective, consistent with the behavior predicted by the idealized analysis. 
 
 
-\subsection{Supervision on \(W\) versus \(H\)}
+\section{Supervision on \(W\) versus \(H\)}
 
 Classical nonnegative matrix factorization (NMF) is non-identifiable: for any
 invertible matrix \(R\) with nonnegative entries, the factorization
@@ -648,7 +656,7 @@ In DeSurv, survival supervision enters through the projection $Z = W^\top X$ in 
 \[
 \nabla \mathcal{L} = (1-\alpha) \nabla_W \mathcal{L}_{\mathrm{NMF}}(W,H) - \alpha\nabla_W \mathcal{L}_{\mathrm{Cox}}(W,\beta),
 \]
-and therefore the update rule for $W$ as in Equation~\ref{eqn:W_update} relies on both the reconstruction term and the supervision term. As such, the gene-program definitions are directly shaped by their association with survival. This mechanism amplifies
+and therefore the update rule for $W$ as in Equation \ref{eqn:W_update} relies on both the reconstruction term and the supervision term. As such, the gene-program definitions are directly shaped by their association with survival. This mechanism amplifies
 genes aligned with the hazard gradient and suppresses those that dilute
 prognostic structure, ensuring that the learned programs encode survival-relevant
 biological variation.
@@ -674,8 +682,8 @@ initializations, and yields biologically interpretable signatures that
 generalize across cohorts.
 
 
-\subsection{Cross-validation procedure}
-Algorithm~S\ref{alg:cv} describes the cross validation procedure with $F$ folds and $R$ initializations.
+\section{Cross-validation procedure}
+Algorithm S\ref{alg:cv} describes the cross validation procedure with $F$ folds and $R$ initializations.
 We define the c-index using comparable pairs
 $\mathcal{P} = \{(i,j) : y_i < y_j,\ \delta_i = 1\}$ and linear predictors
 $\hat{\eta}_i$:
@@ -706,13 +714,13 @@ $\hat{\eta}_i$:
     \State Split data into training and validation $(X_{(-f)},y_{(-f)}, \delta_{(-f)})$, and $(X_{(f)},y_{(f)}, \delta_{(f)})$ sets
     \For{$r = 1$ to $R$}
         \State set.seed$(r)$
-        \State Apply Algorithm~\ref{alg:desurv} with inputs $(X_{(-f)},y_{(-f)}, \delta_{(-f)})$, and $(k, \alpha, \lambda, \xi, \lambda_H)$
-        \State Obtain $\hat{W}$ and $\hat{\beta}$ as output from Algorithm~\ref{alg:desurv}
+        \State Apply Algorithm \ref{alg:desurv} with inputs $(X_{(-f)},y_{(-f)}, \delta_{(-f)})$, and $(k, \alpha, \lambda, \xi, \lambda_H)$
+        \State Obtain $\hat{W}$ and $\hat{\beta}$ as output from Algorithm \ref{alg:desurv}
         \State Compute the estimated linear predictor: 
         $
         \hat{\eta} = X_{(f)}^T\hat{W}\hat{\beta}
         $
-        \State Compute c-index, denoted $\hat{c}_{(f)r}$, according to Equation~\ref{eqn:cindex}
+        \State Compute c-index, denoted $\hat{c}_{(f)r}$, according to Equation \ref{eqn:cindex}
     \EndFor
     \State \textbf{end loop over $r$}
     \State Compute average c-index across initializations:
@@ -731,13 +739,13 @@ $
 \end{algorithm}
 
 
-\subsection{Bayesian Optimization}
+\section{Bayesian Optimization}
 
 We treat hyperparameter tuning as a black-box optimization problem over a
 bounded domain. Let $\theta$ collect the tuned parameters (at minimum
 $\theta = (k,\alpha,\lambda,\xi)$, and optionally discrete choices
 such as the signature size $n_{\text{top}}$). For a given $\theta$ we run the
-cross-validation procedure in Algorithm~S\ref{alg:cv}, averaging the c-index
+cross-validation procedure in Algorithm S\ref{alg:cv}, averaging the c-index
 across folds and random initializations to form the objective
 \[
 \hat{c}(\theta) = \frac{1}{F} \sum_{f=1}^F \hat{c}_{(f)}(\theta).
@@ -777,7 +785,7 @@ is refit at the selected parameters using the consensus-based initialization
 described above, and the BO-chosen $n_{\text{top}}$ (when tuned) is used to
 truncate each program for downstream analysis.
 
-\subsection{PDAC Datasets}
+\section{PDAC Datasets}
 
 We analyzed PDAC cohorts from TCGA-PAAD and CPTAC-PDAC as training data
 [@raphael2017integrated;@ellis2013clinical]. External validation used
@@ -808,13 +816,13 @@ training. Validation datasets were restricted to this same 1,970-gene set.
 Within-sample rank transformation was applied to all datasets to mitigate
 platform effects, with validation data transformed identically to training.
 
-Table~\ref{tab:cohorts} summarizes the cohorts, platforms, sample sizes after
+Table \ref{tab:cohorts} summarizes the cohorts, platforms, sample sizes after
 quality control, and patient-level metadata used in this study. Overall survival
 time and event indicators were available for all cohorts. PurIST
 \cite{rashid2020purity} and DeCAF \cite{peng2024determination} molecular
 classifications, applied to bulk expression data as described in those
 references, were used as covariates in the covariate-adjusted sensitivity
-analysis (SI Appendix, Table~S2). Gene expression data and molecular
+analysis (SI Appendix, Table S2). Gene expression data and molecular
 classifications for the validation cohorts were originally compiled for the
 DeCAF study \cite{peng2024determination}; training data were obtained directly
 from GDC.
@@ -850,7 +858,7 @@ Puleo            & Microarray & 288 & Validation & E-MTAB-6134      & OS, PurIST
 \end{tabular}
 \end{table}
 
-\subsection{Survival Analysis}
+\section{Survival Analysis}
 
 Survival analyses used overall survival time with event indicators as provided
 by each cohort. For fitted DeSurv models, sample-level program scores were
@@ -864,7 +872,7 @@ differences. When multiple datasets were pooled, Cox models were stratified
 by dataset to allow cohort-specific baseline hazards. All p-values reported for
 survival differences between groups correspond to two-sided log-rank tests.
 
-\subsection{Gene Program Correlation Analysis}
+\section{Gene Program Correlation Analysis}
 
 To assess the biological identity of learned factors, we evaluated the
 correspondence between factor-specific gene rankings and established PDAC gene
@@ -901,7 +909,7 @@ periductal subtypes, and MSI subtypes were excluded from visualization due to
 redundancy with other included programs or low overall correlation across all
 factors.
 
-\subsection{Variance and Survival Contribution per Factor}
+\section{Variance and Survival Contribution per Factor}
 
 For each factor $j \in \{1, \ldots, k\}$, we quantified two quantities to assess
 the alignment between expression variance and prognostic relevance. The
@@ -925,7 +933,7 @@ marginal contribution of factor $j$ to survival prediction given all other
 factors. These two quantities are plotted against each other in
 SI Appendix, Fig.\ S7.
 
-\subsection{Factor Correspondence Analysis}
+\section{Factor Correspondence Analysis}
 
 To assess which biological programs are preserved, altered, or suppressed
 under survival supervision, we quantified the pairwise correspondence between
@@ -937,3 +945,7 @@ restricted to genes present in both models. Spearman correlation was used to
 capture monotone correspondence in gene loading ranks while remaining robust
 to scale differences between the two methods. Results are displayed as a
 heatmap with NMF factors as rows and DeSurv factors as columns (main text, Fig.\ 4C).
+
+\clearpage
+
+\section{References}

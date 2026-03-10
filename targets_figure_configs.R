@@ -10,7 +10,7 @@ targets_figure_configs <- function() {
       val_key = "tcgacptac"
     ),
     heatmap_factor_labels = list(
-      tcgacptac = c("D1 Classical/iCAF", "D2 Microenviron.", "D3 Basal-like")
+      tcgacptac = c("D1 Classical/restCAF", "D2 proCAF", "D3 Basal-like")
     ),
     heatmap_factor_labels_std = list(
       tcgacptac = c("N1 Classical", "N2 Exocrine-like", "N3 Microenviron.")
