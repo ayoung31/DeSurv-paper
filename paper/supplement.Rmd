@@ -519,6 +519,101 @@ knitr::kable(
 
 Standard NMF at elbow-selected $k = 5$ and BO-selected $k = 7$ both substantially improve over NMF at $k = 3$ across all cohorts (Table \ref{tab:tab-cindex-comparison}), confirming that additional unsupervised factors capture prognostically relevant variation missed at the matched rank. At $k = 7$, NMF matches or exceeds DeSurv's per-cohort C-index in most cohorts, demonstrating that unsupervised factorization can approach supervised concordance given enough factors. However, this comes at the cost of a less parsimonious and less interpretable factorization: the $k = 7$ NMF solution shows increased fragmentation (Fig. \ref{fig:fig-nmf-k7-heatmap}), and the K-sensitivity analysis (Tables S1--S3) shows that $k = 7$'s prognostic signal largely overlaps with existing molecular classifiers (PurIST, DeCAF), whereas $k = 3$ DeSurv retains significance after classifier adjustment. DeSurv's advantage thus lies not in maximal concordance but in recovering a compact, interpretable factorization whose prognostic content is independent of known classifiers.
 
+To quantify this directly, Table \ref{tab:tab-hr-adjusted} reports pooled validation hazard ratios (per SD of the linear predictor) for DeSurv at $k = 3$ and standard NMF at BO-selected $k = 7$, both unadjusted and after adjustment for PurIST and DeCAF molecular classifiers. In the unadjusted analysis, both methods show a survival association, though DeSurv's effect size is substantially larger. After adjustment, DeSurv retains a significant and clinically meaningful hazard ratio, whereas NMF's effect attenuates and is no longer significant, confirming that NMF's prognostic content at $k = 7$ is largely redundant with existing classifiers.
+
+```{r tab-hr-adjusted, echo=FALSE, results='asis'}
+library(survival)
+library(knitr)
+library(kableExtra)
+
+# ── Load validation latent targets ────────────────────────────────────────────
+tar_load(val_latent_desurv_tcgacptac)
+tar_load(val_latent_desurv_alpha0_tcgacptac)
+tar_load(data_val_filtered_tcgacptac)
+
+# ── Extract pooled risk_score + survival + PurIST/DeCAF ───────────────────────
+extract_pool_df_with_covariates <- function(val_latent, data_val) {
+  pool_dfs <- lapply(val_latent, function(entry) {
+    surv <- entry$survival
+    if (is.null(surv) || !all(c("time", "event") %in% names(surv))) return(NULL)
+    df <- data.frame(
+      sample_id = rownames(surv),
+      time = surv$time, event = surv$event,
+      dataset = entry$dataset, risk_score = entry$risk_score,
+      stringsAsFactors = FALSE
+    )
+    # Merge PurIST/DeCAF from validation data
+    ds_match <- Filter(function(d) d$sampInfo$dataset[1] == entry$dataset, data_val)
+    if (length(ds_match) > 0) {
+      si <- ds_match[[1]]$sampInfo
+      si$sample_id <- rownames(si)
+      covars <- si[, intersect(c("sample_id", "PurIST", "DeCAF"), names(si)), drop = FALSE]
+      if ("DeCAF" %in% names(covars)) {
+        covars$DeCAF[covars$DeCAF == "permCAF"] <- "proCAF"
+      }
+      df <- merge(df, covars, by = "sample_id", all.x = TRUE)
+    }
+    df
+  })
+  df <- dplyr::bind_rows(Filter(Negate(is.null), pool_dfs))
+  df[is.finite(df$time) & is.finite(df$risk_score), ]
+}
+
+# ── Fit unadjusted + PurIST/DeCAF-adjusted stratified Cox ────────────────────
+pooled_cox_unadj_adj <- function(df) {
+  rs_sd <- sd(df$risk_score, na.rm = TRUE)
+  if (is.na(rs_sd) || rs_sd < 1e-12) rs_sd <- 1
+  df$risk_z <- df$risk_score / rs_sd
+  # Unadjusted
+  cox_u <- summary(coxph(Surv(time, event) ~ risk_z + strata(dataset), data = df))
+  # Adjusted for PurIST + DeCAF
+  df_adj <- df[complete.cases(df[, c("PurIST", "DeCAF")]), ]
+  cox_a <- summary(coxph(Surv(time, event) ~ risk_z + PurIST + DeCAF + strata(dataset),
+                          data = df_adj))
+  fmt <- function(cx) {
+    coef_row <- cx$coefficients["risk_z", , drop = FALSE]
+    ci_row   <- cx$conf.int["risk_z", , drop = FALSE]
+    list(
+      hr    = round(ci_row[, "exp(coef)"], 2),
+      ci_lo = round(ci_row[, "lower .95"], 2),
+      ci_hi = round(ci_row[, "upper .95"], 2),
+      p     = coef_row[, "Pr(>|z|)"]
+    )
+  }
+  list(unadj = fmt(cox_u), adj = fmt(cox_a))
+}
+
+fmt_p <- function(p) {
+  if (p < 0.001) return("$< 0.001$")
+  paste0("$", formatC(p, format = "f", digits = 3), "$")
+}
+fmt_hr <- function(s) {
+  paste0(s$hr, " (", s$ci_lo, "--", s$ci_hi, "), ", fmt_p(s$p))
+}
+
+# ── Compute ──────────────────────────────────────────────────────────────────
+pool_desurv <- extract_pool_df_with_covariates(
+  val_latent_desurv_tcgacptac, data_val_filtered_tcgacptac)
+stats_desurv <- pooled_cox_unadj_adj(pool_desurv)
+
+pool_nmf7 <- extract_pool_df_with_covariates(
+  val_latent_desurv_alpha0_tcgacptac, data_val_filtered_tcgacptac)
+stats_nmf7 <- pooled_cox_unadj_adj(pool_nmf7)
+
+tab_df <- data.frame(
+  Method = c("DeSurv ($k = 3$)", "Std NMF ($k = 7$, BO $\\alpha = 0$)"),
+  Unadjusted = c(fmt_hr(stats_desurv$unadj), fmt_hr(stats_nmf7$unadj)),
+  Adjusted   = c(fmt_hr(stats_desurv$adj), fmt_hr(stats_nmf7$adj)),
+  stringsAsFactors = FALSE
+)
+colnames(tab_df) <- c("Method", "Unadjusted HR per SD (95\\% CI), $P$",
+                       "Adjusted HR per SD (95\\% CI), $P$")
+
+kable(tab_df, format = "latex", escape = FALSE, booktabs = TRUE,
+      caption = "Pooled external validation hazard ratios (per SD of linear predictor) for DeSurv at $k = 3$ and standard NMF at BO-selected $k = 7$ ($\\alpha = 0$). Adjusted models include PurIST and DeCAF molecular classifiers as covariates, with stratification by dataset. \\label{tab:tab-hr-adjusted}") |>
+  kable_styling(latex_options = c("hold_position"), font_size = 9)
+```
+
 The variance--survival decomposition at $k = 5$ (Fig. \ref{fig:varsurvival-k5}) confirms that elbow selection does not recover additional prognostic structure. At $k = 5$, standard NMF continues to distribute survival contribution negligibly across all factors; the two factors new relative to $k = 3$ (N4 and N5) contribute minimally, confirming that the additional rank captures background transcriptional variance rather than independent prognostic programs.
 
 ```{r fig-varsurvival-k5, fig.width = 4.5, fig.height = 3.5, fig.cap = "Fraction of expression variance explained versus Type III partial likelihood contribution for each standard NMF factor at elbow-selected $k = 5$. Each point represents one factor, labeled N1--N5. Survival contribution is quantified as the reduction in Cox partial log-likelihood when each factor is removed from the full model. The two factors new relative to $k = 3$ (N4, N5) contribute negligibly to survival, confirming that elbow selection recovers no additional prognostic structure. \\label{fig:varsurvival-k5}", fig.env='figure', fig.pos='t'}
