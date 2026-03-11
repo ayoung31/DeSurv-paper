@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  10 MAR 2026 17:54
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  11 MAR 2026 10:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -539,7 +539,6 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 
 {/nas/longleaf/home/ayoung31/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}]
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 188.
-[2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 218.
@@ -556,7 +555,7 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 240.
 
-[3]
+[2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}] [3]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 345.
@@ -569,7 +568,7 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 345.
 
-[4] [5] [6] [7] [8]
+[4] [5] [6] [7]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 682.
@@ -578,6 +577,7 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 682.
 
+[8]
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <14.4> on input line 726.
 
@@ -609,107 +609,31 @@ pdfTeX warning (ext4): destination with the same identifier (name{equation.16}) 
                    \relax 
 l.779 ...ictors \(\hat{\eta}_i\): \begin{equation}
                                                    [10] [11]
-
-LaTeX Warning: Citation `rashid2020purity' on page 12 undefined on input line 915.
-
-
-LaTeX Warning: Citation `peng2024determination' on page 12 undefined on input line 916.
-
-
-LaTeX Warning: Citation `peng2024determination' on page 12 undefined on input line 921.
-
-
-LaTeX Warning: Citation `rashid2020purity' on page 12 undefined on input line 933.
-
-
-LaTeX Warning: Citation `peng2024determination' on page 12 undefined on input line 933.
-
-
-LaTeX Warning: Citation `peng2024determination' on page 12 undefined on input line 933.
-
-
-LaTeX Warning: Citation `rashid2020purity' on page 12 undefined on input line 933.
-
-
-LaTeX Warning: Citation `peng2024determination' on page 12 undefined on input line 933.
-
-
-LaTeX Warning: Citation `peng2024determination' on page 12 undefined on input line 933.
-
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 936.
-
-LaTeX Warning: Citation `raphael2017integrated' on page 12 undefined on input line 940.
-
-
-LaTeX Warning: Citation `ellis2013clinical' on page 12 undefined on input line 941.
-
-
-LaTeX Warning: Citation `dijk2020unsupervised' on page 12 undefined on input line 943.
-
-
-LaTeX Warning: Citation `moffitt2015virtual' on page 12 undefined on input line 944.
-
-
-LaTeX Warning: Citation `zhao2018gene' on page 12 undefined on input line 945.
-
-
-LaTeX Warning: Citation `zhao2018gene' on page 12 undefined on input line 946.
-
-
-LaTeX Warning: Citation `puleo2018stratification' on page 12 undefined on input line 947.
-
-
-Overfull \hbox (15.48294pt too wide) in paragraph at lines 936--953
+Overfull \hbox (26.42845pt too wide) in paragraph at lines 935--952
  [][] 
  []
 
-[12]
+[12] [13] [14
 
-LaTeX Warning: Citation `moffitt2015virtual' on page 13 undefined on input line 999.
-
-
-LaTeX Warning: Citation `elyada2019cross' on page 13 undefined on input line 1001.
-
-
-LaTeX Warning: Citation `peng2024determination' on page 13 undefined on input line 1002.
-
-
-LaTeX Warning: Citation `leary2023s' on page 13 undefined on input line 1003.
-
-
-LaTeX Warning: Citation `peng2019novo' on page 13 undefined on input line 1004.
-
-
-LaTeX Warning: Citation `rashid2020purity' on page 13 undefined on input line 1005.
-
-
-LaTeX Warning: Citation `Bailey2016' on page 13 undefined on input line 1006.
-
-[13] [14] [15
-
-] (./supp_methods.aux)
+] [15] (./supp_methods.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
-
-LaTeX Warning: There were undefined references.
-
  ) 
 Here is how much of TeX's memory you used:
- 14646 strings out of 469471
- 230997 string characters out of 5467057
- 684028 words of memory out of 5000000
- 42739 multiletter control sequences out of 15000+600000
- 739554 words of font info for 226 fonts, out of 8000000 for 9000
+ 14615 strings out of 469471
+ 230695 string characters out of 5467057
+ 689257 words of memory out of 5000000
+ 42725 multiletter control sequences out of 15000+600000
+ 721620 words of font info for 209 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 89i,10n,93p,1009b,647s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb>
-Output written on supp_methods.pdf (15 pages, 459530 bytes).
+ 89i,10n,93p,1009b,610s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb>
+Output written on supp_methods.pdf (15 pages, 401932 bytes).
 PDF statistics:
- 406 PDF objects out of 1000 (max. 8388607)
+ 400 PDF objects out of 1000 (max. 8388607)
  334 compressed objects within 4 object streams
- 93 named destinations out of 1000 (max. 500000)
- 61601 words of extra memory for PDF output out of 61914 (max. 10000000)
+ 99 named destinations out of 1000 (max. 500000)
+ 51361 words of extra memory for PDF output out of 51595 (max. 10000000)
 

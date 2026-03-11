@@ -41,8 +41,7 @@ $W$ to survival via an elastic-net–penalized Cox model.
 
 Let $y \in \mathbb{R}^n_{> 0}$ be the observed survival times,
 $\delta \in \{0,1\}^n$ the event indicators, and
-$Z = W^\top X \in \mathbb{R}^{k \times n}$ the sample-wise program
-loadings. We write $Z_i$ for the $i$th column of $Z$, and
+$Z = W^\top X \in \mathbb{R}^{k \times n}$ the sample-wise factor scores. We write $Z_i$ for the $i$th column of $Z$, and
 $n_{\text{event}} = \sum_{i=1}^n \delta_i$. For convenience we recall the
 DeSurv loss from Equation 1 in the main text and rewrite it as
 \begin{align}
@@ -82,7 +81,7 @@ scheme used to minimize $\mathcal{L}(W,H,\beta)$. At each outer iteration,
 we update $H$, then $W$, then $\beta$ while holding the other blocks
 fixed.
 
-\begin{algorithm}[H]
+\begin{algorithm}[htbp]
 \caption{DeSurv block coordinate descent}
 \label{alg:desurv}
     \begin{algorithmic}[1]
@@ -390,7 +389,7 @@ Algorithm S\ref{alg:desurv} satisfy:
         applied at $(W^{(t)},H^{(t)})$. This rule preserves nonnegativity and
         yields a nonincreasing value of the reconstruction term conditional on
         $W^{(t)}$ and $\beta^{(t)}$; see e.g.
-        [@seung2001algorithms; @pascualmontano2006nonsmooth; @lin2007convergence].
+        (Lee and Seung 2001; Pascual-Montano et al. 2006; Lin 2007).
   \item \emph{$W$-update.} For fixed $(H^{(t+1)},\beta^{(t)})$, the update
         $W^{(t)} \mapsto W^{(t+1)}$ is the hybrid multiplicative step
         followed by backtracking as in Algorithm S\ref{alg:backtrack}, producing
@@ -405,7 +404,7 @@ Algorithm S\ref{alg:desurv} satisfy:
         $W^{(t+1)} := W^{(t)}$.
   \item \emph{$\beta$-update.} For fixed $(W^{(t+1)},H^{(t+1)})$, the update
         $\beta^{(t)} \mapsto \beta^{(t+1)}$ is obtained by running the
-        coordinate descent method of [@simon2011regularization] on the convex elastic-net Cox
+        coordinate descent method of Simon et al. (2011) on the convex elastic-net Cox
         subproblem until convergence. Thus
         \[
           \beta^{(t+1)} \in
@@ -819,12 +818,12 @@ platform effects, with validation data transformed identically to training.
 Table \ref{tab:cohorts} summarizes the cohorts, platforms, sample sizes after
 quality control, and patient-level metadata used in this study. Overall survival
 time and event indicators were available for all cohorts. PurIST
-\cite{rashid2020purity} and DeCAF \cite{peng2024determination} molecular
+[@rashid2020purity] and DeCAF [@peng2024determination] molecular
 classifications, applied to bulk expression data as described in those
 references, were used as covariates in the covariate-adjusted sensitivity
 analysis (SI Appendix, Table S2). Gene expression data and molecular
 classifications for the validation cohorts were originally compiled for the
-DeCAF study \cite{peng2024determination}; training data were obtained directly
+DeCAF study [@peng2024determination]; training data were obtained directly
 from GDC.
 
 \begin{table}[ht]
@@ -833,27 +832,27 @@ from GDC.
 samples after all quality-control filters (histology, survival validity,
 dataset-specific exclusions). Patient-level metadata: OS = overall survival
 (time and event indicator); PurIST = tumor subtype classification
-\cite{rashid2020purity}; DeCAF = CAF subtype classification
-\cite{peng2024determination}. Expression data and molecular classifications
+(Rashid et al. 2020); DeCAF = CAF subtype classification
+(Peng et al. 2020). Expression data and molecular classifications
 for the validation cohorts were originally compiled for the DeCAF study
-\cite{peng2024determination}.}
+(Peng et al. 2020).}
 \label{tab:cohorts}
-\small
+\footnotesize
 \begin{tabular}{llrllll}
 \toprule
 Cohort & Platform & $N$ & Role & Accession & Metadata & Reference \\
 \midrule
-TCGA-PAAD        & RNA-seq    & 144 & Training   & GDC (TCGA-PAAD) & OS, PurIST, DeCAF & \cite{raphael2017integrated} \\
-CPTAC            & RNA-seq    & 129 & Training   & GDC (CPTAC-3)    & OS, PurIST, DeCAF & \cite{ellis2013clinical} \\
+TCGA-PAAD        & RNA-seq    & 144 & Training   & GDC (TCGA-PAAD) & OS, PurIST, DeCAF & Raphael et al. (2017) \\
+CPTAC            & RNA-seq    & 129 & Training   & GDC (CPTAC-3)    & OS, PurIST, DeCAF & Ellis et al. (2013) \\
 \addlinespace
-Dijk             & RNA-seq    &  90 & Validation & E-MTAB-6830      & OS, PurIST, DeCAF & \cite{dijk2020unsupervised} \\
-Moffitt          & Microarray & 123 & Validation & GSE71729         & OS, PurIST, DeCAF & \cite{moffitt2015virtual} \\
-PACA-AU (array)  & Microarray &  63 & Validation & GSE36924         & OS, PurIST, DeCAF & \cite{zhao2018gene} \\
-PACA-AU (RNA-seq) & RNA-seq   &  52 & Validation & EGAS00001000154  & OS, PurIST, DeCAF & \cite{zhao2018gene} \\
-Puleo            & Microarray & 288 & Validation & E-MTAB-6134      & OS, PurIST, DeCAF & \cite{puleo2018stratification} \\
+Dijk             & RNA-seq    &  90 & Validation & E-MTAB-6830      & OS, PurIST, DeCAF & Dijk et al. (2020) \\
+Moffitt          & Microarray & 123 & Validation & GSE71729         & OS, PurIST, DeCAF & Moffitt et al. (2015) \\
+PACA-AU (array)  & Microarray &  63 & Validation & GSE36924         & OS, PurIST, DeCAF & Zhao et al. (2018) \\
+PACA-AU (RNA-seq) & RNA-seq   &  52 & Validation & EGAS00001000154  & OS, PurIST, DeCAF & Zhao et al. (2018) \\
+Puleo            & Microarray & 288 & Validation & E-MTAB-6134      & OS, PurIST, DeCAF & Puleo et al. (2018) \\
 \addlinespace
-\multicolumn{2}{l}{\textit{Training total}} & 273 & & & & \\
-\multicolumn{2}{l}{\textit{Validation total}} & 616 & & & & \\
+\multicolumn{2}{l}{Training total} & 273 & & & & \\
+\multicolumn{2}{l}{Validation total} & 616 & & & & \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -898,13 +897,13 @@ at least one factor yielded a Spearman correlation exceeding 0.2. Asterisks
 ($*$) indicate adjusted p-value $< 0.1$.
 
 Reference gene programs included classical and basal-like tumor cell signatures
-from Moffitt et al.\ \cite{moffitt2015virtual}; iCAF and myCAF
+from Moffitt et al.\ [@moffitt2015virtual]; iCAF and myCAF
 cancer-associated fibroblast signatures from Elyada et al.\
-\cite{elyada2019cross}; activated (proCAF) and resting (restCAF) fibroblast
-programs from the deCAF study \cite{peng2024determination}; SCISSORS PDAC subtypes \cite{leary2023s}; tumor,
-stromal, and immune compartment signatures from DECODER \cite{peng2019novo};
+[@elyada2019cross]; activated (proCAF) and resting (restCAF) fibroblast
+programs from the deCAF study [@peng2024determination]; SCISSORS PDAC subtypes [@leary2023s]; tumor,
+stromal, and immune compartment signatures from DECODER [@peng2019novo];
 and classical and basal-like subtype classifiers from PurIST
-\cite{rashid2020purity}. Programs from Bailey et al.\ \cite{Bailey2016},
+[@rashid2020purity]. Programs from Bailey et al.\ [@Bailey2016],
 periductal subtypes, and MSI subtypes were excluded from visualization due to
 redundancy with other included programs or low overall correlation across all
 factors.
