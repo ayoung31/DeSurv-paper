@@ -26,6 +26,7 @@ output:
     toc: true
     number_sections: true
     fig_caption: true
+    keep_tex: true
   html_document: default
 ---
 

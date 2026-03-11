@@ -443,7 +443,7 @@ DeSurv's most prognostic factor (D1) showed only weak, roughly uniform
 correlations with all three NMF factors, indicating that the gene
 program structure underlying D1 does not have a direct counterpart in
 the unsupervised factorization. Because D1 couples classical tumor and
-iCAF-associated stromal signatures into a single survival-aligned
+restCAF-associated stromal signatures into a single survival-aligned
 program, its signal is distributed across multiple NMF factors, none of
 which individually captures the same tumor--stroma coupling. NMF's
 exocrine-associated factor (N2) similarly lacked a strong DeSurv
@@ -483,7 +483,7 @@ dataset by projecting the gene programs learned in the training cohort
 (\(Z = \tilde{W}^\top X_{\text{new}}\)), yielding a continuous score for
 each factor per sample.
 
-For DeSurv, we evaluated D1 (the classical--iCAF co-program with the
+For DeSurv, we evaluated D1 (the classical--restCAF co-program with the
 largest training-data \(\Delta\ell\)); for standard NMF at the same
 rank, we selected the factor with the largest \(\Delta\ell\) (N1, the
 classical-associated factor). External validation C-index for NMF at
@@ -544,9 +544,11 @@ S1--S3). \(K = 3\) achieved significance (\(P < 0.05\)) across 6 of 7
 supervision strengths, and \(K = 7\) at a comparable 5 of 7. After
 additional adjustment for PurIST and DeCAF molecular classifiers,
 \(K = 3\) retained significance at 5 of 7 supervision strengths, while
-\(K = 7\) dropped to 2 of 7 (SI Appendix, Table S2), indicating that
-much of \(K = 7\)'s prognostic signal overlaps with existing molecular
-classifiers. The parsimonious \(K = 3\) solution thus validates robustly
+\(K = 7\) dropped to 2 of 7 (SI Appendix, Table S2). This indicates that
+\(K = 7\)'s prognostic content is largely recoverable from existing
+classifiers applied to the same data, whereas DeSurv's D1 factor
+provides independent prognostic information not captured by PurIST or
+DeCAF. The parsimonious \(K = 3\) solution thus validates robustly
 across supervision strengths and retains prognostic value beyond known
 classifiers, providing empirical support for the 1-SE rule.
 
@@ -570,7 +572,7 @@ projection.
 
 In PDAC, the factor structure produced by survival supervision is
 biologically informative. The factor with the largest survival
-contribution (D1) couples classical tumor programs with an
+contribution (D1) couples classical tumor programs with a
 restCAF-associated stromal signature, consistent with growing evidence
 that clinical outcomes depend on the joint configuration of
 tumor-intrinsic and cancer-associated fibroblast subtypes (11, 24). This
@@ -599,10 +601,19 @@ twelve; for standard NMF, concordance increased steadily with \(k\),
 approaching DeSurv's level by \(k = 7\) (SI Appendix, Table S4) but
 requiring more than twice as many factors and producing a fragmented
 structure whose prognostic content overlaps with existing molecular
-classifiers (SI Appendix, Tables S1--S2). This parsimony is a property
-of the 1-SE rule rather than an intrinsic consequence of supervision,
-but supervision creates the flat concordance surface under which the
-rule can operate effectively.
+classifiers (SI Appendix, Tables S1--S2). Notably, NMF's own
+unsupervised rank selection heuristics --- reconstruction residuals,
+cophenetic correlation, and silhouette width (SI Appendix, Fig.~S3) ---
+do not point to \(k = 7\); the elbow criterion suggests \(k = 5\), which
+does not match DeSurv's concordance. NMF only reaches \(k = 7\) through
+Bayesian optimization with \(\alpha = 0\), that is, by applying DeSurv's
+tuning infrastructure to an unsupervised model. The model selection
+framework --- joint BO over rank and hyperparameters with the 1-SE rule
+--- is thus itself part of the methodological contribution, not merely
+the survival gradient. This parsimony is a property of the 1-SE rule
+rather than an intrinsic consequence of supervision, but supervision
+creates the flat concordance surface under which the rule can operate
+effectively.
 
 Our simulations provide further guidance on when this tradeoff is most
 beneficial: DeSurv's advantage is greatest when prognostic programs

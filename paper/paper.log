@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  11 MAR 2026 13:16
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  11 MAR 2026 16:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -703,8 +703,9 @@ Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \@thisruleclass=\count352
 \@lastruleclass=\count353
 \@thisrulewidth=\dimen309
-) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/algorithms/algorithm.sty
-Package: algorithm 2009/08/24 v0.1 Document Style `algorithm' - floating environment
+) (./algorithm.sty
+Package: algorithm 
+Document Style `algorithm' - floating environment
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/float/float.sty
 Package: float 2001/11/08 v1.3d Float enhancements (AL)
 \c@float@type=\count354
@@ -715,9 +716,9 @@ Package: float 2001/11/08 v1.3d Float enhancements (AL)
 )
 \@float@every@algorithm=\toks44
 \c@algorithm=\count355
-) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/algorithmicx/algpseudocode.sty
+) (./algpseudocode.sty
 Package: algpseudocode 
-(/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/algorithmicx/algorithmicx.sty
+(./algorithmicx.sty
 Package: algorithmicx 2005/04/27 v1.2 Algorithmicx
 Document Style algorithmicx 1.2 - a greatly improved `algorithmic' style
 \c@ALG@line=\count356
@@ -1152,139 +1153,139 @@ Underfull \vbox (badness 3623) has occurred while \output is active []
 
 [4] [5]
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 7.59998pt on input line 832.
+(Font)              scaled to size 7.59998pt on input line 843.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 832.
+(Font)              <8> on input line 843.
 
-Underfull \hbox (badness 10000) in paragraph at lines 842--846
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 848--853
+Underfull \hbox (badness 10000) in paragraph at lines 853--857
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 855--858
+Underfull \hbox (badness 10000) in paragraph at lines 859--864
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 860--864
+Underfull \hbox (badness 10000) in paragraph at lines 866--869
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 866--870
+Underfull \hbox (badness 10000) in paragraph at lines 871--875
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 872--877
+Underfull \hbox (badness 10000) in paragraph at lines 877--881
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 879--884
+Underfull \hbox (badness 10000) in paragraph at lines 883--888
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 886--890
+Underfull \hbox (badness 10000) in paragraph at lines 890--895
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 892--895
+Underfull \hbox (badness 10000) in paragraph at lines 897--901
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 897--902
+Underfull \hbox (badness 10000) in paragraph at lines 903--906
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 904--910
+Underfull \hbox (badness 10000) in paragraph at lines 908--913
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 912--915
+Underfull \hbox (badness 10000) in paragraph at lines 915--921
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 917--921
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 923--927
-
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Underfull \vbox (badness 3260) has occurred while \output is active []
 
 [6]
-Underfull \hbox (badness 10000) in paragraph at lines 929--933
+Underfull \hbox (badness 10000) in paragraph at lines 923--926
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 935--939
+Underfull \hbox (badness 10000) in paragraph at lines 928--932
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 941--946
+Underfull \hbox (badness 10000) in paragraph at lines 934--938
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 948--951
+Underfull \hbox (badness 10000) in paragraph at lines 940--944
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 953--958
+Underfull \hbox (badness 10000) in paragraph at lines 946--950
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 960--964
+Underfull \hbox (badness 10000) in paragraph at lines 952--957
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 966--971
+Underfull \hbox (badness 10000) in paragraph at lines 959--962
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 973--977
+Underfull \hbox (badness 10000) in paragraph at lines 964--969
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 979--984
+Underfull \hbox (badness 10000) in paragraph at lines 971--975
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 986--990
+Underfull \hbox (badness 10000) in paragraph at lines 977--982
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 992--996
+Underfull \hbox (badness 10000) in paragraph at lines 984--988
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 998--1003
+Underfull \hbox (badness 10000) in paragraph at lines 990--995
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 997--1001
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1003--1007
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1009--1014
 
  []
 
@@ -1301,15 +1302,15 @@ Package rerunfilecheck Info: File `paper.out' has not changed.
 (rerunfilecheck)             Checksum: 0763B0560AE2CDAD65B7A18ABB24CE37;3932.
  ) 
 Here is how much of TeX's memory you used:
- 30828 strings out of 469471
- 576555 string characters out of 5467057
- 1029005 words of memory out of 5000000
+ 30830 strings out of 469471
+ 576037 string characters out of 5467057
+ 1028940 words of memory out of 5000000
  58437 multiletter control sequences out of 15000+600000
- 727298 words of font info for 327 fonts, out of 8000000 for 9000
+ 727470 words of font info for 329 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  117i,14n,121p,1046b,1115s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb>
-Output written on paper.pdf (11 pages, 563901 bytes).
+Output written on paper.pdf (11 pages, 564621 bytes).
 PDF statistics:
  366 PDF objects out of 1000 (max. 8388607)
  291 compressed objects within 3 object streams
