@@ -361,7 +361,7 @@ which matches the multiplicative form used in the software implementation.
 \section{Convergence proof}
 
 We show that, under mild regularity conditions, the block coordinate descent
-(BCD) Algorithm S\ref{alg:desurv} converges to a stationary point of the DeSurv
+(BCD) Algorithm \ref{alg:desurv} converges to a stationary point of the DeSurv
 loss function
 \[
 \mathcal{L}(W,H,\beta).
@@ -391,7 +391,7 @@ We assume:
 
 \textbf{Assumption 2 (Block updates).}
 At each outer iteration $t$, the three block updates in
-Algorithm S\ref{alg:desurv} satisfy:
+Algorithm \ref{alg:desurv} satisfy:
 \begin{enumerate}[label=(\roman*)]
   \item \emph{$H$-update.} For fixed $(W^{(t)},\beta^{(t)})$, the update
         $H^{(t)} \mapsto H^{(t+1)}$ is given by the multiplicative rule
@@ -404,7 +404,7 @@ Algorithm S\ref{alg:desurv} satisfy:
         (Lee and Seung 2001; Pascual-Montano et al. 2006; Lin 2007).
   \item \emph{$W$-update.} For fixed $(H^{(t+1)},\beta^{(t)})$, the update
         $W^{(t)} \mapsto W^{(t+1)}$ is the hybrid multiplicative step
-        followed by backtracking as in Algorithm S\ref{alg:backtrack}, producing
+        followed by backtracking as in Algorithm \ref{alg:backtrack}, producing
         $W^{(t+1)}$ such that
         \[
           \mathcal{L}(W^{(t+1)},H^{(t+1)},\beta^{(t)})
@@ -464,7 +464,7 @@ from $\theta^{(0)}\in\mathcal{S}_0$. \hfill$\square$
 
 \vspace{0.5em}
 \textbf{Lemma 2 (Monotone descent and existence of limit points).}
-Under Assumptions 1 and 2, Algorithm S\ref{alg:desurv} (without $W$
+Under Assumptions 1 and 2, Algorithm \ref{alg:desurv} (without $W$
 normalization) generates a sequence $\{\theta^{(t)}\}_{t\ge 0}\subset\mathcal{S}_0$
 such that
 \[
@@ -568,7 +568,7 @@ $\beta$-block given $(W^*,H^*)$ and hence satisfies its KKT conditions.
 \vspace{0.5em}
 \textbf{Theorem 1 (Convergence to a stationary point).}
 Under Assumptions 1 and 2, the sequence $\{\theta^{(t)}\}$ produced by
-Algorithm S\ref{alg:desurv} (without $W$ normalization) satisfies:
+Algorithm \ref{alg:desurv} (without $W$ normalization) satisfies:
 \begin{enumerate}[label=(\alph*)]
   \item The objective values $\{\mathcal{L}(\theta^{(t)})\}$ are monotonically
         nonincreasing and converge to a finite limit $\mathcal{L}^*$.
@@ -608,14 +608,14 @@ full problem: equivalently,
 \]
 which are precisely the KKT conditions for
 $\min_{\theta\in\Theta}\mathcal{L}(\theta)$.
-Hence every limit point of Algorithm S\ref{alg:desurv} is stationary.
+Hence every limit point of Algorithm \ref{alg:desurv} is stationary.
 \hfill$\square$
 
 \subsection{Effect of column normalization of $W$}
 \label{subsec:conv_normalization}
 
 The above analysis omits the column-normalization step for $W$ used in
-Algorithm S\ref{alg:backtrack}. We briefly argue that this normalization does
+Algorithm \ref{alg:backtrack}. We briefly argue that this normalization does
 not affect stationarity of limit points.
 
 Let $D$ be a diagonal matrix with strictly positive diagonal entries. The
@@ -694,7 +694,7 @@ generalize across cohorts.
 
 
 \section{Cross-validation procedure}
-Algorithm S\ref{alg:cv} describes the cross validation procedure with $F$ folds and $R$ initializations.
+Algorithm \ref{alg:cv} describes the cross validation procedure with $F$ folds and $R$ initializations.
 We define the c-index using comparable pairs
 $\mathcal{P} = \{(i,j) : y_i < y_j,\ \delta_i = 1\}$ and linear predictors
 $\hat{\eta}_i$:
@@ -756,7 +756,7 @@ We treat hyperparameter tuning as a black-box optimization problem over a
 bounded domain. Let $\theta$ collect the tuned parameters (at minimum
 $\theta = (k,\alpha,\lambda,\xi)$, and optionally discrete choices
 such as the signature size $n_{\text{top}}$). For a given $\theta$ we run the
-cross-validation procedure in Algorithm S\ref{alg:cv}, averaging the c-index
+cross-validation procedure in Algorithm \ref{alg:cv}, averaging the c-index
 across folds and random initializations to form the objective
 \[
 \hat{c}(\theta) = \frac{1}{F} \sum_{f=1}^F \hat{c}_{(f)}(\theta).
@@ -833,7 +833,7 @@ time and event indicators were available for all cohorts. PurIST
 [@rashid2020purity] and DeCAF [@peng2024determination] molecular
 classifications, applied to bulk expression data as described in those
 references, were used as covariates in the covariate-adjusted sensitivity
-analysis (SI Appendix, Table S2). Gene expression data and molecular
+analysis (SI Appendix, Table S3). Gene expression data and molecular
 classifications for the validation cohorts were originally compiled for the
 DeCAF study [@peng2024determination]; training data were obtained directly
 from GDC.
@@ -942,7 +942,7 @@ where $\ell(\cdot)$ denotes the Cox partial log-likelihood evaluated at the
 maximum partial likelihood estimates. Larger $\Delta\ell_j$ indicates a greater
 marginal contribution of factor $j$ to survival prediction given all other
 factors. These two quantities are plotted against each other in
-SI Appendix, Fig.\ S7.
+main text, Fig.\ 3C.
 
 \section{Factor Correspondence Analysis}
 
@@ -955,7 +955,7 @@ $W_{\text{NMF}}$ and the DeSurv gene program matrix $W_{\text{DeSurv}}$,
 restricted to genes present in both models. Spearman correlation was used to
 capture monotone correspondence in gene loading ranks while remaining robust
 to scale differences between the two methods. Results are displayed as a
-heatmap with NMF factors as rows and DeSurv factors as columns (main text, Fig.\ 4C).
+heatmap with NMF factors as rows and DeSurv factors as columns (main text, Fig.\ 3D).
 
 \clearpage
 
@@ -1463,7 +1463,7 @@ knitr::kable(
 )
 ```
 
-Standard NMF at elbow-selected $k = 5$ and BO-selected $k = 7$ both substantially improve over NMF at $k = 3$ across all cohorts (Table \ref{tab:tab-cindex-comparison}), confirming that additional unsupervised factors capture prognostically relevant variation missed at the matched rank. At $k = 7$, NMF matches or exceeds DeSurv's per-cohort C-index in most cohorts, demonstrating that unsupervised factorization can approach supervised concordance given enough factors. However, this comes at the cost of a less parsimonious and less interpretable factorization: the $k = 7$ NMF solution shows increased fragmentation (Fig. \ref{fig:fig-nmf-k7-heatmap}), and the K-sensitivity analysis (Tables S1--S3) shows that $k = 7$'s prognostic signal largely overlaps with existing molecular classifiers (PurIST, DeCAF), whereas $k = 3$ DeSurv retains significance after classifier adjustment. DeSurv's advantage thus lies not in maximal concordance but in recovering a compact, interpretable factorization whose prognostic content is independent of known classifiers.
+Standard NMF at elbow-selected $k = 5$ and BO-selected $k = 7$ both substantially improve over NMF at $k = 3$ across all cohorts (Table \ref{tab:tab-cindex-comparison}), confirming that additional unsupervised factors capture prognostically relevant variation missed at the matched rank. At $k = 7$, NMF matches or exceeds DeSurv's per-cohort C-index in most cohorts, demonstrating that unsupervised factorization can approach supervised concordance given enough factors. However, this comes at the cost of a less parsimonious and less interpretable factorization: the $k = 7$ NMF solution shows increased fragmentation (Fig. \ref{fig:fig-nmf-k7-heatmap}), and the K-sensitivity analysis (Tables S2--S4) shows that $k = 7$'s prognostic signal largely overlaps with existing molecular classifiers (PurIST, DeCAF), whereas $k = 3$ DeSurv retains significance after classifier adjustment. DeSurv's advantage thus lies not in maximal concordance but in recovering a compact, interpretable factorization whose prognostic content is independent of known classifiers.
 
 To quantify this directly, Table \ref{tab:tab-hr-adjusted} reports pooled validation hazard ratios (per SD of the linear predictor) for DeSurv at $k = 3$ and standard NMF at BO-selected $k = 7$, both unadjusted and after adjustment for PurIST and DeCAF molecular classifiers. In the unadjusted analysis, both methods show a survival association, though DeSurv's effect size is substantially larger. After adjustment, DeSurv retains a significant and clinically meaningful hazard ratio, whereas NMF's effect attenuates and is no longer significant, confirming that NMF's prognostic content at $k = 7$ is largely redundant with existing classifiers.
 
