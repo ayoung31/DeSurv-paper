@@ -862,7 +862,7 @@ Puleo            & Microarray & 288 & Validation & E-MTAB-6134      & OS, PurIST
 
 Survival analyses used overall survival time with event indicators as provided
 by each cohort. For fitted DeSurv models, sample-level program scores were
-computed as $Z = \tilde{W}^\top X$ and standardized using the training mean and
+computed as $Z = \widetilde{W}^\top X$ and standardized using the training mean and
 standard deviation before constructing the linear predictor
 $\hat{\eta} = Z \hat{\beta}$. Prognostic performance was summarized using the
 concordance index as defined above. For visualization and group-level testing,
@@ -878,10 +878,10 @@ To assess the biological identity of learned factors, we evaluated the
 correspondence between factor-specific gene rankings and established PDAC gene
 programs. For each factor column $j$ of the gene program matrix $W$, we
 identified the top 50 genes by factor specificity score. Each column of $W$
-was first scaled by its column maximum to produce $\tilde{W}_{ij} = W_{ij} /
+was first scaled by its column maximum to produce $\widetilde{W}_{ij} = W_{ij} /
 \max_i W_{ij}$, placing all factors on a common $[0,1]$ scale. The
 specificity score for gene $i$ in factor $j$ was then defined as
-$$s_{ij} = \tilde{W}_{ij} - \max_{j' \neq j} \tilde{W}_{ij'}.$$
+$$s_{ij} = \widetilde{W}_{ij} - \max_{j' \neq j} \widetilde{W}_{ij'}.$$
 Genes were ranked in descending order of $s_{ij}$, and the top 50 per factor
 were retained. The union of these gene sets across all factors was then
 intersected with the genes present in any reference program to form the set of
