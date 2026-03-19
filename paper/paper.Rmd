@@ -97,7 +97,10 @@ knitr::opts_chunk$set(
   message = FALSE,  # suppress package startup messages
   warning = FALSE,  # suppress warnings
   error   = FALSE,  # suppress errors in output
-  fig.align = "center" # center figures
+  fig.align = "center", # center figures
+  fig.path = "figures/",
+  dev = "png",
+  dpi = 300
 )
 
 if (requireNamespace("ggplot2", quietly = TRUE)) {

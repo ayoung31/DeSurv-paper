@@ -137,7 +137,7 @@ distributions of cross-validated C-index and partial likelihood,
 confirming stability of the optimization procedure.
 
 \begin{figure*}[htbp]
-\includegraphics[width=5in,height=3in]{/work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-converge-1} \caption{Convergence of model across initializations. \label{fig:fig-converge}}\label{fig:fig-converge}
+\includegraphics[width=5in,height=3in]{figures/fig-converge-1} \caption{Convergence of model across initializations. \label{fig:fig-converge}}\label{fig:fig-converge}
 \end{figure*}
 
 \section{Simulation results under null and mixed
@@ -212,7 +212,7 @@ prognostically neutral, as is common in cancers with high tumor purity
 variation or dominant tissue-composition signals.
 
 \begin{figure*}[t]
-\includegraphics[width=\textwidth,height=6.5in]{/work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-sim-null-mixed-1} \caption{DeSurv performance under null and mixed simulation scenarios. (A--B) Null scenario ($\beta = 0$): both methods yield C-index $\approx 0.5$ (A) and comparable rank distributions (B), confirming DeSurv does not hallucinate prognostic structure; precision is omitted as no true survival genes exist. (C--F) Mixed scenario: survival depends on factor-specific marker genes (50\%) and shared background genes (50\%). (C) C-index is modestly higher for DeSurv. (D) Precision by gene-set definition: marker-only precision (150 genes; left facet) substantially favors DeSurv; full 300-gene survival-set precision (right facet) shows a more modest improvement. (E) The matched factor receives a substantially larger Cox coefficient $|\beta|$ under DeSurv, confirming preferential amplification of marker-specific signal. (F) Selected-rank distributions. DeSurv (blue); NMF (red, $\alpha = 0$); both Bayesian-optimized. \label{fig:sim-null-mixed}}\label{fig:fig-sim-null-mixed}
+\includegraphics[width=\textwidth,height=6.5in]{figures/fig-sim-null-mixed-1} \caption{DeSurv performance under null and mixed simulation scenarios. (A--B) Null scenario ($\beta = 0$): both methods yield C-index $\approx 0.5$ (A) and comparable rank distributions (B), confirming DeSurv does not hallucinate prognostic structure; precision is omitted as no true survival genes exist. (C--F) Mixed scenario: survival depends on factor-specific marker genes (50\%) and shared background genes (50\%). (C) C-index is modestly higher for DeSurv. (D) Precision by gene-set definition: marker-only precision (150 genes; left facet) substantially favors DeSurv; full 300-gene survival-set precision (right facet) shows a more modest improvement. (E) The matched factor receives a substantially larger Cox coefficient $|\beta|$ under DeSurv, confirming preferential amplification of marker-specific signal. (F) Selected-rank distributions. DeSurv (blue); NMF (red, $\alpha = 0$); both Bayesian-optimized. \label{fig:sim-null-mixed}}\label{fig:fig-sim-null-mixed}
 \end{figure*}
 
 \section{Cross-validated C-index across factorization
@@ -242,7 +242,7 @@ supervision concentrates prognostic information into fewer factors
 rather than requiring additional rank to capture it.
 
 \begin{figure*}[t]
-\includegraphics[width=\textwidth]{/work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cindex-by-k-1} \caption{Training (CV) and external validation C-index as a function of factorization rank $k$ for DeSurv (blue) and standard NMF (red, $\alpha = 0$). Shaded ribbons show $\pm 1$ SE. For each $k$, the best $\alpha$ was selected by maximizing the mean CV C-index. Validation C-index is pooled across all external cohorts. (A) Results using $n_{\text{top}} = 270$ top genes per factor ($\lambda = 0.349$, $\xi = 0.056$). (B) Results retaining all genes ($n_{\text{top}} = \text{ALL}$; $\lambda = 0.349$, $\xi = 0.056$).}\label{fig:fig-cindex-by-k}
+\includegraphics[width=\textwidth]{figures/fig-cindex-by-k-1} \caption{Training (CV) and external validation C-index as a function of factorization rank $k$ for DeSurv (blue) and standard NMF (red, $\alpha = 0$). Shaded ribbons show $\pm 1$ SE. For each $k$, the best $\alpha$ was selected by maximizing the mean CV C-index. Validation C-index is pooled across all external cohorts. (A) Results using $n_{\text{top}} = 270$ top genes per factor ($\lambda = 0.349$, $\xi = 0.056$). (B) Results retaining all genes ($n_{\text{top}} = \text{ALL}$; $\lambda = 0.349$, $\xi = 0.056$).}\label{fig:fig-cindex-by-k}
 \end{figure*}
 
 \section{Standard NMF rank selection
@@ -261,7 +261,7 @@ motivated the survival-supervised rank selection approach described in
 the main text.
 
 \begin{figure*}[t]
-\includegraphics[width=\textwidth,height=3.5in]{/work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-nmf-diagnostics-1} \caption{Standard unsupervised NMF rank selection heuristics for the PDAC training cohort (TCGA + CPTAC). (A) Reconstruction residuals as a function of factorization rank $k$. (B) Cophenetic correlation coefficient as a function of $k$. (C) Mean silhouette width across multiple distance metrics as a function of $k$. These criteria yield inconsistent guidance, motivating the survival-supervised model selection approach (main text Fig. 2D). \label{fig:nmf-diagnostics}}\label{fig:fig-nmf-diagnostics}
+\includegraphics[width=\textwidth,height=3.5in]{figures/fig-nmf-diagnostics-1} \caption{Standard unsupervised NMF rank selection heuristics for the PDAC training cohort (TCGA + CPTAC). (A) Reconstruction residuals as a function of factorization rank $k$. (B) Cophenetic correlation coefficient as a function of $k$. (C) Mean silhouette width across multiple distance metrics as a function of $k$. These criteria yield inconsistent guidance, motivating the survival-supervised model selection approach (main text Fig. 2D). \label{fig:nmf-diagnostics}}\label{fig:fig-nmf-diagnostics}
 \end{figure*}
 
 \section{K-sensitivity analysis: effect of gene focusing on iCAF factor
@@ -423,7 +423,7 @@ failure of K=7 to achieve adjusted significance in external cohorts
 (adjusted \(P = 0.676\); see main text).
 
 \begin{figure*}[t]
-\includegraphics[width=\textwidth]{/work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/k3-k7-nesting-1} \caption{Factor correspondence between the production K=3 model and a K=7 DeSurv fit ($\alpha = 0.35$, $n_{\text{top}} = 270$), measured by Spearman rank correlation of W-matrix gene loadings across all genes. Two K=3 factors have clear K=7 counterparts (K3\_F1 $\to$ K7\_F1, $r = 0.77$; K3\_F2 $\to$ K7\_F7, $r = 0.88$), while K3\_F3 is distributed broadly across four K=7 factors ($r = 0.57$--$0.71$), indicating fragmentation rather than nesting.}\label{fig:k3-k7-nesting}
+\includegraphics[width=\textwidth]{figures/k3-k7-nesting-1} \caption{Factor correspondence between the production K=3 model and a K=7 DeSurv fit ($\alpha = 0.35$, $n_{\text{top}} = 270$), measured by Spearman rank correlation of W-matrix gene loadings across all genes. Two K=3 factors have clear K=7 counterparts (K3\_F1 $\to$ K7\_F1, $r = 0.77$; K3\_F2 $\to$ K7\_F7, $r = 0.88$), while K3\_F3 is distributed broadly across four K=7 factors ($r = 0.57$--$0.71$), indicating fragmentation rather than nesting.}\label{fig:k3-k7-nesting}
 \end{figure*}
 
 \section{Cutpoint selection and validation of dichotomized risk
@@ -447,7 +447,7 @@ showed consistently shorter survival, confirming that the
 training-derived cutpoint generalizes to independent datasets.
 
 \begin{figure*}[t]
-\includegraphics[width=\textwidth,height=8in]{/work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-cutpoint-km-1} \caption{Cutpoint selection and external validation of dichotomized risk groups. (A) Cross-validated mean absolute log-rank z-statistic as a function of z-score cutpoint; red dashed line indicates the selected optimum. (B) Pooled validation Kaplan--Meier curves (stratified log-rank test). (C--D) Per-cohort validation KM curves: (C) Dijk, (D) Moffitt. (E--F) Per-cohort validation KM curves: (E) PACA-AU, (F) Puleo.}\label{fig:fig-cutpoint-km}
+\includegraphics[width=\textwidth,height=8in]{figures/fig-cutpoint-km-1} \caption{Cutpoint selection and external validation of dichotomized risk groups. (A) Cross-validated mean absolute log-rank z-statistic as a function of z-score cutpoint; red dashed line indicates the selected optimum. (B) Pooled validation Kaplan--Meier curves (stratified log-rank test). (C--D) Per-cohort validation KM curves: (C) Dijk, (D) Moffitt. (E--F) Per-cohort validation KM curves: (E) PACA-AU, (F) Puleo.}\label{fig:fig-cutpoint-km}
 \end{figure*}
 
 \section{Overlap of DeSurv risk groups with known molecular
@@ -467,7 +467,7 @@ survival-driven factorization recovers clinically relevant biology
 without requiring subtype labels during training.
 
 \begin{figure*}[t]
-\includegraphics[width=\textwidth]{/work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-subtype-overlap-1} \caption{Subtype composition of DeSurv risk groups in pooled external validation cohorts. Stacked bar charts show the proportion of PurIST (left) and DeCAF (right) subtypes within Low and High risk groups defined by the log-rank-optimized cutpoint. Numbers indicate sample counts; Fisher's exact test P-values are shown above each panel.}\label{fig:fig-subtype-overlap}
+\includegraphics[width=\textwidth]{figures/fig-subtype-overlap-1} \caption{Subtype composition of DeSurv risk groups in pooled external validation cohorts. Stacked bar charts show the proportion of PurIST (left) and DeCAF (right) subtypes within Low and High risk groups defined by the log-rank-optimized cutpoint. Numbers indicate sample counts; Fisher's exact test P-values are shown above each panel.}\label{fig:fig-subtype-overlap}
 \end{figure*}
 
 \section{Standard NMF factor structure at independently selected
@@ -494,7 +494,7 @@ rank adds no prognostically relevant structure.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio]{/work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-nmf-k5-heatmap-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{figures/fig-nmf-k5-heatmap-1.png}}
 \caption{Gene program overlap heatmap for standard NMF at elbow-selected
 rank \(k = 5\). Each cell shows the number of top genes from a given
 factor (rows) overlapping established PDAC gene programs (columns). The
@@ -518,7 +518,7 @@ solution fragments rather than extends the \(k = 3\) structure.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio]{/work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-nmf-k7-heatmap-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{figures/fig-nmf-k7-heatmap-1.png}}
 \caption{Gene program overlap heatmap for standard NMF at \(k = 7\)
 (BO-selected rank with \(\alpha = 0\)). Compared with \(k = 3\) and
 \(k = 5\), the 7-factor solution shows increased fragmentation: multiple
@@ -630,7 +630,7 @@ variance rather than independent prognostic programs.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio]{/work/users/a/y/ayoung31/DeSurv-paper/paper/supplement_files/figure-latex/fig-varsurvival-k5-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{figures/fig-varsurvival-k5-1.png}}
 \caption{Fraction of expression variance explained versus Type III
 partial likelihood contribution for each standard NMF factor at
 elbow-selected \(k = 5\). Each point represents one factor, labeled

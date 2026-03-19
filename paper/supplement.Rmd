@@ -29,7 +29,12 @@ header-includes:
      Internal scenario code names (R0_easy, R00_null, R_mixed) should be replaced with
      descriptive labels (primary, null, mixed) consistent with main text terminology. -->
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE)
+knitr::opts_chunk$set(message = FALSE, 
+                      warning = FALSE, 
+                      echo = FALSE,
+                      fig.path = "figures/",
+                      dev = "png",
+                      dpi = 300)
 library(targets)
 library(dplyr)
 library(ggplot2)
