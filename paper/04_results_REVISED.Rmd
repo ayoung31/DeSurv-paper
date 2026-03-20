@@ -18,7 +18,7 @@
 -->
 
 ```{r setup}
-library(targets)
+source("paper/load_precomputed.R")
 library(stringr)
 library(dplyr)
 library(ggplot2)
@@ -37,7 +37,7 @@ library(NMF)
 library(gtable)
 
 
-tar_load(sim_figs_by_scenario)
+load_result("sim_figs_by_scenario")
 
 scenario_ids = sapply(sim_figs_by_scenario,function(x) x$scenario_id)
 analysis_ids = sapply(sim_figs_by_scenario,function(x) x$analysis_id)
@@ -89,7 +89,7 @@ mixed_wilcox_p <- signif(wilcox.test(mixed_wide$cindex_desurv, mixed_wide$cindex
                                       paired = TRUE)$p.value, 2)
 
 # ── Variance vs survival statistics for PDAC training data ───────────────────
-tar_load(fig_variation_explained_tcgacptac)
+load_result("fig_variation_explained_tcgacptac")
 var_surv_dat   <- fig_variation_explained_tcgacptac$data
 nmf_vs         <- var_surv_dat[var_surv_dat$method == "NMF", ]
 desurv_vs      <- var_surv_dat[var_surv_dat$method == "DeSurv", ]
@@ -130,7 +130,7 @@ pooled_cox_stats <- function(df) {
 }
 
 # ── Pooled PDAC validation statistics (DeSurv) ───────────────────────────────
-tar_load(val_latent_desurv_tcgacptac)
+load_result("val_latent_desurv_tcgacptac")
 pool_df      <- extract_pool_df(val_latent_desurv_tcgacptac)
 n_val_total  <- nrow(pool_df)
 n_val_events <- sum(pool_df$event, na.rm = TRUE)
@@ -142,7 +142,7 @@ ci_pool_hi   <- desurv_stats$ci_hi
 p_pool       <- desurv_stats$p
 
 # ── Pooled PDAC validation statistics (NMF at matched rank) ──────────────────
-tar_load(val_latent_std_desurvk_tcgacptac)
+load_result("val_latent_std_desurvk_tcgacptac")
 pool_df_nmf  <- extract_pool_df(val_latent_std_desurvk_tcgacptac)
 nmf_stats    <- pooled_cox_stats(pool_df_nmf)
 hr_pool_nmf    <- nmf_stats$hr
@@ -153,9 +153,9 @@ p_pool_nmf     <- nmf_stats$p
 # ── KM dichotomized risk-group statistics (extracted from plot annotations) ───
 
 # ── K-selection C-index values from BO history ───────────────────────────────
-k_sel          <- tar_read(tar_k_selection_tcgacptac)
+k_sel          <- read_result("tar_k_selection_tcgacptac")
 k_best_cindex  <- round(k_sel$best_mean, 3)
-bo_hist        <- tar_read(desurv_bo_results_tcgacptac)$history
+bo_hist        <- read_result("desurv_bo_results_tcgacptac")$history
 bo_hist        <- bo_hist[!is.na(bo_hist$mean_cindex) & bo_hist$status == "ok", ]
 k3_hist        <- bo_hist[bo_hist$k_grid == k_sel$k_selected, ]
 k3_best_cindex <- if (nrow(k3_hist)) round(max(k3_hist$mean_cindex), 3) else NA_real_
@@ -177,8 +177,8 @@ km_parse_stats <- function(lbl) {
   p_val <- if (!p_lt) as.numeric(sub(".*p = ([0-9.]+).*", "\\1", lbl)) else NA_real_
   list(hr = nums[1], ci_lo = nums[2], ci_hi = nums[3], p_lt = p_lt, p_val = p_val)
 }
-tar_load(fig_median_survival_desurv_tcgacptac)
-tar_load(fig_median_survival_std_desurvk_tcgacptac)
+load_result("fig_median_survival_desurv_tcgacptac")
+load_result("fig_median_survival_std_desurvk_tcgacptac")
 km_desurv <- km_parse_stats(km_extract_label(fig_median_survival_desurv_tcgacptac))
 km_nmf    <- km_parse_stats(km_extract_label(fig_median_survival_std_desurvk_tcgacptac))
 ```
@@ -198,11 +198,11 @@ We first asked whether incorporating survival outcomes resolves the instability 
 
 Standard NMF diagnostics (reconstruction residuals, cophenetic correlation, mean silhouette width) yielded inconsistent guidance across candidate ranks (SI Appendix, Fig. S4).
 
-Because the goal is prognostic factorization, DeSurv selects $k$ using the criterion that directly measures prognostic performance: cross-validated concordance index (C-index), optimized jointly with supervision strength $\alpha$. The resulting C-index surface identified a coherent region of high performance (Fig. \ref{fig:sim}D). Model selection followed the one-standard-error rule (Methods): we selected the smallest $k$ whose predicted performance lay within one standard error of the maximum, yielding a parsimonious choice. Applying the 1-SE rule to the Bayesian optimization (BO) surface selected $k = `r tar_read(tar_k_selection_tcgacptac)$k_selected`$ and $\alpha = `r round(tar_read(tar_params_best_tcgacptac)$alpha, 3)`$ (peak C-index $`r round(tar_read(tar_k_selection_tcgacptac)$best_mean, 3)`$; $n = `r ncol(tar_read(tar_data_filtered_tcgacptac)$ex)`$ patients, $`r sum(tar_read(tar_data_filtered_tcgacptac)$sampInfo$event)`$ events). Survival-supervised model selection thus resolves the rank ambiguity that unsupervised heuristics leave open, yielding a single parsimonious factorization for downstream evaluation.
+Because the goal is prognostic factorization, DeSurv selects $k$ using the criterion that directly measures prognostic performance: cross-validated concordance index (C-index), optimized jointly with supervision strength $\alpha$. The resulting C-index surface identified a coherent region of high performance (Fig. \ref{fig:sim}D). Model selection followed the one-standard-error rule (Methods): we selected the smallest $k$ whose predicted performance lay within one standard error of the maximum, yielding a parsimonious choice. Applying the 1-SE rule to the Bayesian optimization (BO) surface selected $k = `r read_result("tar_k_selection_tcgacptac")$k_selected`$ and $\alpha = `r round(read_result("tar_params_best_tcgacptac")$alpha, 3)`$ (peak C-index $`r round(read_result("tar_k_selection_tcgacptac")$best_mean, 3)`$; $n = `r ncol(read_result("tar_data_filtered_tcgacptac")$ex)`$ patients, $`r sum(read_result("tar_data_filtered_tcgacptac")$sampInfo$event)`$ events). Survival-supervised model selection thus resolves the rank ambiguity that unsupervised heuristics leave open, yielding a single parsimonious factorization for downstream evaluation.
 
 ```{r fig-sim, fig.width = 6.5, fig.height = 6, fig.cap = "Simulation studies and model selection. (A) Test-set concordance index across 100 simulation replicates ($p = 3{,}000$ genes, $n = 200$ samples, true $k = 3$) comparing DeSurv to standard NMF ($\\alpha = 0$). (B) Precision (fraction of top-weighted genes in a learned factor overlapping a true prognostic program) across replicates. (C) Distribution of selected $k$ values for DeSurv versus standard NMF. (D) Gaussian process predicted mean cross-validated C-index from Bayesian optimization over factorization rank ($k$) and supervision strength ($\\alpha$) in PDAC training data (TCGA + CPTAC). \\label{fig:sim}", fig.env='figure*', fig.pos='t', out.height= "6in", out.width="6.5in"}
 
-tar_load(fig_bo_heat_tcgacptac)
+load_result("fig_bo_heat_tcgacptac")
 fig_bo_heat_tcgacptac = set_fig_font(fig_bo_heat_tcgacptac, size = 10) +
   guides(fill = guide_colorbar(barheight = unit(2, "cm"), barwidth = unit(0.3, "cm"))) +
   theme(legend.title = element_text(size = 7), legend.text = element_text(size = 7))
@@ -245,7 +245,7 @@ To verify that these gains reflect genuine signal recovery rather than overfitti
 
 ## Survival supervision and standard NMF produce different factor structures in PDAC {.unnumbered}
 
-BO selected $k = `r tar_read(tar_k_selection_tcgacptac)$k_selected`$ and $\alpha = `r round(tar_read(tar_params_best_tcgacptac)$alpha, 3)`$ for DeSurv in the PDAC training cohorts (TCGA and CPTAC). To compare the factor structures produced with and without survival supervision at the same dimensionality, we fit standard NMF at DeSurv's BO-selected rank ($k = `r tar_read(tar_k_selection_tcgacptac)$k_selected`$) and examined the overlap between each method's factor-specific gene rankings and established PDAC gene programs (Fig. \ref{fig:pdac}A--B). Matching ranks ensures that differences in factor content reflect the presence or absence of survival supervision rather than differences in model complexity; whether NMF's performance improves at higher ranks is evaluated in the sensitivity analysis below and in SI Appendix, Table S5. We first describe the biological identity of each method's factors, then ask whether these structural differences correspond to differences in survival contribution.
+BO selected $k = `r read_result("tar_k_selection_tcgacptac")$k_selected`$ and $\alpha = `r round(read_result("tar_params_best_tcgacptac")$alpha, 3)`$ for DeSurv in the PDAC training cohorts (TCGA and CPTAC). To compare the factor structures produced with and without survival supervision at the same dimensionality, we fit standard NMF at DeSurv's BO-selected rank ($k = `r read_result("tar_k_selection_tcgacptac")$k_selected`$) and examined the overlap between each method's factor-specific gene rankings and established PDAC gene programs (Fig. \ref{fig:pdac}A--B). Matching ranks ensures that differences in factor content reflect the presence or absence of survival supervision rather than differences in model complexity; whether NMF's performance improves at higher ranks is evaluated in the sensitivity analysis below and in SI Appendix, Table S5. We first describe the biological identity of each method's factors, then ask whether these structural differences correspond to differences in survival contribution.
 
 We refer to the three DeSurv factors as D1--D3 and the three NMF factors as N1--N3. In the DeSurv factorization, D1 correlated with both classical tumor programs and restCAF-associated (iCAF) stromal signatures, D2 with proCAF-associated (activated immune-stromal) programs, and D3 with basal-like tumor programs (Fig. \ref{fig:pdac}A). The co-occurrence of classical and restCAF signatures within a single factor is consistent with evidence that survival stratification in PDAC improves when tumor-intrinsic and CAF subtypes are considered jointly [@peng2024determination; @elyada2019cross]. No DeSurv factor showed a significant positive correlation with exocrine-associated gene programs (DECODER Exocrine, Collisson Exocrine, Bailey ADEX; Fig. \ref{fig:pdac}A). The survival contributions of these factors and their relationship to expression variance are quantified below (Fig. \ref{fig:pdac}C).
 
@@ -260,14 +260,14 @@ library(cowplot)
 library(ggplot2)
 
 # Panels A-B: gene program heatmaps
-tar_load(fig_gene_overlap_heatmap_desurv_tcgacptac)
-tar_load(fig_gene_overlap_heatmap_std_desurvk_tcgacptac)
+load_result("fig_gene_overlap_heatmap_desurv_tcgacptac")
+load_result("fig_gene_overlap_heatmap_std_desurvk_tcgacptac")
 
 # Panel C: variance vs survival (promoted from supplement)
-tar_load(fig_variation_explained_tcgacptac)
+load_result("fig_variation_explained_tcgacptac")
 
 # Panel D: W-matrix correlation (promoted from supplement)
-tar_load(fig_desurv_std_correlation_tcgacptac)
+load_result("fig_desurv_std_correlation_tcgacptac")
 
 # ── Panels A-B: heatmaps with shared legend ──
 # Add top margin so panel labels (A, B) don't overlap heatmap titles
@@ -358,7 +358,7 @@ library(ggplot2)
 library(dplyr)
 
 # ── Panel A: forest plot (rebuilt from stored data with pooled HRs) ──
-tar_load(fig_hr_forest_tcgacptac)
+load_result("fig_hr_forest_tcgacptac")
 d <- fig_hr_forest_tcgacptac$data
 
 # Clean dataset labels
@@ -466,8 +466,8 @@ plot_forest <- plot_grid(
 )
 
 # ── Panels B-C: KM curves ──
-tar_load(fig_median_survival_desurv_tcgacptac)
-tar_load(fig_median_survival_std_desurvk_tcgacptac)
+load_result("fig_median_survival_desurv_tcgacptac")
+load_result("fig_median_survival_std_desurvk_tcgacptac")
 
 theme_pnas <- theme_classic(base_size = base_size) +
   theme(
@@ -599,4 +599,4 @@ n_alpha     <- length(GRID_ALPHA)
 n_grid      <- length(GRID_K) * length(GRID_ALPHA)
 ```
 
-The 1-SE model selection rule chose $k = `r tar_read(tar_k_selection_tcgacptac)$k_selected`$ over the global BO maximum ($k = `r tar_read(tar_k_selection_tcgacptac)$k_best`$; CV C-index $`r k_best_cindex`$ versus $`r k3_best_cindex`$; margin $`r k_margin`$). To assess whether this reflects a robust solution or an artifact of a specific tuning configuration, we conducted a sensitivity analysis across $k \in \{2, 3, 5, 7, 9\}$ and $\alpha \in \{0, 0.25, 0.35, 0.55, 0.75, 0.85, 0.95\}$ (`r n_grid` combinations), holding all other hyperparameters at their BO-selected values and evaluating each combination in independent external validation cohorts via stratified Cox regression (SI Appendix, Tables S2--S4). $k = 3$ achieved significance ($P < 0.05$) across `r n_k3_sig_270` of `r n_alpha` supervision strengths, and $k = `r tar_read(tar_k_selection_tcgacptac)$k_best`$ at a comparable `r n_k7_sig_270` of `r n_alpha`. After additional adjustment for PurIST and DeCAF molecular classifiers, $k = 3$ retained significance at `r n_k3_adj_sig_270` of `r n_alpha` supervision strengths, while $k = `r tar_read(tar_k_selection_tcgacptac)$k_best`$ dropped to `r n_k7_adj_sig_270` of `r n_alpha` (SI Appendix, Table S3). This indicates that $k = `r tar_read(tar_k_selection_tcgacptac)$k_best`$'s prognostic content is largely recoverable from existing classifiers applied to the same data, whereas DeSurv's D1 factor provides independent prognostic information not captured by PurIST or DeCAF. The parsimonious $k = 3$ solution thus validates robustly across supervision strengths and retains prognostic value beyond known classifiers, providing empirical support for the 1-SE rule.
+The 1-SE model selection rule chose $k = `r read_result("tar_k_selection_tcgacptac")$k_selected`$ over the global BO maximum ($k = `r read_result("tar_k_selection_tcgacptac")$k_best`$; CV C-index $`r k_best_cindex`$ versus $`r k3_best_cindex`$; margin $`r k_margin`$). To assess whether this reflects a robust solution or an artifact of a specific tuning configuration, we conducted a sensitivity analysis across $k \in \{2, 3, 5, 7, 9\}$ and $\alpha \in \{0, 0.25, 0.35, 0.55, 0.75, 0.85, 0.95\}$ (`r n_grid` combinations), holding all other hyperparameters at their BO-selected values and evaluating each combination in independent external validation cohorts via stratified Cox regression (SI Appendix, Tables S2--S4). $k = 3$ achieved significance ($P < 0.05$) across `r n_k3_sig_270` of `r n_alpha` supervision strengths, and $k = `r read_result("tar_k_selection_tcgacptac")$k_best`$ at a comparable `r n_k7_sig_270` of `r n_alpha`. After additional adjustment for PurIST and DeCAF molecular classifiers, $k = 3$ retained significance at `r n_k3_adj_sig_270` of `r n_alpha` supervision strengths, while $k = `r read_result("tar_k_selection_tcgacptac")$k_best`$ dropped to `r n_k7_adj_sig_270` of `r n_alpha` (SI Appendix, Table S3). This indicates that $k = `r read_result("tar_k_selection_tcgacptac")$k_best`$'s prognostic content is largely recoverable from existing classifiers applied to the same data, whereas DeSurv's D1 factor provides independent prognostic information not captured by PurIST or DeCAF. The parsimonious $k = 3$ solution thus validates robustly across supervision strengths and retains prognostic value beyond known classifiers, providing empirical support for the 1-SE rule.
