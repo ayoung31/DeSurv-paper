@@ -4,34 +4,41 @@
 REMOTE="nur2@longleaf.unc.edu:/work/users/a/y/ayoung31/DeSurv-paper/store_PKG_VERSION=20260107bugfix_GIT_BRANCH=main/objects/"
 LOCAL="/home/naimrashid/Downloads/DeSurv-paper/store_PKG_VERSION=20260107bugfix_GIT_BRANCH=main/objects/"
 
+# Main text figures, main text data, supplement figures/tables/data, pipeline objects
 rsync -av --files-from=- "$REMOTE" "$LOCAL" << 'EOF'
-desurv_bo_results_tcgacptac
-desurv_seed_fits_tcgacptac
+sim_figs_by_scenario
 fig_bo_heat_tcgacptac
-fig_cophenetic_tcgacptac
-fig_cutpoint_curves_tcgacptac
-fig_desurv_std_correlation_tcgacptac
-fig_gene_overlap_heatmap_desurv_alpha0_tcgacptac
 fig_gene_overlap_heatmap_desurv_tcgacptac
 fig_gene_overlap_heatmap_std_desurvk_tcgacptac
-fig_gene_overlap_heatmap_std_elbowk_tcgacptac
+fig_variation_explained_tcgacptac
+fig_desurv_std_correlation_tcgacptac
 fig_hr_forest_tcgacptac
 fig_median_survival_desurv_tcgacptac
 fig_median_survival_std_desurvk_tcgacptac
-fig_residuals_tcgacptac
-fig_silhouette_tcgacptac
-fig_subtype_overlap_tcgacptac
-fig_val_km_dichot_tcgacptac
-fig_variation_explained_tcgacptac
-fit_std_tcgacptac
-sim_figs_by_scenario
+val_latent_desurv_tcgacptac
+val_latent_std_desurvk_tcgacptac
+tar_k_selection_tcgacptac
+desurv_bo_results_tcgacptac
+tar_params_best_tcgacptac
 tar_data_filtered_tcgacptac
-val_cindex_desurv_alpha0_tcgacptac
+desurv_seed_fits_tcgacptac
+fig_residuals_tcgacptac
+fig_cophenetic_tcgacptac
+fig_silhouette_tcgacptac
+fit_std_tcgacptac
+fig_gene_overlap_heatmap_std_elbowk_tcgacptac
+fig_gene_overlap_heatmap_desurv_alpha0_tcgacptac
 val_cindex_desurv_tcgacptac
 val_cindex_std_desurvk_tcgacptac
-val_latent_desurv_tcgacptac
+val_cindex_std_elbowk_tcgacptac
+val_cindex_desurv_alpha0_tcgacptac
+val_latent_desurv_alpha0_tcgacptac
+data_val_filtered_tcgacptac
+fit_std_elbowk_tcgacptac
+tar_data_filtered_elbowk_tcgacptac
 tar_fit_desurv_tcgacptac
 fit_std_desurvk_tcgacptac
+desurv_lp_stats_tcgacptac
 EOF
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -117,12 +117,8 @@ set_fig_font <- function(plot_obj, size = 10) {
 
 ```
 
-```{r targets-store, include=FALSE}
-library(targets)
-tar_store <- if (exists("params", inherits = TRUE)) params$tar_store else NULL
-if (!is.null(tar_store) && nzchar(tar_store)) {
-  tar_config_set(store = tar_store)
-}
+```{r load-precomputed, include=FALSE}
+source("paper/load_precomputed.R")
 ```
 
 
