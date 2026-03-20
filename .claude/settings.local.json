@@ -6,7 +6,17 @@
       "Bash(cd \"C:\\\\Users\\\\amyou\\\\Documents\\\\GitHub\\\\DeSurv-paper\" && python make_slides.py 2>&1)",
       "Bash(python -c \"import matplotlib, numpy; print\\('ok'\\)\")",
       "Bash(cd \"C:\\\\Users\\\\amyou\\\\Documents\\\\GitHub\\\\DeSurv-paper\" && python make_hex_sticker.py 2>&1)",
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(git fetch:*)",
+      "Bash(ls:*)",
+      "Bash(python3 -c \":*)",
+      "Bash(module list:*)",
+      "Bash(module avail:*)",
+      "Bash(git status:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)"
     ]
   }
 }
