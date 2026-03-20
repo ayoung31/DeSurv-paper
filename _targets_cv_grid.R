@@ -790,9 +790,24 @@ list(
         paths <- c(paths, path)
       }
 
-      # Save combined figure (two rows) for supplement
+      # Save combined figure (two rows) with single shared legend
+      # Convert to gtable
+      gt <- ggplotGrob(plots[[1]])
+      
+      # Find the legend (guide-box)
+      legend_index <- which(sapply(gt$grobs, function(x) x$name) == "guide-box")
+      
+      # Extract the legend
+      legend <- gt$grobs[[legend_index]]
+
+      plots_no_legend <- lapply(plots, function(p) {
+        p + ggplot2::theme(legend.position = "none")
+      })
+      panel_grid <- cowplot::plot_grid(
+        plotlist = plots_no_legend, nrow = 2, labels = c("A", "B"), label_size = 12
+      )
       combined <- cowplot::plot_grid(
-        plotlist = plots, nrow = 2, labels = c("A", "B"), label_size = 12
+        panel_grid, legend, ncol = 1, rel_heights = c(1, 0.05)
       )
       combined_path <- file.path(out_dir, "cv_cindex_by_k_primary.pdf")
       ggplot2::ggsave(combined_path, combined, width = 10, height = 10)

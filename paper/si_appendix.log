@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  15 MAR 2026 10:11
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.2.16)  20 MAR 2026 16:30
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**/work/users/a/y/ayoung31/DeSurv-paper/paper/supplement.tex
-(/work/users/a/y/ayoung31/DeSurv-paper/paper/supplement.tex
+**si_appendix.tex
+(./si_appendix.tex
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/base/article.cls
@@ -282,6 +282,8 @@ Package graphics Info: Driver file: pdftex.def on input line 106.
 \Gin@req@width=\dimen187
 )
 \pandoc@box=\box64
+\cslhangindent=\skip64
+\csllabelwidth=\skip65
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/float/float.sty
 Package: float 2001/11/08 v1.3d Float enhancements (AL)
 \c@float@type=\count313
@@ -289,91 +291,47 @@ Package: float 2001/11/08 v1.3d Float enhancements (AL)
 \float@box=\box65
 \@float@everytoks=\toks31
 \@floatcapt=\box66
-) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/multirow/multirow.sty
-Package: multirow 2024/11/12 v2.9 Span multiple rows of a table
-\multirow@colwidth=\skip64
-\multirow@cntb=\count314
-\multirow@dima=\skip65
-\bigstrutjot=\dimen188
-) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/wrapfig/wrapfig.sty
-\wrapoverhang=\dimen189
-\WF@size=\dimen190
-\c@WF@wrappedlines=\count315
-\WF@box=\box67
-\WF@everypar=\toks32
-Package: wrapfig 2003/01/31  v 3.6
-) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/colortbl/colortbl.sty
-Package: colortbl 2024/10/29 v1.0k Color table columns (DPC)
-\everycr=\toks33
-\minrowclearance=\skip66
-\rownum=\count316
-) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/pdflscape/pdflscape.sty
-Package: pdflscape 2025-06-23 v0.14 Display of landscape pages in PDF
-(/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/pdflscape/pdflscape-nometadata.sty
-Package: pdflscape-nometadata 2025-06-23 v0.14 Display of landscape pages in PDF (HO)
-(/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/graphics/lscape.sty
-Package: lscape 2020/05/28 v3.02 Landscape Pages (DPC)
+) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/bbm-macros/bbm.sty
+Package: bbm 1999/03/15 V 1.2 provides fonts for set symbols - TH
+LaTeX Font Info:    Overwriting math alphabet `\mathbbm' in version `bold'
+(Font)                  U/bbm/m/n --> U/bbm/bx/n on input line 33.
+LaTeX Font Info:    Overwriting math alphabet `\mathbbmss' in version `bold'
+(Font)                  U/bbmss/m/n --> U/bbmss/bx/n on input line 35.
+) (./algorithm.sty
+Package: algorithm 
+Document Style `algorithm' - floating environment
+(/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/base/ifthen.sty
+Package: ifthen 2024/03/16 v1.1e Standard LaTeX ifthen package (DPC)
 )
-Package pdflscape Info: Auto-detected driver: pdftex on input line 81.
-)) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/tabu/tabu.sty
-Package: tabu 2019/01/11 v2.9 - flexible LaTeX tabulars (FC+tabu-fixed)
-(/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/varwidth/varwidth.sty
-Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
-\@vwid@box=\box68
-\sift@deathcycles=\count317
-\@vwid@loff=\dimen191
-\@vwid@roff=\dimen192
+\@float@every@algorithm=\toks32
+\c@algorithm=\count314
+) (./algpseudocode.sty
+Package: algpseudocode 
+(./algorithmicx.sty
+Package: algorithmicx 2005/04/27 v1.2 Algorithmicx
+Document Style algorithmicx 1.2 - a greatly improved `algorithmic' style
+\c@ALG@line=\count315
+\c@ALG@rem=\count316
+\c@ALG@nested=\count317
+\ALG@tlm=\skip66
+\ALG@thistlm=\skip67
+\c@ALG@Lnr=\count318
+\c@ALG@blocknr=\count319
+\c@ALG@storecount=\count320
+\c@ALG@tmpcounter=\count321
+\ALG@tmplength=\skip68
 )
-==> First Aid for varwidth.sty applied!
-\c@taburow=\count318
-\tabu@nbcols=\count319
-\tabu@cnt=\count320
-\tabu@Xcol=\count321
-\tabu@alloc=\count322
-\tabu@nested=\count323
-\tabu@target=\dimen193
-\tabu@spreadtarget=\dimen194
-\tabu@naturalX=\dimen195
-\tabucolX=\dimen196
-\tabu@Xsum=\dimen197
-\extrarowdepth=\dimen198
-\abovetabulinesep=\dimen199
-\belowtabulinesep=\dimen256
-\tabustrutrule=\dimen257
-\tabu@thebody=\toks34
-\tabu@footnotes=\toks35
-\tabu@box=\box69
-\tabu@arstrutbox=\box70
-\tabu@hleads=\box71
-\tabu@vleads=\box72
-\tabu@cellskip=\skip67
-) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/threeparttable/threeparttable.sty
-Package: threeparttable 2003/06/13  v 3.0
-\@tempboxb=\box73
-) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/threeparttablex/threeparttablex.sty
-Package: threeparttablex 2013/07/23 v0.3 by daleif
-(/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/environ/environ.sty
-Package: environ 2014/05/04 v0.3 A new way to define environments
-(/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/trimspaces/trimspaces.sty
-Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
-))
-\TPTL@width=\skip68
-) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/generic/ulem/ulem.sty
-\UL@box=\box74
-\UL@hyphenbox=\box75
-\UL@skip=\skip69
-\UL@hook=\toks36
-\UL@height=\dimen258
-\UL@pe=\count324
-\UL@pixel=\dimen259
-\ULC@box=\box76
-Package: ulem 2019/11/18
-\ULdepth=\dimen260
-) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/makecell/makecell.sty
-Package: makecell 2009/08/03 V0.1e Managing of Tab Column Heads and Cells
-\rotheadsize=\dimen261
-\c@nlinenum=\count325
-\TeXr@lab=\toks37
+Document Style - pseudocode environments for use with the `algorithmicx' style
+) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/setspace/setspace.sty
+Package: setspace 2022/12/04 v6.7b set line spacing
+) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/enumitem/enumitem.sty
+Package: enumitem 2025/02/06 v3.11 Customized lists
+\labelindent=\skip69
+\enit@outerparindent=\dimen188
+\enit@toks=\toks33
+\enit@inbox=\box67
+\enit@count@id=\count322
+\enitdp@description=\count323
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/bookmark/bookmark.sty
 Package: bookmark 2023-12-10 v1.31 PDF bookmarks (HO)
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/hyperref/hyperref.sty
@@ -405,13 +363,13 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/kvoptions/kvoptions.sty
 Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
 ))
-\c@section@level=\count326
+\c@section@level=\count324
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/generic/stringenc/stringenc.sty
 Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO)
 )
-\@linkdim=\dimen262
-\Hy@linkcounter=\count327
-\Hy@pagecounter=\count328
+\@linkdim=\dimen189
+\Hy@linkcounter=\count325
+\Hy@pagecounter=\count326
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/hyperref/pd1enc.def
 File: pd1enc.def 2026-01-29 v7.01p Hyperref: PDFDocEncoding definition (HO)
 Now handling font encoding PD1 ...
@@ -419,7 +377,7 @@ Now handling font encoding PD1 ...
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/generic/intcalc/intcalc.sty
 Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
 )
-\Hy@SavedSpaceFactor=\count329
+\Hy@SavedSpaceFactor=\count327
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/hyperref/puenc.def
 File: puenc.def 2026-01-29 v7.01p Hyperref: PDF Unicode definition (HO)
 Now handling font encoding PU ...
@@ -433,21 +391,21 @@ Package hyperref Info: Plain pages OFF on input line 4216.
 Package hyperref Info: Backreferencing OFF on input line 4221.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4468.
-\c@Hy@tempcnt=\count330
+\c@Hy@tempcnt=\count328
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip18
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
 LaTeX Info: Redefining \url on input line 4807.
-\XeTeXLinkMargin=\dimen263
+\XeTeXLinkMargin=\dimen190
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/generic/bitset/bitset.sty
 Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
 Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO)
 ))
-\Fld@menulength=\count331
-\Field@Width=\dimen264
-\Fld@charsize=\dimen265
+\Fld@menulength=\count329
+\Field@Width=\dimen191
+\Fld@charsize=\dimen192
 Package hyperref Info: Hyper figures OFF on input line 6084.
 Package hyperref Info: Link nesting OFF on input line 6089.
 Package hyperref Info: Hyper index ON on input line 6092.
@@ -455,15 +413,15 @@ Package hyperref Info: backreferencing OFF on input line 6099.
 Package hyperref Info: Link coloring OFF on input line 6104.
 Package hyperref Info: Link coloring with OCG OFF on input line 6109.
 Package hyperref Info: PDF/A mode OFF on input line 6114.
-\Hy@abspage=\count332
-\c@Item=\count333
-\c@Hfootnote=\count334
+\Hy@abspage=\count330
+\c@Item=\count331
+\c@Hfootnote=\count332
 )
 Package hyperref Info: Driver (autodetected): hpdftex.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/hyperref/hpdftex.def
 File: hpdftex.def 2026-01-29 v7.01p Hyperref driver for pdfTeX
-\Fld@listcount=\count335
-\c@bookmark@seq@number=\count336
+\Fld@listcount=\count333
+\c@bookmark@seq@number=\count334
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
 Package: rerunfilecheck 2025-06-21 v1.11 Rerun checks for auxiliary files (HO)
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty
@@ -474,15 +432,15 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 28
 \Hy@SectionHShift=\skip70
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/bookmark/bkm-pdftex.def
 File: bkm-pdftex.def 2023-12-10 v1.31 bookmark driver for pdfTeX and luaTeX (HO)
-\BKM@id=\count337
+\BKM@id=\count335
 ))
-LaTeX Font Info:    Trying to load font information for T1+lmr on input line 107.
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 143.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count338
-) (./supplement.aux
+\l__color_backend_stack_int=\count336
+) (./si_appendix.aux
 
 LaTeX Warning: Label `fig:fig-converge' multiply defined.
 
@@ -490,38 +448,35 @@ LaTeX Warning: Label `fig:fig-converge' multiply defined.
 LaTeX Warning: Label `tab:tab-hr-adjusted' multiply defined.
 
 )
-\openout1 = `supplement.aux'.
+\openout1 = `si_appendix.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 107.
-LaTeX Font Info:    ... okay on input line 107.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 107.
-LaTeX Font Info:    ... okay on input line 107.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 107.
-LaTeX Font Info:    ... okay on input line 107.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 107.
-LaTeX Font Info:    ... okay on input line 107.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 107.
-LaTeX Font Info:    ... okay on input line 107.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 107.
-LaTeX Font Info:    ... okay on input line 107.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 107.
-LaTeX Font Info:    ... okay on input line 107.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 107.
-LaTeX Font Info:    ... okay on input line 107.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 107.
-LaTeX Font Info:    ... okay on input line 107.
-Package microtype Info: Patching varwidth to enable character protrusion.
-\MT@vwid@leftmargin=\dimen266
-\MT@vwid@rightmargin=\dimen267
-LaTeX Info: Redefining \microtypecontext on input line 107.
-Package microtype Info: Applying patch `item' on input line 107.
-Package microtype Info: Applying patch `toc' on input line 107.
-Package microtype Info: Applying patch `eqnum' on input line 107.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 143.
+LaTeX Font Info:    ... okay on input line 143.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 143.
+LaTeX Font Info:    ... okay on input line 143.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 143.
+LaTeX Font Info:    ... okay on input line 143.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 143.
+LaTeX Font Info:    ... okay on input line 143.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 143.
+LaTeX Font Info:    ... okay on input line 143.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 143.
+LaTeX Font Info:    ... okay on input line 143.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 143.
+LaTeX Font Info:    ... okay on input line 143.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 143.
+LaTeX Font Info:    ... okay on input line 143.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 143.
+LaTeX Font Info:    ... okay on input line 143.
+LaTeX Info: Redefining \microtypecontext on input line 143.
+Package microtype Info: Applying patch `item' on input line 143.
+Package microtype Info: Applying patch `toc' on input line 143.
+Package microtype Info: Applying patch `eqnum' on input line 143.
 
-Package microtype Warning: Unable to apply patch `footnote' on input line 107.
+Package microtype Warning: Unable to apply patch `footnote' on input line 143.
 
-Package microtype Info: Applying patch `verbatim' on input line 107.
-LaTeX Info: Redefining \microtypesetup on input line 107.
+Package microtype Info: Applying patch `verbatim' on input line 143.
+LaTeX Info: Redefining \microtypesetup on input line 143.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using protrusion set `basicmath'.
@@ -574,131 +529,216 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package hyperref Info: Link coloring OFF on input line 107.
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 109.
+Package hyperref Info: Link coloring OFF on input line 143.
+LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 145.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 109.
+LaTeX Font Info:    Trying to load font information for OML+lmm on input line 145.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 109.
+LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 145.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 109.
+LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 145.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 109.
+(Font)              <12> on input line 145.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 109.
+(Font)              <8> on input line 145.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 109.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 109.
+(Font)              <6> on input line 145.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 145.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 109.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 145.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
-) (./supplement.toc)
-\tf@toc=\write3
-\openout3 = `supplement.toc'.
-
+) (./si_appendix.toc
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <10> on input line 6.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <7> on input line 6.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <5> on input line 6.
 [1
 
-{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}] (./supplement.lof
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 1.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 1.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 1.
-)
+{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}])
+\tf@toc=\write3
+\openout3 = `si_appendix.toc'.
+
+[2] (./si_appendix.lof)
 \tf@lof=\write4
-\openout4 = `supplement.lof'.
+\openout4 = `si_appendix.lof'.
 
-[2{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}] [3] (./supplement.lot)
+[3{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}] [4] (./si_appendix.lot)
 \tf@lot=\write5
-\openout5 = `supplement.lot'.
+\openout5 = `si_appendix.lot'.
 
-[4]
-<figures/fig-converge-1.png, id=140, 361.35pt x 216.81pt>
+[5]
+Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 213.
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 243.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 243.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 265.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 265.
+
+[6{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}] [7]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 370.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\beta' on input line 370.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 370.
+
+[8] [9] [10] [11] [12]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 708.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 708.
+
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <14.4> on input line 752.
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 752.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 752.
+
+[13]
+pdfTeX warning (ext4): destination with the same identifier (name{equation.8}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.805 ...ictors \(\hat{\eta}_i\): \begin{equation}
+                                                  
+pdfTeX warning (ext4): destination with the same identifier (name{equation.8}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.805 ...ictors \(\hat{\eta}_i\): \begin{equation}
+                                                  
+pdfTeX warning (ext4): destination with the same identifier (name{equation.8}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.805 ...ictors \(\hat{\eta}_i\): \begin{equation}
+                                                  
+pdfTeX warning (ext4): destination with the same identifier (name{equation.8}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.805 ...ictors \(\hat{\eta}_i\): \begin{equation}
+                                                  
+LaTeX Font Info:    Trying to load font information for U+bbm on input line 811.
+(/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/bbm-macros/ubbm.fd
+File: ubbm.fd 1999/03/15 V 1.2 Font definition for bbm font - TH
+) [14]
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 872.
+(/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
+File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+) [15{/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}]
+Overfull \hbox (26.42845pt too wide) in paragraph at lines 962--979
+ [][] 
+ []
+
+[16] [17] [18]
+<figures/fig-converge-1.png, id=310, 361.35pt x 216.81pt>
 File: figures/fig-converge-1.png Graphic file (type png)
 <use figures/fig-converge-1.png>
-Package pdftex.def Info: figures/fig-converge-1.png  used on input line 140.
+Package pdftex.def Info: figures/fig-converge-1.png  used on input line 1099.
 (pdftex.def)             Requested size: 361.35463pt x 216.81938pt.
-[5 <./figures/fig-converge-1.png (PNG copy)>]
-<figures/fig-sim-null-mixed-1.png, id=153, 469.755pt x 505.89pt>
+[19
+
+ <./figures/fig-converge-1.png (PNG copy)>]
+<figures/fig-sim-null-mixed-1.png, id=322, 469.755pt x 505.89pt>
 File: figures/fig-sim-null-mixed-1.png Graphic file (type png)
 <use figures/fig-sim-null-mixed-1.png>
-Package pdftex.def Info: figures/fig-sim-null-mixed-1.png  used on input line 215.
+Package pdftex.def Info: figures/fig-sim-null-mixed-1.png  used on input line 1174.
 (pdftex.def)             Requested size: 469.75386pt x 469.76265pt.
-<figures/fig-cindex-by-k-1.png, id=156, 722.7pt x 722.7pt>
+<figures/fig-cindex-by-k-1.png, id=325, 722.7pt x 722.7pt>
 File: figures/fig-cindex-by-k-1.png Graphic file (type png)
 <use figures/fig-cindex-by-k-1.png>
-Package pdftex.def Info: figures/fig-cindex-by-k-1.png  used on input line 245.
+Package pdftex.def Info: figures/fig-cindex-by-k-1.png  used on input line 1204.
 (pdftex.def)             Requested size: 469.75502pt x 469.76045pt.
-<figures/fig-nmf-diagnostics-1.png, id=160, 433.62pt x 252.945pt>
+<figures/fig-nmf-diagnostics-1.png, id=329, 433.62pt x 252.945pt>
 File: figures/fig-nmf-diagnostics-1.png Graphic file (type png)
 <use figures/fig-nmf-diagnostics-1.png>
-Package pdftex.def Info: figures/fig-nmf-diagnostics-1.png  used on input line 264.
+Package pdftex.def Info: figures/fig-nmf-diagnostics-1.png  used on input line 1223.
 (pdftex.def)             Requested size: 469.7781pt x 252.94823pt.
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 279.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1239.
 (/nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [6]
+) [20]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 315.
+(Font)              <9> on input line 1275.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[7]
-<figures/k3-k7-nesting-1.png, id=185, 505.89pt x 252.945pt>
+[21]
+<figures/k3-k7-nesting-1.png, id=353, 505.89pt x 252.945pt>
 File: figures/k3-k7-nesting-1.png Graphic file (type png)
 <use figures/k3-k7-nesting-1.png>
-Package pdftex.def Info: figures/k3-k7-nesting-1.png  used on input line 426.
+Package pdftex.def Info: figures/k3-k7-nesting-1.png  used on input line 1384.
 (pdftex.def)             Requested size: 469.75502pt x 234.88133pt.
-[8]
-<figures/fig-cutpoint-km-1.png, id=192, 722.7pt x 794.97pt>
+[22]
+<figures/fig-cutpoint-km-1.png, id=360, 722.7pt x 794.97pt>
 File: figures/fig-cutpoint-km-1.png Graphic file (type png)
 <use figures/fig-cutpoint-km-1.png>
-Package pdftex.def Info: figures/fig-cutpoint-km-1.png  used on input line 450.
+Package pdftex.def Info: figures/fig-cutpoint-km-1.png  used on input line 1408.
 (pdftex.def)             Requested size: 469.76045pt x 578.17622pt.
-<figures/fig-subtype-overlap-1.png, id=194, 578.16pt x 361.35pt>
+<figures/fig-subtype-overlap-1.png, id=362, 578.16pt x 361.35pt>
 File: figures/fig-subtype-overlap-1.png Graphic file (type png)
 <use figures/fig-subtype-overlap-1.png>
-Package pdftex.def Info: figures/fig-subtype-overlap-1.png  used on input line 470.
+Package pdftex.def Info: figures/fig-subtype-overlap-1.png  used on input line 1428.
 (pdftex.def)             Requested size: 469.75502pt x 293.59616pt.
-<figures/fig-nmf-k5-heatmap-1.png, id=198, 433.62pt x 361.35pt>
+<figures/fig-nmf-k5-heatmap-1.png, id=366, 433.62pt x 361.35pt>
 File: figures/fig-nmf-k5-heatmap-1.png Graphic file (type png)
 <use figures/fig-nmf-k5-heatmap-1.png>
-Package pdftex.def Info: figures/fig-nmf-k5-heatmap-1.png  used on input line 497.
+Package pdftex.def Info: figures/fig-nmf-k5-heatmap-1.png  used on input line 1455.
 (pdftex.def)             Requested size: 433.61894pt x 361.34912pt.
-<figures/fig-nmf-k7-heatmap-1.png, id=201, 433.62pt x 361.35pt>
+<figures/fig-nmf-k7-heatmap-1.png, id=369, 433.62pt x 361.35pt>
 File: figures/fig-nmf-k7-heatmap-1.png Graphic file (type png)
 <use figures/fig-nmf-k7-heatmap-1.png>
-Package pdftex.def Info: figures/fig-nmf-k7-heatmap-1.png  used on input line 521.
+Package pdftex.def Info: figures/fig-nmf-k7-heatmap-1.png  used on input line 1479.
 (pdftex.def)             Requested size: 433.61894pt x 361.34912pt.
 
-Overfull \hbox (8.80353pt too wide) in paragraph at lines 574--574
+Overfull \hbox (8.80353pt too wide) in paragraph at lines 1532--1532
 []|\T1/lmr/m/n/10 (-20) Moffitt_GEO_array|  
  []
 
-[9]
-<figures/fig-varsurvival-k5-1.png, id=212, 325.215pt x 252.945pt>
+[23]
+<figures/fig-varsurvival-k5-1.png, id=380, 325.215pt x 252.945pt>
 File: figures/fig-varsurvival-k5-1.png Graphic file (type png)
 <use figures/fig-varsurvival-k5-1.png>
-Package pdftex.def Info: figures/fig-varsurvival-k5-1.png  used on input line 633.
+Package pdftex.def Info: figures/fig-varsurvival-k5-1.png  used on input line 1591.
 (pdftex.def)             Requested size: 325.2142pt x 252.94438pt.
-[10] [11 <./figures/fig-sim-null-mixed-1.png (PNG copy)>] [12 <./figures/fig-cindex-by-k-1.png (PNG copy)>] [13 <./figures/fig-nmf-diagnostics-1.png (PNG copy)> <./figures/k3-k7-nesting-1.png (PNG copy)>] [14 <./figures/fig-cutpoint-km-1.png (PNG copy)>] [15 <./figures/fig-subtype-overlap-1.png>] [16 <./figures/fig-nmf-k5-heatmap-1.png (PNG copy)>] [17 <./figures/fig-nmf-k7-heatmap-1.png (PNG copy)>] [18 <./figures/fig-varsurvival-k5-1.png (PNG copy)>] (./supplement.aux)
+[24] [25] [26 <./figures/fig-sim-null-mixed-1.png (PNG copy)>] [27 <./figures/fig-cindex-by-k-1.png (PNG copy)>] [28 <./figures/fig-nmf-diagnostics-1.png (PNG copy)> <./figures/k3-k7-nesting-1.png (PNG copy)>] [29 <./figures/fig-cutpoint-km-1.png (PNG copy)>] [30 <./figures/fig-subtype-overlap-1.png>] [31 <./figures/fig-nmf-k5-heatmap-1.png (PNG copy)>] [32 <./figures/fig-nmf-k7-heatmap-1.png (PNG copy)>] [33 <./figures/fig-varsurvival-k5-1.png (PNG copy)>] (./si_appendix.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
@@ -709,17 +749,17 @@ LaTeX Warning: There were multiply-defined labels.
  ) 
 Here is how much of TeX's memory you used:
  15266 strings out of 469471
- 243164 string characters out of 5467057
- 725920 words of memory out of 5000000
- 43402 multiletter control sequences out of 15000+600000
- 704824 words of font info for 195 fonts, out of 8000000 for 9000
+ 243027 string characters out of 5467057
+ 725113 words of memory out of 5000000
+ 43226 multiletter control sequences out of 15000+600000
+ 751086 words of font info for 265 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 89i,15n,93p,1161b,463s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on supplement.pdf (18 pages, 2398095 bytes).
+ 89i,14n,93p,1118b,614s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ </nas/longleaf/home/ayoung31/.TinyTeX/texmf-var/fonts/pk/ljfour/public/bbm/bbm10.600pk></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nas/longleaf/home/ayoung31/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb>
+Output written on si_appendix.pdf (33 pages, 2633461 bytes).
 PDF statistics:
- 367 PDF objects out of 1000 (max. 8388607)
- 300 compressed objects within 3 object streams
- 48 named destinations out of 1000 (max. 500000)
- 41099 words of extra memory for PDF output out of 42996 (max. 10000000)
+ 716 PDF objects out of 1000 (max. 8388607)
+ 601 compressed objects within 7 object streams
+ 138 named destinations out of 1000 (max. 500000)
+ 69939 words of extra memory for PDF output out of 74296 (max. 10000000)
 
