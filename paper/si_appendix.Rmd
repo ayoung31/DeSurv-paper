@@ -974,7 +974,7 @@ knitr::opts_chunk$set(message = FALSE,
                       fig.path = "figures/",
                       dev = "png",
                       dpi = 300)
-library(targets)
+source("paper/load_precomputed.R")
 library(dplyr)
 library(ggplot2)
 library(cowplot)
@@ -1068,7 +1068,7 @@ n_combinations   <- length(k_labs) * length(alpha_labs)
 Across datasets and initialization schemes, the DeSurv algorithm consistently converged to numerically stable solutions within the designated iteration budget. Warm-start strategies, in which solutions at $\alpha=0$ initialized supervised runs, substantially reduced variability across restarts and improved reproducibility. Fig. \ref{fig:fig-converge} shows representative loss trajectories demonstrating monotone decreases until convergence across restarts. Compared with naive random initialization, warm-starts produced tighter distributions of cross-validated C-index and partial likelihood, confirming stability of the optimization procedure.
 
 ```{r fig-converge, fig.width = 5, fig.height= 3, fig.cap="Convergence of model across initializations. \\label{fig:fig-converge}" , fig.env='figure*', fig.pos='htbp', out.height= "3in", out.width='5in'}
-tar_load(desurv_seed_fits_tcgacptac)
+load_result("desurv_seed_fits_tcgacptac")
 set.seed(147)
 seeds = sample(1:length(desurv_seed_fits_tcgacptac$fits),5,replace = FALSE)
 iters <- list()
@@ -1117,11 +1117,10 @@ Under the mixed scenario (Fig. \ref{fig:sim-null-mixed}C--F), four mechanistic o
 Together, the three scenarios provide a dose-response relationship: DeSurv's advantage is greatest when variance and prognosis diverge (primary), moderate when they partially overlap (mixed), and absent when no survival signal exists (null). The mechanistic basis for the attenuation in the mixed scenario is now clear: DeSurv continues to specifically recover marker programs (high marker precision, elevated $|\beta|$), but the overall survival-gene precision improvement is dampened because background-gene dilution in the 300-gene survival signal reduces the discrimination advantage. This gradient is consistent with the predictions of sufficient dimension reduction theory and offers practical guidance for users: DeSurv is most beneficial in settings where the dominant transcriptional axes are expected to be prognostically neutral, as is common in cancers with high tumor purity variation or dominant tissue-composition signals.
 
 ```{r fig-sim-null-mixed, fig.width = 6.5, fig.height = 7, fig.cap = "DeSurv performance under null and mixed simulation scenarios. (A--B) Null scenario ($\\beta = 0$): both methods yield C-index $\\approx 0.5$ (A) and comparable rank distributions (B), confirming DeSurv does not hallucinate prognostic structure; precision is omitted as no true survival genes exist. (C--F) Mixed scenario: survival depends on factor-specific marker genes (50\\%) and shared background genes (50\\%). (C) C-index is modestly higher for DeSurv. (D) Precision by gene-set definition: marker-only precision (150 genes; left facet) substantially favors DeSurv; full 300-gene survival-set precision (right facet) shows a more modest improvement. (E) The matched factor receives a substantially larger Cox coefficient $|\\beta|$ under DeSurv, confirming preferential amplification of marker-specific signal. (F) Selected-rank distributions. DeSurv (blue); NMF (red, $\\alpha = 0$); both Bayesian-optimized. \\label{fig:sim-null-mixed}", fig.env='figure*', fig.pos='t', out.height = "6.5in", out.width='\\textwidth'}
-library(targets)
 library(cowplot)
 library(ggplot2)
 
-tar_load(sim_figs_by_scenario)
+load_result("sim_figs_by_scenario")
 
 scenario_ids <- sapply(sim_figs_by_scenario, function(x) x$scenario_id)
 analysis_ids <- sapply(sim_figs_by_scenario, function(x) x$analysis_id)
@@ -1222,10 +1221,10 @@ Standard unsupervised rank selection criteria --- reconstruction residuals, coph
 library(cowplot)
 library(ggplot2)
 
-tar_load(fig_residuals_tcgacptac)
-tar_load(fig_cophenetic_tcgacptac)
-tar_load(fig_silhouette_tcgacptac)
-tar_load(fit_std_tcgacptac)
+load_result("fig_residuals_tcgacptac")
+load_result("fig_cophenetic_tcgacptac")
+load_result("fig_silhouette_tcgacptac")
+load_result("fit_std_tcgacptac")
 
 fig_residuals_tcgacptac  <- set_fig_font(fig_residuals_tcgacptac, size = 10)
 fig_cophenetic_tcgacptac <- set_fig_font(fig_cophenetic_tcgacptac, size = 10)
@@ -1328,11 +1327,11 @@ kable(df_all, format = "latex", escape = FALSE, booktabs = TRUE,
   kable_styling(latex_options = c("hold_position"), font_size = 9)
 ```
 
-Four additional findings emerge from these analyses. First, $k = 7$'s apparent advantage observed in a parallel analysis using conventional hyperparameters ($\lambda=0.3$, $n_{\text{top}} = \text{NULL}$), where $k = 7$ at $\alpha=0.75$ achieved adjusted $P = `r formatC(lam300_best_p, format="f", digits=3)`$, completely disappears with $n_{\text{top}} = 270$ (adj $P = `r formatC(k7_alpha75_p_270, format="f", digits=3)`$, Table \ref{tab:tab-ksens-adjp-ntop270}). Focused 270-gene projection fragments the iCAF signal across $k = 7$'s factors, indicating that the earlier $k = 7$ advantage depended on the all-genes projection rather than reflecting an intrinsic property of the 7-factor solution. Second, $k = 3$ achieves adjusted significance across a broad $\alpha$ range with $n_{\text{top}} = 270$ (`r n_k3_sig_270`/7 values), demonstrating that the production result does not depend on the BO-selected $\alpha = `r round(tar_read(tar_params_best_tcgacptac)$alpha, 3)`$ specifically. Third, $k = 5$ at $\alpha=0.55$ achieves the highest factor-program fidelity in the $n_{\text{top}} = 270$ analysis (H-cor = `r round(hcor_k5_a55_270, 3)` vs. $k = 3$'s `r round(hcor_k3_a55_270, 3)`) and also achieves adjusted significance ($P = `r formatC(k5_alpha55_p_270, format="f", digits=3)`$), providing convergent evidence for the iCAF biology from a higher-$k$ model; an independent $k = 5$ all-genes fit at $\alpha=0.25$ likewise achieves adjusted significance ($P = `r formatC(k5_alpha25_p_all, format="f", digits=4)`$, H-cor = `r round(hcor_k5_a25_all, 3)`). Fourth, without gene focusing, high supervision weights ($\alpha \geq 0.75$) produce factors with extreme training discrimination (HR $\approx `r hr_overfit_min`$--$`r hr_overfit_max`$, LRT $P \sim `r formatC(lrt_overfit_min, format="e", digits=0)`$) that fail external validation, indicating overfitting of the training survival signal; gene focusing ($n_{\text{top}} = 270$) suppresses this by constraining each factor to its 270 most biologically characteristic genes.
+Four additional findings emerge from these analyses. First, $k = 7$'s apparent advantage observed in a parallel analysis using conventional hyperparameters ($\lambda=0.3$, $n_{\text{top}} = \text{NULL}$), where $k = 7$ at $\alpha=0.75$ achieved adjusted $P = `r formatC(lam300_best_p, format="f", digits=3)`$, completely disappears with $n_{\text{top}} = 270$ (adj $P = `r formatC(k7_alpha75_p_270, format="f", digits=3)`$, Table \ref{tab:tab-ksens-adjp-ntop270}). Focused 270-gene projection fragments the iCAF signal across $k = 7$'s factors, indicating that the earlier $k = 7$ advantage depended on the all-genes projection rather than reflecting an intrinsic property of the 7-factor solution. Second, $k = 3$ achieves adjusted significance across a broad $\alpha$ range with $n_{\text{top}} = 270$ (`r n_k3_sig_270`/7 values), demonstrating that the production result does not depend on the BO-selected $\alpha = `r round(read_result("tar_params_best_tcgacptac")$alpha, 3)`$ specifically. Third, $k = 5$ at $\alpha=0.55$ achieves the highest factor-program fidelity in the $n_{\text{top}} = 270$ analysis (H-cor = `r round(hcor_k5_a55_270, 3)` vs. $k = 3$'s `r round(hcor_k3_a55_270, 3)`) and also achieves adjusted significance ($P = `r formatC(k5_alpha55_p_270, format="f", digits=3)`$), providing convergent evidence for the iCAF biology from a higher-$k$ model; an independent $k = 5$ all-genes fit at $\alpha=0.25$ likewise achieves adjusted significance ($P = `r formatC(k5_alpha25_p_all, format="f", digits=4)`$, H-cor = `r round(hcor_k5_a25_all, 3)`). Fourth, without gene focusing, high supervision weights ($\alpha \geq 0.75$) produce factors with extreme training discrimination (HR $\approx `r hr_overfit_min`$--$`r hr_overfit_max`$, LRT $P \sim `r formatC(lrt_overfit_min, format="e", digits=0)`$) that fail external validation, indicating overfitting of the training survival signal; gene focusing ($n_{\text{top}} = 270$) suppresses this by constraining each factor to its 270 most biologically characteristic genes.
 
 # K=3 factors are partially but asymmetrically nested within K=7
 
-To assess whether the $k = 3$ solution is simply a pruned version of the $k = 7$ solution, we computed pairwise Spearman correlations between the W-matrix gene loadings of the production $k = 3$ model and a $k = 7$ DeSurv fit at $\alpha = 0.35$ (the nearest grid value to the BO-selected optimum at $\alpha = `r round(tar_read(tar_params_best_tcgacptac)$alpha, 3)`$), both using $n_{\text{top}} = 270$, $\lambda = 0.349$, $\xi = 0.056$.
+To assess whether the $k = 3$ solution is simply a pruned version of the $k = 7$ solution, we computed pairwise Spearman correlations between the W-matrix gene loadings of the production $k = 3$ model and a $k = 7$ DeSurv fit at $\alpha = 0.35$ (the nearest grid value to the BO-selected optimum at $\alpha = `r round(read_result("tar_params_best_tcgacptac")$alpha, 3)`$), both using $n_{\text{top}} = 270$, $\lambda = 0.349$, $\xi = 0.056$.
 
 The correspondence was partial but asymmetric (Fig. \ref{fig:k3-k7-nesting}). Two of three $k = 3$ factors had clear one-to-one $k = 7$ counterparts: K3\_F1 mapped strongly to `r k3f1_best_k7` ($r = `r round(k3f1_best_r, 2)`$) and K3\_F2 mapped very strongly to `r k3f2_best_k7` ($r = `r round(k3f2_best_r, 2)`$). In contrast, K3\_F3 showed no single dominant $k = 7$ match; instead, it correlated moderately with four $k = 7$ factors simultaneously (K7\_F2 through K7\_F6; $r = `r round(k3f3_range_min, 2)`$--$`r round(k3f3_range_max, 2)`$). K7\_F4 showed weak-to-moderate correlations with all three $k = 3$ factors ($r = `r round(k7f4_range_min, 2)`$--$`r round(k7f4_range_max, 2)`$), suggesting it is a mixed composite with no clear biological counterpart in the $k = 3$ solution.
 
@@ -1408,7 +1407,7 @@ At elbow-selected $k = 5$, the three core programs from $k = 3$ are recovered by
 
 ```{r fig-nmf-k5-heatmap, fig.width = 6, fig.height = 5, fig.cap = "Gene program overlap heatmap for standard NMF at elbow-selected rank $k = 5$. Each cell shows the number of top genes from a given factor (rows) overlapping established PDAC gene programs (columns). The three core programs from $k = 3$ are recovered; two additional factors overlap Exocrine-like and iCAF signatures, capturing transcriptional variance not aligned with survival outcomes. \\label{fig:fig-nmf-k5-heatmap}", fig.env='figure', fig.pos='t'}
 library(cowplot)
-tar_load(fig_gene_overlap_heatmap_std_elbowk_tcgacptac)
+load_result("fig_gene_overlap_heatmap_std_elbowk_tcgacptac")
 
 cowplot::plot_grid(
   fig_gene_overlap_heatmap_std_elbowk_tcgacptac$plot,
@@ -1421,10 +1420,7 @@ At BO-selected $k = 7$ under $\alpha = 0$ (Fig. \ref{fig:fig-nmf-k7-heatmap}), s
 
 ```{r fig-nmf-k7-heatmap, fig.width = 6, fig.height = 5, fig.cap = "Gene program overlap heatmap for standard NMF at $k = 7$ (BO-selected rank with $\\alpha = 0$). Compared with $k = 3$ and $k = 5$, the 7-factor solution shows increased fragmentation: multiple factors partially capture the same PDAC gene signatures and no new coherent biological program emerges. No supervised DeSurv equivalent at $k = 7$ is shown; the $k$-sensitivity and factor-nesting analyses (Fig. \\ref{fig:k3-k7-nesting}) characterize the corresponding supervised fit. \\label{fig:fig-nmf-k7-heatmap}", fig.env='figure', fig.pos='t'}
 library(cowplot)
-# This target lacks metadata; load directly from store objects
-fig_gene_overlap_heatmap_desurv_alpha0_tcgacptac <- readRDS(
-  file.path(tar_config_get("store"), "objects", "fig_gene_overlap_heatmap_desurv_alpha0_tcgacptac")
-)
+load_result("fig_gene_overlap_heatmap_desurv_alpha0_tcgacptac")
 cowplot::plot_grid(
   fig_gene_overlap_heatmap_desurv_alpha0_tcgacptac$plot,
   cowplot::ggdraw(fig_gene_overlap_heatmap_desurv_alpha0_tcgacptac$legend),
@@ -1435,10 +1431,10 @@ cowplot::plot_grid(
 ```{r tab-cindex-comparison, echo=FALSE}
 library(dplyr)
 library(knitr)
-tar_load(val_cindex_desurv_tcgacptac)
-tar_load(val_cindex_std_desurvk_tcgacptac)
-tar_load(val_cindex_std_elbowk_tcgacptac)
-tar_load(val_cindex_desurv_alpha0_tcgacptac)
+load_result("val_cindex_desurv_tcgacptac")
+load_result("val_cindex_std_desurvk_tcgacptac")
+load_result("val_cindex_std_elbowk_tcgacptac")
+load_result("val_cindex_desurv_alpha0_tcgacptac")
 
 fmt_cindex <- function(tbl, col_name) {
   tbl %>%
@@ -1473,9 +1469,9 @@ library(knitr)
 library(kableExtra)
 
 # -- Load validation latent targets --------------------------------------------
-tar_load(val_latent_desurv_tcgacptac)
-tar_load(val_latent_desurv_alpha0_tcgacptac)
-tar_load(data_val_filtered_tcgacptac)
+load_result("val_latent_desurv_tcgacptac")
+load_result("val_latent_desurv_alpha0_tcgacptac")
+load_result("data_val_filtered_tcgacptac")
 
 # -- Extract pooled risk_score + survival + PurIST/DeCAF -----------------------
 extract_pool_df_with_covariates <- function(val_latent, data_val) {
@@ -1566,9 +1562,9 @@ The variance--survival decomposition at $k = 5$ (Fig. \ref{fig:varsurvival-k5}) 
 library(survival)
 library(dplyr)
 library(ggrepel)
-tar_load(fit_std_elbowk_tcgacptac)
+load_result("fit_std_elbowk_tcgacptac")
 fit_std_elbowk=fit_std_elbowk_tcgacptac
-tar_load(tar_data_filtered_elbowk_tcgacptac)
+load_result("tar_data_filtered_elbowk_tcgacptac")
 tar_data_filtered_elbowk=tar_data_filtered_elbowk_tcgacptac
 
 compute_variance_explained_inline <- function(X, W, H) {

@@ -59,9 +59,9 @@ load_val_datasets <- function(val_names, training_data, method_trans_train = "ra
 # ── Helper: compute C-index for a model across validation cohorts ────────
 compute_val_cindex <- function(fit, data_val_list, ntop = NULL) {
   results <- lapply(data_val_list, function(dv) {
-    pred <- predict(fit, newdata = dv$ex, type = "risk")
     if (!is.null(ntop)) {
-      top_genes <- DeSurv::desurv_get_top_genes(fit, ntop)
+      top_res <- DeSurv::desurv_get_top_genes(fit$W, ntop)
+      top_genes <- unique(unlist(top_res$top_genes))
       W_sub <- fit$W[top_genes, , drop = FALSE]
       XtW <- t(dv$ex[top_genes, , drop = FALSE]) %*% W_sub
       lp <- as.numeric(XtW %*% fit$beta)
@@ -101,7 +101,8 @@ data_val_filtered <- cache_or_compute("data_val_filtered_tcgacptac", {
   load_val_datasets(VAL_DATASETS, tar_data_filtered)
 })
 
-data_val_filtered_elbowk <- load_val_datasets(VAL_DATASETS, tar_data_filtered_elbowk)
+# elbow-k uses same ngene as DeSurv (both fixed at 3000), so reuse
+data_val_filtered_elbowk <- data_val_filtered
 
 # ── DeSurv validation ────────────────────────────────────────────────────
 val_cindex_desurv <- cache_or_compute("val_cindex_desurv_tcgacptac", {
@@ -129,7 +130,8 @@ val_cindex_std_elbowk <- cache_or_compute("val_cindex_std_elbowk_tcgacptac", {
 # ── Alpha=0 (BO-selected k with no supervision) validation ───────────────
 tar_fit_desurv_alpha0    <- load_precomputed("tar_fit_desurv_alpha0_tcgacptac")
 tar_data_filtered_alpha0 <- load_precomputed("tar_data_filtered_alpha0_tcgacptac")
-data_val_filtered_alpha0 <- load_val_datasets(VAL_DATASETS, tar_data_filtered_alpha0)
+# alpha0 uses same ngene (3000) and same training data, so reuse
+data_val_filtered_alpha0 <- data_val_filtered
 
 val_cindex_desurv_alpha0 <- cache_or_compute("val_cindex_desurv_alpha0_tcgacptac", {
   compute_val_cindex(tar_fit_desurv_alpha0, data_val_filtered_alpha0)

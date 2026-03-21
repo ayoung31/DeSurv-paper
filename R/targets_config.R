@@ -585,6 +585,9 @@ preprocess_validation_data <- function(dataset, genes = NULL, ngene = NULL, meth
     stop("Provide either genes or ngene for validation preprocessing.")
   }
   keep_idx <- dataset$samp_keeps
+  if (is.null(keep_idx) && !is.null(dataset$sampInfo$keep)) {
+    keep_idx <- which(dataset$sampInfo$keep == 1)
+  }
   X <- dataset$ex
   y <- dataset$sampInfo$time
   d <- dataset$sampInfo$event

@@ -30,7 +30,8 @@ if (CONFIG$quick) {
   NCORES_GRID  <- 1L
   PARALLEL     <- FALSE
   STD_NMF_NRUN <- 2L
-  STD_NMF_K_GRID <- 2:5
+  STD_NMF_K_GRID <- 2:6
+  BO_K_UPPER   <- 6L
 } else {
   NINIT        <- 30L
   BO_N_INIT    <- 50L
@@ -39,10 +40,11 @@ if (CONFIG$quick) {
   PARALLEL     <- CONFIG$ncores > 1
   STD_NMF_NRUN <- 30L
   STD_NMF_K_GRID <- 2:12
+  BO_K_UPPER   <- 12L
 }
 
 BO_BOUNDS <- list(
-  k_grid     = list(lower = 2L, upper = 12L, type = "integer"),
+  k_grid     = list(lower = 2L, upper = BO_K_UPPER, type = "integer"),
   alpha_grid = list(lower = 0, upper = 1, type = "continuous"),
   lambda_grid = list(lower = 1e-3, upper = 1e3, scale = "log10"),
   nu_grid    = list(lower = 0, upper = 1, type = "continuous")

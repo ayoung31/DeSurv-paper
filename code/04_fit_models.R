@@ -20,6 +20,9 @@ message("=== Step 4: Fit Models ===")
 source("code/00_helpers.R")
 library(DeSurv)
 library(NMF)
+library(glmnet)
+library(survival)
+library(dplyr)
 source("R/fit_cox_model.R")
 
 # ── Configuration ─────────────────────────────────────────────────────────
@@ -83,7 +86,7 @@ run_seed_fits <- function(data, params, lambdaW, lambdaH, ninit, label) {
 consensus_and_fit <- function(seed_fits, data, params, lambdaW, lambdaH, ntop, label) {
   init_vals <- DeSurv::desurv_consensus_seed(
     fits = seed_fits$fits, X = data$ex, ntop = ntop,
-    k = params$k, min_frequency = 0.3 * length(seed_fits$fits)
+    k = params$k, min_frequency = max(1L, as.integer(ceiling(0.3 * length(seed_fits$fits))))
   )
   fit <- desurv_fit(
     X = data$ex, y = data$sampInfo$time, d = data$sampInfo$event,
